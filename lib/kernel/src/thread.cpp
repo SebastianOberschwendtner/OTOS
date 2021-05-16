@@ -42,7 +42,7 @@ OTOS::Thread::Thread(void)
     // Initialize properties
     this->StackSize = 0;
     this->StackPointer = nullptr;
-    this->StackStart = nullptr;
+    this->StackTop = nullptr;
 };
 
 /**
@@ -51,5 +51,6 @@ OTOS::Thread::Thread(void)
  */
 bool OTOS::Thread::StackOverflow(void)
 {
-    return false;
+    // When the current stack pointer occupies more or all of the stack, return true
+    return (this->StackTop - this->StackPointer) >= StackSize;
 };

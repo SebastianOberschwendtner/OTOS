@@ -30,7 +30,7 @@ namespace OTOS
     enum Priority : u_base_t
     {
         PrioLow = 1,
-        PrioMid = 2,
+        PrioNormal = 2,
         PrioHigh = 3
     };
 

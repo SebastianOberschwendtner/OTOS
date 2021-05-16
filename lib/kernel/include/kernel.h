@@ -51,14 +51,15 @@ namespace OTOS
         u_base_t Stack[OTOS_STACK_SIZE];     // The total stack for the threads
 
         // Methods
-        u_base_t GetNextThread(void);
         void UpdateSchedule(void);
+        void GetNextThread(void);
+        void SwitchThread(void);
         // unsigned int Time_ms(void);
 
     public:
         // Methods
         Kernel();
-        void ScheduleThread(taskpointer_t ThreadFunc, Priority Priority);
+        void ScheduleThread(taskpointer_t TaskFunc, Priority Priority);
         // void ScheduleThread_Hz(void);
         void Start(void);
         u_base_t AllocatedStackSize(void);

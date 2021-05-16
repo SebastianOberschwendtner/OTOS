@@ -33,28 +33,13 @@
 
 // ****** Variables ******
 unsigned int Value = 0;
-// OTOS::kernel_t Stack;
 
 // ****** Main ******
 int main(void)
 {
-    // Value = myass((unsigned int)Stack.Stack + OTOS_STACK_SIZE);
-    // OTOS::Kernel OS;
-    // // Init OS with the maximum execution time each thread gets per execution slot.
-    // ///@todo Should the slot time be calculated automatically? Or be defined separately.
-    // OTOS_Init(SlotTime);
+    // Create Kernel
+    OTOS::Kernel OS;
 
-    // // Schedule threads
-    // // Low priority, no timing requirements
-    // OTOS_ScheduleThread(&MyFunc1, LOW);
-    // OS.ScheduleThread();
-    // // Mid priority, execute with 10 Hz
-    // OTOS_ScheduleThread_Hz(&MyFunc2, MID, 10);
-    // OS.ScheduleThread_Hz();
-
-    // // Start execution, also pets the watchdog periodically
-    // OTOS_Start();
-    // OS.Start();
     if(Value)
         Value = 1;
     else
