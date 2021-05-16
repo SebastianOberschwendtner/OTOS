@@ -1,0 +1,28 @@
+@startuml ACT_OTOS_Switch
+title Activity Diagram for **Switch** \n
+
+
+caption Mode: **Handler**, Stackpointer: **msp**
+legend Stack layout depends on used processor!
+
+start
+partition "Save Kernel" {
+    :Push **LR** on Stack (msp);
+    :Push **R1-R12** on Stack (msp);
+    :Push **PSR** on Stack (msp);
+}
+partition "Restore Thread"{
+    :Load **R4-R11** from [R0];
+    :Set **PSP** to R0
+    ----
+    R0 is now the new/old stack address
+    of the thread.;
+    :Branch to **LR** with __valid__
+    exception return behavior.
+    ----
+    Restores the registers of 
+    the saved exception frame.;
+}
+
+stop
+@enduml

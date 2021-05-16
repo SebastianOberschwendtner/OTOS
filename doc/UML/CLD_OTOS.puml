@@ -1,0 +1,69 @@
+@startuml CLD_OTOS
+title Class Diagram for **OTOS**\n
+
+class Schedule{
+    'Properties:
+    + Priority
+    + TickSchedule
+    + TickCounter
+    'Methods
+    + Schedule()
+    + Runable()
+}
+
+class Thread {
+    'Properies:
+    - StackStart
+    + StackSize
+    + StackPointer
+    'Methods:
+    + Thread()
+    + StackOverflow()
+}
+class Kernel{
+    'Properties:
+    - CurrentThread
+    - ThreadCount
+    - Stack[StackSize]
+    'Methods:
+    + Kernel()
+    + ScheduleThread()
+    + ScheduleThread_Hz()
+    + Start()
+    - GetNextThread()
+    - UpdateSchedule()
+    - Time_ms()
+}
+
+class Watchdog {
+    + Watchdog()
+    + Pet()
+}
+
+class Task{
+    ' Properties:
+    - LastTicks
+
+    ' Methods:
+    + Task()
+    + //static// Lock()
+    + //static// Unlock()
+    + //static// WaitFor()
+    + //static// Yield()
+    + Sleep()
+    - GetSysTick()
+}
+
+class IPC{
+    - Id
+    - CmdBuffer
+    + GetQueue()
+    + PushQueue()
+}
+
+Thread --|> Schedule
+Thread "*"-*"1" Kernel
+Kernel --|> Watchdog
+Task --|> IPC
+
+@enduml

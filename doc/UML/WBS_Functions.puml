@@ -1,0 +1,16 @@
+@startwbs WBS_Functions
+title Main Function Breakdown of OTOS\n
+
+* **OTOS**
+** Threads
+*** Scheduling
+**** Switching
+**** Prioritising
+**** Timing
+** Kernel
+*** Watchdog
+*** Error Handling
+**** Stack Overflow
+*** Logging
+
+@endwbs

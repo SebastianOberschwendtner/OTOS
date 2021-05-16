@@ -1,0 +1,16 @@
+@startuml ACT_OTOS_General
+title General Activity Diagram for OTOS
+
+start
+:Init Main Stack;
+partition "Schedule Thread" {
+    :Init Thread Stack;
+}
+repeat
+    :Get Next Runable Task;
+    :Switch to Next Task;
+repeat while (Loop Forever)
+stop
+
+
+@enduml

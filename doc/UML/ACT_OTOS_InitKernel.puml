@@ -1,0 +1,18 @@
+@startuml ACT_OTOS_InitKernel
+title Activity Diagram for **Initializing the Kernel** \n
+caption Entry: Mode: **Thread**, Stackpointer: **msp**
+
+start
+:Push **LR** on Stack (msp);
+:Push **R1-R12** on Stack (msp);
+:Push **PSR** on Stack (msp);
+:Set **psp** to beginning of
+Thread Stack;
+:Enable psp Stack in **CONTROL**;
+:Call **Yield** to finish initialization;
+note left
+    The kernel resumes execution in
+    privileged **handler** mode after that.
+endnote
+stop
+@enduml

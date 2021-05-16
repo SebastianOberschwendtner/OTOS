@@ -1,0 +1,23 @@
+@startuml ACT_OTOS_SysCall
+title Activity Diagram for **SVC** Interrupt Handler\n
+caption Mode: **Handler**, Stackpointer: **msp**
+
+start
+partition "Save Thread" {
+    :Move **psp** to R0;
+    :Store **LR** to psp (R0)
+    ----
+    Should be a __valid__
+    exception return behavior.;
+    :Store **R4-R11** to psp (R0);
+    :**R0** now contains the
+    end of the occupied thread
+    stack. ;
+}
+partition "Load Kernel" {
+    :Pop and Restore **PSR**;
+    :Pop **R1-R11**;
+    :Restore **PC**;
+}
+stop
+@enduml
