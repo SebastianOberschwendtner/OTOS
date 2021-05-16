@@ -57,6 +57,7 @@ void test_Constructor(void)
     // Test the constructor of sub class
     TEST_ASSERT_EQUAL( 0, UUT.StackSize);
     TEST_ASSERT_NULL( UUT.StackPointer );
+    TEST_ASSERT_NULL( UUT.StackTop );
 };
 
 /**
