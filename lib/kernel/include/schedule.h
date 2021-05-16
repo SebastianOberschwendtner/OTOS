@@ -18,12 +18,34 @@
  *
  */
 
-#ifndef MAIN_H_
-#define MAIN_H_
-// ****** Defines ******
+#ifndef SCHEDULE_H_
+#define SCHEDULE_H_
 
 // ****** Includes ******
-#include "kernel.h"
-#include "thread.h"
+#include "types.h"
 
+namespace OTOS 
+{
+    // Enumeration for task priority
+    enum Priority : u_base_t
+    {
+        PrioLow = 1,
+        PrioMid = 2,
+        PrioHigh = 3
+    };
+
+    // Class for schedule data of one thread
+    class Schedule
+    {
+    public:
+        // Properties:
+        Priority ThreadPriority; // Priority of task
+        u_base_t TickSchedule;   // The scheduled execution time of thread
+        u_base_t TickCounter;    // Ticks since last execution of thread
+
+        // Methods
+        Schedule(void);
+        bool Runable(void);
+    };
+};
 #endif

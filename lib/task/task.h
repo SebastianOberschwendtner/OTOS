@@ -18,12 +18,27 @@
  *
  */
 
-#ifndef MAIN_H_
-#define MAIN_H_
-// ****** Defines ******
+#ifndef TASK_H_
+#define TASK_H_
 
 // ****** Includes ******
-#include "kernel.h"
-#include "thread.h"
+#include "processors.h"
+
+namespace OTOS {
+
+    // ****** Class Definitions ******
+    class Task
+    {
+    private:
+        unsigned int LastTick;
+    public:
+        Task();
+        static void Lock(void);
+        static void Unlock(void);
+        static void WaitFor(bool Condition);
+        static void Yield(void);
+        void Sleep(unsigned int Time);
+    };
+};
 
 #endif

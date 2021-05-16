@@ -18,12 +18,29 @@
  *
  */
 
-#ifndef MAIN_H_
-#define MAIN_H_
-// ****** Defines ******
+#ifndef THREAD_H_
+#define THREAD_H_
 
 // ****** Includes ******
-#include "kernel.h"
-#include "thread.h"
+#include "schedule.h"
 
+namespace OTOS
+{
+    // Class for stack data of one thread
+    class Thread : public Schedule
+    {
+    private:
+        // Properties
+        stackpointer_t StackStart; // Pointer to start of allocated stack
+
+    public:
+        // Properties
+        u_base_t StackSize;          // Allocated stack size of the thread
+        stackpointer_t StackPointer; // Pointer to the current stack of the thread
+
+        // Methods
+        Thread(void);
+        bool StackOverflow(void);
+    };
+};
 #endif
