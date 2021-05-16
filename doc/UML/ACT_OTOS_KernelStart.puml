@@ -1,0 +1,12 @@
+@startuml ACT_OTOS_KernelStart
+title Activity Diagram for **Kernel.Start()** \n
+
+start
+repeat
+    :Get Next Runable Task;
+    :Switch to Next Task;
+repeat while (Loop Forever)
+stop
+
+
+@enduml

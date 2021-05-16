@@ -7,10 +7,11 @@ title Main Function Breakdown of OTOS\n
 **** Switching
 **** Prioritising
 **** Timing
+*** Stack Overflow
+
 ** Kernel
 *** Watchdog
 *** Error Handling
-**** Stack Overflow
 *** Logging
 
 @endwbs
