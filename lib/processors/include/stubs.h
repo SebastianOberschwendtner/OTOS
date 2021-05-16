@@ -18,32 +18,20 @@
  *
  */
 
-#ifndef PROCESSORS_H_
-#define PROCESSORS_H_
+#ifndef STUBS_H_
+#define STUBS_H_
 
-// Only include when not unit testing!
-#ifndef UNIT_TEST
+// ****** Includes ******
 
-/* 
- * Check which processor is used and 
- * include corresponding implementation
- * of the assembler functions.
- */
-///@todo Add check for FPU here.
-#ifdef STM32F4
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-/******************************
-* Processor:    ARM Cortex M4
-* Detail:       No FPU enabled!
-*******************************/
-#include "arm_m4_nofpu.h"
+unsigned int*   __otos_switch       (unsigned int* ThreadStack);
+void            __otos_yield        (void);
+void            __otos_init_kernel  (unsigned int* ThreadStack);
 
-#else
-// Processor is not yet implemented -> throw error
-#error "OTOS: Processor not supported yet!"
-#endif
-#else
-// Include dummy assembler functions when unit testing
-#include "stubs.h"
-#endif
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif
