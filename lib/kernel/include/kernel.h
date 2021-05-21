@@ -24,6 +24,7 @@
 // ****** Includes ******
 #include "thread.h"
 #include "processors.h"
+#include <array>
 
 // ****** Defines *******
 /** The defines are just default values here.
@@ -40,15 +41,14 @@
 
 namespace OTOS
 {
-    ///@todo where should the schedule be stored?
     class Kernel
     {
     private:
         // Properties
         u_base_t CurrentThread;              // The current running thread
         u_base_t ThreadCount;                // Number of scheduled threads
-        Thread Threads[OTOS_NUMBER_THREADS]; // Array with stack data of each thread
-        u_base_t Stack[OTOS_STACK_SIZE];     // The total stack for the threads
+        std::array<Thread, OTOS_NUMBER_THREADS> Threads; // Array with stack data of each thread
+        std::array<u_base_t, OTOS_STACK_SIZE> Stack;     // The total stack for the threads
 
         // Methods
         void UpdateSchedule(void);
@@ -59,10 +59,10 @@ namespace OTOS
     public:
         // Methods
         Kernel();
-        void ScheduleThread(taskpointer_t TaskFunc, Priority Priority);
+        void ScheduleThread(taskpointer_t TaskFunc, u_base_t StackSize, Priority Priority);
         // void ScheduleThread_Hz(void);
         void Start(void);
-        u_base_t AllocatedStackSize(void);
+        u_base_t AllocatedStackSize(void) const;
     };
 
 };

@@ -24,6 +24,6 @@
 
 // ****** Includes ******
 #include "kernel.h"
-#include "thread.h"
+#include "task.h"
 
 #endif

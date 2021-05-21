@@ -34,11 +34,21 @@
 // ****** Variables ******
 unsigned int Value = 0;
 
+void MyFunc(void)
+{
+    while(1)
+    {
+        OTOS::Task::Yield();
+    }
+};
+
 // ****** Main ******
 int main(void)
 {
     // Create Kernel
     OTOS::Kernel OS;
+
+    OS.ScheduleThread(&MyFunc, 256, OTOS::PrioNormal);
 
     if(Value)
         Value = 1;
@@ -49,9 +59,9 @@ int main(void)
 
     // Never reached
     return 0;
-}
+};
 
-// ****** Functions ******
+// ****** Functions *****
 // void MyFunc1(void)
 // {
 //     // Init stuff here

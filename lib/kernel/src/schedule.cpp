@@ -39,18 +39,41 @@
  * @param TickSchedule (Optional, Default: 0) Defines the fixed periode for the thread.
  */
 OTOS::Schedule::Schedule(void)
+    : ThreadPriority(PrioLow), TickSchedule(0), TickCounter(0)
 {
-    // Initialize properties
-    this->ThreadPriority = PrioLow;
-    this->TickSchedule = 0;
-    this->TickCounter = 0;
+
+};
+
+/**
+ * @brief Set the schedule data of one thread
+ * @param ThreadTicks The execution periode of the thread in Ticks.
+ * @param ThreadPriority The execution priority of the thread.
+ */
+void OTOS::Schedule::SetSchedule(u_base_t ThreadTicks, Priority Threadpriority)
+{
+    // Set schedule data
+    this->ThreadPriority = ThreadPriority;
+    this->TickSchedule = ThreadTicks;
+
+    // Reset tick counter
+    this->TickCounter = ThreadTicks;    
+};
+
+/**
+ * @brief Count SysTicks to determine whether the thread is runable.
+ */
+void OTOS::Schedule::CountTick(void)
+{
+    // Only count, when counter is not already at 0
+    if (this->TickCounter)
+        this->TickCounter--;
 };
 
 /**
  * @brief Check whether the current thread is runable.
  * @return Returns true, when the thread is runable.
  */
-bool OTOS::Schedule::Runable(void)
+bool OTOS::Schedule::Runable(void) const
 {
     // When the tick counter reached 0, the task is runable
     return (this->TickCounter == 0);

@@ -22,7 +22,7 @@
 #define TYPES_H_
 
 // ****** Typdefs ******
-// Function pointer for thread
+// Function pointer for thread task
 typedef void(*taskpointer_t)(void);
 
 // Define a type for the stack pointers
@@ -30,7 +30,7 @@ typedef void(*taskpointer_t)(void);
 typedef unsigned int* stackpointer_t;
 
 /*
- * Define for fundamental byte size for the OS
+ * Define of fundamental byte size for the OS
  * This enables the OS to be used in 8bit and 
  * 32bit systems, hopefully.
  */

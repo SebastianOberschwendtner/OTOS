@@ -22,8 +22,12 @@
 #define PROCESSORS_H_
 
 // Only include when not unit testing!
-#ifndef UNIT_TEST
+#ifdef UNIT_TEST
 
+// Include dummy assembler functions when unit testing
+#include "stubs.h"
+
+#else
 /* 
  * Check which processor is used and 
  * include corresponding implementation
@@ -42,8 +46,5 @@
 // Processor is not yet implemented -> throw error
 #error "OTOS: Processor not supported yet!"
 #endif
-#else
-// Include dummy assembler functions when unit testing
-#include "stubs.h"
 #endif
 #endif

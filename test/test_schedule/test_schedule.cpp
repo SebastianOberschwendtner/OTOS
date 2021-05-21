@@ -49,9 +49,8 @@ void tearDown(void) {
  */
 void test_Constructor(void)
 {
-    TEST_ASSERT_EQUAL( OTOS::PrioLow, UUT.ThreadPriority );
-    TEST_ASSERT_EQUAL( 0, UUT.TickSchedule );
-    TEST_ASSERT_EQUAL( 0, UUT.TickCounter );
+    // The thread should be runable after initialization
+    TEST_ASSERT_TRUE( UUT.Runable() );
 };
 
 
@@ -63,11 +62,17 @@ void test_Runable(void)
     // After initializing the thread should be runable
     TEST_ASSERT_TRUE( UUT.Runable() )
 
-    // Increment tick counter
-    UUT.TickCounter++;
+    // Set the thread schedule
+    UUT.SetSchedule(1, OTOS::PrioNormal);
 
     // Thread should now not be runable
     TEST_ASSERT_FALSE( UUT.Runable() );
+
+    // Increment tick counter
+    UUT.CountTick();
+
+    // Thread should now be runable
+    TEST_ASSERT_TRUE( UUT.Runable() );
 };
 
 int main(int argc, char** argv)

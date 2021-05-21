@@ -38,22 +38,11 @@
  * Only one kernel object should exist in your project!
  */
 OTOS::Kernel::Kernel()
+    : CurrentThread(0), ThreadCount(0)
 {
-    // initialize properties
-    this->CurrentThread = 0;
-    this->ThreadCount = 0;
-
-    // Initialize thread handler
-    for (u_base_t i=0; i < OTOS_NUMBER_THREADS; i++)
-        this->Threads[i] = OTOS::Thread();
-
-    // Set first thread to top of thread stack, the other threads are still nullptr!
-    stackpointer_t _StackTop = this->Stack + OTOS_STACK_SIZE - 1;
-    this->Threads[0].StackTop = _StackTop;
-    this->Threads[0].StackPointer = _StackTop;
-
     // Call assembler function to return to kernel in handler mode
-    __otos_init_kernel(_StackTop);
+    // Uses the thread stack as temporary memory
+    __otos_init_kernel(this->Stack.end());
 };
 
 /**
@@ -94,32 +83,43 @@ void OTOS::Kernel::SwitchThread(void)
 /**
  * @brief Add a thread schedule to the kernel and activate its execution.
  * @param TaskFunc Function pointer to the task of the thread.
+ * @param StackSize The size of the thread stack in words.
  * @param Priority Priority of the scheduled thread.
  */
-void OTOS::Kernel::ScheduleThread(taskpointer_t TaskFunc, Priority Priority)
+void OTOS::Kernel::ScheduleThread(taskpointer_t TaskFunc, const u_base_t StackSize, Priority Priority)
 {
     // Check whether maximum number of tasks is reached
-    if (this->ThreadCount < OTOS_NUMBER_THREADS - 1)
+    if ( this->ThreadCount < (this->Threads.size() - 1) )
     {
-        // increase thread counter
-        this->ThreadCount++;
+        // Get pointer to next thread
+        OTOS::Thread *_NewThread = &this->Threads[this->CurrentThread];
 
-        // set thread handler
-        this->Threads[this->ThreadCount].ThreadPriority = Priority;
-        this->Threads[this->ThreadCount].StackPointer = nullptr;
-        this->Threads[this->ThreadCount].StackSize = 1;
-        this->Threads[this->ThreadCount].TickCounter = 0;
-        this->Threads[this->ThreadCount].TickSchedule = 0;
+        // Get the top of the next thread stack
+        stackpointer_t _newStack = 0;
+
+        // The next thread stack begins at the end of the currently
+        // allocated stack
+        _newStack = this->Stack.end() - this->AllocatedStackSize();
 
         // Init the stack data
-        stackpointer_t _newStack = this->Stack;
-        _newStack[16] = 0x100000;
-        _newStack[15] = 0xFFFFFFFD;
-        _newStack[8] = reinterpret_cast<u_base_t>(TaskFunc);
+        _NewThread->SetStack(_newStack, StackSize);
+        _NewThread->SetSchedule(0, Priority);
+        
+        // Initialize and mimic the psp stack frame
+        // -> See Stack-Layout.md for details
+        _newStack -= 17; // The stack frame stores 17 bytes
+        _newStack[16] = 0x01000000; // Thread PSR
+        _newStack[15] = reinterpret_cast<u_base_t>(TaskFunc); // Thread PC
+        _newStack[8] = 0xFFFFFFFD; // Thread LR, Exception return mode
 
         // Init task
-        this->Threads[this->CurrentThread].StackPointer = 
-            __otos_switch(_newStack);
+        _NewThread->StackPointer = __otos_switch(_newStack);
+        
+        // Set next thread active for scheduling
+        this->CurrentThread++;
+
+        // increase thread counter
+        this->ThreadCount++;
     }
 };
 
@@ -144,13 +144,15 @@ void OTOS::Kernel::Start(void)
  * Loops through all the stack sizes of the scheduled threads.
  * @return Returns the currently allocated stack size in words.
  */
-u_base_t OTOS::Kernel::AllocatedStackSize(void)
+u_base_t OTOS::Kernel::AllocatedStackSize(void) const
 {
     // Counter variable
     u_base_t _stack = 0;
 
     // Loop through all allocated stacks
     for(u_base_t i = 0; i < this->ThreadCount; i++)
-        _stack += this->Threads[i].StackSize;
+        _stack += this->Threads[i].GetStackSize();
+
+    // Return the total allocated stack size
     return _stack;
 };

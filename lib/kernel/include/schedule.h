@@ -37,15 +37,18 @@ namespace OTOS
     // Class for schedule data of one thread
     class Schedule
     {
-    public:
+    private:
         // Properties:
         Priority ThreadPriority; // Priority of task
         u_base_t TickSchedule;   // The scheduled execution time of thread
         u_base_t TickCounter;    // Ticks since last execution of thread
 
+    public:
         // Methods
         Schedule(void);
-        bool Runable(void);
+        void SetSchedule(u_base_t ThreadTicks, Priority ThreadPriority);
+        void CountTick(void);
+        bool Runable(void) const;
     };
 };
 #endif

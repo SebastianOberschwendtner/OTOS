@@ -29,15 +29,20 @@ namespace OTOS
     // Class for stack data of one thread
     class Thread : public Schedule
     {
-    public:
+    private:
         // Properties
         u_base_t StackSize;          // Allocated stack size of the thread
         stackpointer_t StackTop; // Pointer to the top of allocated stack for thread
+
+    public:
+        //Properties
         stackpointer_t StackPointer; // Pointer to the current top of stack of the thread
 
         // Methods
         Thread(void);
-        bool StackOverflow(void);
+        void SetStack(stackpointer_t StackPosition, u_base_t StackSize);
+        u_base_t GetStackSize(void) const;
+        bool StackOverflow(void) const;
     };
 };
 #endif
