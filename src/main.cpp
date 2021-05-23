@@ -34,23 +34,37 @@
 // ****** Variables ******
 // unsigned int Value = 0;
 
-void MyFunc(void)
-{
-    while(1)
-    {
-        OTOS::Task::yield();
-    }
-};
+// void MyFunc(void)
+// {
+//     while(1)
+//     {
+//         OTOS::Task::yield();
+//     }
+// };
 
 // ****** Main ******
 int main(void)
 {
-    // Create Kernel
-    OTOS::Kernel OS;
+    volatile unsigned long counter = 0;
 
-    OS.scheduleThread(&MyFunc, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
+    using namespace GPIO;
+    PIN<PORTG, PIN13> LED3(OUTPUT);
+    PIN<PORTG, PIN14> LED4;
+    LED4.setMode(OUTPUT);
 
-    OS.start();
+    LED3.setHigh();
+    LED4.setHigh();
+    while(1)
+    {
+        counter++;
+
+        if(counter == 100000)
+        {
+            counter = 0;
+            LED4.toggle();
+        }
+        LED3.set(!LED4.get());
+    }
     // Never reached
     return 0;
 };

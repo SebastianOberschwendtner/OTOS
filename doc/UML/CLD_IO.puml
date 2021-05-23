@@ -12,13 +12,14 @@ class PIN <<template>> {
     'Properties
 
     'Methods
+    - //static constexpr// Port()
     + PIN()
-    + setState()
-    + setOutput()
-    + setPullUp()
-    + setPullDown()
-    + getDirection()
-    + getState()
+    + setMode()
+    + setType()
+    + setSpeed()
+    + setPull()
+    + set()
+    + get()
 }
 
 @enduml

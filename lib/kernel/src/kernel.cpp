@@ -83,7 +83,7 @@ void OTOS::Kernel::switchThread(void)
 /**
  * @brief Add a thread schedule to the kernel and activate its execution.
  * @param TaskFunc Function pointer to the task of the thread.
- * @param StackSize The size of the thread stack in words.
+ * @param StackSize The size of the thread stack in words. => Should be checked with 'OTOS::Check::StackSize<Size>()' first.
  * @param Priority Priority of the scheduled thread.
  */
 void OTOS::Kernel::scheduleThread(taskpointer_t TaskFunc, const u_base_t StackSize, Priority Priority)

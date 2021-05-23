@@ -17,14 +17,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef MAIN_H_
-#define MAIN_H_
-// ****** Defines ******
+/**
+ ******************************************************************************
+ * @file    devicec.c
+ * @author  SO
+ * @version v1.0.0
+ * @date    23-March-2021
+ * @brief   Interface classes for device peripherals.
+ ******************************************************************************
+ */
 
 // ****** Includes ******
-#include "kernel.h"
-#include "task.h"
 #include "device.h"
 
-#endif
+// ****** Methods ******
+
+/**
+ * @brief Constructor for static PIN object
+ */
+
+
+/**
+ * @brief Set the Mode of the GPIO Pin
+ * @param NewMode The new mode of the pin.
+ * @details static
+ */
