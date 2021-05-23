@@ -34,26 +34,12 @@
 // ****** Variables ******
 // unsigned int Value = 0;
 
-// void MyFunc(void)
-// {
-//     while(1)
-//     {
-//         OTOS::Task::yield();
-//     }
-// };
-
-// ****** Main ******
-int main(void)
+void MyFunc(void)
 {
-    volatile unsigned long counter = 0;
-
-    using namespace GPIO;
-    PIN<PORTG, PIN13> LED3(OUTPUT);
-    PIN<PORTG, PIN14> LED4;
-    LED4.setMode(OUTPUT);
+    unsigned long counter = 0;
+    GPIO::PIN<GPIO::PORTG, GPIO::PIN13> LED3(GPIO::OUTPUT);
 
     LED3.setHigh();
-    LED4.setHigh();
     while(1)
     {
         counter++;
@@ -61,10 +47,40 @@ int main(void)
         if(counter == 100000)
         {
             counter = 0;
+            LED3.toggle();
+        }
+        OTOS::Task::yield();
+    }
+};
+
+void MyFunc2(void)
+{
+    unsigned long counter = 0;
+    GPIO::PIN<GPIO::PORTG, GPIO::PIN14> LED4(GPIO::OUTPUT);
+
+    LED4.setHigh();
+    while(1)
+    {
+        counter++;
+
+        if(counter == 50000)
+        {
+            counter = 0;
             LED4.toggle();
         }
-        LED3.set(!LED4.get());
+        OTOS::Task::yield();
     }
+};
+
+// ****** Main ******
+int main(void)
+{
+    OTOS::Kernel OS;
+
+    OS.scheduleThread(&MyFunc, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
+    OS.scheduleThread(&MyFunc2, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
+
+    OS.start();
     // Never reached
     return 0;
 };
