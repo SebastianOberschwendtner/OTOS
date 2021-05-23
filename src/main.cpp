@@ -48,7 +48,7 @@ int main(void)
     // Create Kernel
     OTOS::Kernel OS;
 
-    OS.scheduleThread(&MyFunc, 256, OTOS::PrioNormal);
+    OS.scheduleThread(&MyFunc, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
 
     OS.start();
     // Never reached

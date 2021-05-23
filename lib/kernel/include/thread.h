@@ -26,6 +26,15 @@
 
 namespace OTOS
 {
+    namespace Check{
+        // Constexpr to check the minimum required stack size for a thread
+        template <u_base_t Size>
+        constexpr u_base_t StackSize() {
+            static_assert( Size > 42, "Minimum Stack Size required for a thread is 42!");
+            return Size;
+        };
+    };
+
     // Class for stack data of one thread
     class Thread : public Schedule
     {
