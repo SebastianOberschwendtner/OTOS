@@ -1,6 +1,8 @@
 @startuml CLD_OTOS
 title Class Diagram for **OTOS**\n
 
+hide empty members
+
 class Schedule{
     'Properties:
     + Priority
@@ -36,8 +38,8 @@ class Kernel{
 }
 
 class Watchdog {
-    + Watchdog()
-    + Pet()
+   '+ Watchdog()
+   '+ Pet()
 }
 
 class Task{
@@ -55,10 +57,10 @@ class Task{
 }
 
 class IPC{
-    - Id
-    - CmdBuffer
-    + GetQueue()
-    + PushQueue()
+   '- Id
+   '- CmdBuffer
+   '+ GetQueue()
+   '+ PushQueue()
 }
 
 Thread --|> Schedule

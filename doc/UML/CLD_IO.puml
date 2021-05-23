@@ -1,0 +1,24 @@
+@startuml CLD_IO
+title Class Diagram for **IO** \n
+
+class PORT {
+    'Properties
+
+    'Methods
+    + PORT()
+}
+
+class PIN <<template>> {
+    'Properties
+
+    'Methods
+    + PIN()
+    + setState()
+    + setOutput()
+    + setPullUp()
+    + setPullDown()
+    + getDirection()
+    + getState()
+}
+
+@enduml
