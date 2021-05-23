@@ -49,7 +49,7 @@ OTOS::Kernel::Kernel()
  * @brief Update the thread tick counters and determine which
  * thread is runable.
  */
-void OTOS::Kernel::UpdateSchedule(void)
+void OTOS::Kernel::updateSchedule(void)
 {
     ///@todo Implement the scheduling!
 };
@@ -60,7 +60,7 @@ void OTOS::Kernel::UpdateSchedule(void)
  * @details This currently only implements a simple round-robin scheme.
  * @todo Add scheduling with priority.
  */
-void OTOS::Kernel::GetNextThread(void)
+void OTOS::Kernel::getNextThread(void)
 {
     // Increment to next thread
     this->CurrentThread++;
@@ -73,7 +73,7 @@ void OTOS::Kernel::GetNextThread(void)
 /**
  * @brief Switch to the thread which is currently active and handover control.
  */
-void OTOS::Kernel::SwitchThread(void)
+void OTOS::Kernel::switchThread(void)
 {
     // Invoke the assembler function to switch context
     this->Threads[this->CurrentThread].StackPointer =
@@ -86,7 +86,7 @@ void OTOS::Kernel::SwitchThread(void)
  * @param StackSize The size of the thread stack in words.
  * @param Priority Priority of the scheduled thread.
  */
-void OTOS::Kernel::ScheduleThread(taskpointer_t TaskFunc, const u_base_t StackSize, Priority Priority)
+void OTOS::Kernel::scheduleThread(taskpointer_t TaskFunc, const u_base_t StackSize, Priority Priority)
 {
     // Check whether maximum number of tasks is reached
     if ( this->ThreadCount < (this->Threads.size() - 1) )
@@ -99,11 +99,11 @@ void OTOS::Kernel::ScheduleThread(taskpointer_t TaskFunc, const u_base_t StackSi
 
         // The next thread stack begins at the end of the currently
         // allocated stack
-        _newStack = this->Stack.end() - this->AllocatedStackSize();
+        _newStack = this->Stack.end() - this->getAllocatedStackSize();
 
         // Init the stack data
-        _NewThread->SetStack(_newStack, StackSize);
-        _NewThread->SetSchedule(0, Priority);
+        _NewThread->setStack(_newStack, StackSize);
+        _NewThread->setSchedule(0, Priority);
         
         // Initialize and mimic the psp stack frame
         // -> See Stack-Layout.md for details
@@ -126,16 +126,16 @@ void OTOS::Kernel::ScheduleThread(taskpointer_t TaskFunc, const u_base_t StackSi
 /**
  * @brief Start the kernel execution.
  */
-void OTOS::Kernel::Start(void)
+void OTOS::Kernel::start(void)
 {
     // Loop forever
     while(1)
     {
         // Determine the next thread to run
-        this->GetNextThread();
+        this->getNextThread();
 
         // Give the control to the next thread
-        this->SwitchThread();
+        this->switchThread();
     };
 };
 
@@ -144,14 +144,14 @@ void OTOS::Kernel::Start(void)
  * Loops through all the stack sizes of the scheduled threads.
  * @return Returns the currently allocated stack size in words.
  */
-u_base_t OTOS::Kernel::AllocatedStackSize(void) const
+u_base_t OTOS::Kernel::getAllocatedStackSize(void) const
 {
     // Counter variable
     u_base_t _stack = 0;
 
     // Loop through all allocated stacks
     for(u_base_t i = 0; i < this->ThreadCount; i++)
-        _stack += this->Threads[i].GetStackSize();
+        _stack += this->Threads[i].getStackSize();
 
     // Return the total allocated stack size
     return _stack;

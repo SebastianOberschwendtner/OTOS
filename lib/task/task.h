@@ -33,11 +33,11 @@ namespace OTOS {
         unsigned int LastTick;
     public:
         Task();
-        static void Lock(void);
-        static void Unlock(void);
-        static void WaitFor(bool Condition);
-        static void Yield(void);
-        void Sleep(unsigned int Time);
+        static void lock(void);
+        static void unlock(void);
+        static void waitFor(bool Condition);
+        static void yield(void);
+        void sleep(unsigned int Time);
     };
 };
 

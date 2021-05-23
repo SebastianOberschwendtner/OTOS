@@ -40,9 +40,9 @@ namespace OTOS
 
         // Methods
         Thread(void);
-        void SetStack(stackpointer_t StackPosition, u_base_t StackSize);
-        u_base_t GetStackSize(void) const;
-        bool StackOverflow(void) const;
+        void setStack(stackpointer_t StackPosition, u_base_t StackSize);
+        u_base_t getStackSize(void) const;
+        bool getStackOverflow(void) const;
     };
 };
 #endif

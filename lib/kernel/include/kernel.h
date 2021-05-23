@@ -51,18 +51,18 @@ namespace OTOS
         std::array<u_base_t, OTOS_STACK_SIZE> Stack;     // The total stack for the threads
 
         // Methods
-        void UpdateSchedule(void);
-        void GetNextThread(void);
-        void SwitchThread(void);
+        void updateSchedule(void);
+        void getNextThread(void);
+        void switchThread(void);
         // unsigned int Time_ms(void);
 
     public:
         // Methods
         Kernel();
-        void ScheduleThread(taskpointer_t TaskFunc, u_base_t StackSize, Priority Priority);
-        // void ScheduleThread_Hz(void);
-        void Start(void);
-        u_base_t AllocatedStackSize(void) const;
+        void scheduleThread(taskpointer_t TaskFunc, u_base_t StackSize, Priority Priority);
+        // voId ScheduleThread_Hz(void);
+        void start(void);
+        u_base_t getAllocatedStackSize(void) const;
     };
 
 };

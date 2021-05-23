@@ -32,13 +32,13 @@
 #include "main.h"
 
 // ****** Variables ******
-unsigned int Value = 0;
+// unsigned int Value = 0;
 
 void MyFunc(void)
 {
     while(1)
     {
-        OTOS::Task::Yield();
+        OTOS::Task::yield();
     }
 };
 
@@ -48,15 +48,9 @@ int main(void)
     // Create Kernel
     OTOS::Kernel OS;
 
-    OS.ScheduleThread(&MyFunc, 256, OTOS::PrioNormal);
+    OS.scheduleThread(&MyFunc, 256, OTOS::PrioNormal);
 
-    if(Value)
-        Value = 1;
-    else
-        Value =2;
-
-    while(1);
-
+    OS.start();
     // Never reached
     return 0;
 };

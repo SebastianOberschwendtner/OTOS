@@ -46,9 +46,9 @@ namespace OTOS
     public:
         // Methods
         Schedule(void);
-        void SetSchedule(u_base_t ThreadTicks, Priority ThreadPriority);
-        void CountTick(void);
-        bool Runable(void) const;
+        void setSchedule(u_base_t ThreadTicks, Priority ThreadPriority);
+        void countTick(void);
+        bool isRunable(void) const;
     };
 };
 #endif

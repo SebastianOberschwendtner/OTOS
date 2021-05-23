@@ -49,7 +49,7 @@ OTOS::Schedule::Schedule(void)
  * @param ThreadTicks The execution periode of the thread in Ticks.
  * @param ThreadPriority The execution priority of the thread.
  */
-void OTOS::Schedule::SetSchedule(u_base_t ThreadTicks, Priority Threadpriority)
+void OTOS::Schedule::setSchedule(u_base_t ThreadTicks, Priority Threadpriority)
 {
     // Set schedule data
     this->ThreadPriority = ThreadPriority;
@@ -62,7 +62,7 @@ void OTOS::Schedule::SetSchedule(u_base_t ThreadTicks, Priority Threadpriority)
 /**
  * @brief Count SysTicks to determine whether the thread is runable.
  */
-void OTOS::Schedule::CountTick(void)
+void OTOS::Schedule::countTick(void)
 {
     // Only count, when counter is not already at 0
     if (this->TickCounter)
@@ -73,7 +73,7 @@ void OTOS::Schedule::CountTick(void)
  * @brief Check whether the current thread is runable.
  * @return Returns true, when the thread is runable.
  */
-bool OTOS::Schedule::Runable(void) const
+bool OTOS::Schedule::isRunable(void) const
 {
     // When the tick counter reached 0, the task is runable
     return (this->TickCounter == 0);

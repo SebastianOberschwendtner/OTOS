@@ -46,7 +46,7 @@ OTOS::Task::Task()
  * cannot be interrupted. Make sure to enable interrupts again
  * after important section is finished!.
  */
-void OTOS::Task::Lock(void)
+void OTOS::Task::lock(void)
 {
     ///@todo Disable SysTick interrupt
 };
@@ -55,7 +55,7 @@ void OTOS::Task::Lock(void)
  * @brief Enable the SysTick interrupt again, after important
  * section finished execution.
  */
-void OTOS::Task::Unlock(void)
+void OTOS::Task::unlock(void)
 {
     ///@todo Enable SysTick interrupt
 };
@@ -64,7 +64,7 @@ void OTOS::Task::Unlock(void)
  * @brief Yield the execution until a condition becomes true.
  * @param Condition This value has to be true in order to resume execution.
  */
-void OTOS::Task::WaitFor(bool Condition)
+void OTOS::Task::waitFor(bool Condition)
 {
     while (!Condition)
         __otos_yield();
@@ -73,7 +73,7 @@ void OTOS::Task::WaitFor(bool Condition)
 /**
  * @brief Yield execution and give control to kernel.
  */
-void OTOS::Task::Yield(void)
+void OTOS::Task::yield(void)
 {
     __otos_yield();
 };
@@ -82,7 +82,7 @@ void OTOS::Task::Yield(void)
  * @brief Yield execution for a specific amount of time.
  * @param Time Time to sleep in SysTicks.
  */
-void OTOS::Task::Sleep(unsigned int Time)
+void OTOS::Task::sleep(unsigned int Time)
 {
     ///@todo Add sleep function.
 };
