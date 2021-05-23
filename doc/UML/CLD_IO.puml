@@ -19,6 +19,9 @@ class PIN <<template>> {
     + setSpeed()
     + setPull()
     + set()
+    + setHigh()
+    + setLow()
+    + toggle()
     + get()
 }
 
