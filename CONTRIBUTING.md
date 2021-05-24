@@ -42,6 +42,8 @@ Examples for the abbreviations of the variable type:
 You do not need to use these variable types, you can use the `uint8_t` type for example, this naming convention is just a recommendation.
 > For more complex typedefs, the abbreviation does not make sense anymore.
 
+> Also when writing in *C++* the compiler handles more of the type checks, so it is not as relevant here to include the types in the variable names.
+
 Example:
 ```c
 unsigned char pch_array = {}; //Example pointer to a char array
@@ -51,6 +53,14 @@ unsigned char pch_array = {}; //Example pointer to a char array
 Functions follow the same rules as [variables](#variables), but they have a short abbreviation of the context in the beginning of the name.
 This is an attempt to mimic the name spaces of *C++*. The abbreviation should be as **short** as possible. The return type does not have to be in
 the name.
+
+> When writing in *C++* use namespaces wherever appropriate.
+
+## Classes
+When you use classes, use *capitalized words* as the class names. Also use namespaces wherever applicable.
+
+- **Properties** should use *CamelCase*.
+- **Methods** should start with a *lower case letter* and then also use *camelCase*.
 
 # Comments
 We use the *doxygen* documentation flags in the headers, to make them more readable. Although we do not export the documentation as *html*, the flags
@@ -87,6 +97,7 @@ A function header gives a short **description**, defines the **inputs** and the 
  Possible `@details` are:
  - *interrupt handler*
  - *inline function*
+ - ...
  
  You can also use additional comments:
  - `@todo`: Note what has to be done
@@ -95,14 +106,14 @@ A function header gives a short **description**, defines the **inputs** and the 
 # Commits
 - Commit messages should be clear and concise 
 - Use **English** as far as possible.
-- Use the # to close issues. 
-- *Present* tense is **not** required. 
+- Use the `#` to close issues. 
+- *Present* tense is **not** required, but appreciated. :wink:
 
 Symbols for commits:
 - :art: `:art:` Improvements in the *User Experience*
 - :bug: `:bug:` Bugfix
 - :racehorse: `:racehorse:` Performance Improvement
-- :wrench: `:wrench:`Minor Improvement or Fix
+- :wrench: `:wrench:` Minor Improvement or Fix
 - :mag: `:mag:` Made Code More Readable
 - :8ball: `:8ball:` Add or Change Unittests
 - :memo: `:memo:` Improved Documentation
