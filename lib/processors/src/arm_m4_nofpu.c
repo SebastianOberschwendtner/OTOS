@@ -130,13 +130,23 @@ void __otos_init_kernel(unsigned int* ThreadStack)
         "msr    psp, R0         \t\n" // Set the psp to temporary memory
         "mov    R0, #0b11       \n\t"
         "msr    CONTROL, R0     \n\t" // Set CONTROL for Thread mode
-        "isb                        " // Has to follow the write to CONTROL
+        "isb                    \n\t" // Has to follow the write to CONTROL
+        // inline __otos_yield() afterwards
+        "nop                    \n\t"
+        "svc 0                  \n\t" // Call the SVC interrupt
+        "nop                    \n\t"
+        "bx lr                      " // Resume operation when the SVC call is finished
         : // No outputs
         : "r" (ThreadStack) // Input item
     );
 
-    // Now call yield to resume execution in handler mode
-    __otos_yield();
+    /* ---------------------------------------------------------------------------------- 
+    The __otos_yield() function is inlined in the above assembler code, because
+    otherwise it does not work in debug mode. It would only work with the optimization
+    -O2, which would inline the function call as an optimization result. Since the inline
+    keyword is only a suggestion to the compiler and not a binding rule, the code is 
+    inlined here as a hardcoded function.
+    -------------------------------------------------------------------------------------*/
 };
 
 #endif
