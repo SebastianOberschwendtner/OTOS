@@ -18,19 +18,19 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    schedule.c
  * @author  SO
  * @version v1.0.0
  * @date    16-March-2021
  * @brief   Handles and determines the scheduling of the threads of the OTOS kernel.
- ******************************************************************************
+ ==============================================================================
  */
 
-// ****** Includes ******
+// *** Includes ***
 #include "schedule.h"
 
-// ****** Methods ******
+// *** Methods ***
 
 /**
  * @brief Constructor for a Schedule object.

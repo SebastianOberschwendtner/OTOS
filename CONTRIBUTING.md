@@ -46,7 +46,7 @@ You do not need to use these variable types, you can use the `uint8_t` type for 
 
 Example:
 ```c
-unsigned char pch_array = {}; //Example pointer to a char array
+unsigned char pch_array = {}; // Example pointer to a char array
 ```
 
 ## Functions
@@ -74,13 +74,13 @@ The file header gives a short description of what the file does. Also the [licen
 Example:
 ```c
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    filename.c
  * @author  name
  * @version vx.x.x
  * @date    dd-Month-yyyy
  * @brief   Description
- ******************************************************************************
+ ==============================================================================
  */
  ```
 ## Function Header
@@ -102,6 +102,14 @@ A function header gives a short **description**, defines the **inputs** and the 
  You can also use additional comments:
  - `@todo`: Note what has to be done
  - `@deprecated`: Why this function is no longer used.
+
+ ## File Sections
+ Try to separate *sections within one file. Sections can be anything which combines the same content, for example function declarations or variable declaration can be sections.
+ Mark them according to:
+ ```c
+ // *** Section Name ***
+ -> Code here.
+ ```
  
 # Commits
 - Commit messages should be clear and concise 

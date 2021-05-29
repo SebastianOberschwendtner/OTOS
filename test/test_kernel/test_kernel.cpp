@@ -18,16 +18,16 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    test_kernel.c
  * @author  SO
  * @version v1.0.0
  * @date    16-March-2021
  * @brief   Unit tests for the OTOS kernel to be executed on the host.
- ******************************************************************************
+ ==============================================================================
  */
 
-// ****** Includes ******
+// *** Includes ***
 #include <unity.h>
 #include <kernel.h>
 
@@ -42,7 +42,7 @@ void tearDown(void) {
 // clean stuff up here
 };
 
-// ****** Define Tests ******
+// *** Define Tests ***
 
 /**
  * @brief Test the constructor
@@ -53,6 +53,7 @@ void test_Constructor(void)
     TEST_ASSERT_EQUAL( 0, UUT.AllocatedStackSize() );
 };
 
+// *** Perform the tests ***
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();

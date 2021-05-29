@@ -21,7 +21,7 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
-// ****** Typdefs ******
+// *** Typdefs ***
 // Function pointer for thread task
 typedef void(*taskpointer_t)(void);
 

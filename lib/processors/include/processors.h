@@ -36,10 +36,10 @@
 ///@todo Add check for FPU here.
 #ifdef STM32F4
 
-/******************************
+/*-----------------------------
 * Processor:    ARM Cortex M4
 * Detail:       No FPU enabled!
-*******************************/
+------------------------------*/
 #include "arm_m4_nofpu.h"
 
 #else

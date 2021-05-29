@@ -21,12 +21,12 @@
 #ifndef TASK_H_
 #define TASK_H_
 
-// ****** Includes ******
+// *** Includes ***
 #include "processors.h"
 
 namespace OTOS {
 
-    // ****** Class Definitions ******
+    // *** Class Definitions ***
     class Task
     {
     private:

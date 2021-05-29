@@ -21,7 +21,7 @@
 #ifndef ARM_M4_NOFPU_H_
 #define ARM_M4_NOFPU_H_
 
-// ****** Includes ******
+// *** Includes ***
 
 #ifdef __cplusplus
 extern "C" {

@@ -18,16 +18,16 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    test_thread.c
  * @author  SO
  * @version v1.0.0
  * @date    16-March-2021
  * @brief   Unit tests for the thread handler of OTOS.
- ******************************************************************************
+ ==============================================================================
  */
 
-// ****** Includes ******
+// *** Includes ***
 #include <array>
 #include <unity.h>
 #include <thread.h>
@@ -46,7 +46,7 @@ void tearDown(void) {
 // clean stuff up here
 };
 
-// ****** Define Tests ******
+// *** Define Tests ***
 
 /**
  * @brief Test the correct behavior of the cosntructor
@@ -98,6 +98,7 @@ void test_StackOverflow(void)
 
 };
 
+// *** Perform the tests *** 
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();

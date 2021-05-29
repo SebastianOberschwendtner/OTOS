@@ -18,21 +18,21 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    stubs.c
  * @author  SO
  * @version v1.0.0
  * @date    16-March-2021
  * @brief   Stub assembler functions for unit testing.
- ******************************************************************************
+ ==============================================================================
  */
 
-// ****** Includes ******
+// *** Includes ***
 
 // Only include functions when  unit testing!
 #ifdef UNIT_TEST
 
-// ****** Functions ******
+// *** Functions ***
 
 /**
  * @brief This function is called by the kernel to give the control

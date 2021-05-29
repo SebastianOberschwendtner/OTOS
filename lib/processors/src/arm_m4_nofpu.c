@@ -18,7 +18,7 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    arm_m4_nofpu.c
  * @author  SO
  * @version v1.0.0
@@ -26,15 +26,15 @@
  * @brief   Defines the assembly code for:
  *          - ARM Cortex M4
  *          - No FPU enabled
- ******************************************************************************
+ ==============================================================================
  */
 
-// ****** Includes ******
+// *** Includes ***
 
 // Only include functions when not unit testing!
 #ifndef UNIT_TEST
 
-// ****** Functions ******
+// *** Functions ***
 
 /**
  * @brief This function is called by the kernel to give the control

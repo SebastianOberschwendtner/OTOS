@@ -21,9 +21,10 @@
 #ifndef SCHEDULE_H_
 #define SCHEDULE_H_
 
-// ****** Includes ******
+// *** Includes ***
 #include "types.h"
 
+// *** Declarations ***
 namespace OTOS 
 {
     // Enumeration for task priority

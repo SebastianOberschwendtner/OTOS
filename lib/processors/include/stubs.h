@@ -21,7 +21,7 @@
 #ifndef STUBS_H_
 #define STUBS_H_
 
-// ****** Includes ******
+// *** Includes ***
 
 #ifdef __cplusplus
 extern "C" {

@@ -18,16 +18,16 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    test_schedule.c
  * @author  SO
  * @version v1.0.0
  * @date    16-March-2021
  * @brief   Test the basic functions of the scheduler of OTSO.
- ******************************************************************************
+ ==============================================================================
  */
 
-// ****** Includes ******
+// *** Includes ***
 #include <unity.h>
 #include <schedule.h>
 
@@ -42,7 +42,7 @@ void tearDown(void) {
 // clean stuff up here
 };
 
-// ****** Define Tests ******
+// *** Define Tests ***
 
 /**
  * @brief Test the correct behavior of the constructor
@@ -75,6 +75,7 @@ void test_Runable(void)
     TEST_ASSERT_TRUE( UUT.Runable() );
 };
 
+// *** Perform the tests ***
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();

@@ -21,9 +21,10 @@
 #ifndef THREAD_H_
 #define THREAD_H_
 
-// ****** Includes ******
+// *** Includes ***
 #include "schedule.h"
 
+// *** Declarations ***
 namespace OTOS
 {
     namespace Check{

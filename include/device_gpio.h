@@ -21,11 +21,12 @@
 #ifndef DEVICE_GPIO_H_
 #define DEVICE_GPIO_H_
 
-// ****** Includes ******
+// *** Includes ***
 #include <stm32f4xx.h>
 
+// *** Declarations ***
 namespace GPIO {
-    // ****** Enums ******
+    // *** Enums ***
     enum PinPort
     {
         PORTA = GPIOA_BASE,
@@ -62,7 +63,7 @@ namespace GPIO {
         NO_PP = 0, PULL_UP, PULL_DOWN
     };
 
-    // ****** Classes ******
+    // *** Classes ***
     template<PinPort PinPort, PinNumber ThisPin>
     class PIN{
     private:

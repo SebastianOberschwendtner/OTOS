@@ -21,12 +21,12 @@
 #ifndef KERNEL_H_
 #define KERNEL_H_
 
-// ****** Includes ******
+// *** Includes ***
 #include "thread.h"
 #include "processors.h"
 #include <array>
 
-// ****** Defines *******
+// *** Defines ****
 /** The defines are just default values here.
  * They can be overritten by defining them before including kernel.h
  * => that is why they are not defined with constexpr...
@@ -39,6 +39,7 @@
 #define OTOS_NUMBER_THREADS 5 // Maximum number of threads
 #endif
 
+// *** Declarations ***
 namespace OTOS
 {
     class Kernel
@@ -60,7 +61,7 @@ namespace OTOS
         // Methods
         Kernel();
         void scheduleThread(taskpointer_t TaskFunc, u_base_t StackSize, Priority Priority);
-        // voId ScheduleThread_Hz(void);
+        // void ScheduleThread_Hz(void);
         void start(void);
         u_base_t getAllocatedStackSize(void) const;
     };

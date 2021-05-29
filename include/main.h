@@ -20,9 +20,9 @@
 
 #ifndef MAIN_H_
 #define MAIN_H_
-// ****** Defines ******
+// *** Defines ***
 
-// ****** Includes ******
+// *** Includes ***
 #include "kernel.h"
 #include "task.h"
 #include "device.h"
