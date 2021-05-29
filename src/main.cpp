@@ -18,23 +18,28 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    main.c
  * @author  SO
  * @version v1.0.0
  * @date    09-March-2021
  * @brief   Main function for the OTOS. Mainly used to demonstrate how the OTOS
  *          functions work and should be used.
- ******************************************************************************
+ ==============================================================================
  */
 
-// ****** Includes ******
+// *** Includes ***
 #include "main.h"
 
-// ****** Variables ******
-// unsigned int Value = 0;
+// *** Variables ***
 
-void MyFunc(void)
+// *** Functions ***
+
+/**
+ * @brief Example task which blinks LED3 of the STM32F429-Discovery board.
+ * @details Example Task
+ */
+void Blink_LED3(void)
 {
     unsigned long counter = 0;
     GPIO::PIN<GPIO::PORTG, GPIO::PIN13> LED3(GPIO::OUTPUT);
@@ -53,7 +58,11 @@ void MyFunc(void)
     }
 };
 
-void MyFunc2(void)
+/**
+ * @brief Example task which blinks LED4 of the STM32F429-Discovery board.
+ * @details Example Task
+ */
+void Blink_LED4(void)
 {
     unsigned long counter = 0;
     GPIO::PIN<GPIO::PORTG, GPIO::PIN14> LED4(GPIO::OUTPUT);
@@ -72,58 +81,19 @@ void MyFunc2(void)
     }
 };
 
-// ****** Main ******
+// *** Main ***
 int main(void)
 {
+    // Create the kernel object
     OTOS::Kernel OS;
 
-    OS.scheduleThread(&MyFunc, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
-    OS.scheduleThread(&MyFunc2, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
+    // Schedule Threads
+    OS.scheduleThread(&Blink_LED3, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
+    OS.scheduleThread(&Blink_LED4, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
 
+    // Start the task execution
     OS.start();
+
     // Never reached
     return 0;
 };
-
-// ****** Functions *****
-// void MyFunc1(void)
-// {
-//     // Init stuff here
-//     OTOS::Thread MyThread;
-    
-//     while(1)
-//     {
-//         //Loop Here...
-
-//         //Get elapsed time since boot in ms
-//         // time = OTOS_Time_ms();
-
-//         /* Lock this thread, meaning disabling interrupt for SysTick
-//          * so that the thread cannot be interrupted. Only via the watchdog.
-//          */
-//         MyThread.Lock();
-//         // Enable Systick interrupt again
-//         MyThread.Unlock();
-
-//         // Wait for condition to become true
-//         MyThread.WaitFor(true);
-
-//         // Sleep and do other stuff in the meantime
-//         MyThread.Sleep(10);
-
-//         //Yield execution and give control back to the kernel
-//         MyThread.Yield();
-//     }
-
-// };
-
-// void MyFunc2(void)
-// {
-//         // Get items from IPC queue
-//         items = Thread_GetQueue();
-
-//         // Push to IPC queue
-//         Thread_PushQueue(Target);
-
-//         // => KISS: Communication stays in ipc.c
-// };
