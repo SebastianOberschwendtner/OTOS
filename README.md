@@ -19,6 +19,19 @@ Bear bones realtime operating system for embedded systems. Focus lies on KISS (*
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/knuffel-v2/otos)
 ![GitHub](https://img.shields.io/github/license/knuffel-v2/otos)
 
+> Supported Microcontrollers:
+- STM<sup>&reg;</sub>
+
+|Device | Core | FPU | Header |
+|---|---|:---:|---|
+|STM32F4xx|*ARM* Cortex M4<sup>&reg;</sub>|:x:|`arm_m4_nofpu.h`|
+
+- Atmel<sup>&reg;</sub>
+
+|Device | Core | FPU | Header |
+|---|---|:---:|---|
+|-|||
+
 ## Branches
 |Name|Status|Description|
 |---|---|---|
