@@ -50,7 +50,7 @@ void tearDown(void) {
 void test_Constructor(void)
 {
     // There should be no allocated stack
-    TEST_ASSERT_EQUAL( 0, UUT.AllocatedStackSize() );
+    TEST_ASSERT_EQUAL( 0, UUT.getAllocatedStackSize() );
 };
 
 // *** Perform the tests ***

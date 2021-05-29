@@ -54,7 +54,7 @@ void tearDown(void) {
 void test_Constructor(void)
 {
     // Test the constructor
-    TEST_ASSERT_EQUAL( 0, UUT.GetStackSize() );
+    TEST_ASSERT_EQUAL( 0, UUT.getStackSize() );
     TEST_ASSERT_EQUAL( 0, UUT.StackPointer );
 };
 
@@ -64,10 +64,10 @@ void test_Constructor(void)
 void test_SetStack(void)
 {
     // Set the stack to the local stack with size 50
-    UUT.SetStack(LocalStack.end(), 50);
+    UUT.setStack(LocalStack.end(), 50);
     TEST_ASSERT_EQUAL( LocalStack.end(), UUT.StackPointer);
-    TEST_ASSERT_EQUAL( 50, UUT.GetStackSize() );
-    TEST_ASSERT_FALSE( UUT.StackOverflow() );
+    TEST_ASSERT_EQUAL( 50, UUT.getStackSize() );
+    TEST_ASSERT_FALSE( UUT.getStackOverflow() );
 };
 
 /**
@@ -76,25 +76,25 @@ void test_SetStack(void)
 void test_StackOverflow(void)
 {
     // Set the stack to the local stack with size 50
-    UUT.SetStack(LocalStack.end(), 50);
+    UUT.setStack(LocalStack.end(), 50);
     
     // After initializing the stack, no overflow should occur
-    TEST_ASSERT_FALSE( UUT.StackOverflow() );
+    TEST_ASSERT_FALSE( UUT.getStackOverflow() );
 
     // Increase the stack pointer of the thread just before its limit
     // -> No overflow should occur now.
     UUT.StackPointer = LocalStack.end() - 49;
-    TEST_ASSERT_FALSE( UUT.StackOverflow() );
+    TEST_ASSERT_FALSE( UUT.getStackOverflow() );
 
     // Increase the stack pointer of the thread exactly to its limit
     // -> An overflow should occur now.
     UUT.StackPointer = LocalStack.end() - 50;
-    TEST_ASSERT_TRUE( UUT.StackOverflow() );
+    TEST_ASSERT_TRUE( UUT.getStackOverflow() );
 
     // Increase the stack pointer of the thread beyond its limit
     // -> An overflow should occur now.
     UUT.StackPointer = LocalStack.end() - 51;
-    TEST_ASSERT_TRUE( UUT.StackOverflow() );
+    TEST_ASSERT_TRUE( UUT.getStackOverflow() );
 
 };
 
