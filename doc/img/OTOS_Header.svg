@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1000"
+   height="250"
+   viewBox="0 0 264.58333 66.145835"
+   version="1.1"
+   id="svg48"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   sodipodi:docname="OTOS_Header.svg"
+   inkscape:export-filename="C:\Users\Sebastian\Coding\10_Repositories\OTOS\doc\img\OTOS_Header.png"
+   inkscape:export-xdpi="900.09595"
+   inkscape:export-ydpi="900.09595"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview50"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     units="px"
+     height="250px"
+     inkscape:zoom="1.0998546"
+     inkscape:cx="385.0509"
+     inkscape:cy="47.733582"
+     inkscape:window-width="2560"
+     inkscape:window-height="1377"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer2"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-nodes="true"
+     inkscape:snap-bbox-edge-midpoints="false"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:snap-page="true"
+     inkscape:snap-smooth-nodes="true"
+     inkscape:snap-intersection-paths="true">
+    <sodipodi:guide
+       position="0,33.072917"
+       orientation="0,1"
+       id="guide11716"
+       inkscape:label=""
+       inkscape:locked="false"
+       inkscape:color="rgb(0,0,255)" />
+    <sodipodi:guide
+       position="132.29167,33.072918"
+       orientation="-1,0"
+       id="guide11718"
+       inkscape:label=""
+       inkscape:locked="false"
+       inkscape:color="rgb(0,0,255)" />
+    <sodipodi:guide
+       position="238.58681,41.266854"
+       orientation="1,0"
+       id="guide70458" />
+  </sodipodi:namedview>
+  <defs
+     id="defs45">
+    <rect
+       x="744.64388"
+       y="66.37241"
+       width="210.02776"
+       height="236.39488"
+       id="rect13131" />
+    <rect
+       x="744.64388"
+       y="66.37241"
+       width="210.02776"
+       height="236.39488"
+       id="rect68366" />
+  </defs>
+  <g
+     inkscape:label="Logo"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <image
+       preserveAspectRatio="none"
+       inkscape:svg-dpi="600"
+       width="60.854168"
+       height="60.854168"
+       xlink:href="OTOS_Logo.svg"
+       id="image961"
+       x="2.6458333"
+       y="2.6458333"
+       style="stroke-width:4.34783" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Text">
+    <text
+       xml:space="preserve"
+       style="font-size:7.05556px;line-height:1.25;font-family:Calibri;-inkscape-font-specification:Calibri;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#002329;fill-opacity:1;stroke:#005064;stroke-width:1.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       x="140.95189"
+       y="61.471531"
+       id="text2130"><tspan
+         sodipodi:role="line"
+         id="tspan2128"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:81.1389px;font-family:OpenDinSchriftenEngshrift;-inkscape-font-specification:'OpenDinSchriftenEngshrift, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#002329;fill-opacity:1;stroke:#005064;stroke-width:1.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         x="140.95189"
+         y="61.471531">OTOS</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,18.523282,-13.303432)"
+       id="text13129"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42.6667px;line-height:1.25;font-family:OpenDinSchriftenEngshrift;-inkscape-font-specification:'OpenDinSchriftenEngshrift, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;white-space:pre;shape-inside:url(#rect13131);fill:#005064;fill-opacity:1"
+       x="-143.73288"
+       y="0"><tspan
+         x="744.64453"
+         y="105.83974"
+         id="tspan76295"><tspan
+           style="text-align:start;text-anchor:start"
+           id="tspan76291">▪</tspan><tspan
+           style="text-align:start;text-anchor:start"
+           id="tspan76293">Threads
+</tspan></tspan><tspan
+         x="744.64453"
+         y="159.24483"
+         id="tspan76301"><tspan
+           style="text-align:start;text-anchor:start"
+           id="tspan76297">▪</tspan><tspan
+           style="text-align:start;text-anchor:start"
+           id="tspan76299">Schedule
+</tspan></tspan><tspan
+         x="744.64453"
+         y="212.64991"
+         id="tspan76307"><tspan
+           style="text-align:start;text-anchor:start"
+           id="tspan76303">▪</tspan><tspan
+           style="text-align:start;text-anchor:start"
+           id="tspan76305">Embedded
+</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,-0.05324939,0.26458333,22.645308,30.089429)"
+       id="text68364"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42.6667px;line-height:1.25;font-family:OpenDinSchriftenEngshrift;-inkscape-font-specification:'OpenDinSchriftenEngshrift, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;white-space:pre;shape-inside:url(#rect68366);fill:#005064;fill-opacity:1"
+       x="-143.73288"
+       y="0"><tspan
+         x="744.64453"
+         y="105.83974"
+         id="tspan76311"><tspan
+           style="text-align:start;text-anchor:start"
+           id="tspan76309">Open Source
+</tspan></tspan></text>
+  </g>
+</svg>
