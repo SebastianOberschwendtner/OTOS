@@ -7,7 +7,7 @@
 ![bugs](https://img.shields.io/github/issues/knuffel-v2/otos/bug?color=red)
 ![Status](https://img.shields.io/badge/Status-Developing-yellowgreen)
 
-Bear bones realtime operating system for embedded systems. Focus lays on KISS (**K**eep-**I**t-**S**uper-**S**imple).
+Bear bones realtime operating system for embedded systems. Focus lies on KISS (**K**eep-**I**t-**S**uper-**S**imple).
 
 > Read the [&rarrb; Getting Started](#getting-started) when you want to use the OS in your project.
 
@@ -32,7 +32,7 @@ Here are the main steps to get up and running:
 ### Initialize the Kernel
 The kernel is automatically initialized when the *kernel* object is created:
 ```cpp
-# Create the kernel object
+// Create the kernel object
 OTOS::Kernel OS;
 ```
 - Only create the kernel **once**! (The kernel class is not yet implemented as a *singleton*...)
@@ -42,7 +42,7 @@ OTOS::Kernel OS;
 Each thread handles **one** task. You can bundle multiple actions in one task, or use separate tasks for each action.
 The tasks are scheduled using their *function name*:
 ```cpp
-#Schedule task with the function name MyTask
+// Schedule task with the function name MyTask
 OS.scheduleTask(&MyTask, OTOS::Check::Stack(256), OTOS:PrioNormal);
 ```
 - You have to schedule the thread in the file where your *kernel* object is created.
@@ -52,6 +52,6 @@ OS.scheduleTask(&MyTask, OTOS::Check::Stack(256), OTOS:PrioNormal);
 The OS **does not** implement a *preemptive* scheduling (yet). So your scheduled task has
 to periodically yield its execution and tell the OS that another task can be executed.
 ```cpp
-# Tell the OS that it can give the control to another task
+// Tell the OS that it can give the control to another task
 OTOS::Thread::yield();
 ```
