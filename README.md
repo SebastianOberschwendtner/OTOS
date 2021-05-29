@@ -55,3 +55,11 @@ to periodically yield its execution and tell the OS that another task can be exe
 // Tell the OS that it can give the control to another task
 OTOS::Thread::yield();
 ```
+
+### Start Executing the Threads
+Once all threads are scheduled, you can start the kernel execution with:
+```cpp
+// Start the kernel and execute the threads
+OS.start();
+```
+- This starts an *infinite* loop inside the kernel, which switches the context of each thread according to the schedule.
