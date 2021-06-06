@@ -9,7 +9,11 @@ start
 :Set **psp** to beginning of
 Thread Stack;
 :Enable psp Stack in **CONTROL**;
-:Call **Yield** to finish initialization;
+:Call **Yield** to finish initialization
+----
+This function **has** to be inlined,
+otherwise the kernel only works with
+the optimization level //-O2//.;
 note left
     The kernel resumes execution in
     privileged **handler** mode after that.
