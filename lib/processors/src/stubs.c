@@ -84,12 +84,24 @@ void SVC_Handler(void)
  * @brief Initializes the kernel. The kernel starts out in thread mode
  * with privileged operation. It uses the SVC interrupt to switch to
  * handler mode with privileged operation. For the switch the thread
- * stack is used as temporary memory.
+ * stack is used as temporary memory. It also initializes the SysTick
+ * timer, when timing is needed. The SysTick timer should be set to
+ * throw an interrupt every 1 ms.
  * @param ThreadStack Beginning of thread stack as temporary memory.
+ * @param Ticks The number of SysTicks between the SysTick interrupts.
  * @details Thread Mode -> Handler Mode, Stack: msp
  */
-void __otos_init_kernel(unsigned long* ThreadStack)
+void __otos_init_kernel(unsigned int* ThreadStack, const unsigned long Ticks)
 {
+};
+
+/**
+ * @brief Check whether the SysTick timer overflowed since the last call.
+ * @return Returns 1 when the timer overflowed and 0 otherwise.
+ */
+int __otos_tick_passed(void)
+{
+    return 1;
 };
 
 #endif

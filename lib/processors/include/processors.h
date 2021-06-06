@@ -24,27 +24,27 @@
 // Only include when not unit testing!
 #ifdef UNIT_TEST
 
-// Include dummy assembler functions when unit testing
-#include "stubs.h"
+    // Include dummy assembler functions when unit testing
+    #include "stubs.h"
 
 #else
-/* 
- * Check which processor is used and 
- * include corresponding implementation
- * of the assembler functions.
- */
-///@todo Add check for FPU here.
-#ifdef STM32F4
+    /* 
+    * Check which processor is used and 
+    * include corresponding implementation
+    * of the assembler functions.
+    */
+    ///@todo Add check for FPU here.
+    #ifdef STM32F4
 
-/*-----------------------------
-* Processor:    ARM Cortex M4
-* Detail:       No FPU enabled!
-------------------------------*/
-#include "arm_m4_nofpu.h"
+    /*-----------------------------
+    * Processor:    ARM Cortex M4
+    * Detail:       No FPU enabled!
+    ------------------------------*/
+    #include "arm_cm4_nofpu.h"
 
-#else
-// Processor is not yet implemented -> throw error
-#error "OTOS: Processor not supported yet!"
-#endif
+    #else
+        // Processor is not yet implemented -> throw error
+        #error "OTOS: Processor not supported yet!"
+    #endif
 #endif
 #endif

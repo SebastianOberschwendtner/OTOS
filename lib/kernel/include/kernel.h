@@ -50,7 +50,7 @@ namespace OTOS
         u_base_t ThreadCount;                // Number of scheduled threads
         std::array<Thread, OTOS_NUMBER_THREADS> Threads; // Array with stack data of each thread
         std::array<u_base_t, OTOS_STACK_SIZE> Stack;     // The total stack for the threads
-        volatile static std::uint32_t Time_ms;           // Kernel timer with ms resolution
+        static std::uint32_t Time_ms;           // Kernel timer with ms resolution
 
         // Methods
         void updateSchedule(void);

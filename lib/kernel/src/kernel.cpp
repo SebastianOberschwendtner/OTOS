@@ -32,7 +32,7 @@
 #include "kernel.h"
 
 // *** Static Variables ***
-volatile std::uint32_t OTOS::Kernel::Time_ms = 0; // Initialize the kernel time with 0
+std::uint32_t OTOS::Kernel::Time_ms = 0; // Initialize the kernel time with 0
 
 // *** Methods ***
 
@@ -45,7 +45,7 @@ OTOS::Kernel::Kernel()
 {
     // Call assembler function to return to kernel in handler mode
     // Uses the thread stack as temporary memory
-    __otos_init_kernel(this->Stack.end());
+    __otos_init_kernel(this->Stack.end(), 16000);
 };
 
 /**
@@ -134,6 +134,10 @@ void OTOS::Kernel::start(void)
     // Loop forever
     while(1)
     {
+        // Check whether the the SysTick timer overflowed
+        if (__otos_tick_passed())
+            this->countTime_ms();
+
         // Determine the next thread to run
         this->getNextThread();
 
@@ -175,20 +179,4 @@ void OTOS::Kernel::countTime_ms(void)
 std::uint32_t OTOS::Kernel::getTime_ms(void) 
 {
     return OTOS::Kernel::Time_ms;
-};
-
-/**
- * @brief Interrupt handler of the SysTick timer. The SysTick timer
- * should throw this interrupt every 1 ms for the internal timer of the
- * kernel. The interrupt is also used to switch from threads which do
- * not yield their execution in time.
- * @details interrupt-handler
- */
-void SysTick_Handler(void)
-{
-    // Count time
-    OTOS::Kernel::countTime_ms();
-
-    // Call the kernel
-    __otos_call_kernel();
 };

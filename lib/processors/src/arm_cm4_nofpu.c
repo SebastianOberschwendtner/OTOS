@@ -30,7 +30,7 @@
  */
 
 // *** Includes ***
-#include "arm_m4_nofpu.h"
+#include "arm_cm4_nofpu.h"
 
 // Only include functions when not unit testing!
 #ifndef UNIT_TEST
@@ -129,12 +129,19 @@ void SVC_Handler(void)
  * @brief Initializes the kernel. The kernel starts out in thread mode
  * with privileged operation. It uses the SVC interrupt to switch to
  * handler mode with privileged operation. For the switch the thread
- * stack is used as temporary memory.
+ * stack is used as temporary memory. It also initializes the SysTick
+ * timer, when timing is needed. The SysTick timer should be set to
+ * throw an interrupt every 1 ms.
  * @param ThreadStack Beginning of thread stack as temporary memory.
+ * @param Ticks The number of SysTicks between the SysTick interrupts.
  * @details Thread Mode -> Handler Mode, Stack: msp
  */
-void __otos_init_kernel(unsigned int* ThreadStack)
+void __otos_init_kernel(unsigned int* ThreadStack, const unsigned long Ticks)
 {
+    // Initialize the SysTick timer, when Ticks are given
+    if (Ticks)
+        SysTick_Config(Ticks);
+
     // Initialize the CONTROL
     __asm__ volatile(
         "push   {R1-R12, LR}    \n\t" //Save Registers and LR in msp
@@ -160,6 +167,28 @@ void __otos_init_kernel(unsigned int* ThreadStack)
     keyword is only a suggestion to the compiler and not a binding rule, the code is 
     inlined here as a hardcoded function.
     -------------------------------------------------------------------------------------*/
+};
+
+/**
+ * @brief Interrupt handler of the SysTick timer. The SysTick timer
+ * should throw this interrupt every 1 ms for the internal timer of the
+ * kernel. The interrupt is also used to switch from threads which do
+ * not yield their execution in time.
+ * @details interrupt-handler
+ */
+void SysTick_Handler(void)
+{
+    // Call the kernel
+    __otos_call_kernel();
+};
+
+/**
+ * @brief Check whether the SysTick timer overflowed since the last call.
+ * @return Returns 1 when the timer overflowed and 0 otherwise.
+ */
+int __otos_tick_passed(void)
+{
+    return SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk;
 };
 
 #endif

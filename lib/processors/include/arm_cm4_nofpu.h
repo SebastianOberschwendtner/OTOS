@@ -22,6 +22,14 @@
 #define ARM_M4_NOFPU_H_
 
 // *** Includes ***
+// *** hardware specific ***
+#ifndef UNIT_TEST
+    #ifdef STM32F4
+        #include <stm32f4xx.h>
+    #else
+        #error "No valid processor defined!"
+    #endif
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,7 +39,8 @@ extern "C" {
 unsigned int*   __otos_switch       (unsigned int* ThreadStack);
 void            __otos_yield        (void);
 void            __otos_call_kernel  (void);
-void            __otos_init_kernel  (unsigned int* ThreadStack);
+void            __otos_init_kernel  (unsigned int* ThreadStack, const unsigned long Ticks);
+int             __otos_tick_passed  (void);
 
 #ifdef __cplusplus
 }

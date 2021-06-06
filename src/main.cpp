@@ -41,7 +41,7 @@
  */
 void Blink_LED3(void)
 {
-    unsigned long counter = 0;
+    volatile unsigned long counter = 0;
     GPIO::PIN<GPIO::PORTG, GPIO::PIN13> LED3(GPIO::OUTPUT);
 
     LED3.setHigh();
@@ -54,7 +54,7 @@ void Blink_LED3(void)
             counter = 0;
             LED3.toggle();
         }
-        OTOS::Task::yield();
+        // OTOS::Task::yield();
     }
 };
 
@@ -64,7 +64,7 @@ void Blink_LED3(void)
  */
 void Blink_LED4(void)
 {
-    unsigned long counter = 0;
+    volatile unsigned long counter = 0;
     GPIO::PIN<GPIO::PORTG, GPIO::PIN14> LED4(GPIO::OUTPUT);
 
     LED4.setHigh();
@@ -77,7 +77,7 @@ void Blink_LED4(void)
             counter = 0;
             LED4.toggle();
         }
-        OTOS::Task::yield();
+        // OTOS::Task::yield();
     }
 };
 
