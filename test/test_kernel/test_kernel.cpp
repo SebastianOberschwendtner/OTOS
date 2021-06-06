@@ -45,7 +45,7 @@ void tearDown(void) {
 // *** Define Tests ***
 
 /**
- * @brief Test the constructor
+ * @brief Test the constructor.
  */
 void test_Constructor(void)
 {
@@ -72,7 +72,7 @@ void test_scheduleThread(void)
 };
 
 /**
- * @brief Test the ms timer of the kernel
+ * @brief Test the ms timer of the kernel.
  */
 void test_Time_ms(void)
 {

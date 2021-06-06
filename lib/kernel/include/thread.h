@@ -30,7 +30,7 @@ namespace OTOS
     namespace Check{
 
         /**
-         * @brief Constexpr to check the minimum required stack size for a thread
+         * @brief Constexpr to check the minimum required stack size for a thread.
          * @details The actual minimum size is 17, 42 is an arbitrary choice. ;)
          */
         template <u_base_t Size>
@@ -45,8 +45,8 @@ namespace OTOS
     {
     private:
         // Properties
-        u_base_t StackSize;          // Allocated stack size of the thread
-        stackpointer_t StackTop; // Pointer to the top of allocated stack for thread
+        u_base_t StackSize;         // Allocated stack size of the thread
+        stackpointer_t StackTop;    // Pointer to the top of allocated stack for thread
 
     public:
         //Properties

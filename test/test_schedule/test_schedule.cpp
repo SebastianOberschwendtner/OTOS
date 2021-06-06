@@ -45,7 +45,7 @@ void tearDown(void) {
 // *** Define Tests ***
 
 /**
- * @brief Test the correct behavior of the constructor
+ * @brief Test the correct behavior of the constructor.
  */
 void test_Constructor(void)
 {

@@ -49,7 +49,7 @@ void tearDown(void) {
 // *** Define Tests ***
 
 /**
- * @brief Test the correct behavior of the cosntructor
+ * @brief Test the correct behavior of the constructor.
  */
 void test_Constructor(void)
 {
@@ -59,7 +59,7 @@ void test_Constructor(void)
 };
 
 /**
- * @brief Test setting the stack data
+ * @brief Test setting the stack data.
  */
 void test_SetStack(void)
 {

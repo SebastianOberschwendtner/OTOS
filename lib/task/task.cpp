@@ -44,7 +44,7 @@ OTOS::Task::Task()
 /**
  * @brief Disable the SysTick interrupt, so that this thread
  * cannot be interrupted. Make sure to enable interrupts again
- * after important section is finished!.
+ * after important section is finished!
  */
 void OTOS::Task::lock(void)
 {
