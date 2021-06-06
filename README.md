@@ -24,7 +24,7 @@ Bear bones realtime operating system for embedded systems. Focus lies on KISS (*
 
 |Device | Core | FPU | Header |
 |---|---|:---:|---|
-|STM32F4xx|*ARM* Cortex M4<sup>&reg;</sub>|:x:|`arm_m4_nofpu.h`|
+|STM32F4xx|*ARM* Cortex M4<sup>&reg;</sub>|:x:|`arm_cm4_nofpu.h`|
 
 - Atmel<sup>&reg;</sub>
 
