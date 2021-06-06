@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    kernel.c
  * @author  SO
- * @version v1.0.0
+ * @version v1.0.1
  * @date    09-March-2021
  * @brief   The kernel of the OTOS. It manages the task scheduling and context
  *          switching.
@@ -30,6 +30,9 @@
 
 // *** Includes ***
 #include "kernel.h"
+
+// *** Static Variables ***
+volatile std::uint32_t OTOS::Kernel::Time_ms = 0; // Initialize the kernel time with 0
 
 // *** Methods ***
 
@@ -155,4 +158,37 @@ u_base_t OTOS::Kernel::getAllocatedStackSize(void) const
 
     // Return the total allocated stack size
     return _stack;
+};
+
+/**
+ * @brief Increase the milli-seconds timer by one milli-second.
+ */
+void OTOS::Kernel::countTime_ms(void)
+{
+    OTOS::Kernel::Time_ms++;
+};
+
+/**
+ * @brief Get the current system time in milli-seconds.
+ * @return Returns the current time in milli-seconds.
+ */
+std::uint32_t OTOS::Kernel::getTime_ms(void) 
+{
+    return OTOS::Kernel::Time_ms;
+};
+
+/**
+ * @brief Interrupt handler of the SysTick timer. The SysTick timer
+ * should throw this interrupt every 1 ms for the internal timer of the
+ * kernel. The interrupt is also used to switch from threads which do
+ * not yield their execution in time.
+ * @details interrupt-handler
+ */
+void SysTick_Handler(void)
+{
+    // Count time
+    OTOS::Kernel::countTime_ms();
+
+    // Call the kernel
+    __otos_call_kernel();
 };

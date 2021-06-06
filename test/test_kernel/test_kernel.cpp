@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    test_kernel.c
  * @author  SO
- * @version v1.0.0
+ * @version v1.0.1
  * @date    16-March-2021
  * @brief   Unit tests for the OTOS kernel to be executed on the host.
  ==============================================================================
@@ -53,11 +53,25 @@ void test_Constructor(void)
     TEST_ASSERT_EQUAL( 0, UUT.getAllocatedStackSize() );
 };
 
+/**
+ * @brief Test the ms timer of the kernel
+ */
+void test_Time_ms(void)
+{
+    //The initial time value should be 0
+    TEST_ASSERT_EQUAL( 0, UUT.getTime_ms());
+
+    //Increase the count by 1 ms
+    UUT.countTime_ms();
+    TEST_ASSERT_EQUAL( 1, UUT.getTime_ms());
+};
+
 // *** Perform the tests ***
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();
     test_Constructor();
+    test_Time_ms();
     UNITY_END();
     return 0;
 }
