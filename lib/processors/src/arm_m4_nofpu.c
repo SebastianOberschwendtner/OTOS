@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    arm_m4_nofpu.c
  * @author  SO
- * @version v1.0.0
+ * @version v1.0.1
  * @date    09-March-2021
  * @brief   Defines the assembly code for:
  *          - ARM Cortex M4
@@ -30,6 +30,7 @@
  */
 
 // *** Includes ***
+#include "arm_m4_nofpu.h"
 
 // Only include functions when not unit testing!
 #ifndef UNIT_TEST
@@ -90,11 +91,12 @@ void __otos_yield(void)
 };
 
 /**
- * @brief SVC Interrupt handler. This interrupt stores the context of the
+ * @brief This function stores the context of the
  * calling thread and restores the context of the kernel.
- * @details interrupt-handler, Stack: msp
+ * This function should only be called within interrupts!
+ * @details Stack: msp
  */
-void SVC_Handler(void)
+inline void __attribute__((always_inline)) __otos_call_kernel(void)
 {
     // Give control back to the kernel
     __asm__ volatile(
@@ -110,6 +112,17 @@ void SVC_Handler(void)
         // bit[0] os the loaded value has to be 1 to stay in thumb mode!
         "pop    {PC}" 
     );
+};
+  
+/**
+ * @brief SVC Interrupt handler. This interrupt stores the context of the
+ * calling thread and restores the context of the kernel.
+ * @details interrupt-handler, Stack: msp
+ */
+void SVC_Handler(void)
+{
+    // Give control back to the kernel
+    __otos_call_kernel();
 };
   
 /**
