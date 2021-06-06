@@ -54,6 +54,24 @@ void test_Constructor(void)
 };
 
 /**
+ * @brief Test the correct allocation of the stack of one thread.
+ */
+void test_scheduleThread(void)
+{
+    // Schedule one thread
+    UUT.scheduleThread(0, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
+
+    // Test the new stack size
+    TEST_ASSERT_EQUAL(256, UUT.getAllocatedStackSize());
+
+    // Schedule another thread
+    UUT.scheduleThread(0, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
+
+    // Test the new stack size
+    TEST_ASSERT_EQUAL(2*256, UUT.getAllocatedStackSize());
+};
+
+/**
  * @brief Test the ms timer of the kernel
  */
 void test_Time_ms(void)
@@ -71,6 +89,7 @@ int main(int argc, char** argv)
 {
     UNITY_BEGIN();
     test_Constructor();
+    test_scheduleThread();
     test_Time_ms();
     UNITY_END();
     return 0;
