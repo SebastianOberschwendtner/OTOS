@@ -1,0 +1,21 @@
+@startwbs WBS_LibStructure
+title The Library Structure within **OTOS** \n
+legend Hardware or Processor specific levels are marked in **<color #SkyBlue> blue </color>**.
+
+* main.h
+** kernel.h
+*** thread.h
+**** schedule.h
+***** types.h
+*** processors.h
+****[#SkyBlue] arm_cm4_nofpu.h
+***** //stm32f4xx.h//
+**** stubs.h
+*** //array//
+** task.h
+*** processors.h
+** device.h
+***[#SkyBlue] device_gpio.h
+**** //stm32f4xx.h//
+
+@endwbs
