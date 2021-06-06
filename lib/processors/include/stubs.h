@@ -27,9 +27,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-unsigned int*   __otos_switch       (unsigned int* ThreadStack);
+unsigned long*  __otos_switch       (unsigned long* ThreadStack);
 void            __otos_yield        (void);
-void            __otos_init_kernel  (unsigned int* ThreadStack);
+void            __otos_call_kernel  (void);
+void            __otos_init_kernel  (unsigned long* ThreadStack);
 
 #ifdef __cplusplus
 }

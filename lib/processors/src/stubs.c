@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    stubs.c
  * @author  SO
- * @version v1.0.0
+ * @version v1.0.1
  * @date    16-March-2021
  * @brief   Stub assembler functions for unit testing.
  ==============================================================================
@@ -44,7 +44,7 @@
  * The address of this pointer is used to catch stack overflows.
  * @details: Handler Mode, Stack: msp
  */
-unsigned int* __otos_switch(unsigned int* ThreadStack)
+unsigned long* __otos_switch(unsigned long* ThreadStack)
 {
     // Return the current task stack pointer, when resuming kernel operation
     return ThreadStack;
@@ -62,6 +62,16 @@ void __otos_yield(void)
 };
 
 /**
+ * @brief This function stores the context of the
+ * calling thread and restores the context of the kernel.
+ * This function should only be called within interrupts!
+ * @details Stack: msp
+ */
+void __otos_call_kernel(void)
+{
+};
+  
+/**
  * @brief SVC Interrupt handler. This interrupt stores the context of the
  * calling thread and restores the context of the kernel.
  * @details interrupt-handler, Stack: msp
@@ -78,7 +88,7 @@ void SVC_Handler(void)
  * @param ThreadStack Beginning of thread stack as temporary memory.
  * @details Thread Mode -> Handler Mode, Stack: msp
  */
-void __otos_init_kernel(unsigned int* ThreadStack)
+void __otos_init_kernel(unsigned long* ThreadStack)
 {
 };
 
