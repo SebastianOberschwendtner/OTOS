@@ -45,19 +45,9 @@ void tearDown(void) {
 // *** Define Tests ***
 
 /**
- * @brief Test the correct behavior of the constructor.
+ * @brief Test the state change of a schedule when it reaches the runnable state.
  */
-void test_Constructor(void)
-{
-    // The thread should be runable after initialization
-    TEST_ASSERT_TRUE( UUT.isRunable() );
-};
-
-
-/**
- * @brief Test whether thread is runable.
- */
-void test_Runable(void)
+void test_isRunable(void)
 {
     // After initializing the thread should be runable
     TEST_ASSERT_TRUE( UUT.isRunable() )
@@ -79,8 +69,7 @@ void test_Runable(void)
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();
-    test_Constructor();
-    test_Runable();
+    test_isRunable();
     UNITY_END();
     return 0;
 };
