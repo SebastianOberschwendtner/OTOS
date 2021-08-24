@@ -22,7 +22,6 @@
 #define DEVICE_GPIO_H_
 
 // *** Includes ***
-#include <stm32f4xx.h>
 
 // *** Declarations ***
 namespace GPIO {
