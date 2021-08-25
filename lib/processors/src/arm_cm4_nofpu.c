@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    arm_m4_nofpu.c
  * @author  SO
- * @version v1.0.1
+ * @version v1.0.2
  * @date    09-March-2021
  * @brief   Defines the assembly code for:
  *          - ARM Cortex M4
@@ -31,9 +31,6 @@
 
 // *** Includes ***
 #include "arm_cm4_nofpu.h"
-
-// Only include functions when not unit testing!
-#ifndef UNIT_TEST
 
 // *** Functions ***
 
@@ -190,5 +187,3 @@ int __otos_tick_passed(void)
 {
     return SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk;
 };
-
-#endif

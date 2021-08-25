@@ -22,14 +22,7 @@
 #define ARM_M4_NOFPU_H_
 
 // *** Includes ***
-// *** hardware specific ***
-#ifndef UNIT_TEST
-    #ifdef STM32F4
-        #include <stm32f4xx.h>
-    #else
-        #error "No valid processor defined!"
-    #endif
-#endif
+#include <stm32f4xx.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef STUBS_H_
-#define STUBS_H_
+#ifndef MOCK_PROCESSORS_H
+#define MOCK_PROCESSORS_H
 
 // *** Includes ***
 
@@ -27,6 +27,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
+// *** Function Declarations ***
 unsigned long*  __otos_switch       (unsigned long* ThreadStack);
 void            __otos_yield        (void);
 void            __otos_call_kernel  (void);
