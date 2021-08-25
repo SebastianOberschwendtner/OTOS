@@ -35,7 +35,7 @@ Bear bones realtime operating system for embedded systems. Focus lies on KISS (*
 ## Branches
 |Name|Status|Description|
 |---|---|---|
-|**arm**|`active`| Main branch for developing with *ARM*|
+|**main**|`active`| Main branch for **developing**|
 
 ## Getting Started
 You want to use the *OTOS* operating system in your project? Awesome! :sunglasses:
