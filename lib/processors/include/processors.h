@@ -41,6 +41,7 @@
     * Detail:       No FPU enabled!
     ------------------------------*/
     #include "arm_cm4_nofpu.h"
+    #include <stm32f4xx.h>
 
     #else
         // Processor is not yet implemented -> throw error

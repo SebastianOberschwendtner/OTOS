@@ -17,14 +17,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef MAIN_H_
-#define MAIN_H_
-// *** Defines ***
+/**
+ ==============================================================================
+ * @file    gpio_stm32.c
+ * @author  SO
+ * @version v1.0.2
+ * @date    25-August-2021
+ * @brief   GPIO driver for STM32 microcontrollers.
+ ==============================================================================
+ */
 
 // *** Includes ***
-#include "kernel.h"
-#include "task.h"
-#include "drivers.h"
-
-#endif
+#include "gpio_stm32.h"

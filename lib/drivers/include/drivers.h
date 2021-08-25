@@ -18,13 +18,19 @@
  *
  */
 
-#ifndef MAIN_H_
-#define MAIN_H_
-// *** Defines ***
+/**=========================================================================
+ * This file includes all the available device drivers for the supported
+ * microcontrollers. Each driver includes 'processors.h' which includes the
+ * device specific library files provided by PlatformIO.
+ * 
+ * New drivers have to be added here.
+ *==========================================================================*/
+
+#ifndef DRIVERS_H_
+#define DRIVERS_H_
 
 // *** Includes ***
-#include "kernel.h"
-#include "task.h"
-#include "drivers.h"
+/// @todo Check for the microcontroller type (STM32/AVR/...) before including the driver.
+#include "gpio_stm32.h"
 
 #endif

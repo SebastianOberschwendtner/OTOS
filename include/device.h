@@ -22,6 +22,6 @@
 #define DEVICE_H_
 
 // *** Includes ***
-#include "gpio.h" // Device driver for GPIO
+#include "drivers.h" // Device driver for GPIO
 
 #endif

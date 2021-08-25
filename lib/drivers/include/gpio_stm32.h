@@ -18,10 +18,11 @@
  *
  */
 
-#ifndef DEVICE_GPIO_H_
-#define DEVICE_GPIO_H_
+#ifndef GPIO_STM32_H_
+#define GPIO_STM32_H_
 
 // *** Includes ***
+#include "processors.h"
 
 // *** Declarations ***
 namespace GPIO {
