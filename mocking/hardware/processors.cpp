@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    mocks/processors.c
  * @author  SO
- * @version v1.0.2
+ * @version v1.0.3
  * @date    16-March-2021
  * @brief   Mock the processor assembler functions for unit testing.
  ==============================================================================
@@ -97,7 +97,7 @@ void __otos_init_kernel(unsigned long* ThreadStack, const unsigned long Ticks)
  * @brief Check whether the SysTick timer overflowed since the last call.
  * @return Returns 1 when the timer overflowed and 0 otherwise.
  */
-int __otos_tick_passed(void)
-{
-    return 1;
-};
+// int __otos_tick_passed(void)
+// {
+//     return 1;
+// };

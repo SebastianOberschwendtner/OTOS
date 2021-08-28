@@ -32,7 +32,7 @@ unsigned long*  __otos_switch       (unsigned long* ThreadStack);
 void            __otos_yield        (void);
 void            __otos_call_kernel  (void);
 void            __otos_init_kernel  (unsigned long* ThreadStack, const unsigned long Ticks);
-int             __otos_tick_passed  (void);
+// int             __otos_tick_passed  (void);
 
 #ifdef __cplusplus
 }
