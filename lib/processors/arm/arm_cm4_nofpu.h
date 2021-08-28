@@ -22,7 +22,7 @@
 #define ARM_M4_NOFPU_H_
 
 // *** Includes ***
-#include <stm32f4xx.h>
+// #include "core_cm4.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,7 +33,7 @@ unsigned int*   __otos_switch       (unsigned int* ThreadStack);
 void            __otos_yield        (void);
 void            __otos_call_kernel  (void);
 void            __otos_init_kernel  (unsigned int* ThreadStack, const unsigned long Ticks);
-int             __otos_tick_passed  (void);
+// int             __otos_tick_passed  (void);
 
 #ifdef __cplusplus
 }

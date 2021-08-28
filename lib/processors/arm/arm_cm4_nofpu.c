@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    arm_m4_nofpu.c
  * @author  SO
- * @version v1.0.2
+ * @version v1.0.3
  * @date    09-March-2021
  * @brief   Defines the assembly code for:
  *          - ARM Cortex M4
@@ -136,8 +136,8 @@ void SVC_Handler(void)
 void __otos_init_kernel(unsigned int* ThreadStack, const unsigned long Ticks)
 {
     // Initialize the SysTick timer, when Ticks are given
-    if (Ticks)
-        SysTick_Config(Ticks);
+    // if (Ticks)
+        // SysTick_Config(Ticks);
 
     // Initialize the CONTROL
     __asm__ volatile(
@@ -183,7 +183,7 @@ void SysTick_Handler(void)
  * @brief Check whether the SysTick timer overflowed since the last call.
  * @return Returns 1 when the timer overflowed and 0 otherwise.
  */
-int __otos_tick_passed(void)
-{
-    return SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk;
-};
+// int __otos_tick_passed(void)
+// {
+//     return SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk;
+// };

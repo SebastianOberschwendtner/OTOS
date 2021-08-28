@@ -20,20 +20,29 @@
 
 #ifndef PROCESSORS_H_
 #define PROCESSORS_H_
+    // *** Includes
+    #include "vendors.h"
+
     /* 
     * Check which processor is used and 
     * include corresponding implementation
     * of the assembler functions.
+    * 
+    * The vendor libraries included in vendors.h
+    * usually have some defines to identify the
+    * used processor. At the least the microcontrollers
+    * OTOS supports do that.
     */
     ///@todo Add check for FPU here.
-    #ifdef STM32F4
 
-    /*-----------------------------
-    * Processor:    ARM Cortex M4
-    * Detail:       No FPU enabled!
-    ------------------------------*/
-    #include "arm_cm4_nofpu.h"
-    #include <stm32f4xx.h>
+    #ifdef __CORTEX_M // -> ARM Cortex M family
+    #if __CORTEX_M == 4
+        /*-----------------------------
+        * Processor:    ARM Cortex M4
+        * Detail:       No FPU enabled!
+        ------------------------------*/
+        #include "arm/arm_cm4_nofpu.h"
+    #endif
 
     #else
         // Processor is not yet implemented -> throw error
