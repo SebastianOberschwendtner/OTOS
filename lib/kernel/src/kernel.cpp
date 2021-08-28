@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    kernel.c
  * @author  SO
- * @version v1.0.1
+ * @version v1.0.3
  * @date    09-March-2021
  * @brief   The kernel of the OTOS. It manages the task scheduling and context
  *          switching.
@@ -135,8 +135,8 @@ void OTOS::Kernel::start(void)
     while(1)
     {
         // Check whether the the SysTick timer overflowed
-        if (__otos_tick_passed())
-            this->countTime_ms();
+        // if (__otos_tick_passed())
+        //     this->countTime_ms();
 
         // Determine the next thread to run
         this->getNextThread();
