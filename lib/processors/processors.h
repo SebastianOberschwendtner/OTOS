@@ -35,13 +35,16 @@
     */
     ///@todo Add check for FPU here.
 
-    #ifdef __CORTEX_M // -> ARM Cortex M family
+    #if defined(__CORTEX_M) // -> ARM Cortex M family
     #if __CORTEX_M == 4
         /*-----------------------------
         * Processor:    ARM Cortex M4
         * Detail:       No FPU enabled!
         ------------------------------*/
         #include "arm/arm_cm4_nofpu.h"
+    #else
+        // ARM core is not yet implemented -> throw error
+        #error "OTOS: ARM core not supported yet!"
     #endif
 
     #else

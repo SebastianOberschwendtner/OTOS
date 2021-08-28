@@ -26,13 +26,22 @@
     * of the vendors specific peripheral libraries.
     */
 
-    #ifdef STM32F4
+    #if defined(STM32F4)
     /*-----------------------------
     * Controller:   STM32F4xx
     * Processor:    ARM Cortex M4
     * Vendor:       ST Microelectronics
     ------------------------------*/
     #include "stm32f4xx.h"
+    
+    #elif defined(STM32L0)
+    /*-----------------------------
+    * Controller:   STM32L0xx
+    * Processor:    ARM Cortex M0+
+    * Vendor:       ST Microelectronics
+    ------------------------------*/
+    #include "stm32l0xx.h"
+
 
     #else
         // Microcontroller is not yet implemented -> throw error
