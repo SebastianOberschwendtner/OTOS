@@ -18,19 +18,25 @@
  *
  */
 
-/**=========================================================================
- * This file includes all the available device drivers for the supported
- * microcontrollers. Each driver includes 'processors.h' which includes the
- * device specific library files provided by PlatformIO.
- * 
- * New drivers have to be added here.
- *==========================================================================*/
+#ifndef VENDORS_H_
+#define VENDORS_H_
+    /* 
+    * Check which microcontroller is used and 
+    * include the corresponding implementation
+    * of the vendors specific peripheral libraries.
+    */
 
-#ifndef DRIVERS_H_
-#define DRIVERS_H_
+    #ifdef STM32F4
+    /*-----------------------------
+    * Controller:   STM32F4xx
+    * Processor:    ARM Cortex M4
+    * Vendor:       ST Microelectronics
+    ------------------------------*/
+    #include "stm32f4xx.h"
 
-// *** Includes ***
-/// @todo Check for the microcontroller type (STM32/AVR/...) before including the driver.
-#include "gpio_stm32.h"
+    #else
+        // Microcontroller is not yet implemented -> throw error
+        #error "OTOS: Microcontroller not supported yet!"
+    #endif
 
 #endif

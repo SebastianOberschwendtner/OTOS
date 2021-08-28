@@ -22,7 +22,7 @@
 #define GPIO_STM32_H_
 
 // *** Includes ***
-#include "processors.h"
+#include "vendors.h"
 
 // *** Declarations ***
 namespace GPIO {
