@@ -34,6 +34,9 @@ namespace Fake
     // Base class for mocking registers
     class Peripheral
     {
+        public:
+        Peripheral(){};
+        virtual void registers_to_default(void) = 0; // Reset all register to default values
     };
 }
 #endif

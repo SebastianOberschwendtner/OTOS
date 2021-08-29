@@ -41,6 +41,9 @@ public:
   // Constructor to mimic device initialization
   GPIO_TypeDef();
 
+  // Methods for unit testing
+  void registers_to_default(void) override;
+
   // Fake registers of port
   Fake::Register_t MODER;    /*!< GPIO port mode register,               Address offset: 0x00      */
   Fake::Register_t OTYPER;   /*!< GPIO port output type register,        Address offset: 0x04      */

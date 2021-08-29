@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    gpio_stm32_fake.cpp
  * @author  SO
- * @version v1.0.5
+ * @version v1.0.7
  * @date    26-August-2021
  * @brief   Fakes for the stm32 GPIO peripheral for unit testing.
  ==============================================================================
@@ -76,11 +76,25 @@ unsigned long GPIOK_BASE = reinterpret_cast<unsigned long>(GPIOK);
  * @brief Constructor for port object which initializes
  * the port to default values.
  */
-GPIO_TypeDef::GPIO_TypeDef():
-    MODER(0), OTYPER(0), OSPEEDR(0), PUPDR(0),
-    IDR(0), ODR(0), BSRR(0), LCKR(0)
+GPIO_TypeDef::GPIO_TypeDef()
 {
-    // Alternate function register is an array
-    AFR[0] = 0;
-    AFR[1] = 0;
+    // Reinit to default values
+    registers_to_default();
+};
+
+/**
+ * @brief Reset all the registers to the default values
+ */
+void GPIO_TypeDef::registers_to_default(void)
+{
+    this->MODER     = 0x00;
+    this->OTYPER    = 0x00;
+    this->OSPEEDR   = 0x00;
+    this->PUPDR     = 0x00;
+    this->IDR       = 0x00;
+    this->ODR       = 0x00;
+    this->BSRR      = 0x00;
+    this->LCKR      = 0x00;
+    this->AFR[0]    = 0x00;
+    this->AFR[1]    = 0x00;
 };

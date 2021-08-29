@@ -43,6 +43,9 @@ public:
   // Constructor which initializes peripheral with default values
   RCC_TypeDef();
 
+  // Methods for unit testing
+  void registers_to_default (void) override;
+
   // Fake Peripheral registers
   Fake::Register_t CR;            /*!< RCC clock control register,                                  Address offset: 0x00 */
   Fake::Register_t PLLCFGR;       /*!< RCC PLL configuration register,                              Address offset: 0x04 */
