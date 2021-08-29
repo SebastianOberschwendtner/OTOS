@@ -23,6 +23,7 @@
 
     // *** Includes which mock vendor specific perpherals
     // ---------- STM32 -------------
+    #define STM32F4 // => The library fakes the STM32F4 microcontroller family
     #include "../stm32/clock_stm32_fake.h"
     #include "../stm32/gpio_stm32_fake.h"
 

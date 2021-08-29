@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    gpio_stm32.cpp
  * @author  SO
- * @version v1.0.5
+ * @version v1.0.6
  * @date    25-August-2021
  * @brief   GPIO driver for STM32 microcontrollers.
  ==============================================================================
@@ -53,18 +53,20 @@ static unsigned char get_RCCEN_position(GPIO::PinPort Port)
             return 3;
         case GPIO::PORTE:
             return 4;
+        case GPIO::PORTH:
+            return 7;
+#ifdef STM32F4
         case GPIO::PORTF:
             return 5;
         case GPIO::PORTG:
             return 6;
-        case GPIO::PORTH:
-            return 7;
         case GPIO::PORTI:
             return 8;
         case GPIO::PORTJ:
             return 9;
         case GPIO::PORTK:
             return 10;
+#endif
         default:
             return 32;
     }
@@ -94,14 +96,15 @@ static unsigned long get_port_address(GPIO::PinPort Port)
     case GPIO::PORTE:
         return GPIOE_BASE;
         
+    case GPIO::PORTH:
+        return GPIOH_BASE;
+
+#ifdef STM32F4
     case GPIO::PORTF:
         return GPIOF_BASE;
         
     case GPIO::PORTG:
         return GPIOG_BASE;
-        
-    case GPIO::PORTH:
-        return GPIOH_BASE;
         
     case GPIO::PORTI:
         return GPIOI_BASE;
@@ -111,7 +114,7 @@ static unsigned long get_port_address(GPIO::PinPort Port)
         
     case GPIO::PORTK:
         return GPIOK_BASE;
-
+#endif
     default:
         return 0;
     }
@@ -128,7 +131,11 @@ GPIO::PIN::PIN(GPIO::PinPort Port, GPIO::PinNumber Pin):
     thisPin(Pin)
 {
     // enable the clock for this gpio port
+#if defined(STM32F4)
     RCC->AHB1ENR |= (1 << get_RCCEN_position(Port));
+#elif defined(STM32L0)
+    RCC->IOPENR |= (1 << get_RCCEN_position(Port));
+#endif
 
     // set the Port configuration
     unsigned long Port_addr = get_port_address(Port);
@@ -144,7 +151,11 @@ GPIO::PIN::PIN(GPIO::PinPort Port, GPIO::PinNumber Pin, GPIO::Mode PinMode):
     thisPin(Pin)
 {
     // enable the clock for this gpio port
+#if defined(STM32L4)
     RCC->AHB1ENR |= (1 << get_RCCEN_position(Port));
+#elif defined(STM32L0)
+    RCC->IOPENR |= (1 << get_RCCEN_position(Port));
+#endif
 
     // set the Port configuration
     unsigned long Port_addr = get_port_address(Port);
