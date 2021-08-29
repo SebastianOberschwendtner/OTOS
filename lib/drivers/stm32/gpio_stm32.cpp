@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    gpio_stm32.cpp
  * @author  SO
- * @version v1.0.6
+ * @version v1.0.7
  * @date    25-August-2021
  * @brief   GPIO driver for STM32 microcontrollers.
  ==============================================================================
@@ -208,7 +208,7 @@ GPIO::PIN::PIN(GPIO::PinPort Port, GPIO::PinNumber Pin, GPIO::Mode PinMode):
  void GPIO::PIN::setPull(GPIO::Pull NewPull)
 {
     // Save old register state and delete the part which will change
-    uint32_t _Reg = this->thisPort->MODER & ~(0b11 << (2 * this->thisPin));
+    uint32_t _Reg = this->thisPort->PUPDR & ~(0b11 << (2 * this->thisPin));
 
     // Combine the old and the new data and write the register
     this->thisPort->PUPDR = _Reg | (NewPull << (2 * this->thisPin));
