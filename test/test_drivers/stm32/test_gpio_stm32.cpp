@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_gpio_stm32.c
  * @author  SO
- * @version v1.0.3
+ * @version v1.0.5
  * @date    16-March-2021
  * @brief   Unit tests for the gpio drivers of stm32 controllers.
  ******************************************************************************
@@ -46,7 +46,7 @@ void test_init_pin(void)
     RCC->AHB1ENR = 0b1000;
 
     // Create GPIO object
-    GPIO::PIN<GPIO::PORTA, GPIO::PIN0> UUT;
+    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
 
     // Check whether clock for port was enabled and already
     // set bit was not deleted.
