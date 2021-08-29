@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    main.c
  * @author  SO
- * @version v1.0.0
+ * @version v1.0.5
  * @date    09-March-2021
  * @brief   Main function for the OTOS. Mainly used to demonstrate how the OTOS
  *          functions work and should be used.
@@ -42,7 +42,7 @@
 void Blink_LED3(void)
 {
     volatile unsigned long counter = 0;
-    GPIO::PIN<GPIO::PORTG, GPIO::PIN13> LED3(GPIO::OUTPUT);
+    GPIO::PIN LED3(GPIO::PORTG, GPIO::PIN13, GPIO::OUTPUT);
 
     LED3.setHigh();
     while(1)
@@ -54,7 +54,7 @@ void Blink_LED3(void)
             counter = 0;
             LED3.toggle();
         }
-        // OTOS::Task::yield();
+        OTOS::Task::yield();
     }
 };
 
@@ -65,7 +65,8 @@ void Blink_LED3(void)
 void Blink_LED4(void)
 {
     volatile unsigned long counter = 0;
-    GPIO::PIN<GPIO::PORTG, GPIO::PIN14> LED4(GPIO::OUTPUT);
+    // GPIO::PIN<GPIO::PORTG, GPIO::PIN14> LED4(GPIO::OUTPUT);
+    GPIO::PIN LED4(GPIO::PORTG, GPIO::PIN14, GPIO::OUTPUT);
 
     LED4.setHigh();
     while(1)
@@ -77,7 +78,7 @@ void Blink_LED4(void)
             counter = 0;
             LED4.toggle();
         }
-        // OTOS::Task::yield();
+        OTOS::Task::yield();
     }
 };
 
