@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    gpio_stm32_fake.cpp
  * @author  SO
- * @version v1.0.3
+ * @version v1.0.5
  * @date    26-August-2021
  * @brief   Fakes for the stm32 GPIO peripheral for unit testing.
  ==============================================================================
@@ -29,3 +29,58 @@
 
 // *** Includes ***
 #include "gpio_stm32_fake.h"
+
+// *** Fakes ***
+// Peripheral objects
+static GPIO_TypeDef GPIOA_Fake;
+static GPIO_TypeDef GPIOB_Fake;
+static GPIO_TypeDef GPIOC_Fake;
+static GPIO_TypeDef GPIOD_Fake;
+static GPIO_TypeDef GPIOE_Fake;
+static GPIO_TypeDef GPIOF_Fake;
+static GPIO_TypeDef GPIOG_Fake;
+static GPIO_TypeDef GPIOH_Fake;
+static GPIO_TypeDef GPIOI_Fake;
+static GPIO_TypeDef GPIOJ_Fake;
+static GPIO_TypeDef GPIOK_Fake;
+
+// Pointer to peripherals
+GPIO_TypeDef* GPIOA = &GPIOA_Fake;
+GPIO_TypeDef* GPIOB = &GPIOB_Fake;
+GPIO_TypeDef* GPIOC = &GPIOC_Fake;
+GPIO_TypeDef* GPIOD = &GPIOD_Fake;
+GPIO_TypeDef* GPIOE = &GPIOE_Fake;
+GPIO_TypeDef* GPIOF = &GPIOF_Fake;
+GPIO_TypeDef* GPIOG = &GPIOG_Fake;
+GPIO_TypeDef* GPIOH = &GPIOH_Fake;
+GPIO_TypeDef* GPIOI = &GPIOI_Fake;
+GPIO_TypeDef* GPIOJ = &GPIOJ_Fake;
+GPIO_TypeDef* GPIOK = &GPIOK_Fake;
+
+// Base addresses to peripherals
+unsigned long GPIOA_BASE = reinterpret_cast<unsigned long>(GPIOA);
+unsigned long GPIOB_BASE = reinterpret_cast<unsigned long>(GPIOB);
+unsigned long GPIOC_BASE = reinterpret_cast<unsigned long>(GPIOC);
+unsigned long GPIOD_BASE = reinterpret_cast<unsigned long>(GPIOD);
+unsigned long GPIOE_BASE = reinterpret_cast<unsigned long>(GPIOE);
+unsigned long GPIOF_BASE = reinterpret_cast<unsigned long>(GPIOF);
+unsigned long GPIOG_BASE = reinterpret_cast<unsigned long>(GPIOG);
+unsigned long GPIOH_BASE = reinterpret_cast<unsigned long>(GPIOH);
+unsigned long GPIOI_BASE = reinterpret_cast<unsigned long>(GPIOI);
+unsigned long GPIOJ_BASE = reinterpret_cast<unsigned long>(GPIOJ);
+unsigned long GPIOK_BASE = reinterpret_cast<unsigned long>(GPIOK);
+
+// *** Methods ***
+
+/**
+ * @brief Constructor for port object which initializes
+ * the port to default values.
+ */
+GPIO_TypeDef::GPIO_TypeDef():
+    MODER(0), OTYPER(0), OSPEEDR(0), PUPDR(0),
+    IDR(0), ODR(0), BSRR(0), LCKR(0)
+{
+    // Alternate function register is an array
+    AFR[0] = 0;
+    AFR[1] = 0;
+};

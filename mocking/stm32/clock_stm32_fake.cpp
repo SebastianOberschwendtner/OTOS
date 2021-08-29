@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    clock_stm32_fake.cpp
  * @author  SO
- * @version v1.0.3
+ * @version v1.0.5
  * @date    27-August-2021
  * @brief   Fakes the clock interface for STM32 microcontrollers.
  ==============================================================================
@@ -33,6 +33,7 @@
 // *** Fakes ***
 static RCC_TypeDef RCC_Fake;    // Fake Peripheral
 RCC_TypeDef* RCC = &RCC_Fake;   // Public Pointer to fake which mimics peripheral behaviour.
+unsigned long RCC_BASE = reinterpret_cast<unsigned long>(RCC); // Fake register address
 
 // *** Methods ***
 

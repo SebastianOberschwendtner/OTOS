@@ -30,26 +30,18 @@
 // *** Includes ***
 #include "../base/fake.h"
 
-// *** Mock the register addresses
-#define GPIOA_BASE      0x0000
-#define GPIOB_BASE      0x0001
-#define GPIOC_BASE      0x0002
-#define GPIOD_BASE      0x0003
-#define GPIOE_BASE      0x0004
-#define GPIOF_BASE      0x0005
-#define GPIOG_BASE      0x0006
-#define GPIOH_BASE      0x0007
-#define GPIOI_BASE      0x0008
-#define GPIOJ_BASE      0x0009
-#define GPIOK_BASE      0x0010
-
-// *** Mock the peripheral typedefs
+// *** The peripheral typedefs
 /** 
   * @brief General Purpose I/O
   */
 
 class GPIO_TypeDef: public Fake::Peripheral
 {
+public:
+  // Constructor to mimic device initialization
+  GPIO_TypeDef();
+
+  // Fake registers of port
   Fake::Register_t MODER;    /*!< GPIO port mode register,               Address offset: 0x00      */
   Fake::Register_t OTYPER;   /*!< GPIO port output type register,        Address offset: 0x04      */
   Fake::Register_t OSPEEDR;  /*!< GPIO port output speed register,       Address offset: 0x08      */
@@ -61,7 +53,31 @@ class GPIO_TypeDef: public Fake::Peripheral
   Fake::Register_t AFR[2];   /*!< GPIO alternate function registers,     Address offset: 0x20-0x24 */
 };
 
-GPIO_TypeDef GPIO_Fake;
-GPIO_TypeDef* GPIOA = &GPIO_Fake;
+// *** Public references to fake peripherals
+// Fake peripheral pointers
+extern GPIO_TypeDef* GPIOA;
+extern GPIO_TypeDef* GPIOB;
+extern GPIO_TypeDef* GPIOC;
+extern GPIO_TypeDef* GPIOD;
+extern GPIO_TypeDef* GPIOE;
+extern GPIO_TypeDef* GPIOF;
+extern GPIO_TypeDef* GPIOG;
+extern GPIO_TypeDef* GPIOH;
+extern GPIO_TypeDef* GPIOI;
+extern GPIO_TypeDef* GPIOJ;
+extern GPIO_TypeDef* GPIOK;
+
+// Fake addresses
+extern unsigned long GPIOA_BASE;
+extern unsigned long GPIOB_BASE;
+extern unsigned long GPIOC_BASE;
+extern unsigned long GPIOD_BASE;
+extern unsigned long GPIOE_BASE;
+extern unsigned long GPIOF_BASE;
+extern unsigned long GPIOG_BASE;
+extern unsigned long GPIOH_BASE;
+extern unsigned long GPIOI_BASE;
+extern unsigned long GPIOJ_BASE;
+extern unsigned long GPIOK_BASE;
 
 #endif

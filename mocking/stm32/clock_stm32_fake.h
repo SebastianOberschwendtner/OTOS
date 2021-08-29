@@ -81,5 +81,6 @@ public:
 // *** Public references to fake peripherals
 // Public pointer to RCC peripheral which is faked
 extern RCC_TypeDef* RCC;
+extern unsigned long RCC_BASE;
 
 #endif
