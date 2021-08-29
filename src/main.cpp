@@ -42,9 +42,9 @@
 void Blink_LED3(void)
 {
     volatile unsigned long counter = 0;
-    GPIO::PIN LED3(GPIO::PORTG, GPIO::PIN13, GPIO::OUTPUT);
+    // GPIO::PIN LED3(GPIO::PORTG, GPIO::PIN13, GPIO::OUTPUT);
 
-    LED3.setHigh();
+    // LED3.setHigh();
     while(1)
     {
         counter++;
@@ -52,7 +52,7 @@ void Blink_LED3(void)
         if(counter == 100000)
         {
             counter = 0;
-            LED3.toggle();
+            // LED3.toggle();
         }
         OTOS::Task::yield();
     }
@@ -65,8 +65,8 @@ void Blink_LED3(void)
 void Blink_LED4(void)
 {
     volatile unsigned long counter = 0;
-    // GPIO::PIN<GPIO::PORTG, GPIO::PIN14> LED4(GPIO::OUTPUT);
-    GPIO::PIN LED4(GPIO::PORTG, GPIO::PIN14, GPIO::OUTPUT);
+    // GPIO::PIN LED4(GPIO::PORTG, GPIO::PIN14, GPIO::OUTPUT);
+    GPIO::PIN LED4(GPIO::PORTA, GPIO::PIN5, GPIO::OUTPUT);
 
     LED4.setHigh();
     while(1)

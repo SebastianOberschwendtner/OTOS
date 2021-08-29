@@ -19,24 +19,23 @@
  */
 /**
  ==============================================================================
- * @file    arm_m4_nofpu.c
+ * @file    arm_cm0plus_nofpu.c
  * @author  SO
  * @version v1.0.6
- * @date    09-March-2021
+ * @date    29-August-2021
  * @brief   Defines the assembly code for:
- *          - ARM Cortex M4
+ *          - ARM Cortex M0+
  *          - No FPU enabled
  ==============================================================================
  */
-
 // *** Includes ***
-#include "arm_cm4_nofpu.h"
+#include "arm_cm0plus_nofpu.h"
 
 /** @attention Only include implementation when correct processor is used, 
  * otherwise the compiler complains when compiling this translation unit.
  */
 #if defined(__CORTEX_M)
-#if __CORTEX_M == 4
+#if __CORTEX_M == 0
 
 // *** Functions ***
 
@@ -58,14 +57,28 @@ unsigned int* __otos_switch(unsigned int* ThreadStack)
     // Hand over control to the task belonging to the stack address
     __asm__ volatile(
         // Save kernel context
-        "push   {R1-R7,LR}      \n\t" // Push first half of registers on msp stack
-        "push   {R8-R12}        \n\t" // second half => now stack is compatible with M0+ stack
+        "push   {R1-R7,LR}      \n\t" // Push first half of regsisters, since the M0+ cannot push more registers
+        "mov    R1, R8          \n\t"
+        "mov    R2, R9          \n\t"
+        "mov    R3, R10         \n\t"
+        "mov    R4, R11         \n\t"
+        "mov    R5, R12         \n\t"
+        "push   {R1-R5}         \n\t" // Push second half of the registers
         "mrs    R1, PSR         \n\t"
         "push   {R1}            \n\t" // Push PSR on msp stack
         // Restore thread context
-        "ldmia  R0!,{R4-R11}    \n\t" // Load R4-R11 from task stack (psp)
-        "ldmia  R0!,{R1}        \n\t"
-        "mov    LR, R1          \n\t" // Load LR from task stack (psp)
+        "ldmia  R0!,{R1-R3}     \n\t" // Load R4-R6 from task stack (psp) into R1 - R3 (M0+ can only load up to R7)
+        "mov    R4, R1          \n\t"
+        "mov    R5, R2          \n\t"
+        "mov    R6, R3          \n\t"
+        "ldmia  R0!,{R1-R3}     \n\t" // Load R7-R10 from task stack (psp) into R1 - R3 (M0+ can only load up to R7)
+        "mov    R7, R1          \n\t"
+        "mov    R8, R2          \n\t"
+        "mov    R9, R3          \n\t"
+        "ldmia  R0!,{R1-R3}     \n\t" // Load R10-R11 and LR from task stack (psp) into R1 - R3 (M0+ can only load up to R7)
+        "mov    R10, R1         \n\t"
+        "mov    R11, R2         \n\t"
+        "mov    LR, R3          \n\t" // Load LR from task stack (psp)
         "msr    PSP, R0         \n\t" // Restore the psp stack pointer
         "bx     LR                  "
         // Jump to user task, LR should contain a valid exception return behavior
@@ -106,13 +119,33 @@ inline void __attribute__((always_inline)) __otos_call_kernel(void)
     __asm__ volatile(
         // Save thread context
         "mrs    R0, PSP         \n\t"   // Save the current stack pointer (psp)
-        "stmdb  R0!, {R4-R11,LR}\n\t"   // Save LR, and registers onto psp stack
+        "sub    R0, #12         \n\t"   // stack frame will be saved with 3 registers (12bytes) at a time
+        "mov    R3, LR          \n\t"
+        "mov    R2, R11         \n\t"
+        "mov    R1, R10         \n\t"
+        "stmia  R0!,{R1-R3}     \n\t"   // Save LR, R11 and R10 onto to psp stack
+        "sub    R0, #24         \n\t"   // Move 3 memory addresses (12 bytes) beyond current stack end
+        "mov    R3, R9          \n\t"
+        "mov    R2, R8          \n\t"
+        "mov    R1, R7          \n\t"
+        "stmia  R0!,{R1-R3}     \n\t"   // Save R7-R9 onto to psp stack
+        "sub    R0, #24         \n\t"   // Move 3 memory addresses (12 bytes) beyond current stack end
+        "mov    R3, R6          \n\t"
+        "mov    R2, R5          \n\t"
+        "mov    R1, R4          \n\t"
+        "stmia  R0!,{R1-R3}     \n\t"   // Save R4-R6 onto to psp stack
+        "sub    R0, #12         \n\t"   // Update R0 with end of stack
         // R0 now contains the end of the occupied stack
         // Restore kernel context
         "pop    {R1}            \n\t"
         "msr    PSR_NZCVQ, R1   \n\t" // Write PSR with bitmask with value from msp stack
-        "pop    {R8-R12}        \n\t" // Pop the second half of registers from the msp stack
-        "pop    {R1-R7}         \n\t" // Pop the first half => Stack is compatible with M0+ stack
+        "pop    {R1-R5}         \n\t" // Pop the second half registers from the msp stack, since M0+ cannot pop more
+        "mov    R8, R1          \n\t"
+        "mov    R9, R2          \n\t"
+        "mov    R10, R3         \n\t"
+        "mov    R11, R4         \n\t"
+        "mov    R12, R5         \n\t"
+        "pop    {R1-R7}         \n\t" // Pop the first half registers from the msp stack, since M0+ cannot pop more
         // Restore LR and set program counter to resume kernel operation
         // bit[0] os the loaded value has to be 1 to stay in thumb mode!
         "pop    {PC}" 
@@ -144,8 +177,13 @@ void __otos_init_kernel(unsigned int* ThreadStack)
 {
     // Initialize the CONTROL
     __asm__ volatile(
-        "push   {R1-R7,LR}      \n\t" // Push first half of registers on msp stack
-        "push   {R8-R12}        \n\t" // second half => now stack is compatible with M0+ stack
+        "push   {R1-R7,LR}      \n\t" // Push first half of regsisters, since the M0+ cannot push more registers
+        "mov    R1, R8          \n\t"
+        "mov    R2, R9          \n\t"
+        "mov    R3, R10         \n\t"
+        "mov    R4, R11         \n\t"
+        "mov    R5, R12         \n\t"
+        "push   {R1-R5}         \n\t" // Push second half of the registers
         "mrs    R1, PSR         \n\t"
         "push   {R1}            \n\t" // Save PSR to msp stack
         "msr    psp, R0         \t\n" // Set the psp to temporary memory

@@ -42,6 +42,12 @@
         * Detail:       No FPU enabled!
         ------------------------------*/
         #include "arm/arm_cm4_nofpu.h"
+    #elif __CORTEX_M == 0
+        /*-----------------------------
+        * Processor:    ARM Cortex M0+
+        * Detail:       No FPU enabled!
+        ------------------------------*/
+        #include "arm/arm_cm0plus_nofpu.h"
     #else
         // ARM core is not yet implemented -> throw error
         #error "OTOS: ARM core not supported yet!"

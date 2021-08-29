@@ -18,20 +18,21 @@
  *
  */
 
-#ifndef MOCK_PROCESSORS_H
-#define MOCK_PROCESSORS_H
+#ifndef ARM_CM0PLUS_NOFPU_H_
+#define ARM_CM0PLUS_NOFPU_H_
 
 // *** Includes ***
+#include "vendors.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 // *** Function Declarations ***
-unsigned long*  __otos_switch       (unsigned long* ThreadStack);
+unsigned int*   __otos_switch       (unsigned int* ThreadStack);
 void            __otos_yield        (void);
 void            __otos_call_kernel  (void);
-void            __otos_init_kernel  (unsigned long* ThreadStack);
+void            __otos_init_kernel  (unsigned int* ThreadStack);
 
 #ifdef __cplusplus
 }

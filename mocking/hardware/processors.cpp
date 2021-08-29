@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    mocks/processors.c
  * @author  SO
- * @version v1.0.3
+ * @version v1.0.6
  * @date    16-March-2021
  * @brief   Mock the processor assembler functions for unit testing.
  ==============================================================================
@@ -89,7 +89,7 @@ void SVC_Handler(void)
  * @param Ticks The number of SysTicks between the SysTick interrupts.
  * @details Thread Mode -> Handler Mode, Stack: msp
  */
-void __otos_init_kernel(unsigned long* ThreadStack, const unsigned long Ticks)
+void __otos_init_kernel(unsigned long* ThreadStack)
 {
 };
 

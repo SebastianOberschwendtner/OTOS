@@ -45,7 +45,7 @@ OTOS::Kernel::Kernel()
 {
     // Call assembler function to return to kernel in handler mode
     // Uses the thread stack as temporary memory
-    __otos_init_kernel(this->Stack.end(), 16000);
+    __otos_init_kernel(this->Stack.end());
 };
 
 /**

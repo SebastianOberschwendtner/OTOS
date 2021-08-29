@@ -18,11 +18,11 @@
  *
  */
 
-#ifndef ARM_M4_NOFPU_H_
-#define ARM_M4_NOFPU_H_
+#ifndef ARM_CM4_NOFPU_H_
+#define ARM_CM4_NOFPU_H_
 
 // *** Includes ***
-// #include "core_cm4.h"
+#include "vendors.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,8 +32,7 @@ extern "C" {
 unsigned int*   __otos_switch       (unsigned int* ThreadStack);
 void            __otos_yield        (void);
 void            __otos_call_kernel  (void);
-void            __otos_init_kernel  (unsigned int* ThreadStack, const unsigned long Ticks);
-// int             __otos_tick_passed  (void);
+void            __otos_init_kernel  (unsigned int* ThreadStack);
 
 #ifdef __cplusplus
 }
