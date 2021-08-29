@@ -151,7 +151,7 @@ GPIO::PIN::PIN(GPIO::PinPort Port, GPIO::PinNumber Pin, GPIO::Mode PinMode):
     thisPin(Pin)
 {
     // enable the clock for this gpio port
-#if defined(STM32L4)
+#if defined(STM32F4)
     RCC->AHB1ENR |= (1 << get_RCCEN_position(Port));
 #elif defined(STM32L0)
     RCC->IOPENR |= (1 << get_RCCEN_position(Port));
