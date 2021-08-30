@@ -69,15 +69,15 @@ namespace GPIO {
     public:
 
         // Constructor
-        PIN(PinPort Port, PinNumber Pin);
-        PIN(PinPort Port, PinNumber Pin, Mode PinMode);
+        PIN(const PinPort Port, const PinNumber Pin);
+        PIN(const PinPort Port, const PinNumber Pin, const Mode PinMode);
 
         // Methods
-        void setMode(Mode NewMode);
-        void setType(Type NewType);
-        void setSpeed(Speed NewSpeed);
-        void setPull(Pull NewPull);
-        void set(bool NewState);
+        void setMode(const Mode NewMode);
+        void setType(const Type NewType);
+        void setSpeed(const Speed NewSpeed);
+        void setPull(const Pull NewPull);
+        void set(const bool NewState);
         void setHigh(void);
         void setLow(void);
         void toggle(void);

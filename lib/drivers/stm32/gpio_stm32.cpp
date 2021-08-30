@@ -38,7 +38,7 @@
  * @param Port The identifier of the port.
  * @return Return the bit position of the enable bit.
  */
-static unsigned char get_RCCEN_position(GPIO::PinPort Port)
+static unsigned char get_RCCEN_position(const GPIO::PinPort Port)
 {
     // Return the bit position according to the used port
     switch(Port)
@@ -77,7 +77,7 @@ static unsigned char get_RCCEN_position(GPIO::PinPort Port)
  * @param Port The identifier of the port.
  * @return Returns the address of the port as an integer.
  */
-static unsigned long get_port_address(GPIO::PinPort Port)
+static unsigned long get_port_address(const GPIO::PinPort Port)
 {
     switch (Port)
     {
@@ -127,7 +127,7 @@ static unsigned long get_port_address(GPIO::PinPort Port)
  * @param Port The Port the pin belongs to
  * @param Pin The pin number of the pin in the port
  */
-GPIO::PIN::PIN(GPIO::PinPort Port, GPIO::PinNumber Pin):
+GPIO::PIN::PIN(const GPIO::PinPort Port, const GPIO::PinNumber Pin):
     thisPin(Pin)
 {
     // enable the clock for this gpio port
@@ -147,7 +147,7 @@ GPIO::PIN::PIN(GPIO::PinPort Port, GPIO::PinNumber Pin):
  * @param Port The Port the pin belongs to
  * @param Pin The pin number of the pin in the port
  */
-GPIO::PIN::PIN(GPIO::PinPort Port, GPIO::PinNumber Pin, GPIO::Mode PinMode):
+GPIO::PIN::PIN(const GPIO::PinPort Port, const GPIO::PinNumber Pin, const GPIO::Mode PinMode):
     thisPin(Pin)
 {
     // enable the clock for this gpio port
@@ -167,7 +167,7 @@ GPIO::PIN::PIN(GPIO::PinPort Port, GPIO::PinNumber Pin, GPIO::Mode PinMode):
  * @brief Set the output mode of the GPIO pin.
  * @param NewMode The new mode of the pin.
  */
- void GPIO::PIN::setMode(GPIO::Mode NewMode)
+ void GPIO::PIN::setMode(const GPIO::Mode NewMode)
 {
     // Save old register state and delete the part which will change
     uint32_t _Reg = this->thisPort->MODER & ~(0b11 << (2 * this->thisPin));
@@ -179,7 +179,7 @@ GPIO::PIN::PIN(GPIO::PinPort Port, GPIO::PinNumber Pin, GPIO::Mode PinMode):
  * @brief Set the output type of the GPIO pin.
  * @param NewType The new output type of the pin.
  */
- void GPIO::PIN::setType(GPIO::Type NewType)
+ void GPIO::PIN::setType(const GPIO::Type NewType)
 {
     // Save old register state and delete the part which will change
     uint32_t _Reg = this->thisPort->OTYPER & ~(1 << this->thisPin);
@@ -192,7 +192,7 @@ GPIO::PIN::PIN(GPIO::PinPort Port, GPIO::PinNumber Pin, GPIO::Mode PinMode):
  * @brief Set the output speed of the GPIO pin.
  * @param NewSpeed The new speed of the pin.
  */
- void GPIO::PIN::setSpeed(GPIO::Speed NewSpeed)
+ void GPIO::PIN::setSpeed(const GPIO::Speed NewSpeed)
 {
     // Save old register state and delete the part which will change
     uint32_t _Reg = this->thisPort->OSPEEDR & ~(0b11 << (2 * this->thisPin));
@@ -205,7 +205,7 @@ GPIO::PIN::PIN(GPIO::PinPort Port, GPIO::PinNumber Pin, GPIO::Mode PinMode):
  * @brief Set the pull type of the GPIO pin.
  * @param NewPull The new pull state of the pin.
  */
- void GPIO::PIN::setPull(GPIO::Pull NewPull)
+ void GPIO::PIN::setPull(const GPIO::Pull NewPull)
 {
     // Save old register state and delete the part which will change
     uint32_t _Reg = this->thisPort->PUPDR & ~(0b11 << (2 * this->thisPin));
@@ -218,7 +218,7 @@ GPIO::PIN::PIN(GPIO::PinPort Port, GPIO::PinNumber Pin, GPIO::Mode PinMode):
  * @brief Set the logic output state of the GPIO pin.
  * @param NewState The new output state of the pin.
  */
- void GPIO::PIN::set(bool NewState)
+ void GPIO::PIN::set(const bool NewState)
 {
     // Call the setHigh or setLow function according to NewState
     if (NewState)
