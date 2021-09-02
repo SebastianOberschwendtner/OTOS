@@ -19,7 +19,7 @@
  */
 /**
  ******************************************************************************
- * @file    test_gpio_stm32.c
+ * @file    test_gpio_stm32.cpp
  * @author  SO
  * @version v1.0.7
  * @date    16-March-2021
@@ -28,8 +28,8 @@
  */
 
 // ****** Includes ******
-#include <unity.h>
-#include <stm32/gpio_stm32.h>
+#include "unity.h"
+#include "stm32/gpio_stm32.h"
 
 void setUp(void) {
 // set stuff up here
