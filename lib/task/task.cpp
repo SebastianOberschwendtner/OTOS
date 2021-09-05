@@ -63,12 +63,13 @@ void OTOS::Task::unlock(void)
 /**
  * @brief Yield the execution until a condition becomes true.
  * @param Condition This value has to be true in order to resume execution.
+ * @todo the wait for has to take a reference not a value as the condition.
  */
-void OTOS::Task::waitFor(bool Condition)
-{
-    while (!Condition)
-        __otos_yield();
-};
+// void OTOS::Task::waitFor(bool Condition)
+// {
+//     while (!Condition)
+//         __otos_yield();
+// };
 
 /**
  * @brief Yield execution and give control to kernel.

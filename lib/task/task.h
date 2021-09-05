@@ -21,8 +21,17 @@
 #ifndef TASK_H_
 #define TASK_H_
 
-// *** Includes ***
+// === Includes ===
 #include "processors.h"
+
+// === defines ===
+
+/**
+ * @brief This macro can be used to wait as long as 
+ * the condition is true without blocking other tasks.
+ */
+
+#define YIELD_WHILE(condition) while(condition) { __otos_yield(); }
 
 namespace OTOS {
 
@@ -35,7 +44,7 @@ namespace OTOS {
         Task();
         static void lock(void);
         static void unlock(void);
-        static void waitFor(bool Condition);
+        // static void waitFor(bool Condition);
         static void yield(void);
         void sleep(unsigned int Time);
     };
