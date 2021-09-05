@@ -93,7 +93,7 @@ void tearDown(void) {
 // clean stuff up here
 };
 
-// ****** Define Tests ******
+/// @brief Test the initialization of the controller
 void test_init(void)
 {
     setUp();
@@ -115,6 +115,7 @@ void test_init(void)
     TEST_ASSERT_EQUAL(0, UUT.get_error());  // Test that no errors exist after creating  the controller
 };
 
+/// @brief Test the setting of the target address
 void test_target_address(void)
 {
     // Create object
@@ -129,6 +130,7 @@ void test_target_address(void)
     TEST_ASSERT_EQUAL(0xFE, UUT.get_target_address());
 };
 
+/// @brief Test the assignment of the output pins.
 void test_output_assignment(void)
 {
     // Create object
