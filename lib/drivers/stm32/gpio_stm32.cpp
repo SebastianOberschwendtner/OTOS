@@ -120,6 +120,66 @@ static unsigned long get_port_address(const GPIO::PinPort Port)
     }
 };
 
+/**
+ * @brief Get the code for the alternate function for the AFR register.
+ * @param function The desired alternate function of a pin.
+ * @return The AF code of the alternate function to put into the AF register.
+ */
+static unsigned char get_af_code(const GPIO::Alternate function)
+{
+    switch (function)
+    {
+    case GPIO::SYSTEM:
+        return 0;
+    case GPIO::TIM1:
+    case GPIO::TIM2:
+        return 1;
+    case GPIO::TIM3:
+    case GPIO::TIM4:
+    case GPIO::TIM5:
+        return 2;
+    case GPIO::TIM8:
+    case GPIO::TIM9:
+    case GPIO::TIM10:
+    case GPIO::TIM11:
+        return 3;
+    case GPIO::I2C1:
+    case GPIO::I2C2:
+    case GPIO::I2C3:
+        return 4;
+    case GPIO::SPI1:
+    case GPIO::SPI2:
+        return 5;
+    case GPIO::SPI3:
+        return 6;
+    case GPIO::USART1:
+    case GPIO::USART2:
+    case GPIO::USART3:
+        return 7;
+    case GPIO::CAN1:
+    case GPIO::CAN2:
+    case GPIO::TIM12:
+    case GPIO::TIM13:
+    case GPIO::TIM14:
+        return 9;
+    case GPIO::OTG_FS:
+    case GPIO::OTG_HS:
+        return 10;
+    case GPIO::ETH:
+        return 11;
+    case GPIO::FSMC:
+    case GPIO::SDIO:
+        return 12;
+    case GPIO::DCMI:
+        return 13;
+    case GPIO::EVENTOUT:
+        return 15;
+    
+    default:
+        return 0;
+    }
+};
+
 // *** Methods ***
 
 /**
@@ -213,6 +273,28 @@ GPIO::PIN::PIN(const GPIO::PinPort Port, const GPIO::PinNumber Pin, const GPIO::
 
     // Combine the old and the new data and write the register
     this->thisPort->PUPDR = _Reg | (NewPull << (2 * this->thisPin));
+};
+
+/**
+ * @brief Enable the desired alternate function of the pin.
+ * @param function The alternate function of the pin.
+ */
+void GPIO::PIN::set_alternate_function(const GPIO::Alternate function)
+{
+    if(this->thisPin < GPIO::PIN8)
+    {
+        // Save old register state and delete the part which will change
+        uint32_t _Reg = this->thisPort->AFR[0] & ~(0b1111 << (4 * this->thisPin));
+        // Get the code for teh alternate function and set the register
+        this->thisPort->AFR[0] = _Reg | (get_af_code(function) << (4 * this->thisPin));
+    }
+    else
+    {
+        // Save old register state and delete the part which will change
+        uint32_t _Reg = this->thisPort->AFR[1] & ~(0b1111 << (4 * (this->thisPin - 8)));
+        // Get the code for teh alternate function and set the register
+        this->thisPort->AFR[1] = _Reg | (get_af_code(function) << (4 * (this->thisPin - 8)));
+    }
 };
 
 /**

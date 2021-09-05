@@ -232,6 +232,36 @@ void test_get(void)
     TEST_ASSERT_TRUE(UUT.get());
 };
 
+/// @brief Test setting an alternate function in the low register
+void test_alternate_function_low(void)
+{
+    setUp();
+    // Assume other AFs are already set
+    GPIOA->AFR[0] = 0b1101;
+
+    // Create Pin object
+    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN1);
+    UUT.set_alternate_function(GPIO::TIM8);
+
+    // perform testing
+    TEST_ASSERT_EQUAL(0b00111101, GPIOA->AFR[0]);
+};
+
+/// @brief Test setting an alternate function in the low register
+void test_alternate_function_high(void)
+{
+    setUp();
+    // Assume other AFs are already set
+    GPIOA->AFR[1] = 0b1101;
+
+    // Create Pin object
+    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN9);
+    UUT.set_alternate_function(GPIO::ETH);
+
+    // perform testing
+    TEST_ASSERT_EQUAL(0b10111101, GPIOA->AFR[1]);
+};
+
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();
@@ -246,6 +276,8 @@ int main(int argc, char** argv)
     test_set();
     test_toggle();
     test_get();
+    test_alternate_function_low();
+    test_alternate_function_high();
     UNITY_END();
     return 0;
 };

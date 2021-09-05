@@ -55,6 +55,14 @@ namespace GPIO {
     {
         NO_PP = 0, PULL_UP, PULL_DOWN
     };
+    enum Alternate: unsigned char
+    {
+        SYSTEM = 0, TIM1, TIM2, TIM3, TIM4, TIM5, TIM6,
+        TIM7, TIM8, TIM9, TIM10, TIM11, TIM12, TIM13, TIM14,
+        I2C1, I2C2, I2C3, SPI1, SPI2, SPI3, USART1,
+        USART2, USART3, USART4, USART5, USART6, CAN1,
+        CAN2, OTG_FS, OTG_HS, ETH, FSMC, SDIO, DCMI, EVENTOUT
+    };
 
     // === GPIO Interface ===
     /**
@@ -67,15 +75,16 @@ namespace GPIO {
     {
     public:
         // Methods
-        virtual void setMode    (const Mode NewMode)    = 0;
-        virtual void setType    (const Type NewType)    = 0;
-        virtual void setSpeed   (const Speed NewSpeed)  = 0;
-        virtual void setPull    (const Pull NewPull)    = 0;
-        virtual void set        (const bool NewState)   = 0;
-        virtual void setHigh    (void)                  = 0;
-        virtual void setLow     (void)                  = 0;
-        virtual void toggle     (void)                  = 0;
-        virtual bool get        (void) const            = 0;
+        virtual void setMode                (const Mode NewMode)        = 0;
+        virtual void setType                (const Type NewType)        = 0;
+        virtual void setSpeed               (const Speed NewSpeed)      = 0;
+        virtual void setPull                (const Pull NewPull)        = 0;
+        virtual void set_alternate_function (const Alternate function)  = 0;
+        virtual void set                    (const bool NewState)       = 0;
+        virtual void setHigh                (void)                      = 0;
+        virtual void setLow                 (void)                      = 0;
+        virtual void toggle                 (void)                      = 0;
+        virtual bool get                    (void) const                = 0;
     };
 };
 

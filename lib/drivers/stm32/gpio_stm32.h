@@ -42,15 +42,16 @@ namespace GPIO {
         PIN(const PinPort Port, const PinNumber Pin, const Mode PinMode);
 
         // Methods
-        void setMode    (const Mode NewMode)    final;
-        void setType    (const Type NewType)    final;
-        void setSpeed   (const Speed NewSpeed)  final;
-        void setPull    (const Pull NewPull)    final;
-        void set        (const bool NewState)   final;
-        void setHigh    (void)                  final;
-        void setLow     (void)                  final;
-        void toggle     (void)                  final;
-        bool get        (void) const            final;
+        void setMode                (const Mode NewMode)        final;
+        void setType                (const Type NewType)        final;
+        void setSpeed               (const Speed NewSpeed)      final;
+        void setPull                (const Pull NewPull)        final;
+        void set_alternate_function (const Alternate function)  final;
+        void set                    (const bool NewState)       final;
+        void setHigh                (void)                      final;
+        void setLow                 (void)                      final;
+        void toggle                 (void)                      final;
+        bool get                    (void) const                final;
     };
 };
 
