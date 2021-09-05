@@ -86,6 +86,18 @@ namespace Mock
             // Test the call count
             TEST_ASSERT_TRUE_MESSAGE(Expected == this->last_called_with, &buf[0]); 
         };
+
+        /**
+         * @brief Assert whether the function was called once with
+         * the expected argument.
+         * @param Expected The last expected argument
+         * @details Calls the unit TEST_ macros.
+         */
+        void assert_called_once_with(const int Expected) const { 
+            // Call the corresponding tests.
+            this->assert_called_once();
+            this->assert_called_last_with(Expected);
+        };
     };
 
     // Base class for mocking registers
