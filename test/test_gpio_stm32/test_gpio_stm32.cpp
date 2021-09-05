@@ -67,7 +67,7 @@ void test_init_pin_with_mode(void)
 
     // Create GPIO objects
     GPIO::PIN OUTPUT(GPIO::PORTA, GPIO::PIN0, GPIO::OUTPUT);
-    GPIO::PIN AF_MODE(GPIO::PORTA, GPIO::PIN1, GPIO::AF);
+    GPIO::PIN AF_MODE(GPIO::PORTA, GPIO::PIN1, GPIO::AF_Mode);
 
     // Check whether clock for port was enabled and already
     // set bit was not deleted.
@@ -89,7 +89,7 @@ void test_set_mode(void)
     TEST_ASSERT_EQUAL(0b1100, GPIOA->MODER); // Output modes have not changed
     UUT.setMode(GPIO::OUTPUT);
     TEST_ASSERT_EQUAL(0b1101, GPIOA->MODER); // Only output mode of pin has changed
-    UUT.setMode(GPIO::AF);
+    UUT.setMode(GPIO::AF_Mode);
     TEST_ASSERT_EQUAL(0b1110, GPIOA->MODER); // Only output mode of pin has changed
 };
 

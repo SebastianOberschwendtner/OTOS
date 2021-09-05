@@ -139,7 +139,7 @@ GPIO::PIN::PIN(const GPIO::PinPort Port, const GPIO::PinNumber Pin):
 
     // set the Port configuration
     unsigned long Port_addr = get_port_address(Port);
-    thisPort = reinterpret_cast<volatile GPIO_TypeDef*>(Port_addr);
+    this->thisPort = reinterpret_cast<volatile GPIO_TypeDef*>(Port_addr);
 };
 
 /**
@@ -159,8 +159,8 @@ GPIO::PIN::PIN(const GPIO::PinPort Port, const GPIO::PinNumber Pin, const GPIO::
 
     // set the Port configuration
     unsigned long Port_addr = get_port_address(Port);
-    thisPort = reinterpret_cast<volatile GPIO_TypeDef*>(Port_addr);
-    setMode(PinMode);
+    this->thisPort = reinterpret_cast<volatile GPIO_TypeDef*>(Port_addr);
+    this->setMode(PinMode);
 };
 
 /**
@@ -175,11 +175,12 @@ GPIO::PIN::PIN(const GPIO::PinPort Port, const GPIO::PinNumber Pin, const GPIO::
     // Combine the old and the new data and write the register
     this->thisPort->MODER = _Reg | (NewMode << (2 * this->thisPin));
 };
+
 /**
  * @brief Set the output type of the GPIO pin.
  * @param NewType The new output type of the pin.
  */
- void GPIO::PIN::setType(const GPIO::Type NewType)
+ void GPIO::PIN::setType(const GPIO::Type NewType) 
 {
     // Save old register state and delete the part which will change
     uint32_t _Reg = this->thisPort->OTYPER & ~(1 << this->thisPin);
@@ -259,7 +260,7 @@ void GPIO::PIN::setHigh(void)
  * @brief Get the logical pin state of the GPIO pin.
  * @return The logical state of the pin.
  */
- bool GPIO::PIN::get(void)
+ bool GPIO::PIN::get(void) const
 {
     return (this->thisPort->IDR & (1 << this->thisPin));
 };
