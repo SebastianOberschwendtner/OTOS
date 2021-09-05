@@ -46,6 +46,10 @@
 * ✓ controller can set the DATA pin
 * ✓ controller can be enabled
 * ✓ controller can be disabled
+* ▢ Transmitting:
+*   ▢ controller can start communication by transmitting target address
+*   ▢ controller can check whether target address is sent
+*   ▢ controller can check whether target address was acknowledged
 * ▢ controller has a method which gives the current peripheral status (busy, ready, ...)
 * ▢ controller has a non-blocking send function:
 *   ▢ for ( 8 bits) 1 byte
@@ -59,7 +63,7 @@
 *   ▢ for (32 bits) 4 bytes
 * ✗ Multiple controllers with the same peripheral assigned to them do not interfere with each other
 * ▢ error codes:
-*   ▢ error -1: 
+*   ▢ error -1: Target address not acknowledged
 */
 
 // === Mocks ===
@@ -68,13 +72,14 @@ class Mock_Pin: public GPIO::PIN_Base, public Mock::Peripheral
 public:
     // === Functions to watch ===
     Mock::Callable set_mode;
+    Mock::Callable set_type;
     Mock::Callable set_alternate;
 
     // === Mocked interface ===
     Mock_Pin() {};
 
     void setMode                (const GPIO::Mode NewMode)          override { set_mode.add_call((int)NewMode); };
-    void setType                (const GPIO::Type NewType)          override {};
+    void setType                (const GPIO::Type NewType)          override { set_type.add_call((int)NewType); };
     void setSpeed               (const GPIO::Speed NewSpeed)        override {};
     void setPull                (const GPIO::Pull NewPull)          override {};
     void set_alternate_function (const GPIO::Alternate function)    override { set_alternate.add_call((int)function); };
@@ -146,9 +151,11 @@ void test_output_assignment(void)
 
     // Perform testing
     SCL.set_mode.assert_called_once_with((int)GPIO::AF_Mode);
-    SCL.set_alternate.assert_called_once_with((int)GPIO::I2C1);
+    SCL.set_alternate.assert_called_once_with((int)GPIO::I2C_1);
+    SCL.set_type.assert_called_once_with((int) GPIO::OPEN_DRAIN);
     SDA.set_mode.assert_called_once_with((int)GPIO::AF_Mode);
-    SDA.set_alternate.assert_called_once_with((int)GPIO::I2C1);
+    SDA.set_alternate.assert_called_once_with((int)GPIO::I2C_1);
+    SCL.set_type.assert_called_once_with((int) GPIO::OPEN_DRAIN);
 };
 
 /// @brief Test the enabling and disabling of the peripheral.
@@ -165,6 +172,20 @@ void test_enable(void)
     TEST_ASSERT_BIT_LOW(0, I2C1->CR1);
 };
 
+/// @brief Test the start of an I2C communication
+void test_start_communication(void)
+{
+    // Create Object
+    I2C::Controller UUT(I2C::I2C_1, 400000);
+
+    // Start communication
+    UUT.set_target_address(0xEE);
+    UUT.send_address();
+
+    // Perform testing
+    TEST_ASSERT_EQUAL(0xEE, I2C1->DR);
+};
+
 // === Main ===
 int main(int argc, char** argv)
 {
@@ -173,6 +194,7 @@ int main(int argc, char** argv)
     test_target_address();
     test_output_assignment();
     test_enable();
+    test_start_communication();
     UNITY_END();
     return 0;
 };

@@ -147,7 +147,8 @@ void I2C::Controller::set_target_address(const unsigned char address)
 void I2C::Controller::assign_pin(GPIO::PIN_Base& output_pin) const
 {
     output_pin.setMode(GPIO::AF_Mode);
-    output_pin.set_alternate_function(GPIO::I2C1);
+    output_pin.setType(GPIO::OPEN_DRAIN);
+    output_pin.set_alternate_function(GPIO::I2C_1);
     /**
      * @todo For now it does not matter which I2C is used for the pin,
      * since all use the same alternate function code, but this could
@@ -169,6 +170,24 @@ void I2C::Controller::enable(void)
 void I2C::Controller::disable(void)
 {
     this->peripheral->CR1 &= ~I2C_CR1_PE;
+};
+
+/**
+ * @brief Write a byte to the output shift register.
+ * @param data Data for the ouput register
+ */
+void I2C::Controller::write_data_register(const unsigned char data)
+{
+    this->peripheral->DR = data;
+};
+
+/**
+ * @brief Start the I2C transaction by sending the target address
+ * on the bus.
+ */
+void I2C::Controller::send_address(void)
+{
+    this->write_data_register(this->target);
 };
 
 /**
