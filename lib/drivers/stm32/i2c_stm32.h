@@ -21,26 +21,34 @@
 #ifndef I2C_STM32_H_
 #define I2C_STM32_H_
 
-// *** Includes ***
+// === Includes ===
 #include "vendors.h"
 
-// *** Declarations ***
-namespace I2C {
-    // *** Enums ***
-    // enum Instance: unsigned char
-    // {
-    //     FIRST = 0, SECOND, THIRD
-    // };
+// === Needed Interfaces ===
+#include "interface.h"
 
-    // *** Classes ***
-    class Controller
+// === Declarations ===
+namespace I2C {
+
+    // === Classes ===
+    class Controller: public Controller_Base
     {
     private:
+        // *** Properties ***
+        volatile I2C_TypeDef*   peripheral;
+        unsigned char           target;
 
     public:
-        // Constructor
-        Controller(char instance, unsigned long frequency);
+        // *** Constructor ***
+        Controller(const Instance i2c_instance, const unsigned long frequency);
+
+        // *** Methods ***
+        void            set_target_address  (const unsigned char address);
+        void            assign_pin          (GPIO::PIN_Base& output_pin) const;
+        unsigned char   get_target_address  (void) const;
+        Data_t          get_rx_data         (void) const;
+        int             get_error           (void) const;
     };
 
-}
+};
 #endif

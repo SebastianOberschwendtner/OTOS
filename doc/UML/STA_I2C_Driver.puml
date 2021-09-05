@@ -1,0 +1,28 @@
+@startuml STA_I2C_Driver
+title State Diagram for I2C Driver\n
+caption OTOS 
+
+[*] --> Initializing
+Initializing --> Idle 
+Idle --> Error
+Idle --> Busy
+Busy --> Idle
+Busy --> Error
+
+state Busy {
+    state TX {
+        [*] --> Transmitting
+        Transmitting : Transmit N Bytes
+        Transmitting --> Transmitting
+        Transmitting --> [*]
+    }
+
+    state RX {
+        [*] --> Receiving
+        Receiving : Receive N Bytes
+        Receiving --> Receiving
+        Receiving --> [*]
+    
+}
+
+@enduml

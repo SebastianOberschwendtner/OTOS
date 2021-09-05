@@ -31,9 +31,20 @@
 #include "i2c_stm32_fake.h"
 
 // *** Fakes ***
-static I2C_TypeDef I2C1_Fake;    // Fake Peripheral
-I2C_TypeDef* I2C1 = &I2C1_Fake;   // Public Pointer to fake which mimics peripheral behaviour.
-unsigned long I2C1_BASE = reinterpret_cast<unsigned long>(I2C1); // Fake register address
+// Fake Peripheral
+static I2C_TypeDef I2C1_Fake;
+static I2C_TypeDef I2C2_Fake;
+static I2C_TypeDef I2C3_Fake;
+
+// Public Pointer to fake which mimics peripheral behaviour.
+I2C_TypeDef* I2C1 = &I2C1_Fake;
+I2C_TypeDef* I2C2 = &I2C2_Fake;
+I2C_TypeDef* I2C3 = &I2C3_Fake;
+
+// Fake register address
+unsigned long I2C1_BASE = reinterpret_cast<unsigned long>(I2C1);
+unsigned long I2C2_BASE = reinterpret_cast<unsigned long>(I2C2);
+unsigned long I2C3_BASE = reinterpret_cast<unsigned long>(I2C3);
 
 /**
  * @brief Constructor for the fake I2C peripheral. Initializes the
@@ -54,5 +65,14 @@ I2C_TypeDef::I2C_TypeDef()
  */
 void I2C_TypeDef::registers_to_default(void)
 {
-    this->CR1       = 0x83;
+    this->CR1       = 0x0000;
+    this->CR2       = 0x0000;
+    this->OAR1      = 0x0000;
+    this->OAR2      = 0x0000;
+    this->DR        = 0x0000;
+    this->SR1       = 0x0000;
+    this->SR2       = 0x0000;
+    this->CCR       = 0x0000;
+    this->TRISE     = 0x0000;
+    this->FLTR      = 0x0000;
 };

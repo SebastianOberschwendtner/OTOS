@@ -31,9 +31,14 @@
 #include "clock_stm32_fake.h"
 
 // *** Fakes ***
-static RCC_TypeDef RCC_Fake;    // Fake Peripheral
-RCC_TypeDef* RCC = &RCC_Fake;   // Public Pointer to fake which mimics peripheral behaviour.
-unsigned long RCC_BASE = reinterpret_cast<unsigned long>(RCC); // Fake register address
+// Fake Peripheral
+static RCC_TypeDef RCC_Fake;
+
+// Public Pointer to fake which mimics peripheral behaviour.
+RCC_TypeDef* RCC = &RCC_Fake;
+
+// Fake register address
+unsigned long RCC_BASE = reinterpret_cast<unsigned long>(RCC);
 
 // *** Methods ***
 
@@ -59,4 +64,5 @@ void RCC_TypeDef::registers_to_default(void)
     this->CR        = 0x83;
     this->PLLCFGR   = 0x24003010;
     this->AHB1ENR   = 0x0;
+    this->APB1ENR   = 0x0;
 };
