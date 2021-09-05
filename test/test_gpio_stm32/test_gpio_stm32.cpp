@@ -241,7 +241,7 @@ void test_alternate_function_low(void)
 
     // Create Pin object
     GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN1);
-    UUT.set_alternate_function(GPIO::TIM8);
+    UUT.set_alternate_function(GPIO::TIM_8);
 
     // perform testing
     TEST_ASSERT_EQUAL(0b00111101, GPIOA->AFR[0]);
@@ -256,7 +256,7 @@ void test_alternate_function_high(void)
 
     // Create Pin object
     GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN9);
-    UUT.set_alternate_function(GPIO::ETH);
+    UUT.set_alternate_function(GPIO::ETH_);
 
     // perform testing
     TEST_ASSERT_EQUAL(0b10111101, GPIOA->AFR[1]);

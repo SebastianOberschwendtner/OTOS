@@ -129,50 +129,50 @@ static unsigned char get_af_code(const GPIO::Alternate function)
 {
     switch (function)
     {
-    case GPIO::SYSTEM:
+    case GPIO::SYSTEM_:
         return 0;
-    case GPIO::TIM1:
-    case GPIO::TIM2:
+    case GPIO::TIM_1:
+    case GPIO::TIM_2:
         return 1;
-    case GPIO::TIM3:
-    case GPIO::TIM4:
-    case GPIO::TIM5:
+    case GPIO::TIM_3:
+    case GPIO::TIM_4:
+    case GPIO::TIM_5:
         return 2;
-    case GPIO::TIM8:
-    case GPIO::TIM9:
-    case GPIO::TIM10:
-    case GPIO::TIM11:
+    case GPIO::TIM_8:
+    case GPIO::TIM_9:
+    case GPIO::TIM_10:
+    case GPIO::TIM_11:
         return 3;
-    case GPIO::I2C1:
-    case GPIO::I2C2:
-    case GPIO::I2C3:
+    case GPIO::I2C_1:
+    case GPIO::I2C_2:
+    case GPIO::I2C_3:
         return 4;
-    case GPIO::SPI1:
-    case GPIO::SPI2:
+    case GPIO::SPI_1:
+    case GPIO::SPI_2:
         return 5;
-    case GPIO::SPI3:
+    case GPIO::SPI_3:
         return 6;
-    case GPIO::USART1:
-    case GPIO::USART2:
-    case GPIO::USART3:
+    case GPIO::USART_1:
+    case GPIO::USART_2:
+    case GPIO::USART_3:
         return 7;
-    case GPIO::CAN1:
-    case GPIO::CAN2:
-    case GPIO::TIM12:
-    case GPIO::TIM13:
-    case GPIO::TIM14:
+    case GPIO::CAN_1:
+    case GPIO::CAN_2:
+    case GPIO::TIM_12:
+    case GPIO::TIM_13:
+    case GPIO::TIM_14:
         return 9;
-    case GPIO::OTG_FS:
-    case GPIO::OTG_HS:
+    case GPIO::OTG_FS_:
+    case GPIO::OTG_HS_:
         return 10;
-    case GPIO::ETH:
+    case GPIO::ETH_:
         return 11;
-    case GPIO::FSMC:
-    case GPIO::SDIO:
+    case GPIO::FSMC_:
+    case GPIO::SDIO_:
         return 12;
-    case GPIO::DCMI:
+    case GPIO::DCMI_:
         return 13;
-    case GPIO::EVENTOUT:
+    case GPIO::EVENTOUT_:
         return 15;
     
     default:

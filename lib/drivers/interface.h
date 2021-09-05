@@ -57,11 +57,11 @@ namespace GPIO {
     };
     enum Alternate: unsigned char
     {
-        SYSTEM = 0, TIM1, TIM2, TIM3, TIM4, TIM5, TIM6,
-        TIM7, TIM8, TIM9, TIM10, TIM11, TIM12, TIM13, TIM14,
-        I2C1, I2C2, I2C3, SPI1, SPI2, SPI3, USART1,
-        USART2, USART3, USART4, USART5, USART6, CAN1,
-        CAN2, OTG_FS, OTG_HS, ETH, FSMC, SDIO, DCMI, EVENTOUT
+        SYSTEM_ = 0, TIM_1, TIM_2, TIM_3, TIM_4, TIM_5, TIM_6,
+        TIM_7, TIM_8, TIM_9, TIM_10, TIM_11, TIM_12, TIM_13, TIM_14,
+        I2C_1, I2C_2, I2C_3, SPI_1, SPI_2, SPI_3, USART_1,
+        USART_2, USART_3, USART_4, USART_5, USART_6, CAN_1,
+        CAN_2, OTG_FS_, OTG_HS_, ETH_, FSMC_, SDIO_, DCMI_, EVENTOUT_
     };
 
     // === GPIO Interface ===
