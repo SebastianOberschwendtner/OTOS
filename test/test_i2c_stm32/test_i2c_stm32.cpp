@@ -44,8 +44,8 @@
 * ✓ controller can set and store target address
 * ✓ controller can set the CLK pin
 * ✓ controller can set the DATA pin
-* ▢ error codes:
-*   ▢ error -1: 
+* ✓ controller can be enabled
+* ✓ controller can be disabled
 * ▢ controller has a method which gives the current peripheral status (busy, ready, ...)
 * ▢ controller has a non-blocking send function:
 *   ▢ for ( 8 bits) 1 byte
@@ -58,6 +58,8 @@
 *   ▢ for (24 bits) 3 bytes
 *   ▢ for (32 bits) 4 bytes
 * ✗ Multiple controllers with the same peripheral assigned to them do not interfere with each other
+* ▢ error codes:
+*   ▢ error -1: 
 */
 
 // === Mocks ===
@@ -149,6 +151,20 @@ void test_output_assignment(void)
     SDA.set_alternate.assert_called_once_with((int)GPIO::I2C1);
 };
 
+/// @brief Test the enabling and disabling of the peripheral.
+void test_enable(void)
+{
+    // Create Object
+    I2C::Controller UUT(I2C::I2C_1, 400000);
+
+    // Perform testing
+    TEST_ASSERT_BIT_LOW(0, I2C1->CR1);
+    UUT.enable();
+    TEST_ASSERT_BIT_HIGH(0, I2C1->CR1);
+    UUT.disable();
+    TEST_ASSERT_BIT_LOW(0, I2C1->CR1);
+};
+
 // === Main ===
 int main(int argc, char** argv)
 {
@@ -156,6 +172,7 @@ int main(int argc, char** argv)
     test_init();
     test_target_address();
     test_output_assignment();
+    test_enable();
     UNITY_END();
     return 0;
 };

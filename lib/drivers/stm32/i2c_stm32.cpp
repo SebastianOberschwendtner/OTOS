@@ -156,6 +156,22 @@ void I2C::Controller::assign_pin(GPIO::PIN_Base& output_pin) const
 };
 
 /**
+ * @brief Enable the hardware peripheral.
+ */
+void I2C::Controller::enable(void)
+{
+    this->peripheral->CR1 |= I2C_CR1_PE;
+};
+
+/**
+ * @brief Enable the hardware peripheral.
+ */
+void I2C::Controller::disable(void)
+{
+    this->peripheral->CR1 &= ~I2C_CR1_PE;
+};
+
+/**
  * @brief Return the currently active target address.
  * @return The 7-bit target address.
  */

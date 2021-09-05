@@ -45,6 +45,8 @@ namespace I2C {
         // *** Methods ***
         void            set_target_address  (const unsigned char address);
         void            assign_pin          (GPIO::PIN_Base& output_pin) const;
+        void            enable              (void);
+        void            disable              (void);
         unsigned char   get_target_address  (void) const;
         Data_t          get_rx_data         (void) const;
         int             get_error           (void) const;
