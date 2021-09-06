@@ -82,14 +82,25 @@ static unsigned long get_peripheral_address(const I2C::Instance instance)
 static unsigned long get_CCR(const unsigned long frequency)
 {
     unsigned long reg_val = 0;
-    // get the CCR value
-    reg_val = (get_FREQ()*1000000)/frequency;
-    // limit CCR value to 12 bits
-    reg_val &= 0xFFF;
     // Set F/S and DUTY bits according to outputfrequency
-    if (frequency > 100000)
+    if (frequency <= 100000)
+    {
+        // get the CCR value
+        reg_val = (get_FREQ()*1000000)/(2*frequency);
+        // limit CCR to 0x01 since SM is enabled with this frequency
+        if (reg_val < 0x04)
+            reg_val = 0x04;
+        // limit CCR value to 12 bits
+        reg_val &= 0xFFF;
+    }
+    else
+    {
+        // get the CCR value
+        reg_val = (get_FREQ()*1000000)/(25*frequency);
+        // limit CCR value to 12 bits
+        reg_val &= 0xFFF;
         reg_val |= I2C_CCR_FS | I2C_CCR_DUTY;
-
+    }
     return reg_val;
 };
 
@@ -182,6 +193,14 @@ void I2C::Controller::write_data_register(const unsigned char data)
 };
 
 /**
+ * @brief Generate a start condition on the bus.
+ */
+void I2C::Controller::generate_start(void)
+{
+    this->peripheral->CR1 |= I2C_CR1_START;
+};
+
+/**
  * @brief Start the I2C transaction by sending the target address
  * on the bus.
  */
@@ -218,4 +237,33 @@ I2C::Data_t I2C::Controller::get_rx_data(void) const
 int I2C::Controller::get_error(void) const
 {
     return 0;
+};
+
+/**
+ * @brief Check whether the hardware peripheral is in controller mode.
+ * @return Returns true when the peripheral is controller mode and false when
+ * it is in target mode.
+ */
+bool I2C::Controller::in_controller_mode(void) const
+{
+    return this->peripheral->SR2 & I2C_SR2_MSL;
+};
+
+/**
+ * @brief Check whether the start condition was generated on the bus
+ * by the controller hardware.
+ * @return Returns true when start condition was generated.
+ */
+bool I2C::Controller::start_sent(void) const
+{
+    return this->peripheral->SR1 & I2C_SR1_SB;
+};
+
+/**
+ * @brief Check whether the target address was sent successfully on the bus.
+ * @return Returns true when address transmission is complete.
+ */
+bool I2C::Controller::address_sent(void) const
+{
+    return this->peripheral->SR1 & I2C_SR1_ADDR;
 };

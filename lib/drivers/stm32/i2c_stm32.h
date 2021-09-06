@@ -50,10 +50,14 @@ namespace I2C {
         void            assign_pin          (GPIO::PIN_Base& output_pin) const;
         void            enable              (void);
         void            disable             (void);
+        void            generate_start      (void);
         void            send_address        (void);
         unsigned char   get_target_address  (void) const;
         Data_t          get_rx_data         (void) const;
         int             get_error           (void) const;
+        bool            in_controller_mode  (void) const;
+        bool            start_sent          (void) const;
+        bool            address_sent        (void) const;
     };
 
 };

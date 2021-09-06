@@ -47,8 +47,11 @@
 * ✓ controller can be enabled
 * ✓ controller can be disabled
 * ▢ Transmitting:
+*   ▢ controller can send start condition
+*   ✓ controller can check whether start condition was generated
+*   ✓ controller can check whether peripheral is in controller mode
 *   ▢ controller can start communication by transmitting target address
-*   ▢ controller can check whether target address is sent
+*   ✓ controller can check whether target address is sent
 *   ▢ controller can check whether target address was acknowledged
 * ▢ controller has a method which gives the current peripheral status (busy, ready, ...)
 * ▢ controller has a non-blocking send function:
@@ -114,7 +117,7 @@ void test_init(void)
     TEST_ASSERT_EQUAL((1<<23) | (1<<21) | (1<<20), RCC->APB1ENR); // Enable the peripheral clock
     TEST_ASSERT_EQUAL( 0, I2C1->CR1);
     TEST_ASSERT_EQUAL(20, I2C1->CR2);
-    TEST_ASSERT_EQUAL((1<<15) | (1<<14) | 50, I2C1->CCR);
+    TEST_ASSERT_EQUAL((1<<15) | (1<<14) | 2, I2C1->CCR);
     TEST_ASSERT_EQUAL(11, I2C1->TRISE);
     TEST_ASSERT_EQUAL(0, I2C1->FLTR);
     TEST_ASSERT_EQUAL(0, UUT.get_target_address());  // Test that the target is address is 0
@@ -186,6 +189,48 @@ void test_start_communication(void)
     TEST_ASSERT_EQUAL(0xEE, I2C1->DR);
 };
 
+/// @brief Test whether controller can read its events
+void test_events(void)
+{
+    // Create Object
+    I2C::Controller UUT(I2C::I2C_1, 100000);
+
+    // Check the events after init
+    TEST_ASSERT_FALSE(UUT.in_controller_mode());
+    TEST_ASSERT_FALSE(UUT.start_sent());
+    TEST_ASSERT_FALSE(UUT.address_sent());
+
+    // Test whether the return values change according to the events
+    // controller in controller mode
+    I2C1->SR2 = I2C_SR2_MSL;
+    TEST_ASSERT_TRUE(UUT.in_controller_mode());
+    TEST_ASSERT_FALSE(UUT.start_sent());
+    TEST_ASSERT_FALSE(UUT.address_sent());
+
+    // start condition generated
+    I2C1->SR1 = I2C_SR1_SB;
+    TEST_ASSERT_TRUE(UUT.in_controller_mode());
+    TEST_ASSERT_TRUE(UUT.start_sent());
+    TEST_ASSERT_FALSE(UUT.address_sent());
+
+    // address was sent
+    I2C1->SR1 = I2C_SR1_ADDR;
+    TEST_ASSERT_TRUE(UUT.in_controller_mode());
+    TEST_ASSERT_FALSE(UUT.start_sent());
+    TEST_ASSERT_TRUE(UUT.address_sent());
+};
+
+/// @brief Test whether the controller can generate events
+void test_generate_events(void)
+{
+    // Create object
+    I2C::Controller UUT(I2C::I2C_1, 100000);
+    UUT.generate_start();
+
+    // perform test
+    TEST_ASSERT_BIT_HIGH(I2C_CR1_START_Pos, I2C1->CR1);
+}
+
 // === Main ===
 int main(int argc, char** argv)
 {
@@ -195,6 +240,8 @@ int main(int argc, char** argv)
     test_output_assignment();
     test_enable();
     test_start_communication();
+    test_events();
+    test_generate_events();
     UNITY_END();
     return 0;
 };
