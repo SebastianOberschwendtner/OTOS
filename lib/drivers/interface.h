@@ -22,6 +22,24 @@
 #define INTERFACE_H_
 
 // === Includes ===
+#include "error_codes.h"
+
+// === Common base class for every driver ===
+namespace Driver {
+    class Base {
+    private:
+        Error::Code_t error;
+
+    public:
+        // *** Constructor ***
+        Base(): error(Error::None) {};
+
+        // *** Methods ***
+        void            set_error(const Error::Code_t err) { this->error = err; };
+        Error::Code_t   get_error(void) const { return this->error; };
+
+    };
+};
 
 // === Define the Interfaces ===
 
