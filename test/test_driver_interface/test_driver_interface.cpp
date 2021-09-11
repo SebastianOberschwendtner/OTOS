@@ -32,7 +32,10 @@
 #include "interface.h"
 
 /** === Test List ===
- * ▢ base class is initalized with no error
+ * ✓ base class is initalized with no error
+ * ✓ has method to get most recent error
+ * ▢ has methods which counts timeouts
+ * ▢ timeout methods sets timeout error
  */
 
 // === Tests ===
@@ -44,7 +47,7 @@ void tearDown(void) {
 // clean stuff up here
 };
 
-/// @brief Test the initialization of the controller
+/// @brief Test the initialization of the driver object
 void test_init(void)
 {
     // create object
@@ -57,10 +60,28 @@ void test_init(void)
 /// @brief Test whether errors can be set
 void test_set_error(void)
 {
+    // create object
     Driver::Base UUT;
     UUT.set_error(Error::I2C_Address_Error);
+
+    // perform testing
     TEST_ASSERT_EQUAL(Error::I2C_Address_Error, UUT.get_error());
-}
+};
+
+/// @brief test the timeout methods
+void test_timeout(void)
+{
+    // create object
+    Driver::Base UUT;
+    UUT.set_timeout(5); // set timeout to 5 calls
+
+    // perform testing
+    for (int count = 0; count < 5; count++)
+        TEST_ASSERT_FALSE(UUT.timed_out());
+    TEST_ASSERT_TRUE(UUT.timed_out())
+    UUT.reset_timeout();
+    TEST_ASSERT_FALSE(UUT.timed_out());
+};
 
 // === Main ===
 int main(int argc, char** argv)
@@ -68,6 +89,7 @@ int main(int argc, char** argv)
     UNITY_BEGIN();
     test_init();
     test_set_error();
+    test_timeout();
     UNITY_END();
     return 0;
 };
