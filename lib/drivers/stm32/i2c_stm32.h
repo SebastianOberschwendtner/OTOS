@@ -31,7 +31,7 @@
 namespace I2C {
 
     // === Classes ===
-    class Controller: public Controller_Base
+    class Controller: public Controller_Base, public Driver::Base
     {
     private:
         // *** Properties ***
@@ -39,7 +39,8 @@ namespace I2C {
         unsigned char           target;
 
         // *** Methods ***
-        void            write_data_register(const unsigned char data);
+        void            write_data_register (const unsigned char data);
+        bool            send_data_byte      (const unsigned char data);
 
     public:
         // *** Constructor ***
@@ -51,13 +52,20 @@ namespace I2C {
         void            enable              (void);
         void            disable             (void);
         void            generate_start      (void);
-        void            send_address        (void);
+        void            generate_stop       (void);
+        void            write_address       (void);
+        bool            send_address        (void);
+        bool            send_data           (const Data_t payload, const unsigned char n_bytes);
+        bool            send_byte           (const unsigned char data);
+        bool            send_word           (const unsigned int data);
         unsigned char   get_target_address  (void) const;
         Data_t          get_rx_data         (void) const;
-        int             get_error           (void) const;
         bool            in_controller_mode  (void) const;
         bool            start_sent          (void) const;
         bool            address_sent        (void) const;
+        bool            ack_received        (void) const;
+        bool            TX_register_empty   (void) const;
+        bool            transfer_finished   (void) const;
     };
 
 };

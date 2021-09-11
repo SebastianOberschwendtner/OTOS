@@ -137,6 +137,9 @@ target(0)
     peripheral->CCR     = get_CCR(frequency);
     peripheral->TRISE   = get_TRISE(500); /** @todo Rise time is fixed to 500ns for now. Adjust that later. */
     peripheral->FLTR    = 0;
+
+    // Enable a standard timeout of 100 calls
+    set_timeout(100);
 };
 
 /**
@@ -201,12 +204,175 @@ void I2C::Controller::generate_start(void)
 };
 
 /**
- * @brief Start the I2C transaction by sending the target address
- * on the bus.
+ * @brief Generate a stop condition on the bus after the current byte transfer
  */
-void I2C::Controller::send_address(void)
+void I2C::Controller::generate_stop(void)
+{
+    this->peripheral->CR1 |= I2C_CR1_STOP;
+};
+
+/**
+ * @brief Write the current target address to the output shift register.
+ */
+void I2C::Controller::write_address(void)
 {
     this->write_data_register(this->target);
+};
+
+/**
+ * @brief Send the set target address via the I2C bus.
+ * Sets the following errors:
+ * - I2C_Timeout
+ * - I2C_Address_Error
+ * @return Returns True when the address was sent successfully, False otherwise.
+ * @details blocking function
+ */
+bool I2C::Controller::send_address(void)
+{
+    // Reset timeout
+    this->reset_timeout();
+
+    // Generate Start condition
+    this->generate_start();
+    while(!this->start_sent())
+    {
+        if(this->timed_out())
+        {
+            this->set_error(Error::I2C_Timeout);
+            return false;
+        }
+    }
+
+    // send the address
+    this->write_address();
+
+    // Wait for transmission and check whether target responded
+    while(!this->address_sent())
+    {
+        if(!this->ack_received())
+        {
+            // Set the error
+            this->set_error(Error::I2C_Address_Error);
+            // reset the error flag and stop waiting
+            return false;
+        }
+    }
+
+    // Address was sent successfully. Return controller mode,
+    // which should be true after sending the address.
+    return this->in_controller_mode();    
+};
+
+/**
+ * @brief Write a byte to the data register of the i2c peripheral
+ * and wait until it is sent. Does not send an address on the bus.
+ * Sets the following errors:
+ * - I2C_Timeout
+ * - I2C_Data_ACK_Error
+ * @param data The byte to be sent
+ * @return Returns True when the byte was sent successfully, False otherwise
+ * @details blocking function
+ */
+bool I2C::Controller::send_data_byte(const unsigned char data)
+{
+    // Wait until the peripheral can except new data
+    this->reset_timeout();
+    while(!this->TX_register_empty())
+    {
+        // Check for timeouts
+        if(this->timed_out())
+        {
+            this->set_error(Error::I2C_Timeout);
+            return false;
+        }
+    }
+
+    // write the byte
+    this->write_data_register(data); 
+
+    // Wait for the byte transfer
+    while (!this->transfer_finished())
+    {
+        // Check for ack or nack
+        if (!this->ack_received())
+        {
+            this->set_error(Error::I2C_Data_ACK_Error);
+            return false;
+        }
+
+        // Check for timeouts
+        if(this->timed_out())
+        {
+            this->set_error(Error::I2C_Timeout);
+            return false;
+        }
+    }
+    // Byte was sent successfully
+    return true;
+};
+
+/**
+ * @brief Send n bytes to an i2c target
+ * Sets the following errors:
+ * - I2C_Timeout
+ * - I2C_Data_ACK_Error
+ * @param payload Data struct with maximum 4 bytes
+ * @param n_bytes How many bytes should be sent
+ * @return Returns True when the byte was sent successfully, False otherwise.
+ * @details blocking function
+ */
+bool I2C::Controller::send_data(const I2C::Data_t payload, 
+    const unsigned char n_bytes)
+{
+    if(this->send_address())
+    {
+        for (unsigned char n_byte = n_bytes + 1; n_byte > 0; n_byte--)
+            if(!this->send_data_byte(payload.byte[n_byte - 1]))
+                return false;
+
+        // After sending all bytes generate the stop condition
+        this->generate_stop();
+        return true;
+    }
+    return false;
+};
+
+/**
+ * @brief Send a byte to an i2c target
+ * Sets the following errors:
+ * - I2C_Timeout
+ * - I2C_Data_ACK_Error
+ * @param data Byte in data representation to be sent
+ * @return Returns True when the byte was sent successfully, False otherwise.
+ * @details blocking function
+ */
+bool I2C::Controller::send_byte(const unsigned char data)
+{
+    // set the payload data
+    I2C::Data_t payload;
+    payload.byte[0] = data;
+
+    // send the data
+    return this->send_data(payload, 1);
+};
+
+/**
+ * @brief Send a word to an i2c target
+ * Sets the following errors:
+ * - I2C_Timeout
+ * - I2C_Data_ACK_Error
+ * @param data Word (2 bytes) in data representation to be sent
+ * @return Returns True when the byte was sent successfully, False otherwise.
+ * @details blocking function
+ */
+bool I2C::Controller::send_word(const unsigned int data)
+{
+    // set the payload data
+    I2C::Data_t payload;
+    payload.word[0] = data;
+
+    // send the data
+    return this->send_data(payload, 2);
 };
 
 /**
@@ -228,15 +394,6 @@ I2C::Data_t I2C::Controller::get_rx_data(void) const
     I2C::Data_t val;
     val.value = 0;
     return val;
-};
-
-/**
- * @brief Return the most recent occurred error
- * @return Returns most recent error code.
- */
-int I2C::Controller::get_error(void) const
-{
-    return 0;
 };
 
 /**
@@ -266,4 +423,39 @@ bool I2C::Controller::start_sent(void) const
 bool I2C::Controller::address_sent(void) const
 {
     return this->peripheral->SR1 & I2C_SR1_ADDR;
+};
+
+/**
+ * @brief Check whether an acknowledge was received. When no communication is ongoing
+ * on the bus this will always return true. Only when an nack was received this will
+ * become false.
+ * @return Returns true when an acknowledge was received in the current transaction.
+ */
+bool I2C::Controller::ack_received(void) const
+{
+    // Check whether nack was received and clear error
+    bool nack = (this->peripheral->SR1 & I2C_SR1_AF);
+    this->peripheral->SR1 &= ~I2C_SR1_AF;
+    
+    // Return whether there was NO acknowledge failure
+    return !nack;
+};
+
+/**
+ * @brief Check whether the TX data shift register is empty and
+ * can receive new data.
+ * @returns Returns True when new data can be written to the register.
+ */
+bool I2C::Controller::TX_register_empty(void) const
+{
+    return this->peripheral->SR1 & I2C_SR1_TXE;
+};
+
+/**
+ * @brief Check whether the transfer of the current byte is finished.
+ * @returns Returns True when the transfer is finished.
+ */
+bool I2C::Controller::transfer_finished(void) const
+{
+    return this->peripheral->SR1 & I2C_SR1_BTF;
 };

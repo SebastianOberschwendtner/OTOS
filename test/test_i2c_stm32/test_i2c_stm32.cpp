@@ -47,12 +47,12 @@
 * ✓ controller can be enabled
 * ✓ controller can be disabled
 * ▢ Transmitting:
-*   ▢ controller can send start condition
+*   ✓ controller can send start condition
 *   ✓ controller can check whether start condition was generated
 *   ✓ controller can check whether peripheral is in controller mode
 *   ▢ controller can start communication by transmitting target address
 *   ✓ controller can check whether target address is sent
-*   ▢ controller can check whether target address was acknowledged
+*   ▢ controller can check whether ACK or NACK was received
 * ▢ controller has a method which gives the current peripheral status (busy, ready, ...)
 * ▢ controller has a non-blocking send function:
 *   ▢ for ( 8 bits) 1 byte
@@ -183,7 +183,7 @@ void test_start_communication(void)
 
     // Start communication
     UUT.set_target_address(0xEE);
-    UUT.send_address();
+    UUT.write_address();
 
     // Perform testing
     TEST_ASSERT_EQUAL(0xEE, I2C1->DR);
@@ -192,6 +192,8 @@ void test_start_communication(void)
 /// @brief Test whether controller can read its events
 void test_events(void)
 {
+    setUp();
+
     // Create Object
     I2C::Controller UUT(I2C::I2C_1, 100000);
 
@@ -218,18 +220,113 @@ void test_events(void)
     TEST_ASSERT_TRUE(UUT.in_controller_mode());
     TEST_ASSERT_FALSE(UUT.start_sent());
     TEST_ASSERT_TRUE(UUT.address_sent());
+
+    // Start generation
+    UUT.generate_start();
+    TEST_ASSERT_BIT_HIGH(I2C_CR1_START_Pos, I2C1->CR1);
+
+    // Acknowledge received
+    TEST_ASSERT_TRUE(UUT.ack_received());
+    I2C1->SR1 = I2C_SR1_AF;
+    TEST_ASSERT_FALSE(UUT.ack_received());
+
+    // TX shift register is empty and ready to receive data
+    TEST_ASSERT_FALSE(UUT.TX_register_empty());
+    I2C1->SR1 = I2C_SR1_TXE;
+    TEST_ASSERT_TRUE(UUT.TX_register_empty());
+
+    // Stop generation
+    UUT.generate_stop();
+    TEST_ASSERT_BIT_HIGH(I2C_CR1_STOP_Pos, I2C1->CR1);
+
+    // Transfer of last byte is finished
+    TEST_ASSERT_FALSE(UUT.transfer_finished());
+    I2C1->SR1 = I2C_SR1_BTF;
+    TEST_ASSERT_TRUE(UUT.transfer_finished());
 };
 
-/// @brief Test whether the controller can generate events
-void test_generate_events(void)
+/// @brief Test the i2c address transmission
+void test_address_transmission(void)
 {
+    setUp();
+    // Set the flags for a successfull data transmission
+    I2C1->SR1 = I2C_SR1_ADDR | I2C_SR1_SB;
+    I2C1->SR2 = I2C_SR2_MSL;
+
     // Create object
     I2C::Controller UUT(I2C::I2C_1, 100000);
-    UUT.generate_start();
+    UUT.set_target_address(0xEE);
 
-    // perform test
-    TEST_ASSERT_BIT_HIGH(I2C_CR1_START_Pos, I2C1->CR1);
-}
+    // perform testing
+    TEST_ASSERT_TRUE(UUT.send_address());
+    TEST_ASSERT_EQUAL(0xEE, I2C1->DR);
+
+    // test when target is not responding
+    I2C1->SR1 = I2C_SR1_AF | I2C_SR1_SB;
+    TEST_ASSERT_FALSE(UUT.send_address());
+    TEST_ASSERT_EQUAL(Error::I2C_Address_Error, UUT.get_error());
+    TEST_ASSERT_EQUAL(0xEE, I2C1->DR);
+
+    // test a timeout of peripheral
+    UUT.set_timeout(5);
+    I2C1->SR1 = I2C_SR1_AF;
+    TEST_ASSERT_FALSE(UUT.send_address());
+    TEST_ASSERT_EQUAL(Error::I2C_Timeout, UUT.get_error());
+};
+
+/// @brief Test sending a byte via the i2c bus
+void test_send_byte(void)
+{
+    setUp();
+    // Set the flags for a successfull data transmission
+    I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
+    I2C1->SR2 = I2C_SR2_MSL;
+
+    // Create object
+    I2C::Controller UUT(I2C::I2C_1, 100000);
+    UUT.set_target_address(0xEE);
+
+    // Perform testing
+    TEST_ASSERT_TRUE(UUT.send_byte(0xAA));
+    TEST_ASSERT_EQUAL(0xAA, I2C1->DR); 
+    
+    // Test the timeout
+    I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
+    TEST_ASSERT_FALSE(UUT.send_byte(0xAA));
+    TEST_ASSERT_EQUAL(Error::I2C_Timeout, UUT.get_error());
+
+    // Test an acknowledge error
+    I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB | I2C_SR1_AF;
+    TEST_ASSERT_FALSE(UUT.send_byte(0xAA));
+    TEST_ASSERT_EQUAL(Error::I2C_Data_ACK_Error, UUT.get_error());
+};
+
+/// @brief Test sending a word via the i2c bus
+void test_send_word(void)
+{
+    setUp();
+    // Set the flags for a successfull data transmission
+    I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
+    I2C1->SR2 = I2C_SR2_MSL;
+
+    // Create object
+    I2C::Controller UUT(I2C::I2C_1, 100000);
+    UUT.set_target_address(0xEE);
+
+    // Perform testing
+    TEST_ASSERT_TRUE(UUT.send_word(0xAAEE));
+    TEST_ASSERT_EQUAL(0xEE, I2C1->DR); 
+    
+    // Test the timeout
+    I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
+    TEST_ASSERT_FALSE(UUT.send_word(0xAAEE));
+    TEST_ASSERT_EQUAL(Error::I2C_Timeout, UUT.get_error());
+
+    // Test an acknowledge error
+    I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB | I2C_SR1_AF;
+    TEST_ASSERT_FALSE(UUT.send_word(0xAAEE));
+    TEST_ASSERT_EQUAL(Error::I2C_Data_ACK_Error, UUT.get_error());
+};
 
 // === Main ===
 int main(int argc, char** argv)
@@ -241,7 +338,9 @@ int main(int argc, char** argv)
     test_enable();
     test_start_communication();
     test_events();
-    test_generate_events();
+    test_address_transmission();
+    test_send_byte();
+    test_send_word();
     UNITY_END();
     return 0;
 };
