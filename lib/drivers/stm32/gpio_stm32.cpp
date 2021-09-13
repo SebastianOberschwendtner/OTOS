@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    gpio_stm32.cpp
  * @author  SO
- * @version v1.0.7
+ * @version v1.0.8
  * @date    25-August-2021
  * @brief   GPIO driver for STM32 microcontrollers.
  ==============================================================================
@@ -125,10 +125,11 @@ static unsigned long get_port_address(const GPIO::PinPort Port)
  * @param function The desired alternate function of a pin.
  * @return The AF code of the alternate function to put into the AF register.
  */
-static unsigned char get_af_code(const GPIO::Alternate function)
+unsigned char GPIO::PIN::get_af_code(const GPIO::Alternate function) const
 {
     switch (function)
     {
+#if defined(STM32F4)
     case GPIO::SYSTEM_:
         return 0;
     case GPIO::TIM_1:
@@ -174,7 +175,32 @@ static unsigned char get_af_code(const GPIO::Alternate function)
         return 13;
     case GPIO::EVENTOUT_:
         return 15;
+#elif defined(STM32L0)
+    case GPIO::I2C_1:
+        if (this->thisPort == GPIOA)
+            return 6;
+        if (this->thisPort == GPIOB)
+        {
+            if(this->thisPin < 8)
+                return 1;
+            else
+                return 4;
+        }
+        return 0; //This pin cannot be assigned to I2C1
     
+    case GPIO::I2C_2:
+        if (this->thisPort == GPIOB)
+        {
+            if (this->thisPin < 12)
+                return 6;
+            else
+                return 5;
+        }
+        return 0; //This pin cannot be assigned to I2C2
+    
+    case GPIO::I2C_3:
+        return 7;
+#endif
     default:
         return 0;
     }

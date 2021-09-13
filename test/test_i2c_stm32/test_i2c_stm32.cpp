@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_i2c_stm32.cpp
  * @author  SO
- * @version v1.0.7
+ * @version v1.0.8
  * @date    30-August-2021
  * @brief   Unit tests for testing the i2c driver for stm32 microcontrollers.
  ******************************************************************************
@@ -243,6 +243,11 @@ void test_events(void)
     TEST_ASSERT_FALSE(UUT.transfer_finished());
     I2C1->SR1 = I2C_SR1_BTF;
     TEST_ASSERT_TRUE(UUT.transfer_finished());
+
+    // Detect when bus is busy
+    TEST_ASSERT_FALSE(UUT.bus_busy());
+    I2C1->SR2 = I2C_SR2_BUSY;
+    TEST_ASSERT_TRUE(UUT.bus_busy());
 };
 
 /// @brief Test the i2c address transmission
@@ -299,6 +304,11 @@ void test_send_byte(void)
     I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB | I2C_SR1_AF;
     TEST_ASSERT_FALSE(UUT.send_byte(0xAA));
     TEST_ASSERT_EQUAL(Error::I2C_Data_ACK_Error, UUT.get_error());
+
+    // Test sending when bus is busy
+    I2C1->SR2 |= I2C_SR2_BUSY;
+    TEST_ASSERT_FALSE(UUT.send_byte(0xAA));
+    TEST_ASSERT_EQUAL(Error::I2C_BUS_Busy_Error, UUT.get_error());
 };
 
 /// @brief Test sending a word via the i2c bus

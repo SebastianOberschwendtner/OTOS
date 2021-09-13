@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    i2c_stm32.cpp
  * @author  SO
- * @version v1.0.7
+ * @version v1.0.8
  * @date    02-September-2021
  * @brief   I2C driver for STM32 microcontrollers.
  ==============================================================================
@@ -40,12 +40,22 @@
  */
 constexpr unsigned long get_FREQ(void) 
 {
-    // Check whether F_APB is valid
-    static_assert(F_APB > 2000000, "Minimum APB clock speed for I2C peripheral is 2 MHz!");
-    static_assert(F_APB < 50000000, "Maximum APB clock speed for I2C peripheral is 50 MHz!");
+    // Check whether peripheral clock frequency is valid is valid
+    static_assert(F_I2C > 2000000, "Minimum APB clock speed for I2C peripheral is 2 MHz!");
+    static_assert(F_I2C < 50000000, "Maximum APB clock speed for I2C peripheral is 50 MHz!");
 
-    // Return F_APB in MHz
-    return F_APB/1000000;
+    // Return F_I2C in MHz
+    return F_I2C/1000000;
+};
+
+/**
+ * @brief Calculate the optimal prescaler value for STM32L0 devices
+ * @param frequency The output frequency for the bus
+ * @return Returns the 4-bit prescaler value.
+ */
+constexpr unsigned char get_prescaler(const unsigned long frequency)
+{
+    return (1 + ((F_I2C / frequency) / 255)) & 0b1111;
 };
 
 // === Functions ===
@@ -75,13 +85,14 @@ static unsigned long get_peripheral_address(const I2C::Instance instance)
  * @brief Calculate the control bits for the clock control
  * register of the i2c peripheral.
  * @param frequency The desired clock frequency in Hz.
- * @return The control bits for the CCR register.
+ * @return The control bits for the timing ot clock control register.
  * @details For i2c frequencies below 100 kHz the SM mode is used.
- * For frequencies higher than 100 kHz, the FM mode with DUTY=1 is used.
+ * For frequencies higher than 100 kHz, the FM mode with DUTY=1 is used (STM32F4xx).
  */
-static unsigned long get_CCR(const unsigned long frequency)
+static unsigned long get_clock_control(const unsigned long frequency)
 {
     unsigned long reg_val = 0;
+#if defined(STM32F4)
     // Set F/S and DUTY bits according to outputfrequency
     if (frequency <= 100000)
     {
@@ -101,6 +112,12 @@ static unsigned long get_CCR(const unsigned long frequency)
         reg_val &= 0xFFF;
         reg_val |= I2C_CCR_FS | I2C_CCR_DUTY;
     }
+#elif defined(STM32L0)
+    unsigned char _pre      = get_prescaler(frequency);
+    unsigned char _pre_l    = ((F_I2C / (_pre * frequency)) / 2) & 0b11111111; 
+    unsigned char _pre_h    = ((F_I2C / (_pre * frequency)) / 2) & 0b11111111; 
+    reg_val = (--_pre << 28) | (--_pre_h << 8) | (--_pre_l << 0);
+#endif
     return reg_val;
 };
 
@@ -125,7 +142,24 @@ I2C::Controller::Controller(const I2C::Instance i2c_instance, const unsigned lon
 target(0)
 {
     // Enable the peripheral clock
-    RCC->APB1ENR |= (1<< (21 + i2c_instance));
+#if defined(STM32F4)
+    unsigned long _reg = (1<< (21 + i2c_instance)); 
+#elif defined(STM32L0)
+    unsigned long _reg = 0;
+    switch (i2c_instance)
+    {
+    case I2C::I2C_1:
+        _reg = RCC_APB1ENR_I2C1EN;
+        break;
+    case I2C::I2C_2:
+        _reg = RCC_APB1ENR_I2C2EN;
+        break;
+    case I2C::I2C_3:
+        _reg = RCC_APB1ENR_I2C3EN;
+        break;
+    };
+#endif
+    RCC->APB1ENR |= _reg;
 
     // set the peripheral address
     peripheral = reinterpret_cast<volatile I2C_TypeDef*>
@@ -133,10 +167,16 @@ target(0)
 
     // Set the configuration registers
     peripheral->CR1     = 0;
+#if defined(STM32F4)
     peripheral->CR2     = get_FREQ();
-    peripheral->CCR     = get_CCR(frequency);
+    peripheral->CCR     = get_clock_control(frequency);
     peripheral->TRISE   = get_TRISE(500); /** @todo Rise time is fixed to 500ns for now. Adjust that later. */
     peripheral->FLTR    = 0;
+#elif defined(STM32L0)
+    peripheral->CR2     = 0;
+    peripheral->TIMINGR = get_clock_control(frequency);
+    peripheral->TIMEOUTR = 0;
+#endif
 
     // Enable a standard timeout of 100 calls
     set_timeout(100);
@@ -162,12 +202,14 @@ void I2C::Controller::assign_pin(GPIO::PIN_Base& output_pin) const
 {
     output_pin.setMode(GPIO::AF_Mode);
     output_pin.setType(GPIO::OPEN_DRAIN);
-    output_pin.set_alternate_function(GPIO::I2C_1);
-    /**
-     * @todo For now it does not matter which I2C is used for the pin,
-     * since all use the same alternate function code, but this could
-     * change for other hardware...
-     */
+
+    // Get the peripheral which is used, since the AF modes depend on that
+    if (this->peripheral == I2C1)
+        output_pin.set_alternate_function(GPIO::I2C_1);
+    else if (this->peripheral == I2C2)
+        output_pin.set_alternate_function(GPIO::I2C_2);
+    else
+        output_pin.set_alternate_function(GPIO::I2C_3);
 };
 
 /**
@@ -192,7 +234,11 @@ void I2C::Controller::disable(void)
  */
 void I2C::Controller::write_data_register(const unsigned char data)
 {
+#if defined(STM32F4)
     this->peripheral->DR = data;
+#elif defined(STM32L0)
+    this->peripheral->TXDR = data;
+#endif
 };
 
 /**
@@ -200,7 +246,11 @@ void I2C::Controller::write_data_register(const unsigned char data)
  */
 void I2C::Controller::generate_start(void)
 {
+#if defined(STM32F4)
     this->peripheral->CR1 |= I2C_CR1_START;
+#elif defined(STM32L0)
+    this->peripheral->CR2 |= I2C_CR2_START;
+#endif
 };
 
 /**
@@ -208,7 +258,11 @@ void I2C::Controller::generate_start(void)
  */
 void I2C::Controller::generate_stop(void)
 {
+#if defined(STM32F4)
     this->peripheral->CR1 |= I2C_CR1_STOP;
+#elif defined(STM32L0)
+    this->peripheral->CR2 |= I2C_CR2_STOP;
+#endif
 };
 
 /**
@@ -216,7 +270,9 @@ void I2C::Controller::generate_stop(void)
  */
 void I2C::Controller::write_address(void)
 {
+#ifdef STM32F4
     this->write_data_register(this->target);
+#endif
 };
 
 /**
@@ -275,8 +331,9 @@ bool I2C::Controller::send_address(void)
  */
 bool I2C::Controller::send_data_byte(const unsigned char data)
 {
-    // Wait until the peripheral can except new data
     this->reset_timeout();
+
+    // Wait until the peripheral can except new data
     while(!this->TX_register_empty())
     {
         // Check for timeouts
@@ -316,6 +373,7 @@ bool I2C::Controller::send_data_byte(const unsigned char data)
  * Sets the following errors:
  * - I2C_Timeout
  * - I2C_Data_ACK_Error
+ * - I2C_BUS_Busy
  * @param payload Data struct with maximum 4 bytes
  * @param n_bytes How many bytes should be sent
  * @return Returns True when the byte was sent successfully, False otherwise.
@@ -324,17 +382,31 @@ bool I2C::Controller::send_data_byte(const unsigned char data)
 bool I2C::Controller::send_data(const I2C::Data_t payload, 
     const unsigned char n_bytes)
 {
-    if(this->send_address())
+    // Only start transfer when bus is idle
+    if(!this->bus_busy())
     {
-        for (unsigned char n_byte = n_bytes + 1; n_byte > 0; n_byte--)
-            if(!this->send_data_byte(payload.byte[n_byte - 1]))
-                return false;
+#ifdef STM32L0
+        // Set the number of bytes and target address
+        this->peripheral->CR2 = (n_bytes << 16) | this->target;
+#endif
 
-        // After sending all bytes generate the stop condition
-        this->generate_stop();
-        return true;
+        if(this->send_address())
+        {
+            for (unsigned char n_byte = n_bytes; n_byte > 0; n_byte--)
+                if(!this->send_data_byte(payload.byte[n_byte - 1]))
+                    return false;
+
+            // After sending all bytes generate the stop condition
+            this->generate_stop();
+            return true;
+        }
+        return false;
     }
-    return false;
+    else
+    {
+        this->set_error(Error::I2C_BUS_Busy_Error);
+        return false;
+    }
 };
 
 /**
@@ -403,7 +475,11 @@ I2C::Data_t I2C::Controller::get_rx_data(void) const
  */
 bool I2C::Controller::in_controller_mode(void) const
 {
+#if defined(STM32F4)
     return this->peripheral->SR2 & I2C_SR2_MSL;
+#elif defined(STM32L0)
+    return true;
+#endif
 };
 
 /**
@@ -413,7 +489,11 @@ bool I2C::Controller::in_controller_mode(void) const
  */
 bool I2C::Controller::start_sent(void) const
 {
+#if defined(STM32F4)
     return this->peripheral->SR1 & I2C_SR1_SB;
+#elif defined(STM32L0)
+    return !(this->peripheral->CR2 & I2C_CR2_START);
+#endif
 };
 
 /**
@@ -422,7 +502,13 @@ bool I2C::Controller::start_sent(void) const
  */
 bool I2C::Controller::address_sent(void) const
 {
+#if defined(STM32F4)
     return this->peripheral->SR1 & I2C_SR1_ADDR;
+#elif defined(STM32L0)
+    // This L0 devices combine the start generation an the address transmission
+    // therefore the address is sent, when the start condition is generated
+    return this->start_sent();
+#endif
 };
 
 /**
@@ -433,12 +519,21 @@ bool I2C::Controller::address_sent(void) const
  */
 bool I2C::Controller::ack_received(void) const
 {
+#if defined(STM32F4)
     // Check whether nack was received and clear error
     bool nack = (this->peripheral->SR1 & I2C_SR1_AF);
     this->peripheral->SR1 &= ~I2C_SR1_AF;
     
     // Return whether there was NO acknowledge failure
     return !nack;
+#elif defined(STM32L0)
+    // Check whether nack was received and clear error
+    bool nack = (this->peripheral->ISR & I2C_ISR_NACKF);
+    this->peripheral->ICR |= I2C_ICR_NACKCF;
+    
+    // Return whether there was NO acknowledge failure
+    return !nack;
+#endif
 };
 
 /**
@@ -448,7 +543,11 @@ bool I2C::Controller::ack_received(void) const
  */
 bool I2C::Controller::TX_register_empty(void) const
 {
+#if defined(STM32F4)
     return this->peripheral->SR1 & I2C_SR1_TXE;
+#elif defined(STM32L0)
+    return this->peripheral->ISR & I2C_ISR_TXE;
+#endif
 };
 
 /**
@@ -457,5 +556,22 @@ bool I2C::Controller::TX_register_empty(void) const
  */
 bool I2C::Controller::transfer_finished(void) const
 {
+#if defined(STM32F4)
     return this->peripheral->SR1 & I2C_SR1_BTF;
+#elif defined(STM32L0)
+    return this->peripheral->ISR & (I2C_ISR_TXIS | I2C_ISR_TC);
+#endif
+};
+
+/**
+ * @brief Detect wether the bus is currently busy.
+ * @return Resturns True when the bus is busy, False otherwise.
+ */
+bool I2C::Controller::bus_busy(void) const
+{
+#if defined(STM32F4)
+    return this->peripheral->SR2 & I2C_SR2_BUSY;
+#elif defined(STM32L0)
+    return this->peripheral->ISR & I2C_ISR_BUSY;
+#endif
 };

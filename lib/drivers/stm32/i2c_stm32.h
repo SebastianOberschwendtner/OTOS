@@ -66,6 +66,7 @@ namespace I2C {
         bool            ack_received        (void) const;
         bool            TX_register_empty   (void) const;
         bool            transfer_finished   (void) const;
+        bool            bus_busy            (void) const;
     };
 
 };

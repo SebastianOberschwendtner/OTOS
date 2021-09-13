@@ -32,8 +32,12 @@ namespace GPIO {
     class PIN final: public PIN_Base 
     {
     private:
+        // properties
         volatile GPIO_TypeDef* thisPort;
         PinNumber thisPin;
+
+        // methods
+        unsigned char   get_af_code(const GPIO::Alternate function) const;
 
     public:
 

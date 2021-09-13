@@ -7,6 +7,9 @@
 - Adds separate type defines for unit testing with the environment `native`.
 - Adds static kernel timer with *ms* resolution using the SysTick timer.
 - Adds separate processor function to call the kernel, which can be used in interrupts. This function uses the *gcc* `__attribute__((always_inline))` to force inlining, which is important for robust context switching.
+- Adds peripheral drivers for:
+    - GPIO
+    - I2C
 
 ### Fixed Issues:
 
