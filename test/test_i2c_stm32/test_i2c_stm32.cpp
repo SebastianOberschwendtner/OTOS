@@ -50,9 +50,9 @@
 *   ✓ controller can send start condition
 *   ✓ controller can check whether start condition was generated
 *   ✓ controller can check whether peripheral is in controller mode
-*   ▢ controller can start communication by transmitting target address
+*   ✓ controller can start communication by transmitting target address
 *   ✓ controller can check whether target address is sent
-*   ▢ controller can check whether ACK or NACK was received
+*   ✓ controller can check whether ACK or NACK was received
 * ▢ controller has a method which gives the current peripheral status (busy, ready, ...)
 * ▢ controller has a non-blocking send function:
 *   ▢ for ( 8 bits) 1 byte
@@ -66,7 +66,10 @@
 *   ▢ for (32 bits) 4 bytes
 * ✗ Multiple controllers with the same peripheral assigned to them do not interfere with each other
 * ▢ error codes:
-*   ▢ error -1: Target address not acknowledged
+*   ✓ error -100: Timeout during transfer
+*   ✓ error -101: Target address not acknowledged
+*   ✓ error -102: Data not acknowledged
+*   ✓ error -103: Bus busy during start of transfer
 */
 
 // === Mocks ===
