@@ -46,8 +46,8 @@ namespace Graphics {
     public:
         union buffer_union
         {
-        T array[Width_px * Height_px];
-        T coordinates[Height_px][Width_px];
+            T array[Width_px * Height_px];
+            T coordinates[Height_px][Width_px];
         };
         buffer_union data;
         constexpr static unsigned int width = Width_px;
