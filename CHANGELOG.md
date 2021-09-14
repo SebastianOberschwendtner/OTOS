@@ -10,6 +10,7 @@
 - Adds peripheral drivers for:
     - GPIO
     - I2C
+- Adds a graphic interface class.
 
 ### Fixed Issues:
 
