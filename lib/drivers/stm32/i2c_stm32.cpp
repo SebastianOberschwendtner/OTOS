@@ -58,6 +58,16 @@ constexpr unsigned char get_prescaler(const unsigned long frequency)
     return (1 + ((F_I2C / frequency) / 255)) & 0b1111;
 };
 
+/**
+ * @brief Get the control bits to define the rise time.
+ * @param rise_time_ns The desired maximum rise time in ns.
+ * @return Returns the bits for the TRISE control register.
+ */
+constexpr unsigned long get_TRISE(const unsigned long rise_time_ns)
+{
+    return (rise_time_ns*get_FREQ()/1000)+1;
+};
+
 // === Functions ===
 
 /**
@@ -66,8 +76,7 @@ constexpr unsigned char get_prescaler(const unsigned long frequency)
  * @param instance The I2C hardware instance to be used as the controller hardware
  * @return The address of the hardware instance.
  */
-static unsigned long get_peripheral_address(const I2C::Instance instance)
-{
+constexpr unsigned long get_peripheral_address(const I2C::Instance instance) {
     switch (instance)
     {
     case I2C::I2C_1:
@@ -89,11 +98,10 @@ static unsigned long get_peripheral_address(const I2C::Instance instance)
  * @details For i2c frequencies below 100 kHz the SM mode is used.
  * For frequencies higher than 100 kHz, the FM mode with DUTY=1 is used (STM32F4xx).
  */
-static unsigned long get_clock_control(const unsigned long frequency)
-{
+constexpr unsigned long get_clock_control(const unsigned long frequency) {
     unsigned long reg_val = 0;
 #if defined(STM32F4)
-    // Set F/S and DUTY bits according to outputfrequency
+    // Set F/S and DUTY bits according to output frequency
     if (frequency <= 100000)
     {
         // get the CCR value
@@ -119,16 +127,6 @@ static unsigned long get_clock_control(const unsigned long frequency)
     reg_val = (--_pre << 28) | (--_pre_h << 8) | (--_pre_l << 0);
 #endif
     return reg_val;
-};
-
-/**
- * @brief Get the control bits to define the rise time.
- * @param rise_time_ns The desired maximum rise time in ns.
- * @return Returns the bits for the TRISE control register.
- */
-static inline unsigned long get_TRISE(unsigned long rise_time_ns)
-{
-    return (rise_time_ns*get_FREQ()/1000)+1;
 };
 
 // === Methods ===

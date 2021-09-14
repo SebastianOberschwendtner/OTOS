@@ -38,8 +38,7 @@
  * @param Port The identifier of the port.
  * @return Return the bit position of the enable bit.
  */
-static unsigned char get_RCCEN_position(const GPIO::PinPort Port)
-{
+constexpr unsigned char get_RCCEN_position(const GPIO::PinPort Port) {
     // Return the bit position according to the used port
     switch(Port)
     {
@@ -77,8 +76,7 @@ static unsigned char get_RCCEN_position(const GPIO::PinPort Port)
  * @param Port The identifier of the port.
  * @return Returns the address of the port as an integer.
  */
-static unsigned long get_port_address(const GPIO::PinPort Port)
-{
+constexpr unsigned long get_port_address(const GPIO::PinPort Port) {
     switch (Port)
     {
     case GPIO::PORTA:
