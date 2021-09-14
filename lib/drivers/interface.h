@@ -136,11 +136,12 @@ namespace I2C {
     {
     public:
         // *** Methods ***
-        // virtual void            set_target          (const unsigned char address)   = 0;
-        // virtual void            set_clock_pin       (GPIO::PIN_Base& clock_pin)     = 0;
-        // virtual unsigned char   get_current_target  (void) const                    = 0;
-        // virtual Data_t          get_rx_data         (void) const                    = 0;
-        // virtual int             get_error           (void) const                    = 0;
+        virtual void    set_target_address  (const unsigned char address)                               = 0;
+        virtual bool    send_data           (const Data_t payload, const unsigned char n_bytes)         = 0;
+        virtual bool    send_byte           (const unsigned char data)                                  = 0;
+        virtual bool    send_word           (const unsigned int data)                                   = 0;
+        virtual bool    send_array          (const unsigned char* data, const unsigned char n_bytes)    = 0;
+        virtual Data_t  get_rx_data         (void) const                                                = 0;
     };
 
 }

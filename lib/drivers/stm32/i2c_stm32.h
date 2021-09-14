@@ -47,7 +47,7 @@ namespace I2C {
         Controller(const Instance i2c_instance, const unsigned long frequency);
 
         // *** Methods ***
-        void            set_target_address  (const unsigned char address);
+        void            set_target_address  (const unsigned char address)                               override;
         void            assign_pin          (GPIO::PIN_Base& output_pin) const;
         void            enable              (void);
         void            disable             (void);
@@ -55,12 +55,12 @@ namespace I2C {
         void            generate_stop       (void);
         void            write_address       (void);
         bool            send_address        (void);
-        bool            send_data           (const Data_t payload, const unsigned char n_bytes);
-        bool            send_byte           (const unsigned char data);
-        bool            send_word           (const unsigned int data);
-        bool            send_array          (const unsigned char* data, const unsigned char n_bytes);
+        bool            send_data           (const Data_t payload, const unsigned char n_bytes)         override;
+        bool            send_byte           (const unsigned char data)                                  override;
+        bool            send_word           (const unsigned int data)                                   override;
+        bool            send_array          (const unsigned char* data, const unsigned char n_bytes)    override;
         unsigned char   get_target_address  (void) const;
-        Data_t          get_rx_data         (void) const;
+        Data_t          get_rx_data         (void) const                                                override;
         bool            in_controller_mode  (void) const;
         bool            start_sent          (void) const;
         bool            address_sent        (void) const;
