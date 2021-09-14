@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    i2c_stm32.cpp
  * @author  SO
- * @version v1.0.8
+ * @version v1.0.10
  * @date    02-September-2021
  * @brief   I2C driver for STM32 microcontrollers.
  ==============================================================================
@@ -368,6 +368,7 @@ bool I2C::Controller::send_data_byte(const unsigned char data)
 
 /**
  * @brief Send n bytes to an i2c target
+ * The last byte in the struct is transmitted first!
  * Sets the following errors:
  * - I2C_Timeout
  * - I2C_Data_ACK_Error
@@ -443,6 +444,48 @@ bool I2C::Controller::send_word(const unsigned int data)
 
     // send the data
     return this->send_data(payload, 2);
+};
+
+/**
+ * @brief Send an array with n bytes to an i2c target.
+ * The first element in the array is transmitted first!
+ * Sets the following errors:
+ * - I2C_Timeout
+ * - I2C_Data_ACK_Error
+ * - I2C_BUS_Busy
+ * @param data Address of array which contains the data
+ * @param n_bytes How many bytes should be sent
+ * @return Returns True when the array was sent successfully, False otherwise.
+ * @details blocking function
+ */
+bool I2C::Controller::send_array(const unsigned char* data, 
+    const unsigned char n_bytes)
+{
+    // Only start transfer when bus is idle
+    if(!this->bus_busy())
+    {
+#ifdef STM32L0
+        // Set the number of bytes and target address
+        this->peripheral->CR2 = (n_bytes << 16) | this->target;
+#endif
+
+        if(this->send_address())
+        {
+            for (unsigned char n_byte = 0; n_byte < n_bytes; n_byte++)
+                if(!this->send_data_byte(data[n_byte]))
+                    return false;
+
+            // After sending all bytes generate the stop condition
+            this->generate_stop();
+            return true;
+        }
+        return false;
+    }
+    else
+    {
+        this->set_error(Error::I2C_BUS_Busy_Error);
+        return false;
+    }
 };
 
 /**
