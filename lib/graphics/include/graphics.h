@@ -23,12 +23,7 @@
 
 // === Includes ===
 #include <array>
-
-namespace Font {
-    constexpr unsigned char font_8x16[5] = {
-        't', 'e', 's', 't', 0
-    };
-};
+#include "font.h"
 
 // === Declarations ===
 namespace Graphics {
@@ -79,18 +74,26 @@ namespace Graphics {
         const unsigned int      width;
         const unsigned int      height;
         const unsigned int      pixels;
+        Font::Size              current_size;
 
     public:
         // *** Constructor ***
         Canvas_BW(unsigned char* const buffer, const unsigned int width, const unsigned int height):
-            buffer(buffer), width(width), height(height), pixels(height * width) {};
+            buffer(buffer), width(width), height(height), pixels(height * width), cursor(0,0),
+            current_size(Font::Small) {};
+
+        // *** properties
+        Coordinate cursor;
 
         // *** Methods ***
-        void        draw_pixel  (const unsigned int x_pos, const unsigned int y_pos, const Color_BW color);
+
+        void        set_cursor  (const unsigned int x_pos, const unsigned int y_pos);
+        void        draw_pixel  (const unsigned int x_px, const unsigned int y_px, const Color_BW color);
         void        fill        (const Color_BW color);
         void        add_line_h  (const Coordinate start, const unsigned int length);
         void        add_line_v  (const Coordinate start, const unsigned int length);
-
+        void        add_char    (const unsigned char character);
+        void        add_string  (const char* string);
     };
 };
 #endif

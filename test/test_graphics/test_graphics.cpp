@@ -37,10 +37,15 @@
  * ✓ Canvas can write single pixel
  * ✓ Canvas can fill complete buffer with black and white
  * ▢ Canvas can write line to buffer:
- *      ▢ vertical line
- *      ▢ horizontal line
+ *      ✓ vertical line
+ *      ✓ horizontal line
  *      ▢ sloped line
  * ▢ Canvas can write rectangle to buffer
+ * ▢ Canvas can set cursor:
+ *      ▢ set its coordinates
+ *      ▢ get its current coordinates
+ *      ▢ increment by fontsize
+ *      ▢ does roll over at limits
  * ▢ Canvas can write character to buffer
  * ▢ Canvas can write string to buffer
  */
@@ -184,6 +189,88 @@ void test_canvas_add_vertical_line(void)
     TEST_ASSERT_EQUAL(0b11111111, buffer.data[12]);
 };
 
+/// @brief test the cursor functionality of teh canvas
+void test_cursor(void)
+{
+    // Create buffer and object
+    Graphics::Buffer_BW<32, 32> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
+
+    // Test the initial cursor position
+    TEST_ASSERT_EQUAL(0, UUT.cursor.x_pos);
+    TEST_ASSERT_EQUAL(0, UUT.cursor.y_pos);
+
+    // Test setting the cursor position
+    UUT.set_cursor(2,3);
+    TEST_ASSERT_EQUAL(12, UUT.cursor.x_pos);
+    TEST_ASSERT_EQUAL(24, UUT.cursor.y_pos);
+
+    // Test the limit of the cursor position
+    UUT.set_cursor(6,5);
+    TEST_ASSERT_EQUAL(0, UUT.cursor.x_pos);
+    TEST_ASSERT_EQUAL(0, UUT.cursor.y_pos);
+};
+
+/// @brief test writting a character
+void test_add_character(void)
+{
+
+    // Create buffer and object
+    Graphics::Buffer_BW<16, 16> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
+
+    // add the character
+    UUT.add_char('B');
+    TEST_ASSERT_EQUAL(Font::Font_Small['B'][0], buffer.data[0]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['B'][1], buffer.data[1]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['B'][2], buffer.data[2]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['B'][3], buffer.data[3]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['B'][4], buffer.data[4]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['B'][5], buffer.data[5]);
+
+    // add another character
+    UUT.add_char('D');
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][0], buffer.data[6]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][1], buffer.data[7]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][2], buffer.data[8]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][3], buffer.data[9]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][4], buffer.data[10]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][5], buffer.data[11]);
+
+    // add another character
+    UUT.set_cursor(0,1);
+    UUT.add_char('F');
+    TEST_ASSERT_EQUAL(Font::Font_Small['F'][0], buffer.data[16]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['F'][1], buffer.data[17]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['F'][2], buffer.data[18]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['F'][3], buffer.data[19]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['F'][4], buffer.data[20]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['F'][5], buffer.data[21]);
+};
+
+/// @brief test adding a string
+void test_add_string(void)
+{
+    // Create buffer and object
+    Graphics::Buffer_BW<16, 16> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
+
+    // add the character
+    UUT.add_string("GD");
+    TEST_ASSERT_EQUAL(Font::Font_Small['G'][0], buffer.data[0]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['G'][1], buffer.data[1]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['G'][2], buffer.data[2]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['G'][3], buffer.data[3]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['G'][4], buffer.data[4]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['G'][5], buffer.data[5]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][0], buffer.data[6]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][1], buffer.data[7]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][2], buffer.data[8]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][3], buffer.data[9]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][4], buffer.data[10]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][5], buffer.data[11]);
+};
+
 /// === Run Tests ===
 int main(int argc, char** argv)
 {
@@ -194,6 +281,9 @@ int main(int argc, char** argv)
     test_canvas_fill();
     test_canvas_add_horizontal_line();
     test_canvas_add_vertical_line();
+    test_cursor();
+    test_add_character();
+    test_add_string();
     UNITY_END();
     return 0;
 };

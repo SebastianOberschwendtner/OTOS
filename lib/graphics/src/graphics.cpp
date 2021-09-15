@@ -33,23 +33,40 @@
 // === Functions ===
 
 /**
+ * @brief Set the cursor position according to the current font size.
+ * Does not exceed the display limits
+ * @param x_pos The character x position
+ * @param y_pos The character y position
+ */
+void Graphics::Canvas_BW::set_cursor(const unsigned int x_pos, const unsigned int y_pos)
+{
+    // Get the new cursor positions
+    this->cursor.x_pos = x_pos * Font::x_pixels(this->current_size);
+    this->cursor.y_pos = y_pos * Font::y_pixels(this->current_size);
+
+    // Limit the cursor to the display bounds
+    if (this->cursor.x_pos >= this->width) this->cursor.x_pos = 0;
+    if (this->cursor.y_pos >= this->height) this->cursor.y_pos = 0;
+};
+
+/**
  * @brief Draw a pixel with the defined color in the assigned buffer.
  * @param x_pos The x coordinate of the pixel
  * @param y_pos The y coordinate of the pixel
  * @param color The new color of the pixel
  */
-void Graphics::Canvas_BW::draw_pixel(const unsigned int x_pos, const unsigned int y_pos,
+void Graphics::Canvas_BW::draw_pixel(const unsigned int x_px, const unsigned int y_px,
     const Color_BW color)
 {
-    if (x_pos < this->width && y_pos < this->height)
+    if (x_px < this->width && y_px < this->height)
     {
-        unsigned int page = y_pos / 8;
-        unsigned char y_page = (y_pos - page);
+        unsigned int page = y_px / 8;
+        unsigned char y_page = (y_px - page);
         unsigned char bit_mask = (1 << y_page);
         switch(color)
         {
-            case Black: this->buffer[x_pos + (this->width) * page] &= ~bit_mask; break;
-            case White: this->buffer[x_pos + (this->width) * page] |= bit_mask; break;
+            case Black: this->buffer[x_px + (this->width) * page] &= ~bit_mask; break;
+            case White: this->buffer[x_px + (this->width) * page] |= bit_mask; break;
         };
     };
 };
@@ -121,4 +138,35 @@ void Graphics::Canvas_BW::add_line_v(const Coordinate start, const unsigned int 
     if (n_pages > 1)
         for (unsigned int iPage = 1; iPage < n_pages; iPage++)
             this->buffer[start.x_pos + this->width*(page + iPage)] |= 0xFF;
+};
+
+/**
+ * @brief Add a character to the canvas
+ * @param character The character to display.
+ */
+void Graphics::Canvas_BW::add_char(const unsigned char character)
+{
+    // Write the pixels, the small font has 6 pixels in x direction
+    for (unsigned char iX = 0; iX < 6; iX++)
+        this->buffer[iX + this->cursor.x_pos + (this->width * this->cursor.y_pos/8)] 
+        = Font::Font_Small[character][iX];
+
+    // append the cursor
+    this->cursor.x_pos += 6;
+};
+
+/**
+ * @brief Add a string to the canvas
+ * String has to be null terminated!
+ * @param string The pointer to the string to display.
+ */
+void Graphics::Canvas_BW::add_string(const char* string)
+{
+    char* character = const_cast<char*>(string);
+
+    while(*character != 0)
+    {
+        this->add_char(*character);
+        character++;
+    }
 };
