@@ -341,7 +341,7 @@ void test_send_word(void)
     TEST_ASSERT_EQUAL(Error::I2C_Data_ACK_Error, UUT.get_error());
 };
 
-/// @brief Test sending a word via the i2c bus
+/// @brief Test sending an array via the i2c bus
 void test_send_array(void)
 {
     setUp();
@@ -370,6 +370,35 @@ void test_send_array(void)
     TEST_ASSERT_EQUAL(Error::I2C_Data_ACK_Error, UUT.get_error());
 };
 
+/// @brief Test sending an array with an preceeding byte via the i2c bus
+void test_send_array_with_leading_byte(void)
+{
+    setUp();
+    // Set the flags for a successfull data transmission
+    I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
+    I2C1->SR2 = I2C_SR2_MSL;
+
+    // Create object
+    I2C::Controller UUT(I2C::I2C_1, 100000);
+    UUT.set_target_address(0xEE);
+
+    // Perform testing
+    unsigned char array[128];
+    array[127] = 0x11;
+    TEST_ASSERT_TRUE(UUT.send_array_leader(0x01, array, 128));
+    TEST_ASSERT_EQUAL(0x11, I2C1->DR); 
+    
+    // Test the timeout
+    I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
+    TEST_ASSERT_FALSE(UUT.send_array(array, 128));
+    TEST_ASSERT_EQUAL(Error::I2C_Timeout, UUT.get_error());
+
+    // Test an acknowledge error
+    I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB | I2C_SR1_AF;
+    TEST_ASSERT_FALSE(UUT.send_array(array, 128));
+    TEST_ASSERT_EQUAL(Error::I2C_Data_ACK_Error, UUT.get_error());
+};
+
 // === Main ===
 int main(int argc, char** argv)
 {
@@ -384,6 +413,7 @@ int main(int argc, char** argv)
     test_send_byte();
     test_send_word();
     test_send_array();
+    test_send_array_with_leading_byte();
     UNITY_END();
     return 0;
 };

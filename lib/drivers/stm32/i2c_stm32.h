@@ -59,6 +59,7 @@ namespace I2C {
         bool            send_byte           (const unsigned char data)                                  final;
         bool            send_word           (const unsigned int data)                                   final;
         bool            send_array          (const unsigned char* data, const unsigned char n_bytes)    final;
+        bool            send_array_leader   (const unsigned char byte, const unsigned char* data, const unsigned char n_bytes)    final;
         unsigned char   get_target_address  (void) const;
         Data_t          get_rx_data         (void) const                                                final;
         bool            in_controller_mode  (void) const;

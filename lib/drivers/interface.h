@@ -141,6 +141,7 @@ namespace I2C {
         virtual bool    send_byte           (const unsigned char data)                                  = 0;
         virtual bool    send_word           (const unsigned int data)                                   = 0;
         virtual bool    send_array          (const unsigned char* data, const unsigned char n_bytes)    = 0;
+        virtual bool    send_array_leader   (const unsigned char byte, const unsigned char* data, const unsigned char n_bytes) = 0;
         virtual Data_t  get_rx_data         (void) const                                                = 0;
     };
 

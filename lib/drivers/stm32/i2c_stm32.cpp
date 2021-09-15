@@ -489,6 +489,56 @@ bool I2C::Controller::send_array(const unsigned char* data,
 };
 
 /**
+ * @brief Send an array with n bytes to an i2c target.
+ * Includes a leading byte in front of the array data.
+ * The first element in the array is transmitted first!
+ * Sets the following errors:
+ * - I2C_Timeout
+ * - I2C_Data_ACK_Error
+ * - I2C_BUS_Busy
+ * @param byte The leading byte in front of the array
+ * @param data Address of array which contains the data
+ * @param n_bytes How many bytes should be sent
+ * @return Returns True when the array was sent successfully, False otherwise.
+ * @details blocking function
+ */
+bool I2C::Controller::send_array_leader(const unsigned char byte,
+    const unsigned char* data, 
+    const unsigned char n_bytes)
+{
+    // Only start transfer when bus is idle
+    if(!this->bus_busy())
+    {
+#ifdef STM32L0
+        // Set the number of bytes (array + leading byte) and target address
+        this->peripheral->CR2 = (n_bytes + 1 << 16) | this->target;
+#endif
+
+        if(this->send_address())
+        {
+            // Send the leading byte
+            if(!this->send_data_byte(byte))
+                return false;
+            
+            // proceed with the array
+            for (unsigned char n_byte = 0; n_byte < n_bytes; n_byte++)
+                if(!this->send_data_byte(data[n_byte]))
+                    return false;
+
+            // After sending all bytes generate the stop condition
+            this->generate_stop();
+            return true;
+        }
+        return false;
+    }
+    else
+    {
+        this->set_error(Error::I2C_BUS_Busy_Error);
+        return false;
+    }
+};
+
+/**
  * @brief Return the currently active target address.
  * @return The 7-bit target address.
  */
