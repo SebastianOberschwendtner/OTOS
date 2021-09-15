@@ -368,7 +368,7 @@ bool I2C::Controller::send_data_byte(const unsigned char data)
 
 /**
  * @brief Send n bytes to an i2c target
- * The last byte in the struct is transmitted first!
+ * The highest byte in the struct is transmitted first!
  * Sets the following errors:
  * - I2C_Timeout
  * - I2C_Data_ACK_Error

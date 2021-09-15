@@ -47,7 +47,7 @@ namespace I2C {
         Controller(const Instance i2c_instance, const unsigned long frequency);
 
         // *** Methods ***
-        void            set_target_address  (const unsigned char address)                               override;
+        void            set_target_address  (const unsigned char address)                               final;
         void            assign_pin          (GPIO::PIN_Base& output_pin) const;
         void            enable              (void);
         void            disable             (void);
@@ -55,12 +55,12 @@ namespace I2C {
         void            generate_stop       (void);
         void            write_address       (void);
         bool            send_address        (void);
-        bool            send_data           (const Data_t payload, const unsigned char n_bytes)         override;
-        bool            send_byte           (const unsigned char data)                                  override;
-        bool            send_word           (const unsigned int data)                                   override;
-        bool            send_array          (const unsigned char* data, const unsigned char n_bytes)    override;
+        bool            send_data           (const Data_t payload, const unsigned char n_bytes)         final;
+        bool            send_byte           (const unsigned char data)                                  final;
+        bool            send_word           (const unsigned int data)                                   final;
+        bool            send_array          (const unsigned char* data, const unsigned char n_bytes)    final;
         unsigned char   get_target_address  (void) const;
-        Data_t          get_rx_data         (void) const                                                override;
+        Data_t          get_rx_data         (void) const                                                final;
         bool            in_controller_mode  (void) const;
         bool            start_sent          (void) const;
         bool            address_sent        (void) const;

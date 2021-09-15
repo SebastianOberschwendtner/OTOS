@@ -33,26 +33,28 @@ namespace Font {
 // === Declarations ===
 namespace Graphics {
     // === Enumerations ===
-    enum Color_BW: bool
+    enum Color_BW: unsigned char
     {
-        Black = false,
-        White = true
+        Black = 0x00,
+        White = 0xFF
     };    
 
     // === Classes ===
-    template<typename T, unsigned int Width_px, unsigned int Height_px>
-    class Buffer
+    template<unsigned int Width_px, unsigned int Height_px>
+    class Buffer_BW
     {
     public:
-        union buffer_union
-        {
-            T array[Width_px * Height_px];
-            T coordinates[Height_px][Width_px];
-        };
-        buffer_union data;
-        constexpr static unsigned int width = Width_px;
-        constexpr static unsigned int height = Height_px;
+        // the height of the display should be divisible by 8
+        static_assert((Height_px%8) == 0, "Pixel height of the display");
+
+        // Properties buffer + sizes
+        std::array<unsigned char, Width_px * Height_px / 8> data;
+        constexpr static unsigned int width_px = Width_px;
+        constexpr static unsigned int height_px = Height_px;
         constexpr static unsigned int pixels = Width_px * Height_px;
+
+        // Constructor
+        Buffer_BW() { this->data.fill(0); };
     };
 
     class Coordinate
@@ -73,20 +75,21 @@ namespace Graphics {
     class Canvas_BW
     {
     private:
-        bool* const         buffer;
-        const unsigned int  width;
-        const unsigned int  height;
-        const unsigned int  pixels;
+        unsigned char* const    buffer;
+        const unsigned int      width;
+        const unsigned int      height;
+        const unsigned int      pixels;
 
     public:
         // *** Constructor ***
-        Canvas_BW(bool* const buffer, const unsigned int width, const unsigned int height):
+        Canvas_BW(unsigned char* const buffer, const unsigned int width, const unsigned int height):
             buffer(buffer), width(width), height(height), pixels(height * width) {};
 
         // *** Methods ***
         void        draw_pixel  (const unsigned int x_pos, const unsigned int y_pos, const Color_BW color);
         void        fill        (const Color_BW color);
-        void        draw        (const Coordinate start, const Coordinate stop);
+        void        add_line_h  (const Coordinate start, const unsigned int length);
+        void        add_line_v  (const Coordinate start, const unsigned int length);
 
     };
 };

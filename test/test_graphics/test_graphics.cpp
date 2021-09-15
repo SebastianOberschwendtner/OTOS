@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_graphics.c
  * @author  SO
- * @version v1.0.9
+ * @version v1.0.10
  * @date    16-March-2021
  * @brief   Unit tests to test the graphics driver.
  ******************************************************************************
@@ -60,111 +60,128 @@ void tearDown(void) {
 void test_buffer(void)
 {
     // Test initialization of buffer
-    Graphics::Buffer<bool, 16, 9> UUT;
-    TEST_ASSERT_EQUAL(16, UUT.width);
-    TEST_ASSERT_EQUAL(9, UUT.height);
-    TEST_ASSERT_EQUAL(16*9, UUT.pixels);
+    Graphics::Buffer_BW<16, 8> UUT;
+    TEST_ASSERT_EQUAL(16, UUT.width_px);
+    TEST_ASSERT_EQUAL(8, UUT.height_px);
+    TEST_ASSERT_EQUAL(16*8, UUT.pixels);
 
     // test writing to buffer
-    UUT.data.array[10] = true;
-    TEST_ASSERT_FALSE(UUT.data.array[0]);
-    TEST_ASSERT_TRUE(UUT.data.array[10]);
-    TEST_ASSERT_TRUE(UUT.data.coordinates[0][10]);
+    UUT.data[10] = 0xAA;
+    TEST_ASSERT_EQUAL(0, UUT.data[0]);
+    TEST_ASSERT_EQUAL(0xAA, UUT.data[10]);
 
-    UUT.data.array[16] = true;
-    TEST_ASSERT_FALSE(UUT.data.array[0]);
-    TEST_ASSERT_TRUE(UUT.data.array[16]);
-    TEST_ASSERT_TRUE(UUT.data.coordinates[1][0]);
+    UUT.data[12] = 0xBB;
+    TEST_ASSERT_EQUAL(0, UUT.data[0]);
+    TEST_ASSERT_EQUAL(0xBB, UUT.data[12]);
 };
 
 /// @brief test the constructor of a canvas object
 void test_canvas_init(void)
 {
     // Create buffer and object
-    Graphics::Buffer<bool, 8, 8> buffer;
-    Graphics::Canvas_BW UUT(&buffer.data.array[0], buffer.width, buffer.height);
+    Graphics::Buffer_BW<8, 8> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 };
 
 /// @brief test writting a pixel
 void test_canvas_write_pixel(void)
 {
     // Create buffer and object
-    Graphics::Buffer<bool, 8, 8> buffer;
-    Graphics::Canvas_BW UUT(&buffer.data.array[0], buffer.width, buffer.height);
+    Graphics::Buffer_BW<8, 16> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // Write pixel
     UUT.draw_pixel(0, 0, Graphics::White);
-    TEST_ASSERT_TRUE(buffer.data.coordinates[0][0]);
+    TEST_ASSERT_EQUAL(0x01, buffer.data[0]);
     UUT.draw_pixel(0, 0, Graphics::Black);
-    TEST_ASSERT_FALSE(buffer.data.coordinates[0][0]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[0]);
     UUT.draw_pixel(1, 0, Graphics::White);
-    TEST_ASSERT_TRUE(buffer.data.coordinates[0][1]);
+    TEST_ASSERT_EQUAL(0x01, buffer.data[1]);
     UUT.draw_pixel(1, 0, Graphics::Black);
-    TEST_ASSERT_FALSE(buffer.data.coordinates[0][1]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[1]);
     UUT.draw_pixel(0, 1, Graphics::White);
-    TEST_ASSERT_TRUE(buffer.data.coordinates[1][0]);
+    TEST_ASSERT_EQUAL(0x02, buffer.data[0]);
     UUT.draw_pixel(0, 1, Graphics::Black);
-    TEST_ASSERT_FALSE(buffer.data.coordinates[1][0]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[0]);
     UUT.draw_pixel(1, 2, Graphics::White);
-    TEST_ASSERT_TRUE(buffer.data.coordinates[2][1]);
+    TEST_ASSERT_EQUAL(0x04, buffer.data[1]);
     UUT.draw_pixel(1, 2, Graphics::Black);
-    TEST_ASSERT_FALSE(buffer.data.coordinates[2][1]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[1]);
 
     // Test when pixel position is out of bounds
     UUT.draw_pixel(8, 0, Graphics::White);
-    TEST_ASSERT_FALSE(buffer.data.array[8]);
+    TEST_ASSERT_EQUAL(0, buffer.data[8]);
 };
 
 /// @brief test the filling of the canvas
 void test_canvas_fill(void)
 {
     // Create buffer and object
-    Graphics::Buffer<bool, 8, 8> buffer;
-    Graphics::Canvas_BW UUT(&buffer.data.array[0], buffer.width, buffer.height);
+    Graphics::Buffer_BW<8, 8> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // Write pixel white
     UUT.fill(Graphics::White);
-    for (unsigned int iPixel = 0; iPixel < buffer.pixels; iPixel++)
-        TEST_ASSERT_TRUE(buffer.data.array[iPixel]);
+    for (unsigned int iPixel = 0; iPixel < buffer.pixels/8; iPixel++)
+        TEST_ASSERT_EQUAL(0xFF, buffer.data[iPixel]);
 
     // Write pixel black
     UUT.fill(Graphics::Black);
-    for (unsigned int iPixel = 0; iPixel < buffer.pixels; iPixel++)
-        TEST_ASSERT_FALSE(buffer.data.array[iPixel]);
+    for (unsigned int iPixel = 0; iPixel < buffer.pixels/8; iPixel++)
+        TEST_ASSERT_EQUAL(0x00, buffer.data[iPixel]);
 };
 
-/// @brief test drawing lines on the canvas
-void test_canvas_draw_line(void)
+/// @brief test adding horizontal lines on the canvas
+void test_canvas_add_horizontal_line(void)
 {
     // Create buffer and object
-    Graphics::Buffer<bool, 8, 8> buffer;
-    Graphics::Canvas_BW UUT(&buffer.data.array[0], buffer.width, buffer.height);
+    Graphics::Buffer_BW<8, 16> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // draw a horizontal line
     Graphics::Coordinate Start(2,0);
-    Graphics::Coordinate End(5,0);
-    UUT.draw(Start, End);
-    TEST_ASSERT_FALSE(buffer.data.coordinates[0][0]);
-    TEST_ASSERT_FALSE(buffer.data.coordinates[0][1]);
-    TEST_ASSERT_TRUE(buffer.data.coordinates[0][2]);
-    TEST_ASSERT_TRUE(buffer.data.coordinates[0][3]);
-    TEST_ASSERT_TRUE(buffer.data.coordinates[0][4]);
-    TEST_ASSERT_TRUE(buffer.data.coordinates[0][5]);
-    TEST_ASSERT_FALSE(buffer.data.coordinates[0][6]);
-    TEST_ASSERT_FALSE(buffer.data.coordinates[0][7]);
+    UUT.add_line_h(Start, 3);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[0]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[1]);
+    TEST_ASSERT_EQUAL(0x01, buffer.data[2]);
+    TEST_ASSERT_EQUAL(0x01, buffer.data[3]);
+    TEST_ASSERT_EQUAL(0x01, buffer.data[4]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[5]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[6]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[7]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[8]);
+};
 
-    // draw a horizontal line
-    Start.set(0, 2);
-    End.set(0, 5);
-    UUT.draw(Start, End);
-    TEST_ASSERT_FALSE(buffer.data.coordinates[0][0]);
-    TEST_ASSERT_FALSE(buffer.data.coordinates[1][0]);
-    TEST_ASSERT_TRUE(buffer.data.coordinates[2][0]);
-    TEST_ASSERT_TRUE(buffer.data.coordinates[3][0]);
-    TEST_ASSERT_TRUE(buffer.data.coordinates[4][0]);
-    TEST_ASSERT_TRUE(buffer.data.coordinates[5][0]);
-    TEST_ASSERT_FALSE(buffer.data.coordinates[6][0]);
-    TEST_ASSERT_FALSE(buffer.data.coordinates[7][0]);
+/// @brief test adding vertical lines on the canvas
+void test_canvas_add_vertical_line(void)
+{
+    // Create buffer and object
+    Graphics::Buffer_BW<8, 16> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
+
+    // draw a vertical line
+    Graphics::Coordinate Start(0,0);
+    UUT.add_line_v(Start, 5);
+    TEST_ASSERT_EQUAL(0b00011111, buffer.data[0]);
+
+    Start.set(1,2);
+    UUT.add_line_v(Start, 5);
+    TEST_ASSERT_EQUAL(0b01111100, buffer.data[1]);
+
+    Start.set(2,2);
+    UUT.add_line_v(Start, 9);
+    TEST_ASSERT_EQUAL(0b11111100, buffer.data[2]);
+    TEST_ASSERT_EQUAL(0b00000111, buffer.data[10]);
+
+    Start.set(3,0);
+    UUT.add_line_v(Start, 16);
+    TEST_ASSERT_EQUAL(0b11111111, buffer.data[3]);
+    TEST_ASSERT_EQUAL(0b11111111, buffer.data[11]);
+
+    Start.set(4,3);
+    UUT.add_line_v(Start, 13);
+    TEST_ASSERT_EQUAL(0b11111000, buffer.data[4]);
+    TEST_ASSERT_EQUAL(0b11111111, buffer.data[12]);
 };
 
 /// === Run Tests ===
@@ -175,7 +192,8 @@ int main(int argc, char** argv)
     test_canvas_init();
     test_canvas_write_pixel();
     test_canvas_fill();
-    test_canvas_draw_line();
+    test_canvas_add_horizontal_line();
+    test_canvas_add_vertical_line();
     UNITY_END();
     return 0;
 };
