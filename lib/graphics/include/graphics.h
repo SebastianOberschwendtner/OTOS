@@ -88,9 +88,10 @@ namespace Graphics {
         // *** Methods ***
 
         void        set_cursor  (const unsigned int x_pos, const unsigned int y_pos);
+        void        newline     (void);
         void        draw_pixel  (const unsigned int x_px, const unsigned int y_px, const Color_BW color);
         void        fill        (const Color_BW color);
-        void        add_line_h  (const Coordinate start, const unsigned int length);
+        void        add_line_h  (const Coordinate start, const unsigned int length, const unsigned char dotted = 0);
         void        add_line_v  (const Coordinate start, const unsigned int length);
         void        add_char    (const unsigned char character);
         void        add_string  (const char* string);

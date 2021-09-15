@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_graphics.c
  * @author  SO
- * @version v1.0.10
+ * @version v1.0.11
  * @date    16-March-2021
  * @brief   Unit tests to test the graphics driver.
  ******************************************************************************
@@ -140,7 +140,7 @@ void test_canvas_fill(void)
 void test_canvas_add_horizontal_line(void)
 {
     // Create buffer and object
-    Graphics::Buffer_BW<8, 16> buffer;
+    Graphics::Buffer_BW<8, 32> buffer;
     Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // draw a horizontal line
@@ -155,6 +155,34 @@ void test_canvas_add_horizontal_line(void)
     TEST_ASSERT_EQUAL(0x00, buffer.data[6]);
     TEST_ASSERT_EQUAL(0x00, buffer.data[7]);
     TEST_ASSERT_EQUAL(0x00, buffer.data[8]);
+
+    // draw a horizontal line
+    Start.set(2,25);
+    UUT.add_line_h(Start, 3);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[23]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[24]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[25]);
+    TEST_ASSERT_EQUAL(0x02, buffer.data[26]);
+    TEST_ASSERT_EQUAL(0x02, buffer.data[27]);
+    TEST_ASSERT_EQUAL(0x02, buffer.data[28]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[29]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[30]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[31]);
+
+    // draw a horizontal line
+    buffer.data.fill(0);
+    Start.set(2,0);
+    UUT.add_line_h(Start, 5, 1);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[0]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[1]);
+    TEST_ASSERT_EQUAL(0x01, buffer.data[2]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[3]);
+    TEST_ASSERT_EQUAL(0x01, buffer.data[4]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[5]);
+    TEST_ASSERT_EQUAL(0x01, buffer.data[6]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[7]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[8]);
+
 };
 
 /// @brief test adding vertical lines on the canvas
@@ -189,7 +217,7 @@ void test_canvas_add_vertical_line(void)
     TEST_ASSERT_EQUAL(0b11111111, buffer.data[12]);
 };
 
-/// @brief test the cursor functionality of teh canvas
+/// @brief test the cursor functionality of the canvas
 void test_cursor(void)
 {
     // Create buffer and object
@@ -209,12 +237,22 @@ void test_cursor(void)
     UUT.set_cursor(6,5);
     TEST_ASSERT_EQUAL(0, UUT.cursor.x_pos);
     TEST_ASSERT_EQUAL(0, UUT.cursor.y_pos);
+
+    // Test the newline
+    UUT.newline();
+    TEST_ASSERT_EQUAL(0, UUT.cursor.x_pos);
+    TEST_ASSERT_EQUAL(8, UUT.cursor.y_pos);
+
+    // Test the newline when at the end of the buffer
+    UUT.set_cursor(5,3);
+    UUT.newline();
+    TEST_ASSERT_EQUAL(0, UUT.cursor.x_pos);
+    TEST_ASSERT_EQUAL(0, UUT.cursor.y_pos);
 };
 
 /// @brief test writting a character
 void test_add_character(void)
 {
-
     // Create buffer and object
     Graphics::Buffer_BW<16, 16> buffer;
     Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
@@ -269,6 +307,23 @@ void test_add_string(void)
     TEST_ASSERT_EQUAL(Font::Font_Small['D'][3], buffer.data[9]);
     TEST_ASSERT_EQUAL(Font::Font_Small['D'][4], buffer.data[10]);
     TEST_ASSERT_EQUAL(Font::Font_Small['D'][5], buffer.data[11]);
+
+    // add character with linebreak
+    buffer.data.fill(0);
+    UUT.set_cursor(0,0);
+    UUT.add_string("G\nD");
+    TEST_ASSERT_EQUAL(Font::Font_Small['G'][0], buffer.data[0]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['G'][1], buffer.data[1]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['G'][2], buffer.data[2]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['G'][3], buffer.data[3]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['G'][4], buffer.data[4]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['G'][5], buffer.data[5]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][0], buffer.data[16]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][1], buffer.data[17]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][2], buffer.data[18]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][3], buffer.data[19]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][4], buffer.data[20]);
+    TEST_ASSERT_EQUAL(Font::Font_Small['D'][5], buffer.data[21]);
 };
 
 /// === Run Tests ===

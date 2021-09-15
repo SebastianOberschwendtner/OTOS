@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    graphics.c
  * @author  SO
- * @version v1.0.10
+ * @version v1.0.11
  * @date    13-September-2021
  * @brief   Graphics interface for the OTOS.
  ==============================================================================
@@ -47,6 +47,22 @@ void Graphics::Canvas_BW::set_cursor(const unsigned int x_pos, const unsigned in
     // Limit the cursor to the display bounds
     if (this->cursor.x_pos >= this->width) this->cursor.x_pos = 0;
     if (this->cursor.y_pos >= this->height) this->cursor.y_pos = 0;
+};
+
+/**
+ * @brief Set the cursor to a newline
+ */
+void Graphics::Canvas_BW::newline(void)
+{
+    // x is always 0
+    this->cursor.x_pos = 0;
+
+    // increase y
+    this->cursor.y_pos += Font::y_pixels(this->current_size);
+
+    // Check bounds of y
+    if (this->cursor.y_pos >= this->height)
+        this->cursor.y_pos = 0;
 };
 
 /**
@@ -85,16 +101,18 @@ void Graphics::Canvas_BW::fill(const Color_BW color)
  * @brief Add a horizontal line on the canvas
  * @param start Coordinate where line begins
  * @param length Length of the line in pixels
+ * @param dotted (Optional) Distance of dots in line.
  */
-void Graphics::Canvas_BW::add_line_h(const Coordinate start, const unsigned int length)
+void Graphics::Canvas_BW::add_line_h(const Coordinate start, const unsigned int length,
+    unsigned char dotted)
 {
     // Get the repeating bit which will be set
     unsigned int page = start.y_pos / 8;
-    unsigned char y_page = (start.y_pos - page);
+    unsigned char y_page = start.y_pos - 8*page;
     unsigned char bit_mask = (1 << y_page);
 
     // Set every bit for the length of the line
-    for (unsigned int iPixel = 0; iPixel < length; iPixel++)
+    for (unsigned int iPixel = 0; iPixel < length; iPixel += 1 + dotted)
         this->buffer[start.x_pos + iPixel + this->width*page] |= bit_mask;
 };
 
@@ -158,6 +176,7 @@ void Graphics::Canvas_BW::add_char(const unsigned char character)
 /**
  * @brief Add a string to the canvas
  * String has to be null terminated!
+ * Newline characters are supported.
  * @param string The pointer to the string to display.
  */
 void Graphics::Canvas_BW::add_string(const char* string)
@@ -166,7 +185,10 @@ void Graphics::Canvas_BW::add_string(const char* string)
 
     while(*character != 0)
     {
-        this->add_char(*character);
+        if(*character == '\n')
+            this->newline();
+        else
+            this->add_char(*character);
         character++;
     }
 };
