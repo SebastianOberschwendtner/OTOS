@@ -292,7 +292,7 @@ bool I2C::Controller::send_address(void)
     {
         if(this->timed_out())
         {
-            this->set_error(Error::I2C_Timeout);
+            this->set_error(Error::Code::I2C_Timeout);
             return false;
         }
     }
@@ -306,7 +306,7 @@ bool I2C::Controller::send_address(void)
         if(!this->ack_received())
         {
             // Set the error
-            this->set_error(Error::I2C_Address_Error);
+            this->set_error(Error::Code::I2C_Address_Error);
             // reset the error flag and stop waiting
             return false;
         }
@@ -337,7 +337,7 @@ bool I2C::Controller::send_data_byte(const unsigned char data)
         // Check for timeouts
         if(this->timed_out())
         {
-            this->set_error(Error::I2C_Timeout);
+            this->set_error(Error::Code::I2C_Timeout);
             return false;
         }
     }
@@ -351,14 +351,14 @@ bool I2C::Controller::send_data_byte(const unsigned char data)
         // Check for ack or nack
         if (!this->ack_received())
         {
-            this->set_error(Error::I2C_Data_ACK_Error);
+            this->set_error(Error::Code::I2C_Data_ACK_Error);
             return false;
         }
 
         // Check for timeouts
         if(this->timed_out())
         {
-            this->set_error(Error::I2C_Timeout);
+            this->set_error(Error::Code::I2C_Timeout);
             return false;
         }
     }
@@ -403,7 +403,7 @@ bool I2C::Controller::send_data(const I2C::Data_t payload,
     }
     else
     {
-        this->set_error(Error::I2C_BUS_Busy_Error);
+        this->set_error(Error::Code::I2C_BUS_Busy_Error);
         return false;
     }
 };
@@ -483,7 +483,7 @@ bool I2C::Controller::send_array(const unsigned char* data,
     }
     else
     {
-        this->set_error(Error::I2C_BUS_Busy_Error);
+        this->set_error(Error::Code::I2C_BUS_Busy_Error);
         return false;
     }
 };
@@ -533,7 +533,7 @@ bool I2C::Controller::send_array_leader(const unsigned char byte,
     }
     else
     {
-        this->set_error(Error::I2C_BUS_Busy_Error);
+        this->set_error(Error::Code::I2C_BUS_Busy_Error);
         return false;
     }
 };

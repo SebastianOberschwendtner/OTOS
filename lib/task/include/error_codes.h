@@ -25,13 +25,17 @@
 
 // === Define the error codes ===
 namespace Error {
-    enum Code_t: int
+    enum class Code: int
     {
-        None                = 0,
-        I2C_Timeout         = -100,
-        I2C_Address_Error   = -101,
-        I2C_Data_ACK_Error  = -102,
-        I2C_BUS_Busy_Error  = -103
+        None                        = 0,
+        // === Internal Errors ===
+        IPC_Multiple_Registrations  = -10,
+
+        // === Driver Errors ===
+        I2C_Timeout                 = -100,
+        I2C_Address_Error           = -101,
+        I2C_Data_ACK_Error          = -102,
+        I2C_BUS_Busy_Error          = -103
     };
 };
 

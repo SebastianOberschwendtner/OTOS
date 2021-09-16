@@ -28,20 +28,20 @@
 namespace Driver {
     class Base {
     private:
-        Error::Code_t error;
+        Error::Code   error;
         unsigned char timeout;
         unsigned char called;
 
     public:
         // *** Constructor ***
-        Base(): error(Error::None), timeout(0), called(0) {};
+        Base(): error(Error::Code::None), timeout(0), called(0) {};
 
         // *** Methods ***
-        void            set_error       (const Error::Code_t err) { this->error = err; };
+        void            set_error       (const Error::Code err) { this->error = err; };
         void            set_timeout     (const unsigned char call_count) { this -> timeout = call_count; };
         void            reset_timeout   (void) { this->called = 0; };
         bool            timed_out       (void) { return (++this->called > this->timeout); };
-        Error::Code_t   get_error       (void) const { return this->error; };
+        Error::Code     get_error       (void) const { return this->error; };
     };
 };
 
