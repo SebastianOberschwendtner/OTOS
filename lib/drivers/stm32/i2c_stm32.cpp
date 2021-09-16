@@ -301,7 +301,13 @@ bool I2C::Controller::send_address(void)
     this->write_address();
 
     // Wait for transmission and check whether target responded
+#if defined(STM32F4)
     while(!this->address_sent())
+#elif defined(STM32L0)
+    // the L0 devices set the TXIS flag after an successfull
+    // address transmission
+    while(!this->transfer_finished())
+#endif
     {
         if(!this->ack_received())
         {
