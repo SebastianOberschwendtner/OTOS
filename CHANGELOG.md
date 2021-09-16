@@ -11,6 +11,7 @@
     - GPIO
     - I2C
 - Adds a graphic interface class.
+- Adds an inter process communication manager for exchanging data addresses.
 
 ### Fixed Issues:
 

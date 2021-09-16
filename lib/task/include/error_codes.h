@@ -29,7 +29,8 @@ namespace Error {
     {
         None                        = 0,
         // === Internal Errors ===
-        IPC_Multiple_Registrations  = -10,
+        IPC_PID_Overflow            = -10,
+        IPC_Multiple_Registrations  = -11,
 
         // === Driver Errors ===
         I2C_Timeout                 = -100,
