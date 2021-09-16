@@ -272,14 +272,14 @@ void test_address_transmission(void)
     // test when target is not responding
     I2C1->SR1 = I2C_SR1_AF | I2C_SR1_SB;
     TEST_ASSERT_FALSE(UUT.send_address());
-    TEST_ASSERT_EQUAL(Error::I2C_Address_Error, UUT.get_error());
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Address_Error, UUT.get_error());
     TEST_ASSERT_EQUAL(0xEE, I2C1->DR);
 
     // test a timeout of peripheral
     UUT.set_timeout(5);
     I2C1->SR1 = I2C_SR1_AF;
     TEST_ASSERT_FALSE(UUT.send_address());
-    TEST_ASSERT_EQUAL(Error::I2C_Timeout, UUT.get_error());
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Timeout, UUT.get_error());
 };
 
 /// @brief Test sending a byte via the i2c bus
@@ -301,17 +301,17 @@ void test_send_byte(void)
     // Test the timeout
     I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
     TEST_ASSERT_FALSE(UUT.send_byte(0xAA));
-    TEST_ASSERT_EQUAL(Error::I2C_Timeout, UUT.get_error());
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Timeout, UUT.get_error());
 
     // Test an acknowledge error
     I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB | I2C_SR1_AF;
     TEST_ASSERT_FALSE(UUT.send_byte(0xAA));
-    TEST_ASSERT_EQUAL(Error::I2C_Data_ACK_Error, UUT.get_error());
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Data_ACK_Error, UUT.get_error());
 
     // Test sending when bus is busy
     I2C1->SR2 |= I2C_SR2_BUSY;
     TEST_ASSERT_FALSE(UUT.send_byte(0xAA));
-    TEST_ASSERT_EQUAL(Error::I2C_BUS_Busy_Error, UUT.get_error());
+    TEST_ASSERT_EQUAL(Error::Code::I2C_BUS_Busy_Error, UUT.get_error());
 };
 
 /// @brief Test sending a word via the i2c bus
@@ -333,12 +333,12 @@ void test_send_word(void)
     // Test the timeout
     I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
     TEST_ASSERT_FALSE(UUT.send_word(0xAAEE));
-    TEST_ASSERT_EQUAL(Error::I2C_Timeout, UUT.get_error());
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Timeout, UUT.get_error());
 
     // Test an acknowledge error
     I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB | I2C_SR1_AF;
     TEST_ASSERT_FALSE(UUT.send_word(0xAAEE));
-    TEST_ASSERT_EQUAL(Error::I2C_Data_ACK_Error, UUT.get_error());
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Data_ACK_Error, UUT.get_error());
 };
 
 /// @brief Test sending an array via the i2c bus
@@ -362,12 +362,12 @@ void test_send_array(void)
     // Test the timeout
     I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
     TEST_ASSERT_FALSE(UUT.send_array(array, 128));
-    TEST_ASSERT_EQUAL(Error::I2C_Timeout, UUT.get_error());
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Timeout, UUT.get_error());
 
     // Test an acknowledge error
     I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB | I2C_SR1_AF;
     TEST_ASSERT_FALSE(UUT.send_array(array, 128));
-    TEST_ASSERT_EQUAL(Error::I2C_Data_ACK_Error, UUT.get_error());
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Data_ACK_Error, UUT.get_error());
 };
 
 /// @brief Test sending an array with an preceeding byte via the i2c bus
@@ -391,12 +391,12 @@ void test_send_array_with_leading_byte(void)
     // Test the timeout
     I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
     TEST_ASSERT_FALSE(UUT.send_array(array, 128));
-    TEST_ASSERT_EQUAL(Error::I2C_Timeout, UUT.get_error());
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Timeout, UUT.get_error());
 
     // Test an acknowledge error
     I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB | I2C_SR1_AF;
     TEST_ASSERT_FALSE(UUT.send_array(array, 128));
-    TEST_ASSERT_EQUAL(Error::I2C_Data_ACK_Error, UUT.get_error());
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Data_ACK_Error, UUT.get_error());
 };
 
 // === Main ===

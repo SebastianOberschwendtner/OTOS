@@ -511,7 +511,7 @@ bool I2C::Controller::send_array_leader(const unsigned char byte,
     {
 #ifdef STM32L0
         // Set the number of bytes (array + leading byte) and target address
-        this->peripheral->CR2 = (n_bytes + 1 << 16) | this->target;
+        this->peripheral->CR2 = ((n_bytes + 1) << 16) | this->target;
 #endif
 
         if(this->send_address())

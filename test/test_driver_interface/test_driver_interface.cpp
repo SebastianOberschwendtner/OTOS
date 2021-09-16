@@ -62,10 +62,10 @@ void test_set_error(void)
 {
     // create object
     Driver::Base UUT;
-    UUT.set_error(Error::I2C_Address_Error);
+    UUT.set_error(Error::Code::I2C_Address_Error);
 
     // perform testing
-    TEST_ASSERT_EQUAL(Error::I2C_Address_Error, UUT.get_error());
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Address_Error, UUT.get_error());
 };
 
 /// @brief test the timeout methods
