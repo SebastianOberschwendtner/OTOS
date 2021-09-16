@@ -52,12 +52,11 @@ namespace Graphics {
         Buffer_BW() { this->data.fill(0); };
     };
 
-    class Coordinate
+    struct Coordinate
     {
-    public:
         // *** Properties ***
-        unsigned int x_pos;
-        unsigned int y_pos;
+        unsigned int x_pos = 0;
+        unsigned int y_pos = 0;
 
         // *** Constructor ***
         Coordinate(const unsigned int x, const unsigned y):
@@ -80,7 +79,7 @@ namespace Graphics {
         // *** Constructor ***
         Canvas_BW(unsigned char* const buffer, const unsigned int width, const unsigned int height):
             buffer(buffer), width(width), height(height), pixels(height * width), cursor(0,0),
-            current_size(Font::Small) {};
+            current_size(Font::Size::Small) {};
 
         // *** properties
         Coordinate cursor;

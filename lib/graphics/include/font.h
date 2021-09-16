@@ -24,7 +24,7 @@ namespace Font {
     /**
      * @brief Define the possible sizes
      */
-    enum Size: unsigned char
+    enum class Size
     {
         Small, Huge
     };
@@ -36,8 +36,8 @@ namespace Font {
     {
         switch(fontsize)
         {
-            case Small: return 6;
-            case Huge: return 12;
+            case Size::Small: return 6;
+            case Size::Huge: return 12;
         }
         return 0;
     };
@@ -45,8 +45,8 @@ namespace Font {
     {
         switch(fontsize)
         {
-            case Small: return 8;
-            case Huge: return 16;
+            case Size::Small: return 8;
+            case Size::Huge: return 16;
         }
         return 0;
     };
