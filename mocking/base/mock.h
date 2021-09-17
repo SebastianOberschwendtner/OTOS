@@ -59,7 +59,7 @@ namespace Mock
          * @brief Assert wether the methods was called once.
          * @details Calls the unit TEST_ macros.
          */
-        void assert_called_once(void) const { 
+        void assert_called_once(void) { 
             // Prepare errors message
             const char *fmt = "Expected to be called once, but was called %d times.";
             int sz = std::snprintf(nullptr, 0, fmt, this->call_count);
@@ -68,6 +68,8 @@ namespace Mock
 
             // Test the call count
             TEST_ASSERT_TRUE_MESSAGE(this->call_count==1, &buf[0]); 
+            // Reset the call count again
+            this->call_count = 0;
         };
 
         /**
@@ -76,15 +78,16 @@ namespace Mock
          * @param Expected The last expected argument
          * @details Calls the unit TEST_ macros.
          */
-        void assert_called_last_with(const int Expected) const { 
+        void assert_called_last_with(const int Expected) const {
             // Prepare errors message
             const char *fmt = "Expected to be called last with ((int) %d), but was called with ((int) %d).";
             int sz = std::snprintf(nullptr, 0, fmt, Expected, this->last_called_with);
             std::vector<char> buf(sz + 1); // note +1 for null terminator
             std::snprintf(&buf[0], buf.size(), fmt, Expected, this->last_called_with);
 
-            // Test the call count
+            // Test the call args
             TEST_ASSERT_TRUE_MESSAGE(Expected == this->last_called_with, &buf[0]); 
+            TEST_ASSERT_TRUE_MESSAGE(this->call_count > 0, "Expected to be called at least once, but was called 0 times.")
         };
 
         /**
@@ -93,10 +96,10 @@ namespace Mock
          * @param Expected The last expected argument
          * @details Calls the unit TEST_ macros.
          */
-        void assert_called_once_with(const int Expected) const { 
+        void assert_called_once_with(const int Expected) { 
             // Call the corresponding tests.
-            this->assert_called_once();
             this->assert_called_last_with(Expected);
+            this->assert_called_once();
         };
     };
 
