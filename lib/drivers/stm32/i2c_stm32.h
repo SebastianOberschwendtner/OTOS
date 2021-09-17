@@ -22,6 +22,7 @@
 #define I2C_STM32_H_
 
 // === Includes ===
+#include <optional>
 #include "vendors.h"
 
 // === Needed Interfaces ===
@@ -37,10 +38,13 @@ namespace I2C {
         // *** Properties ***
         volatile I2C_TypeDef*   peripheral;
         unsigned char           target;
+        Data_t                  rx_data;
 
         // *** Methods ***
-        void            write_data_register (const unsigned char data);
-        bool            send_data_byte      (const unsigned char data);
+        void                         write_data_register (const unsigned char data);
+        unsigned char                read_data_register  (void) const;
+        bool                         send_data_byte      (const unsigned char data);
+        std::optional<unsigned char> read_data_byte      (void);
 
     public:
         // *** Constructor ***
@@ -53,20 +57,24 @@ namespace I2C {
         void            disable             (void);
         void            generate_start      (void);
         void            generate_stop       (void);
-        void            write_address       (void);
-        bool            send_address        (void);
+        void            write_address       (bool read = false);
+        bool            send_address        (bool read = false);
         bool            send_data           (const Data_t payload, const unsigned char n_bytes)         final;
         bool            send_byte           (const unsigned char data)                                  final;
         bool            send_word           (const unsigned int data)                                   final;
         bool            send_array          (const unsigned char* data, const unsigned char n_bytes)    final;
         bool            send_array_leader   (const unsigned char byte, const unsigned char* data, const unsigned char n_bytes)    final;
         unsigned char   get_target_address  (void) const;
+        bool            read_data           (const unsigned char reg, unsigned char n_bytes)            final;
+        bool            read_byte           (const unsigned char reg)                                   final;
+        bool            read_word           (const unsigned char reg)                                   final;
         Data_t          get_rx_data         (void) const                                                final;
         bool            in_controller_mode  (void) const;
         bool            start_sent          (void) const;
         bool            address_sent        (void) const;
         bool            ack_received        (void) const;
         bool            TX_register_empty   (void) const;
+        bool            RX_data_valid       (void) const;
         bool            transfer_finished   (void) const;
         bool            bus_busy            (void) const;
     };

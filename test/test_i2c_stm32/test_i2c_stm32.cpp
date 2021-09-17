@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_i2c_stm32.cpp
  * @author  SO
- * @version v1.0.10
+ * @version v1.0.13
  * @date    30-August-2021
  * @brief   Unit tests for testing the i2c driver for stm32 microcontrollers.
  ******************************************************************************
@@ -184,12 +184,15 @@ void test_start_communication(void)
     // Create Object
     I2C::Controller UUT(I2C::I2C_1, 400000);
 
-    // Start communication
+    // Start communication for write
     UUT.set_target_address(0xEE);
     UUT.write_address();
-
-    // Perform testing
     TEST_ASSERT_EQUAL(0xEE, I2C1->DR);
+
+    // Start communication for read
+    UUT.set_target_address(0xEE);
+    UUT.write_address(true);
+    TEST_ASSERT_EQUAL(0xEF, I2C1->DR);
 };
 
 /// @brief Test whether controller can read its events
@@ -237,6 +240,11 @@ void test_events(void)
     TEST_ASSERT_FALSE(UUT.TX_register_empty());
     I2C1->SR1 = I2C_SR1_TXE;
     TEST_ASSERT_TRUE(UUT.TX_register_empty());
+
+    // RX shift register contains valid data
+    TEST_ASSERT_FALSE(UUT.RX_data_valid());
+    I2C1->SR1 = I2C_SR1_RXNE;
+    TEST_ASSERT_TRUE(UUT.RX_data_valid());
 
     // Stop generation
     UUT.generate_stop();
@@ -399,6 +407,41 @@ void test_send_array_with_leading_byte(void)
     TEST_ASSERT_EQUAL(Error::Code::I2C_Data_ACK_Error, UUT.get_error());
 };
 
+/// @brief Test receiving data via the i2c bus
+void test_read_data(void)
+{
+    setUp();
+    // Set the flags for a successfull data transmission
+    I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_RXNE | I2C_SR1_ADDR | I2C_SR1_SB;
+    I2C1->SR2 = I2C_SR2_MSL;
+
+    // Create object
+    I2C::Controller UUT(I2C::I2C_1, 100000);
+    UUT.set_target_address(0xEE);
+
+    // Perform testing
+    TEST_ASSERT_TRUE( UUT.read_data(0xAA, 1) );
+    TEST_ASSERT_EQUAL(0xEE, UUT.get_rx_data().byte[0]); 
+    TEST_ASSERT_TRUE( UUT.read_data(0xAA, 2) );
+    TEST_ASSERT_EQUAL(0xEE, UUT.get_rx_data().byte[0]); 
+    TEST_ASSERT_EQUAL(0xEE, UUT.get_rx_data().byte[1]); 
+    
+    // Test the timeout
+    I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
+    TEST_ASSERT_FALSE(UUT.read_data(0xAA, 1));
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Timeout, UUT.get_error());
+
+    // Test an acknowledge error
+    I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB | I2C_SR1_AF;
+    TEST_ASSERT_FALSE(UUT.read_data(0xAA, 1));
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Data_ACK_Error, UUT.get_error());
+
+    // Test sending when bus is busy
+    I2C1->SR2 |= I2C_SR2_BUSY;
+    TEST_ASSERT_FALSE(UUT.read_data(0xAA, 1));
+    TEST_ASSERT_EQUAL(Error::Code::I2C_BUS_Busy_Error, UUT.get_error());
+};
+
 // === Main ===
 int main(int argc, char** argv)
 {
@@ -414,6 +457,7 @@ int main(int argc, char** argv)
     test_send_word();
     test_send_array();
     test_send_array_with_leading_byte();
+    test_read_data();
     UNITY_END();
     return 0;
 };

@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    i2c_stm32.cpp
  * @author  SO
- * @version v1.0.10
+ * @version v1.0.13
  * @date    02-September-2021
  * @brief   I2C driver for STM32 microcontrollers.
  ==============================================================================
@@ -178,6 +178,9 @@ target(0)
 
     // Enable a standard timeout of 100 calls
     set_timeout(100);
+
+    // initialize received data buffer
+    rx_data.value = 0;
 };
 
 /**
@@ -240,6 +243,20 @@ void I2C::Controller::write_data_register(const unsigned char data)
 };
 
 /**
+ * @brief Read a byte from the input shift register.
+ * Does not check whether the data is valid!
+ * @return Returns the data in the receive register.
+ */
+unsigned char I2C::Controller::read_data_register(void) const
+{
+#if defined(STM32F4)
+    return this->peripheral->DR;
+#elif defined(STM32L0)
+    return this->peripheral->RXDR;
+#endif
+};
+
+/**
  * @brief Generate a start condition on the bus.
  */
 void I2C::Controller::generate_start(void)
@@ -252,11 +269,13 @@ void I2C::Controller::generate_start(void)
 };
 
 /**
- * @brief Generate a stop condition on the bus after the current byte transfer
+ * @brief Generate a stop condition on the bus after the current byte transfer.
+ * Also disables the ACK bit when in receiver mode.
  */
 void I2C::Controller::generate_stop(void)
 {
 #if defined(STM32F4)
+    this->peripheral->CR1 &= ~I2C_CR1_ACK;
     this->peripheral->CR1 |= I2C_CR1_STOP;
 #elif defined(STM32L0)
     this->peripheral->CR2 |= I2C_CR2_STOP;
@@ -265,11 +284,12 @@ void I2C::Controller::generate_stop(void)
 
 /**
  * @brief Write the current target address to the output shift register.
+ * @param read Set this to true when the address should indicate a data read.
  */
-void I2C::Controller::write_address(void)
+void I2C::Controller::write_address(bool read)
 {
 #ifdef STM32F4
-    this->write_data_register(this->target);
+    this->write_data_register(this->target | read);
 #endif
 };
 
@@ -278,10 +298,11 @@ void I2C::Controller::write_address(void)
  * Sets the following errors:
  * - I2C_Timeout
  * - I2C_Address_Error
+ * @param read Set this to true when the address should indicate a data read.
  * @return Returns True when the address was sent successfully, False otherwise.
  * @details blocking function
  */
-bool I2C::Controller::send_address(void)
+bool I2C::Controller::send_address(bool read)
 {
     // Reset timeout
     this->reset_timeout();
@@ -370,6 +391,35 @@ bool I2C::Controller::send_data_byte(const unsigned char data)
     }
     // Byte was sent successfully
     return true;
+};
+
+/**
+ * @brief Read a byte from the data register of the i2c peripheral
+ * and wait until the data becomes valid. Does not send an address on the bus.
+ * The data is returned as an optional type.
+ * Sets the following errors:
+ * - I2C_Data_ACK_Error
+ * @return Returns True when the bytes were read successfully, False otherwise.
+ * When True the return data contains valid data.
+ * @details blocking function
+ */
+std::optional<unsigned char> I2C::Controller::read_data_byte(void)
+{
+    this->reset_timeout();
+
+    // Wait until the peripheral can except new data
+    while(!this->RX_data_valid())
+    {
+        // Check for timeouts
+        if(this->timed_out())
+        {
+            this->set_error(Error::Code::I2C_Timeout);
+            return { };
+        }
+    }
+
+    // read the byte
+    return this->read_data_register();
 };
 
 /**
@@ -554,15 +604,108 @@ unsigned char I2C::Controller::get_target_address(void) const
 };
 
 /**
+ * @brief Read n bytes from an i2c target
+ * The highest byte in the struct is the first received byte!
+ * Sets the following errors:
+ * - I2C_Timeout
+ * - I2C_Data_ACK_Error
+ * - I2C_BUS_Busy
+ * @param reg Register address of target to get the data from
+ * @param n_bytes How many bytes should be read
+ * @return Returns True when the byte was read successfully, False otherwise.
+ * @details blocking function
+ */
+bool I2C::Controller::read_data(const unsigned char reg, 
+    const unsigned char n_bytes)
+{
+    // Only start transfer when bus is idle
+    if(!this->bus_busy())
+    {
+        std::optional<unsigned char> rx;
+        this->rx_data.value = 0;
+
+#ifdef STM32L0
+        // Set to transfer 1 byte
+        this->peripheral->CR2 = (1 << 16) | this->target;
+#endif
+        // Send address indicating a write
+        if(!this->send_address(false)) return false;
+        
+        // Send the register to read from
+        if(!this->send_data_byte(reg)) return false;
+
+#ifdef STM32L0
+        // Set the number of bytes to be received and target address
+        this->peripheral->CR2 = (n_bytes << 16) | I2C_CR2_RD_WRN | this->target;
+#endif
+        // After sending the register address, send the address indicating a read
+        if(!this->send_address(true)) return false;
+
+        // when more than one byte is recevied
+        for(unsigned char iByte = n_bytes; iByte > 1; iByte--)
+        {
+#if defined(STM32F4)
+            // Enable ACK bit
+            this->peripheral->CR1 |= I2C_CR1_ACK;
+#endif
+            // Read the byte and check whether it is valid
+            rx = this->read_data_byte();
+            if(!rx) return false;
+            // data is valid
+            this->rx_data.byte[iByte - 1] = rx.value();
+        }
+
+        // Generate stop after last byte is received
+        this->generate_stop();
+
+        // Read the byte and check whether it is valid
+        rx = this->read_data_byte();
+        if(!rx) return false;
+        // data is valid
+        this->rx_data.byte[0] = rx.value();
+
+        return true;
+    }
+    else
+    {
+        this->set_error(Error::Code::I2C_BUS_Busy_Error);
+        return false;
+    }
+    return true;
+};
+
+/**
+ * @brief Read a byte from the specified register.
+ * The data is stored in the internal rx buffer.
+ * @param reg The register address to read from.
+ * @return Returns true when the register data was
+ * read successfully, False otherwise.
+ */
+bool I2C::Controller::read_byte(const unsigned char reg)
+{
+    return this->read_data(reg, 1);
+};
+
+/**
+ * @brief Read a word from the specified register.
+ * The data is stored in the internal rx buffer.
+ * @param reg The register address to read from.
+ * @return Returns true when the register data was
+ * read successfully, False otherwise.
+ */
+bool I2C::Controller::read_word(const unsigned char reg)
+{
+    return this->read_data(reg, 2);
+};
+
+/**
  * @brief Return the most recent received data.
  * @return Union which contains the received data. The union can be used
  * to use certain parts of the read values.
  */
 I2C::Data_t I2C::Controller::get_rx_data(void) const
 {
-    I2C::Data_t val;
-    val.value = 0;
-    return val;
+    return this->rx_data;
 };
 
 /**
@@ -648,6 +791,20 @@ bool I2C::Controller::TX_register_empty(void) const
 };
 
 /**
+ * @brief Check whether the RX data shift register contains valid data and
+ * can be read.
+ * @returns Returns True when new data can be read from the register.
+ */
+bool I2C::Controller::RX_data_valid(void) const
+{
+#if defined(STM32F4)
+    return this->peripheral->SR1 & I2C_SR1_RXNE;
+#elif defined(STM32L0)
+    return this->peripheral->ISR & I2C_ISR_RXNE;
+#endif
+};
+
+/**
  * @brief Check whether the transfer of the current byte is finished.
  * @returns Returns True when the transfer is finished.
  */
@@ -656,7 +813,7 @@ bool I2C::Controller::transfer_finished(void) const
 #if defined(STM32F4)
     return this->peripheral->SR1 & I2C_SR1_BTF;
 #elif defined(STM32L0)
-    return this->peripheral->ISR & (I2C_ISR_TXIS | I2C_ISR_TC);
+    return this->peripheral->ISR & (I2C_ISR_TXIS | I2C_ISR_RXNE | I2C_ISR_TC);
 #endif
 };
 
