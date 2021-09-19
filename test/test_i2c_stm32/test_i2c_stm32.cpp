@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_i2c_stm32.cpp
  * @author  SO
- * @version v1.0.13
+ * @version v1.0.14
  * @date    30-August-2021
  * @brief   Unit tests for testing the i2c driver for stm32 microcontrollers.
  ******************************************************************************
@@ -161,7 +161,7 @@ void test_output_assignment(void)
     SCL.set_type.assert_called_once_with((int) GPIO::OPEN_DRAIN);
     SDA.set_mode.assert_called_once_with((int)GPIO::AF_Mode);
     SDA.set_alternate.assert_called_once_with((int)GPIO::I2C_1);
-    SCL.set_type.assert_called_once_with((int) GPIO::OPEN_DRAIN);
+    SDA.set_type.assert_called_once_with((int) GPIO::OPEN_DRAIN);
 };
 
 /// @brief Test the enabling and disabling of the peripheral.
@@ -442,6 +442,34 @@ void test_read_data(void)
     TEST_ASSERT_EQUAL(Error::Code::I2C_BUS_Busy_Error, UUT.get_error());
 };
 
+/// @brief Test sending an array via the i2c bus
+void test_read_array(void)
+{
+    setUp();
+    // Set the flags for a successfull data transmission
+    I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_RXNE | I2C_SR1_ADDR | I2C_SR1_SB;
+    I2C1->SR2 = I2C_SR2_MSL;
+
+    // Create object
+    I2C::Controller UUT(I2C::I2C_1, 100000);
+    UUT.set_target_address(0xEE);
+
+    // Perform testing
+    unsigned char array[128] = {0};
+    TEST_ASSERT_TRUE(UUT.read_array(0x11, array, 128));
+    TEST_ASSERT_EQUAL(0xEE, array[127]); 
+    
+    // Test the timeout
+    I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
+    TEST_ASSERT_FALSE(UUT.read_array(0x11, array, 128));
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Timeout, UUT.get_error());
+
+    // Test an acknowledge error
+    I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB | I2C_SR1_AF;
+    TEST_ASSERT_FALSE(UUT.read_array(0x11, array, 128));
+    TEST_ASSERT_EQUAL(Error::Code::I2C_Data_ACK_Error, UUT.get_error());
+};
+
 // === Main ===
 int main(int argc, char** argv)
 {
@@ -458,6 +486,7 @@ int main(int argc, char** argv)
     test_send_array();
     test_send_array_with_leading_byte();
     test_read_data();
+    test_read_array();
     UNITY_END();
     return 0;
 };

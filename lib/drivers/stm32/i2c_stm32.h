@@ -68,6 +68,7 @@ namespace I2C {
         bool            read_data           (const unsigned char reg, unsigned char n_bytes)            final;
         bool            read_byte           (const unsigned char reg)                                   final;
         bool            read_word           (const unsigned char reg)                                   final;
+        bool            read_array          (const unsigned char reg, unsigned char* dest, const unsigned char n_bytes)    final;
         Data_t          get_rx_data         (void) const                                                final;
         bool            in_controller_mode  (void) const;
         bool            start_sent          (void) const;

@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    i2c_stm32.cpp
  * @author  SO
- * @version v1.0.13
+ * @version v1.0.14
  * @date    02-September-2021
  * @brief   I2C driver for STM32 microcontrollers.
  ==============================================================================
@@ -696,6 +696,79 @@ bool I2C::Controller::read_byte(const unsigned char reg)
 bool I2C::Controller::read_word(const unsigned char reg)
 {
     return this->read_data(reg, 2);
+};
+
+/**
+ * @brief Read an array with n from an i2c target
+ * The highest byte in the output array is the first received byte!
+ * Sets the following errors:
+ * - I2C_Timeout
+ * - I2C_Data_ACK_Error
+ * - I2C_BUS_Busy
+ * @param reg Register address of target to get the data from
+ * @param dest Address of the array where to save the responce
+ * @param n_bytes How many bytes should be read
+ * @return Returns True when the bytes were read successfully, False otherwise.
+ * @details blocking function
+ */
+bool I2C::Controller::read_array(const unsigned char reg, 
+    unsigned char* dest,
+    const unsigned char n_bytes)
+{
+    // Only start transfer when bus is idle
+    if(!this->bus_busy())
+    {
+        std::optional<unsigned char> rx;
+        this->rx_data.value = 0;
+
+#ifdef STM32L0
+        // Set to transfer 1 byte
+        this->peripheral->CR2 = (1 << 16) | this->target;
+#endif
+        // Send address indicating a write
+        if(!this->send_address(false)) return false;
+        
+        // Send the register to read from
+        if(!this->send_data_byte(reg)) return false;
+
+#ifdef STM32L0
+        // Set the number of bytes to be received and target address
+        this->peripheral->CR2 = (n_bytes << 16) | I2C_CR2_RD_WRN | this->target;
+#endif
+        // After sending the register address, send the address indicating a read
+        if(!this->send_address(true)) return false;
+
+        // when more than one byte is received
+        for(unsigned char iByte = n_bytes; iByte > 1; iByte--)
+        {
+#if defined(STM32F4)
+            // Enable ACK bit
+            this->peripheral->CR1 |= I2C_CR1_ACK;
+#endif
+            // Read the byte and check whether it is valid
+            rx = this->read_data_byte();
+            if(!rx) return false;
+            // data is valid
+            dest[iByte - 1] = rx.value();
+        }
+
+        // Generate stop after last byte is received
+        this->generate_stop();
+
+        // Read the byte and check whether it is valid
+        rx = this->read_data_byte();
+        if(!rx) return false;
+        // data is valid
+       dest[0] = rx.value();
+
+        return true;
+    }
+    else
+    {
+        this->set_error(Error::Code::I2C_BUS_Busy_Error);
+        return false;
+    }
+    return true;
 };
 
 /**

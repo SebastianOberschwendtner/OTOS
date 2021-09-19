@@ -145,6 +145,7 @@ namespace I2C {
         virtual bool    read_data           (const unsigned char reg, unsigned char n_bytes)            = 0;
         virtual bool    read_byte           (const unsigned char reg)                                   = 0;
         virtual bool    read_word           (const unsigned char reg)                                   = 0;
+        virtual bool    read_array          (const unsigned char reg, unsigned char* dest, const unsigned char n_bytes)    = 0;
         virtual Data_t  get_rx_data         (void) const                                                = 0;
     };
 
