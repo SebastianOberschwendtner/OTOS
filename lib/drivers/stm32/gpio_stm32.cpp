@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    gpio_stm32.cpp
  * @author  SO
- * @version v1.0.8
+ * @version v1.1.0
  * @date    25-August-2021
  * @brief   GPIO driver for STM32 microcontrollers.
  ==============================================================================
@@ -369,4 +369,41 @@ void GPIO::PIN::setHigh(void)
  bool GPIO::PIN::get(void) const
 {
     return (this->thisPort->IDR & (1 << this->thisPin));
+};
+
+/**
+ * @brief Read teh current pin state and check whether
+ * a logical change occurred.
+ * 
+ * This functions is separate so that the programm can
+ * detect both rising and falling edges at once.
+ */
+void GPIO::PIN::read_edge(void)
+{
+    // Get the rising edge
+    this->edge_rising = (this->get() && !this->state_old);
+
+    // Get the falling edge
+    this->edge_falling = (!this->get() && this->state_old);
+
+    // Remember old state
+    this->state_old = this->get();
+};
+
+/**
+ * @brief Check whether the PIN got a rising edge
+ * @return Returns True when a rising edge was detected.
+ */
+bool GPIO::PIN::rising_edge(void) const
+{
+    return this->edge_rising;
+};
+
+/**
+ * @brief Check whether the PIN got a falling edge
+ * @return Returns True when a falling edge was detected.
+ */
+bool GPIO::PIN::falling_edge(void) const
+{
+    return this->edge_falling;
 };

@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_gpio_stm32.cpp
  * @author  SO
- * @version v1.0.7
+ * @version v1.1.0
  * @date    16-March-2021
  * @brief   Unit tests for the gpio drivers of stm32 controllers.
  ******************************************************************************
@@ -262,6 +262,44 @@ void test_alternate_function_high(void)
     TEST_ASSERT_EQUAL(0b10111101, GPIOA->AFR[1]);
 };
 
+/// @brief Test the reading of rising and falling edges
+void test_edges(void)
+{
+    setUp();
+
+    // Create PIN object
+    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
+
+    // Perform testing
+    UUT.read_edge();
+    TEST_ASSERT_FALSE(UUT.rising_edge());
+    TEST_ASSERT_FALSE(UUT.falling_edge());
+
+    // Simulate rising edge
+    GPIOA->IDR = 1;
+    UUT.read_edge();
+    TEST_ASSERT_TRUE(UUT.rising_edge());
+    TEST_ASSERT_FALSE(UUT.falling_edge());
+
+    // Simulate no edge
+    GPIOA->IDR = 1;
+    UUT.read_edge();
+    TEST_ASSERT_FALSE(UUT.rising_edge());
+    TEST_ASSERT_FALSE(UUT.falling_edge());
+
+    // Simulate falling edge
+    GPIOA->IDR = 0;
+    UUT.read_edge();
+    TEST_ASSERT_FALSE(UUT.rising_edge());
+    TEST_ASSERT_TRUE(UUT.falling_edge());
+
+    // Simulate no edge
+    GPIOA->IDR = 0;
+    UUT.read_edge();
+    TEST_ASSERT_FALSE(UUT.rising_edge());
+    TEST_ASSERT_FALSE(UUT.falling_edge());
+};
+
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();
@@ -278,6 +316,7 @@ int main(int argc, char** argv)
     test_get();
     test_alternate_function_low();
     test_alternate_function_high();
+    test_edges();
     UNITY_END();
     return 0;
 };

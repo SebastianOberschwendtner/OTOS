@@ -107,6 +107,9 @@ namespace GPIO {
         virtual void setLow                 (void)                      = 0;
         virtual void toggle                 (void)                      = 0;
         virtual bool get                    (void) const                = 0;
+        virtual void read_edge              (void)                      = 0;
+        virtual bool rising_edge            (void) const                = 0;
+        virtual bool falling_edge           (void) const                = 0;
     };
 };
 
