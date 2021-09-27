@@ -20,6 +20,8 @@
 
 #ifndef TYPES_H_
 #define TYPES_H_
+// === Includes ===
+#include <cstdint>
 
 // *** Typdefs ***
 // Function pointer for thread task

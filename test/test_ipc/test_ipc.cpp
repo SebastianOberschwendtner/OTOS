@@ -110,8 +110,7 @@ void test_get_data(void)
     TEST_ASSERT_FALSE(UUT.get_data(PID_2));
 
     // Other PID should be nullptr
-    unsigned int* p_data_null = reinterpret_cast<unsigned int*>(*IPC::Manager::get_data(PID_2));
-    TEST_ASSERT_NULL(p_data_null);
+    TEST_ASSERT_EQUAL(0, UUT.get_data(PID_2).value_or<void*>(0));
 };
 
 // === Main ===
