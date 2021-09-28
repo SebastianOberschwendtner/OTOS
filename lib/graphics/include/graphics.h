@@ -87,6 +87,7 @@ namespace Graphics {
         // *** Methods ***
 
         void        set_cursor  (const unsigned int x_pos, const unsigned int y_pos);
+        void        set_fontsize(const Font::Size size);
         void        newline     (void);
         void        draw_pixel  (const unsigned int x_px, const unsigned int y_px, const Color_BW color);
         void        fill        (const Color_BW color);

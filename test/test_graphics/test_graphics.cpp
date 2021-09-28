@@ -326,6 +326,46 @@ void test_add_string(void)
     TEST_ASSERT_EQUAL(Font::Font_Small['D'][5], buffer.data[21]);
 };
 
+/// @brief Test the normal font size
+void test_font_normal(void)
+{
+    // Create buffer and object
+    Graphics::Buffer_BW<16, 16> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
+
+    // Change the fontsize
+    UUT.set_fontsize(Font::Size::Normal);
+
+    // Test writting new characters
+    UUT.add_char('A');
+    
+    // Perform testing
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 0], buffer.data[ 0]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 1], buffer.data[ 1]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 2], buffer.data[ 2]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 3], buffer.data[ 3]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 4], buffer.data[ 4]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 5], buffer.data[ 5]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 6], buffer.data[ 6]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 7], buffer.data[ 7]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 8], buffer.data[ 8]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 9], buffer.data[ 9]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][10], buffer.data[10]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][11], buffer.data[11]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][12], buffer.data[16]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][13], buffer.data[17]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][14], buffer.data[18]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][15], buffer.data[19]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][16], buffer.data[20]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][17], buffer.data[21]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][18], buffer.data[22]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][19], buffer.data[23]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][20], buffer.data[24]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][21], buffer.data[25]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][22], buffer.data[26]);
+    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][23], buffer.data[27]);
+};
+
 /// === Run Tests ===
 int main(int argc, char** argv)
 {
@@ -339,6 +379,7 @@ int main(int argc, char** argv)
     test_cursor();
     test_add_character();
     test_add_string();
+    test_font_normal();
     UNITY_END();
     return 0;
 };

@@ -50,6 +50,15 @@ void Graphics::Canvas_BW::set_cursor(const unsigned int x_pos, const unsigned in
 };
 
 /**
+ * @brief Set the font size to use for characters
+ * @param size The new fontsize
+ */
+void Graphics::Canvas_BW::set_fontsize( const Font::Size size)
+{
+    this->current_size = size;
+};
+
+/**
  * @brief Set the cursor to a newline
  */
 void Graphics::Canvas_BW::newline(void)
@@ -164,13 +173,33 @@ void Graphics::Canvas_BW::add_line_v(const Coordinate start, const unsigned int 
  */
 void Graphics::Canvas_BW::add_char(const unsigned char character)
 {
-    // Write the pixels, the small font has 6 pixels in x direction
-    for (unsigned char iX = 0; iX < 6; iX++)
-        this->buffer[iX + this->cursor.x_pos + (this->width * this->cursor.y_pos/8)] 
-        = Font::Font_Small[character][iX];
+    // get pixelsize of font
+    unsigned char width = Font::x_pixels(this->current_size);
+    unsigned char height = Font::y_pixels(this->current_size);
 
+    // Write character depending in font
+    switch(this->current_size)
+    {
+    case Font::Size::Small:
+        // Write the pixels, the small font has 6 pixels in x direction
+        for (unsigned char iX = 0; iX < width; iX++)
+            this->buffer[iX + this->cursor.x_pos + (this->width * this->cursor.y_pos/height)] 
+            = Font::Font_Small[character][iX];
+        break;
+
+    case Font::Size::Normal:
+        // Write the pixels, the normal font has 12 pixels in x direction
+        for (unsigned char iY = 0; iY < (height/8); iY++)
+            for (unsigned char iX = 0; iX < width; iX++)
+                this->buffer[iX + this->cursor.x_pos + (this->width * (iY + (this->cursor.y_pos/height)))] 
+                = Font::Font_Normal[character][iX + (iY * width)];
+        break;
+
+    default:
+        break;
+    };
     // append the cursor
-    this->cursor.x_pos += 6;
+    this->cursor.x_pos += width;
 };
 
 /**

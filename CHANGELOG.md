@@ -1,5 +1,16 @@
 # Changelog for OTOS
-## [v1.1.0](https://github.com/knuffel-v2/OTOS/releases/tag/v1.1.0) *(2021-xx-xx)*
+## [v2.0.0](https://github.com/knuffel-v2/OTOS/releases/tag/v2.r01.0) *(2021-xx-xx)*
+
+>Released by `SO`
+
+### Release Notes:
+- Adds font for fontsize 'Normal'.
+
+### Fixed Issues:
+
+
+
+## [v1.1.0](https://github.com/knuffel-v2/OTOS/releases/tag/v1.1.0) *(2021-09-21)*
 
 >Released by `SO`
 
