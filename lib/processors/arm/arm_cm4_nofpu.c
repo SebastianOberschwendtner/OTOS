@@ -134,9 +134,7 @@ void SVC_Handler(void)
  * @brief Initializes the kernel. The kernel starts out in thread mode
  * with privileged operation. It uses the SVC interrupt to switch to
  * handler mode with privileged operation. For the switch the thread
- * stack is used as temporary memory. It also initializes the SysTick
- * timer, when timing is needed. The SysTick timer should be set to
- * throw an interrupt every 1 ms.
+ * stack is used as temporary memory. 
  * @param ThreadStack Beginning of thread stack as temporary memory.
  * @details Thread Mode -> Handler Mode, Stack: msp
  */
@@ -149,7 +147,7 @@ void __otos_init_kernel(unsigned int* ThreadStack)
         "mrs    R1, PSR         \n\t"
         "push   {R1}            \n\t" // Save PSR to msp stack
         "msr    psp, R0         \t\n" // Set the psp to temporary memory
-        "mov    R0, #0b11       \n\t"
+        "mov    R0, #0b10       \n\t" // Set Stack to PSP and PRIVILEGED mode
         "msr    CONTROL, R0     \n\t" // Set CONTROL for Thread mode
         "isb                    \n\t" // Has to follow the write to CONTROL
         // inline __otos_yield() afterwards
