@@ -17,25 +17,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
+/**
+ ==============================================================================
+ * @file    cmsis_mock.cpp
+ * @author  SO
+ * @version v1.3.0
+ * @date    04-Oktober-2021
+ * @brief   Mocks of the CMSIS driver functions.
+ ==============================================================================
+ */
 
-#ifndef VENDORS_H_
-#define VENDORS_H_
+// *** Includes ***
+#include "cmsis_mock.h"
 
-    // *** Includes which mock vendor specific peripherals
-    // ---------- STM32 -------------
-    #define STM32F4 // => The library fakes the STM32F4 microcontroller family
-    // === Clock defines ===
-    #define F_CPU 40000000
-    #define F_I2C 20000000
+// *** mocks ***
+Mock::Callable EnableIRQ;
 
-    // === Mocked CMSIS Driver ===
-    #include "../cmsis/cmsis_mock.h"
+// *** Functions ***
 
-    // === Fake peripherals ===
-    #include "../stm32/clock_stm32_fake.h"
-    #include "../stm32/gpio_stm32_fake.h"
-    #include "../stm32/i2c_stm32_fake.h"
-    #include "../stm32/exti_stm32_fake.h"
-
-#endif
-
+/**
+ * @brief Mock the enabling of IRQs.
+ * @param IRQn The IRQ number to enable.
+ */
+void NVIC_EnableIRQ(IRQn_Type IRQn)
+{
+    EnableIRQ.add_call(static_cast<int>(IRQn));
+};
