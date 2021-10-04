@@ -85,6 +85,10 @@ namespace GPIO {
         USART_2, USART_3, USART_4, USART_5, USART_6, CAN_1,
         CAN_2, OTG_FS_, OTG_HS_, ETH_, FSMC_, SDIO_, DCMI_, EVENTOUT_
     };
+    enum class Edge: unsigned char
+    {
+        Rising = 1, Falling = 2, Both = 3
+    };
 
     // === GPIO Interface ===
     /**
@@ -110,6 +114,7 @@ namespace GPIO {
         virtual void read_edge              (void)                      = 0;
         virtual bool rising_edge            (void) const                = 0;
         virtual bool falling_edge           (void) const                = 0;
+        virtual bool enable_interrupt       (const Edge NewEdge)        = 0;
     };
 };
 

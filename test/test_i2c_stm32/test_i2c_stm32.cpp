@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_i2c_stm32.cpp
  * @author  SO
- * @version v1.1.0
+ * @version v1.3.0
  * @date    30-August-2021
  * @brief   Unit tests for testing the i2c driver for stm32 microcontrollers.
  ******************************************************************************
@@ -97,6 +97,7 @@ public:
     void read_edge              (void)                              override {};
     bool rising_edge            (void) const                        override {return false;};
     bool falling_edge           (void) const                        override {return false;};
+    bool enable_interrupt       (const GPIO::Edge NewEdge)          override {return true; };
 };
 
 // === Tests ===
