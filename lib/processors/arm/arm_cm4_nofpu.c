@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    arm_m4_nofpu.c
  * @author  SO
- * @version v1.0.6
+ * @version v1.2.0
  * @date    09-March-2021
  * @brief   Defines the assembly code for:
  *          - ARM Cortex M4

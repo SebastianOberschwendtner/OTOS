@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    arm_cm0plus_nofpu.c
  * @author  SO
- * @version v1.0.6
+ * @version v1.2.0
  * @date    29-August-2021
  * @brief   Defines the assembly code for:
  *          - ARM Cortex M0+

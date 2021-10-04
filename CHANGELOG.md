@@ -4,7 +4,7 @@
 >Released by `SO`
 
 ### Release Notes:
-- Adds font for fontsize 'Normal'.
+- Adds font for fontsize 'Normal'. [&rdca; v1.2.0](https://github.com/knuffel-v2/OTOS/releases/tag/v1.2.0)
 
 ### Fixed Issues:
 
