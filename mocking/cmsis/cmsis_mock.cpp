@@ -27,13 +27,13 @@
  ==============================================================================
  */
 
-// *** Includes ***
+// === Includes ===
 #include "cmsis_mock.h"
 
-// *** mocks ***
+// === Mocks ===
 Mock::Callable EnableIRQ;
 
-// *** Functions ***
+// === Functions ===
 
 /**
  * @brief Mock the enabling of IRQs.

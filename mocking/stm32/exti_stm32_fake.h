@@ -53,11 +53,34 @@ public:
   Fake::Register_t PR;     /*!< EXTI Pending register,                   Address offset: 0x14 */
 };
 
+/** 
+  * @brief System configuration controller
+  */
+
+class SYSCFG_TypeDef: public Fake::Peripheral
+{
+public:
+  // Constructor to mimic device initialization
+  SYSCFG_TypeDef();
+
+  // Methods for unit testing
+  void registers_to_default(void) override;
+
+  // Fake registers of peripheral
+  Fake::Register_t MEMRMP;       /*!< SYSCFG memory remap register,                      Address offset: 0x00      */
+  Fake::Register_t PMC;          /*!< SYSCFG peripheral mode configuration register,     Address offset: 0x04      */
+  Fake::Register_t EXTICR[4];    /*!< SYSCFG external interrupt configuration registers, Address offset: 0x08-0x14 */
+  Fake::Register_t RESERVED[2];  /*!< Reserved, 0x18-0x1C                                                          */
+  Fake::Register_t CMPCR;        /*!< SYSCFG Compensation cell control register,         Address offset: 0x20      */
+};
+
 // *** Public references to fake peripherals
 // Fake peripheral pointers
 extern EXTI_TypeDef* EXTI;
+extern SYSCFG_TypeDef* SYSCFG;
 
 // Fake addresses
 extern unsigned long EXTI_BASE;
+extern unsigned long SYSCFG_BASE;
 
 #endif

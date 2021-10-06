@@ -97,7 +97,7 @@ public:
     void read_edge              (void)                              override {};
     bool rising_edge            (void) const                        override {return false;};
     bool falling_edge           (void) const                        override {return false;};
-    bool enable_interrupt       (const GPIO::Edge NewEdge)          override {return true; };
+    bool enable_interrupt       (const GPIO::Edge NewEdge) const    override {return true; };
 };
 
 // === Tests ===

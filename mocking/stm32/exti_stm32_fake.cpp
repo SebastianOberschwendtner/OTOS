@@ -33,12 +33,15 @@
 // *** Fakes ***
 // Peripheral objects
 static EXTI_TypeDef EXTI_Fake;
+static SYSCFG_TypeDef SYSCFG_Fake;
 
 // Pointer to peripherals
 EXTI_TypeDef* EXTI = &EXTI_Fake;
+SYSCFG_TypeDef* SYSCFG = &SYSCFG_Fake;
 
 // Base addresses to peripherals
 unsigned long EXTI_BASE = reinterpret_cast<unsigned long>(EXTI);
+unsigned long SYSCFG_BASE = reinterpret_cast<unsigned long>(SYSCFG);
 
 // *** Methods ***
 
@@ -63,4 +66,28 @@ void EXTI_TypeDef::registers_to_default(void)
     this->FTSR  = 0x00;
     this->SWIER = 0x00;
     this->PR    = 0x00;
+};
+
+/**
+ * @brief Constructor for port object which initializes
+ * the port to default values.
+ */
+SYSCFG_TypeDef::SYSCFG_TypeDef()
+{
+    // Reinit to default values
+    registers_to_default();
+};
+
+/**
+ * @brief Reset all the registers to the default values
+ */
+void SYSCFG_TypeDef::registers_to_default(void)
+{
+    this->MEMRMP    = 0x00;
+    this->PMC       = 0x00;
+    this->EXTICR[0] = 0x00;
+    this->EXTICR[1] = 0x00;
+    this->EXTICR[2] = 0x00;
+    this->EXTICR[3] = 0x00;
+    this->CMPCR     = 0x00;
 };

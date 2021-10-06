@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    gpio_stm32.cpp
  * @author  SO
- * @version v1.1.0
+ * @version v1.3.0
  * @date    25-August-2021
  * @brief   GPIO driver for STM32 microcontrollers.
  ==============================================================================
@@ -212,7 +212,7 @@ unsigned char GPIO::PIN::get_af_code(const GPIO::Alternate function) const
  * @param Pin The pin number of the pin in the port
  */
 GPIO::PIN::PIN(const GPIO::PinPort Port, const GPIO::PinNumber Pin):
-    thisPin(Pin)
+    thisPin(Pin), PortID(Port)
 {
     // enable the clock for this gpio port
 #if defined(STM32F4)
@@ -232,7 +232,7 @@ GPIO::PIN::PIN(const GPIO::PinPort Port, const GPIO::PinNumber Pin):
  * @param Pin The pin number of the pin in the port
  */
 GPIO::PIN::PIN(const GPIO::PinPort Port, const GPIO::PinNumber Pin, const GPIO::Mode PinMode):
-    thisPin(Pin)
+    thisPin(Pin), PortID(Port)
 {
     // enable the clock for this gpio port
 #if defined(STM32F4)
@@ -406,4 +406,61 @@ bool GPIO::PIN::rising_edge(void) const
 bool GPIO::PIN::falling_edge(void) const
 {
     return this->edge_falling;
+};
+
+/**
+ * @brief Enable the edge triggered interrupt on the pin.
+ * @param NewEdge Which edges trigger the interrupt
+ * @return Returns True when the interrupt was enabled
+ * successfully, False otherwise.
+ * @details Use CMSIS driver to set the interrupts within
+ * the ARM core.
+ */
+bool GPIO::PIN::enable_interrupt(const Edge NewEdge) const
+{
+    // Enable the EXTI line
+    const unsigned int bitmask = (1 << this->thisPin);
+    EXTI->IMR |= bitmask;
+    switch (NewEdge)
+    {
+    case Edge::Rising: EXTI->RTSR |= bitmask; break;
+    case Edge::Falling: EXTI->FTSR |= bitmask; break;
+    case Edge::Both: 
+        EXTI->RTSR |= bitmask;
+        EXTI->FTSR |= bitmask;
+        break;
+    default:
+        return false;
+    }
+    
+    // Configure the pin of the EXTI line in the
+    // System configuration
+    RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+    SYSCFG->EXTICR[this->thisPin / 4] |= (this->PortID << 4*(this->thisPin%4));
+
+    // Enable the EXTI line in the NVIC
+    IRQn_Type ThisIRQn;
+    switch (this->thisPin)
+    {
+    case PIN0: ThisIRQn = EXTI0_IRQn; break;
+    case PIN1: ThisIRQn = EXTI1_IRQn; break;
+    case PIN2: ThisIRQn = EXTI2_IRQn; break;
+    case PIN3: ThisIRQn = EXTI3_IRQn; break;
+    case PIN4: ThisIRQn = EXTI4_IRQn; break;
+    case PIN5:
+    case PIN6:
+    case PIN7:
+    case PIN8:
+    case PIN9: ThisIRQn = EXTI9_5_IRQn; break;
+    case PIN10:
+    case PIN11:
+    case PIN12:
+    case PIN13:
+    case PIN14:
+    case PIN15: ThisIRQn = EXTI15_10_IRQn; break;
+    default:
+        return false;
+    }
+    NVIC_EnableIRQ(ThisIRQn);
+    return true;
 };

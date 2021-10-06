@@ -33,11 +33,12 @@ namespace GPIO {
     {
     private:
         // properties
-        volatile GPIO_TypeDef* thisPort;
-        PinNumber   thisPin;
-        bool        state_old    = false;
-        bool        edge_rising  = false;
-        bool        edge_falling = false;
+        volatile GPIO_TypeDef*  thisPort;
+        const PinNumber         thisPin;
+        const PinPort           PortID;
+        bool                    state_old    = false;
+        bool                    edge_rising  = false;
+        bool                    edge_falling = false;
 
         // methods
         unsigned char   get_af_code(const GPIO::Alternate function) const;
@@ -62,6 +63,7 @@ namespace GPIO {
         void read_edge              (void)                      final;
         bool rising_edge            (void) const                final;
         bool falling_edge           (void) const                final;
+        bool enable_interrupt       (const Edge NewEdge) const  final;
     };
 };
 

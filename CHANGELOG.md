@@ -5,6 +5,9 @@
 
 ### Release Notes:
 - Adds font for fontsize 'Normal'. [&rdca; v1.2.0](https://github.com/knuffel-v2/OTOS/releases/tag/v1.2.0)
+- Adds a mock interface for the CMSIS drivers of ARM<sup>&reg;</sup>.
+- Adds the method `enable_interrupt` to the GPIO driver. This methods takes care of everything
+  which is necessary to enable an edge interrupt on a specific IO pin. [&rdca; v1.3.0](https://github.com/knuffel-v2/OTOS/releases/tag/v1.3.0)
 
 ### Fixed Issues:
 

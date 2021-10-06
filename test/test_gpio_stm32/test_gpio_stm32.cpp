@@ -21,27 +21,32 @@
  ******************************************************************************
  * @file    test_gpio_stm32.cpp
  * @author  SO
- * @version v1.1.0
+ * @version v1.3.0
  * @date    16-March-2021
  * @brief   Unit tests for the gpio drivers of stm32 controllers.
  ******************************************************************************
  */
 
-// ****** Includes ******
+// === Includes ===
 #include "unity.h"
 #include "stm32/gpio_stm32.h"
 
+// === Mocks ===
+extern Mock::Callable EnableIRQ;
+
+// === Fixtures ===
 void setUp(void) {
-// set stuff up here
-RCC->registers_to_default();
-GPIOA->registers_to_default();
+    // set stuff up here
+    RCC->registers_to_default();
+    GPIOA->registers_to_default();
+    EXTI->registers_to_default();
 };
 
 void tearDown(void) {
-// clean stuff up here
+    // clean stuff up here
 };
 
-// ****** Define Tests ******
+// === Define Tests ===
 
 /// @brief Test initialization of pin.
 void test_init_pin(void)
@@ -300,6 +305,51 @@ void test_edges(void)
     TEST_ASSERT_FALSE(UUT.falling_edge());
 };
 
+/// @brief test enabling interrupts
+void test_enable_interrupt(void)
+{
+    setUp();
+
+    // Create PIN object
+    GPIO::PIN PA0(GPIO::PORTA, GPIO::PIN0);
+    GPIO::PIN PA2(GPIO::PORTA, GPIO::PIN2);
+    GPIO::PIN PC5(GPIO::PORTC, GPIO::PIN5);
+
+    // Perform testing
+    // PA0
+    TEST_ASSERT_TRUE(PA0.enable_interrupt(GPIO::Edge::Rising));
+    TEST_ASSERT_EQUAL(0b01, EXTI->IMR);
+    TEST_ASSERT_EQUAL(0b00, EXTI->EMR);
+    TEST_ASSERT_EQUAL(0b01, EXTI->RTSR);
+    TEST_ASSERT_EQUAL(0b00, EXTI->FTSR);
+    TEST_ASSERT_BIT_HIGH(14, RCC->APB2ENR);
+    TEST_ASSERT_EQUAL(0x00, SYSCFG->EXTICR[0]);
+    EnableIRQ.assert_called_once_with((int)EXTI0_IRQn);
+
+    // PA2
+    TEST_ASSERT_TRUE(PA2.enable_interrupt(GPIO::Edge::Falling));
+    TEST_ASSERT_EQUAL(0b101, EXTI->IMR);
+    TEST_ASSERT_EQUAL(0b000, EXTI->EMR);
+    TEST_ASSERT_EQUAL(0b001, EXTI->RTSR);
+    TEST_ASSERT_EQUAL(0b100, EXTI->FTSR);
+    TEST_ASSERT_BIT_HIGH(14, RCC->APB2ENR);
+    TEST_ASSERT_EQUAL(0x00, SYSCFG->EXTICR[0]);
+    TEST_ASSERT_EQUAL(0x00, SYSCFG->EXTICR[2]);
+    EnableIRQ.assert_called_once_with((int)EXTI2_IRQn);
+
+    // PC5
+    TEST_ASSERT_TRUE(PC5.enable_interrupt(GPIO::Edge::Both));
+    TEST_ASSERT_EQUAL(0b100101, EXTI->IMR);
+    TEST_ASSERT_EQUAL(0b000000, EXTI->EMR);
+    TEST_ASSERT_EQUAL(0b100001, EXTI->RTSR);
+    TEST_ASSERT_EQUAL(0b100100, EXTI->FTSR);
+    TEST_ASSERT_BIT_HIGH(14, RCC->APB2ENR);
+    TEST_ASSERT_EQUAL(0x00, SYSCFG->EXTICR[0]);
+    TEST_ASSERT_EQUAL(0x00, SYSCFG->EXTICR[0]);
+    TEST_ASSERT_EQUAL((2 << 4), SYSCFG->EXTICR[1]);
+    EnableIRQ.assert_called_once_with((int)EXTI9_5_IRQn);
+};
+
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();
@@ -317,6 +367,7 @@ int main(int argc, char** argv)
     test_alternate_function_low();
     test_alternate_function_high();
     test_edges();
+    test_enable_interrupt();
     UNITY_END();
     return 0;
 };

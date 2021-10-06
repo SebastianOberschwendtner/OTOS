@@ -51,7 +51,7 @@ namespace Driver {
 namespace GPIO {
 
     // === Enums ===
-    enum PinPort
+    enum PinPort: unsigned char
     {
         PORTA = 0, PORTB, PORTC, PORTD, PORTE, PORTF,
         PORTG, PORTH, PORTI, PORTJ, PORTK 
@@ -114,7 +114,7 @@ namespace GPIO {
         virtual void read_edge              (void)                      = 0;
         virtual bool rising_edge            (void) const                = 0;
         virtual bool falling_edge           (void) const                = 0;
-        virtual bool enable_interrupt       (const Edge NewEdge)        = 0;
+        virtual bool enable_interrupt       (const Edge NewEdge) const  = 0;
     };
 };
 
