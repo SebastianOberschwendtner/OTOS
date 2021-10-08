@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    gpio_stm32.cpp
  * @author  SO
- * @version v1.3.0
+ * @version v1.3.1
  * @date    25-August-2021
  * @brief   GPIO driver for STM32 microcontrollers.
  ==============================================================================
@@ -440,6 +440,7 @@ bool GPIO::PIN::enable_interrupt(const Edge NewEdge) const
 
     // Enable the EXTI line in the NVIC
     IRQn_Type ThisIRQn;
+#if defined(STM32F4)
     switch (this->thisPin)
     {
     case PIN0: ThisIRQn = EXTI0_IRQn; break;
@@ -461,6 +462,31 @@ bool GPIO::PIN::enable_interrupt(const Edge NewEdge) const
     default:
         return false;
     }
+#elif defined(STM32L0)
+    switch (this->thisPin)
+    {
+    case PIN0:
+    case PIN1: ThisIRQn = EXTI0_1_IRQn; break;
+    case PIN2:
+    case PIN3: ThisIRQn = EXTI2_3_IRQn; break;
+    case PIN4: 
+    case PIN5:
+    case PIN6:
+    case PIN7:
+    case PIN8:
+    case PIN9: 
+    case PIN10:
+    case PIN11:
+    case PIN12:
+    case PIN13:
+    case PIN14:
+    case PIN15: ThisIRQn = EXTI4_15_IRQn; break;
+    default:
+        return false;
+    }
+#else
+    return false;
+#endif
     NVIC_EnableIRQ(ThisIRQn);
     return true;
 };
