@@ -64,6 +64,7 @@ namespace GPIO {
         bool rising_edge            (void) const                final;
         bool falling_edge           (void) const                final;
         bool enable_interrupt       (const Edge NewEdge) const  final;
+        void reset_pending_interrupt(void) const;
     };
 };
 

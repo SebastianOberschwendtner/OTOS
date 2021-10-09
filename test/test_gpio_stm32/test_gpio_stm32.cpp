@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_gpio_stm32.cpp
  * @author  SO
- * @version v1.3.0
+ * @version v1.3.2
  * @date    16-March-2021
  * @brief   Unit tests for the gpio drivers of stm32 controllers.
  ******************************************************************************
@@ -350,6 +350,26 @@ void test_enable_interrupt(void)
     EnableIRQ.assert_called_once_with((int)EXTI9_5_IRQn);
 };
 
+/// @brief Test reseting a pending interrupt
+void test_reset_pending_interrupt(void)
+{
+    setUp();
+
+    // Create PIN object
+    GPIO::PIN PA0(GPIO::PORTA, GPIO::PIN0);
+    GPIO::PIN PA2(GPIO::PORTA, GPIO::PIN2);
+    PA0.enable_interrupt(GPIO::Edge::Rising);
+    PA2.enable_interrupt(GPIO::Edge::Both);
+
+    // Perform testing
+    EXTI->PR = 0b101; // Both interrupts are pending
+    PA0.reset_pending_interrupt();
+    TEST_ASSERT_EQUAL(0b100, EXTI->PR);
+
+    PA2.reset_pending_interrupt();
+    TEST_ASSERT_EQUAL(0b000, EXTI->PR);
+}
+
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();
@@ -368,6 +388,7 @@ int main(int argc, char** argv)
     test_alternate_function_high();
     test_edges();
     test_enable_interrupt();
+    test_reset_pending_interrupt();
     UNITY_END();
     return 0;
 };

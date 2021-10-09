@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    gpio_stm32.cpp
  * @author  SO
- * @version v1.3.1
+ * @version v1.3.2
  * @date    25-August-2021
  * @brief   GPIO driver for STM32 microcontrollers.
  ==============================================================================
@@ -410,10 +410,11 @@ bool GPIO::PIN::falling_edge(void) const
 
 /**
  * @brief Enable the edge triggered interrupt on the pin.
+ * The interrupt is automatically enabled in the core.
  * @param NewEdge Which edges trigger the interrupt
  * @return Returns True when the interrupt was enabled
  * successfully, False otherwise.
- * @details Use CMSIS driver to set the interrupts within
+ * @details Uses CMSIS driver to set the interrupts within
  * the ARM core.
  */
 bool GPIO::PIN::enable_interrupt(const Edge NewEdge) const
@@ -489,4 +490,15 @@ bool GPIO::PIN::enable_interrupt(const Edge NewEdge) const
 #endif
     NVIC_EnableIRQ(ThisIRQn);
     return true;
+};
+
+/**
+ * @brief Reset a pending interrupt. This function is needed
+ * for the STM32 devices because the flag is not automatically
+ * reset when the interrupt handler is executed. This function
+ * has to be called first in the corresponding interrupt handler!
+ */
+void GPIO::PIN::reset_pending_interrupt(void) const
+{
+    EXTI->PR &= ~(1 << this->thisPin);
 };
