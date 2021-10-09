@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_gpio_stm32.cpp
  * @author  SO
- * @version v1.3.2
+ * @version v1.3.3
  * @date    16-March-2021
  * @brief   Unit tests for the gpio drivers of stm32 controllers.
  ******************************************************************************
@@ -361,13 +361,14 @@ void test_reset_pending_interrupt(void)
     PA0.enable_interrupt(GPIO::Edge::Rising);
     PA2.enable_interrupt(GPIO::Edge::Both);
 
-    // Perform testing
-    EXTI->PR = 0b101; // Both interrupts are pending
+    // Perform testing => The interrupts are cleared by writing 1 to
+    // the pending register
+    EXTI->PR = 0b000;
     PA0.reset_pending_interrupt();
-    TEST_ASSERT_EQUAL(0b100, EXTI->PR);
+    TEST_ASSERT_EQUAL(0b001, EXTI->PR);
 
     PA2.reset_pending_interrupt();
-    TEST_ASSERT_EQUAL(0b000, EXTI->PR);
+    TEST_ASSERT_EQUAL(0b101, EXTI->PR);
 }
 
 int main(int argc, char** argv)

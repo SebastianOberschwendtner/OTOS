@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    gpio_stm32.cpp
  * @author  SO
- * @version v1.3.2
+ * @version v1.3.3
  * @date    25-August-2021
  * @brief   GPIO driver for STM32 microcontrollers.
  ==============================================================================
@@ -500,5 +500,5 @@ bool GPIO::PIN::enable_interrupt(const Edge NewEdge) const
  */
 void GPIO::PIN::reset_pending_interrupt(void) const
 {
-    EXTI->PR &= ~(1 << this->thisPin);
+    EXTI->PR |= (1 << this->thisPin);
 };
