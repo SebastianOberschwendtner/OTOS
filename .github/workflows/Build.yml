@@ -41,4 +41,4 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade platformio
     - name: Run PlatformIO
-      run: pio run -d . -e STM32F4xx -e STM32L0xx
+      run: pio run -d ./OTOS/ -e STM32F4xx -e STM32L0xx
