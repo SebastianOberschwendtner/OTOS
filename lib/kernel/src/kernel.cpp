@@ -92,7 +92,7 @@ void OTOS::Kernel::switchThread(void)
 void OTOS::Kernel::scheduleThread(taskpointer_t TaskFunc, const u_base_t StackSize, Priority Priority)
 {
     // Check whether maximum number of tasks is reached
-    if ( this->ThreadCount < (this->Threads.size() - 1) )
+    if ( this->ThreadCount < (this->Threads.size()) )
     {
         // Get pointer to next thread
         OTOS::Thread *_NewThread = &this->Threads[this->CurrentThread];
