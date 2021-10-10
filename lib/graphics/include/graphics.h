@@ -76,13 +76,13 @@ namespace Graphics {
         Font::Size              current_size;
 
     public:
-        // *** Constructor ***
-        Canvas_BW(unsigned char* const buffer, const unsigned int width, const unsigned int height):
-            buffer(buffer), width(width), height(height), pixels(height * width), cursor(0,0),
-            current_size(Font::Size::Small) {};
-
         // *** properties
         Coordinate cursor;
+
+        // *** Constructor ***
+        Canvas_BW(unsigned char* const buffer, const unsigned int width, const unsigned int height):
+            buffer(buffer), width(width), height(height), pixels(height * width),
+            current_size(Font::Size::Small), cursor(0,0){};
 
         // *** Methods ***
 
