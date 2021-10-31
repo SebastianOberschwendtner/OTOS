@@ -18,22 +18,32 @@
  *
  */
 
-/**=========================================================================
- * This file includes all the available device drivers for the supported
- * microcontrollers. Each driver includes 'vendors.h' which includes the
- * device specific library files provided by PlatformIO.
- * 
- * => New drivers have to be included in this header file.
- *
- *==========================================================================*/
+#ifndef TIMER_STM32_H_
+#define TIMER_STM32_H_
 
-#ifndef DRIVERS_H_
-#define DRIVERS_H_
+// === Includes ===
+#include "vendors.h"
+#include "interface.h"
 
-// *** Includes ***
-/// @todo Check for the microcontroller type (STM32/AVR/...) before including the drivers.
-#include "stm32/gpio_stm32.h"
-#include "stm32/i2c_stm32.h"
-#include "stm32/timer_stm32.h"
+// === Declarations ===
+namespace Timer {
+
+    // === Classes ===
+    class Timer final: public Timer_Base
+    {
+    private:
+        // properties
+        volatile TIM_TypeDef*   thisTimer;
+        const Instance          thisInstance;
+
+    public:
+        // === Constructor ===
+        Timer(const Instance timer);
+
+        // === Methods ===
+        unsigned int    get_count       (void) const final;
+
+    };
+};
 
 #endif

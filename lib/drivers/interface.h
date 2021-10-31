@@ -157,5 +157,29 @@ namespace I2C {
         virtual Data_t  get_rx_data         (void) const                                                = 0;
     };
 
-}
+};
+
+// => Timer Interface
+namespace Timer {
+    // === Enums ===
+    enum Instance: unsigned char
+    {
+        TIM_1 = 0, TIM_2, TIM_3,
+        TIM_4, TIM_5, TIM_6, TIM_7, TIM_8,
+        TIM_9, TIM_10, TIM_11, TIM_12 
+    };
+
+    enum class Mode
+    {
+        Normal, PWM
+    };
+
+    // === Interface ===
+    class Timer_Base
+    {
+    public:
+        // === Methods ===
+        virtual unsigned int    get_count       (void) const            = 0;
+    };
+};
 #endif

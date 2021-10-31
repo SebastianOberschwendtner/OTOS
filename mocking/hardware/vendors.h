@@ -36,6 +36,7 @@
     #include "../stm32/gpio_stm32_fake.h"
     #include "../stm32/i2c_stm32_fake.h"
     #include "../stm32/exti_stm32_fake.h"
+    #include "../stm32/timer_stm32_fake.h"
 
 #endif
 
