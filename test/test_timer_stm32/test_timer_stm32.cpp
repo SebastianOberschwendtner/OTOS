@@ -19,7 +19,7 @@
  */
 /**
  ******************************************************************************
- * @file    test_timer_stm32.cpp
+ * @file     test_timer_stm32.cpp
  * @author  SO
  * @version v1.4.0
  * @date    31-October-2021
@@ -38,6 +38,15 @@
  * ✓ Timer count can be read
  * ▢ Timer can be started
  * ▢ Timer can be stopped
+ * ▢ The top value (reload value) can be set
+ * ▢ The compare match value can be set
+ * ▢ The timer prescaler can be set to match a certain rate
+ * ▢ The timer mode can be read
+ * ▢ The timer mode can be set:
+ *      ▢ Counter Mode
+ *      ▢ PWM Mode
+ *      ▢ Input Capture Mode
+ * ▢ I/O Pins can be assigned to the timer
 */
 
 // === Mocks ===
@@ -77,8 +86,7 @@ void test_get_count(void)
     // Increase the actual counter and test whether result is correct
     TIM1->CNT++;
     TEST_ASSERT_EQUAL(1, UUT.get_count());
-
-}
+};
 
 // === Main ===
 int main(int argc, char** argv)
