@@ -36,4 +36,13 @@
 #include "stm32/i2c_stm32.h"
 #include "stm32/timer_stm32.h"
 
+// === Chip driver ===
+// *** BMS chips
+#include "battery/bq25700.h"
+#include "battery/tps65987.h"
+#include "battery/max17205.h"
+
+// *** Display driver chips
+#include "display/ssd1306.h"
+
 #endif
