@@ -1,5 +1,5 @@
 /**
- * OTP20 - oBank
+ * OTOS - Open Tec Operating System
  * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
@@ -21,8 +21,8 @@
  ******************************************************************************
  * @file    bq25700.cpp
  * @author  SO
- * @version v1.0.0
- * @date    14-September-2021
+ * @version v1.4.0
+ * @date    14-November-2021
  * @brief   Driver for the BQ25700 battery charger controller.
  ******************************************************************************
  */

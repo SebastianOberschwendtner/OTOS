@@ -1,5 +1,5 @@
 /**
- * OTP20 - oBank
+ * OTOS - Open Tec Operating System
  * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
@@ -21,8 +21,8 @@
  ******************************************************************************
  * @file    test_tps65987.cpp
  * @author  SO
- * @version v1.0.0
- * @date    20-September-2021
+ * @version v1.4.0
+ * @date    14-November-2021
  * @brief   Unit tests to test the driver for USB-3 PD controller.
  ******************************************************************************
  */
@@ -30,7 +30,7 @@
 // === Includes ===
 #include <unity.h>
 #include <mock.h>
-#include "tps65987.h"
+#include "battery/tps65987.h"
 
 // === Fixtures ===
 

@@ -1,5 +1,5 @@
 /**
- * OTP20 - oBank
+ * OTOS - Open Tec Operating System
  * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *

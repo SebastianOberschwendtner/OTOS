@@ -1,5 +1,5 @@
 /**
- * OTP20 - oBank
+ * OTOS - Open Tec Operating System
  * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
@@ -22,7 +22,7 @@
 #define MAX17205_h_
 
 // === includes ===
-#include "drivers.h"
+#include "interface.h"
 
 // === Command codes ===
 namespace MAX17205 {
