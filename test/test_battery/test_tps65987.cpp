@@ -21,16 +21,14 @@
  ******************************************************************************
  * @file    test_tps65987.cpp
  * @author  SO
- * @version v1.4.0
+ * @version v2.0.0
  * @date    14-November-2021
  * @brief   Unit tests to test the driver for USB-3 PD controller.
  ******************************************************************************
  */
 
 // === Includes ===
-#include <unity.h>
-#include <mock.h>
-#include "battery/tps65987.h"
+#include "test_tps65987.h"
 
 // === Fixtures ===
 
@@ -97,17 +95,17 @@ public:
  * ▢ controller can read the PD status
  */
 
-void setUp(void) {
-// set stuff up here
-};
+// static void setUp(void) {
+// // set stuff up here
+// };
 
-void tearDown(void) {
-// clean stuff up here
-};
+// static void tearDown(void) {
+// // clean stuff up here
+// };
 
 // === Define Tests ===
 /// @brief Test the constructor
-void test_init(void)
+static void test_init(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -126,7 +124,7 @@ void test_init(void)
 };
 
 /// @brief Test reading a register with variable length
-void test_read_register(void)
+static void test_read_register(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -144,7 +142,7 @@ void test_read_register(void)
 };
 
 /// @brief Test writing a register with variable length
-void test_write_register(void)
+static void test_write_register(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -162,7 +160,7 @@ void test_write_register(void)
 };
 
 /// @brief Test reading a command status
-void test_read_active_command(void)
+static void test_read_active_command(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -181,7 +179,7 @@ void test_read_active_command(void)
 };
 
 /// @brief Test writting a command
-void test_write_command(void)
+static void test_write_command(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -195,7 +193,7 @@ void test_write_command(void)
 };
 
 /// @brief Test reading the current mode of the controller
-void test_read_mode(void)
+static void test_read_mode(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -214,7 +212,7 @@ void test_read_mode(void)
 };
 
 /// @brief Test the correct initialization of the controller
-void test_initialization(void)
+static void test_initialization(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -234,7 +232,7 @@ void test_initialization(void)
 };
 
 /// @brief Test the reading of the PD status
-void test_read_PD_status(void)
+static void test_read_PD_status(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -312,7 +310,7 @@ void test_read_PD_status(void)
 };
 
 /// === Run Tests ===
-int main(int argc, char** argv)
+void test_tps65987(void)
 {
     UNITY_BEGIN();
     test_init();
@@ -325,5 +323,6 @@ int main(int argc, char** argv)
     test_read_mode();
     test_read_PD_status();
     UNITY_END();
-    return 0;
+    // return 0;
+    return;
 };

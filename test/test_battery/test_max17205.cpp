@@ -21,16 +21,14 @@
  ******************************************************************************
  * @file    test_max17205.cpp
  * @author  SO
- * @version v1.4.0
+ * @version v2.0.0
  * @date    14-November-2021
  * @brief   Unit tests to test the driver for battery balancer and coulomb counter.
  ******************************************************************************
  */
 
 // === Includes ===
-#include <unity.h>
-#include <mock.h>
-#include "battery/max17205.h"
+#include "test_max17205.h"
 
 // === Fixtures ===
 
@@ -102,17 +100,17 @@ public:
  * ▢ controller can enable/disable sleep mode
  */
 
-void setUp(void) {
-// set stuff up here
-};
+// static void setUp(void) {
+// // set stuff up here
+// };
 
-void tearDown(void) {
-// clean stuff up here
-};
+// static void tearDown(void) {
+// // clean stuff up here
+// };
 
 // === Define Tests ===
 /// @brief Test the constructor
-void test_init(void)
+static void test_init(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -138,7 +136,7 @@ void test_init(void)
 };
 
 /// @brief Test writting of registers
-void test_write_register(void)
+static void test_write_register(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -159,7 +157,7 @@ void test_write_register(void)
 };
 
 /// @brief Test reading of registers
-void test_read_register(void)
+static void test_read_register(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -180,7 +178,7 @@ void test_read_register(void)
 };
 
 /// @brief test reading the battery voltage
-void test_read_battery_voltage(void)
+static void test_read_battery_voltage(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -202,7 +200,7 @@ void test_read_battery_voltage(void)
 };
 
 /// @brief test reading the battery current
-void test_read_battery_current(void)
+static void test_read_battery_current(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -222,7 +220,7 @@ void test_read_battery_current(void)
 };
 
 /// @brief test reading the cell voltage
-void test_read_cell_voltage(void)
+static void test_read_cell_voltage(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -242,7 +240,7 @@ void test_read_cell_voltage(void)
 };
 
 /// @brief test reading the battery current
-void test_read_battery_current_avg(void)
+static void test_read_battery_current_avg(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -262,7 +260,7 @@ void test_read_battery_current_avg(void)
 };
 
 /// @brief test reading the cell voltage
-void test_read_cell_voltage_avg(void)
+static void test_read_cell_voltage_avg(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -282,7 +280,7 @@ void test_read_cell_voltage_avg(void)
 };
 
 /// === Run Tests ===
-int main(int argc, char** argv)
+void test_max17205(void)
 {
     UNITY_BEGIN();
     test_init();
@@ -294,5 +292,6 @@ int main(int argc, char** argv)
     test_read_battery_current_avg();
     test_read_cell_voltage_avg();
     UNITY_END();
-    return 0;
+    // return 0;
+    return;
 };

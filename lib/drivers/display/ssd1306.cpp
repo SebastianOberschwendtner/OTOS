@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    ssd1306.cpp
  * @author  SO
- * @version v1.4.0
+ * @version v2.0.0
  * @date    14-November-2021
  * @brief   Driver for the SSD1306 display controller.
  ******************************************************************************
@@ -30,14 +30,17 @@
 // === Includes ===
 #include "ssd1306.h"
 
+template class SSD1306::Controller<I2C::Controller_Base>;
+
 // === Functions ===
 
 /**
  * @brief Constructor for display controller.
  * @param i2c_controller The reference to the used i2c peripheral.
  */
-SSD1306::Controller::Controller(I2C::Controller_Base& i2c_controller):
-i2c(&i2c_controller)
+template<class bus_controller>
+SSD1306::Controller<bus_controller>::Controller(bus_controller& bus_used):
+bus{&bus_used}
 {
     this->payload.value = 0x00;
 };
@@ -46,10 +49,11 @@ i2c(&i2c_controller)
  * @brief Initialize the display controller.
  * @return Returns True when the display was initialized without any errors.
  */
-bool SSD1306::Controller::initialize(void)
+template<class bus_controller>
+bool SSD1306::Controller<bus_controller>::initialize(void)
 {
     // Set the target address for the i2c controller
-    this->i2c->set_target_address(i2c_address);
+    this->bus->set_target_address(i2c_address);
 
     // send the initialization data
     if (!this->send_command_byte(Command::display_off))          return false;
@@ -92,14 +96,15 @@ bool SSD1306::Controller::initialize(void)
  * @param cmd The command byte to send.
  * @return Returns True when the command was sent successfully.
  */
-bool SSD1306::Controller::send_command_byte(const Command cmd)
+template<class bus_controller>
+bool SSD1306::Controller<bus_controller>::send_command_byte(const Command cmd)
 {
     // Set the payload, a single byte sends always two bytes:
     // The first byte (0x00) indicates that the following data
     // is a command
     this->payload.byte[1] = 0x00;
     this->payload.byte[0] = static_cast<unsigned char>(cmd);
-    return this->i2c->send_data(this->payload, 2);
+    return this->bus->send_data(this->payload, 2);
 };
 
 /**
@@ -107,21 +112,23 @@ bool SSD1306::Controller::send_command_byte(const Command cmd)
  * @param cmd The command byte to send.
  * @return Returns True when the command was sent successfully.
  */
-bool SSD1306::Controller::send_command_data(const unsigned char cmd)
+template<class bus_controller>
+bool SSD1306::Controller<bus_controller>::send_command_data(const unsigned char cmd)
 {
     // Set the payload, a single byte sends always two bytes:
     // The first byte (0x00) indicates that the following data
     // is a command
     this->payload.byte[1] = 0x00;
     this->payload.byte[0] = cmd;
-    return this->i2c->send_data(this->payload, 2);
+    return this->bus->send_data(this->payload, 2);
 };
 
 /**
  * @brief Turn the display on.
  * @return Returns True when the dispaly did respond correctly.
  */
-bool SSD1306::Controller::on(void)
+template<class bus_controller>
+bool SSD1306::Controller<bus_controller>::on(void)
 {
     return this->send_command_byte(Command::display_on);
 };
@@ -130,7 +137,8 @@ bool SSD1306::Controller::on(void)
  * @brief Turn the display off.
  * @return Returns True when the dispaly did respond correctly.
  */
-bool SSD1306::Controller::off(void)
+template<class bus_controller>
+bool SSD1306::Controller<bus_controller>::off(void)
 {
     return this->send_command_byte(Command::display_off);
 };
@@ -140,11 +148,12 @@ bool SSD1306::Controller::off(void)
  * @param buffer Pointer to the buffer with the content.
  * @return Returns True when the buffer was sent successfully.
  */
-bool SSD1306::Controller::draw(const unsigned char* buffer)
+template<class bus_controller>
+bool SSD1306::Controller<bus_controller>::draw(const unsigned char* buffer)
 {
     // Send all 4 pages of the buffer
     for (unsigned char iPage=0; iPage<4; iPage++)
-        if(!this->i2c->send_array_leader(0x40, (buffer + 128*iPage), 128))
+        if(!this->bus->send_array_leader(0x40, (buffer + 128*iPage), 128))
             return false;
     
     // Sending was successfull

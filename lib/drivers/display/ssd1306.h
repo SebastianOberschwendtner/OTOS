@@ -19,10 +19,11 @@
  */
 
 #ifndef SSD1306_H_
-#define SSD1306_h_
+#define SSD1306_H_
 
 // === includes ===
 #include "interface.h"
+#include <variant>
 
 // === Command codes ===
 namespace SSD1306 {
@@ -68,11 +69,12 @@ namespace SSD1306 {
     };
 
     // === Classes ===
+    template<class bus_controller>
     class Controller
     {
     private:
         // *** properties ***
-        I2C::Controller_Base* i2c;
+        bus_controller* bus;
         I2C::Data_t payload;
 
         // *** methods ***
@@ -81,7 +83,7 @@ namespace SSD1306 {
 
     public:
         // *** Constructor ***
-        Controller(I2C::Controller_Base& i2c_controller);
+        Controller(bus_controller& bus_used);
 
         // *** Methods ***
 

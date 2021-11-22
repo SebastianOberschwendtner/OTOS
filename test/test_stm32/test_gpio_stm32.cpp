@@ -28,30 +28,29 @@
  */
 
 // === Includes ===
-#include "unity.h"
-#include "stm32/gpio_stm32.h"
+#include "test_gpio_stm32.h"
 
 // === Mocks ===
 extern Mock::Callable EnableIRQ;
 
 // === Fixtures ===
-void setUp(void) {
+static void setUp_GPIO(void) {
     // set stuff up here
     RCC->registers_to_default();
     GPIOA->registers_to_default();
     EXTI->registers_to_default();
 };
 
-void tearDown(void) {
-    // clean stuff up here
-};
+// void tearDown(void) {
+//     // clean stuff up here
+// };
 
 // === Define Tests ===
 
 /// @brief Test initialization of pin.
-void test_init_pin(void)
+static void test_init_pin(void)
 {
-    setUp();
+    setUp_GPIO();
     // Assume the AHB1ENR register was already written to
     RCC->AHB1ENR = 0b1000;
 
@@ -64,9 +63,9 @@ void test_init_pin(void)
 };
 
 /// @brief Test initialization of pin with specifying the output mode.
-void test_init_pin_with_mode(void)
+static void test_init_pin_with_mode(void)
 {
-    setUp();
+    setUp_GPIO();
     // Assume the AHB1ENR register was already written to
     RCC->AHB1ENR = 0b1000;
 
@@ -81,9 +80,9 @@ void test_init_pin_with_mode(void)
 };
 
 /// @brief Test the mode setting.
-void test_set_mode(void)
+static void test_set_mode(void)
 {
-    setUp();
+    setUp_GPIO();
     // Assume other outputs are already set
     GPIOA->MODER = 0b1100;
 
@@ -99,9 +98,9 @@ void test_set_mode(void)
 };
 
 /// @brief Test the output type setting.
-void test_set_type(void)
+static void test_set_type(void)
 {
-    setUp();
+    setUp_GPIO();
     // Assume other outputs are already set
     GPIOA->OTYPER = 0b1100;
 
@@ -117,9 +116,9 @@ void test_set_type(void)
 };
 
 /// @brief Test the output speed setting
-void test_set_speed(void)
+static void test_set_speed(void)
 {
-    setUp();
+    setUp_GPIO();
     // Assume other outputs are already set
     GPIOA->OSPEEDR = 0b1100;
 
@@ -139,9 +138,9 @@ void test_set_speed(void)
 };
 
 /// @brief Test the push or pull output setting.
-void test_set_pull(void)
+static void test_set_pull(void)
 {
-    setUp();
+    setUp_GPIO();
     // Assume other outputs are already set
     GPIOA->PUPDR = 0b1100;
 
@@ -159,9 +158,9 @@ void test_set_pull(void)
 };
 
 /// @brief Test setting the output high.
-void test_set_high(void)
+static void test_set_high(void)
 {
-    setUp();
+    setUp_GPIO();
 
     // Create PIN object
     GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
@@ -173,9 +172,9 @@ void test_set_high(void)
 };
 
 /// @brief Test setting the output low.
-void test_set_low(void)
+static void test_set_low(void)
 {
-    setUp();
+    setUp_GPIO();
 
     // Create PIN object
     GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
@@ -187,9 +186,9 @@ void test_set_low(void)
 };
 
 /// @brief Test the setting of the output state.
-void test_set(void)
+static void test_set(void)
 {
-    setUp();
+    setUp_GPIO();
 
     // Create PIN object
     GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
@@ -204,9 +203,9 @@ void test_set(void)
 };
 
 /// @brief Test the output toggle function.
-void test_toggle(void)
+static void test_toggle(void)
 {
-    setUp();
+    setUp_GPIO();
     // Assume other outputs are already set
     GPIOA->ODR = 0b1100;
 
@@ -222,9 +221,9 @@ void test_toggle(void)
 };
 
 /// @brief Test reading the input value.
-void test_get(void)
+static void test_get(void)
 {
-    setUp();
+    setUp_GPIO();
     // Assume other outputs are already set
     GPIOA->IDR = 0b1100;
 
@@ -238,9 +237,9 @@ void test_get(void)
 };
 
 /// @brief Test setting an alternate function in the low register
-void test_alternate_function_low(void)
+static void test_alternate_function_low(void)
 {
-    setUp();
+    setUp_GPIO();
     // Assume other AFs are already set
     GPIOA->AFR[0] = 0b1101;
 
@@ -253,9 +252,9 @@ void test_alternate_function_low(void)
 };
 
 /// @brief Test setting an alternate function in the low register
-void test_alternate_function_high(void)
+static void test_alternate_function_high(void)
 {
-    setUp();
+    setUp_GPIO();
     // Assume other AFs are already set
     GPIOA->AFR[1] = 0b1101;
 
@@ -268,9 +267,9 @@ void test_alternate_function_high(void)
 };
 
 /// @brief Test the reading of rising and falling edges
-void test_edges(void)
+static void test_edges(void)
 {
-    setUp();
+    setUp_GPIO();
 
     // Create PIN object
     GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
@@ -306,9 +305,9 @@ void test_edges(void)
 };
 
 /// @brief test enabling interrupts
-void test_enable_interrupt(void)
+static void test_enable_interrupt(void)
 {
-    setUp();
+    setUp_GPIO();
 
     // Create PIN object
     GPIO::PIN PA0(GPIO::PORTA, GPIO::PIN0);
@@ -351,9 +350,9 @@ void test_enable_interrupt(void)
 };
 
 /// @brief Test reseting a pending interrupt
-void test_reset_pending_interrupt(void)
+static void test_reset_pending_interrupt(void)
 {
-    setUp();
+    setUp_GPIO();
 
     // Create PIN object
     GPIO::PIN PA0(GPIO::PORTA, GPIO::PIN0);
@@ -371,7 +370,7 @@ void test_reset_pending_interrupt(void)
     TEST_ASSERT_EQUAL(0b101, EXTI->PR);
 }
 
-int main(int argc, char** argv)
+void test_gpio_stm32(void)
 {
     UNITY_BEGIN();
     test_init_pin();
@@ -391,5 +390,5 @@ int main(int argc, char** argv)
     test_enable_interrupt();
     test_reset_pending_interrupt();
     UNITY_END();
-    return 0;
+    return;
 };

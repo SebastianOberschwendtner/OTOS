@@ -28,9 +28,7 @@
  */
 
 // ****** Includes ******
-#include "unity.h"
-#include "mock.h"
-#include "stm32/i2c_stm32.h"
+#include "test_i2c_stm32.h"
 
 /** === Test List ===
 * ▢ i2c controller can be created defining the clock speed:
@@ -101,19 +99,19 @@ public:
 };
 
 // === Tests ===
-void setUp(void) {
+static void setUp_I2C(void) {
 // set stuff up here
 I2C1->registers_to_default();
 };
 
-void tearDown(void) {
-// clean stuff up here
-};
+// void tearDown(void) {
+// // clean stuff up here
+// };
 
 /// @brief Test the initialization of the controller
-void test_init(void)
+static void test_init(void)
 {
-    setUp();
+    setUp_I2C();
     // Assume other clocks in RCC are already set
     RCC->APB1ENR = (1<<23) | (1<<20);
 
@@ -133,7 +131,7 @@ void test_init(void)
 };
 
 /// @brief Test the setting of the target address
-void test_target_address(void)
+static void test_target_address(void)
 {
     // Create object
     I2C::Controller UUT(I2C::I2C_1, 400000);
@@ -148,7 +146,7 @@ void test_target_address(void)
 };
 
 /// @brief Test the assignment of the output pins.
-void test_output_assignment(void)
+static void test_output_assignment(void)
 {
     // Create object
     I2C::Controller UUT(I2C::I2C_1, 400000);
@@ -169,7 +167,7 @@ void test_output_assignment(void)
 };
 
 /// @brief Test the enabling and disabling of the peripheral.
-void test_enable(void)
+static void test_enable(void)
 {
     // Create Object
     I2C::Controller UUT(I2C::I2C_1, 400000);
@@ -183,7 +181,7 @@ void test_enable(void)
 };
 
 /// @brief Test the start of an I2C communication
-void test_start_communication(void)
+static void test_start_communication(void)
 {
     // Create Object
     I2C::Controller UUT(I2C::I2C_1, 400000);
@@ -200,9 +198,9 @@ void test_start_communication(void)
 };
 
 /// @brief Test whether controller can read its events
-void test_events(void)
+static void test_events(void)
 {
-    setUp();
+    setUp_I2C();
 
     // Create Object
     I2C::Controller UUT(I2C::I2C_1, 100000);
@@ -266,9 +264,9 @@ void test_events(void)
 };
 
 /// @brief Test the i2c address transmission
-void test_address_transmission(void)
+static void test_address_transmission(void)
 {
-    setUp();
+    setUp_I2C();
     // Set the flags for a successfull data transmission
     I2C1->SR1 = I2C_SR1_ADDR | I2C_SR1_SB;
     I2C1->SR2 = I2C_SR2_MSL;
@@ -295,9 +293,9 @@ void test_address_transmission(void)
 };
 
 /// @brief Test sending a byte via the i2c bus
-void test_send_byte(void)
+static void test_send_byte(void)
 {
-    setUp();
+    setUp_I2C();
     // Set the flags for a successfull data transmission
     I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
     I2C1->SR2 = I2C_SR2_MSL;
@@ -327,9 +325,9 @@ void test_send_byte(void)
 };
 
 /// @brief Test sending a word via the i2c bus
-void test_send_word(void)
+static void test_send_word(void)
 {
-    setUp();
+    setUp_I2C();
     // Set the flags for a successfull data transmission
     I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
     I2C1->SR2 = I2C_SR2_MSL;
@@ -354,9 +352,9 @@ void test_send_word(void)
 };
 
 /// @brief Test sending an array via the i2c bus
-void test_send_array(void)
+static void test_send_array(void)
 {
-    setUp();
+    setUp_I2C();
     // Set the flags for a successfull data transmission
     I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
     I2C1->SR2 = I2C_SR2_MSL;
@@ -383,9 +381,9 @@ void test_send_array(void)
 };
 
 /// @brief Test sending an array with an preceeding byte via the i2c bus
-void test_send_array_with_leading_byte(void)
+static void test_send_array_with_leading_byte(void)
 {
-    setUp();
+    setUp_I2C();
     // Set the flags for a successfull data transmission
     I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
     I2C1->SR2 = I2C_SR2_MSL;
@@ -412,9 +410,9 @@ void test_send_array_with_leading_byte(void)
 };
 
 /// @brief Test receiving data via the i2c bus
-void test_read_data(void)
+static void test_read_data(void)
 {
-    setUp();
+    setUp_I2C();
     // Set the flags for a successfull data transmission
     I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_RXNE | I2C_SR1_ADDR | I2C_SR1_SB;
     I2C1->SR2 = I2C_SR2_MSL;
@@ -447,9 +445,9 @@ void test_read_data(void)
 };
 
 /// @brief Test sending an array via the i2c bus
-void test_read_array(void)
+static void test_read_array(void)
 {
-    setUp();
+    setUp_I2C();
     // Set the flags for a successfull data transmission
     I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_RXNE | I2C_SR1_ADDR | I2C_SR1_SB;
     I2C1->SR2 = I2C_SR2_MSL;
@@ -475,7 +473,7 @@ void test_read_array(void)
 };
 
 // === Main ===
-int main(int argc, char** argv)
+void test_i2c_stm32(void)
 {
     UNITY_BEGIN();
     test_init();
@@ -492,5 +490,5 @@ int main(int argc, char** argv)
     test_read_data();
     test_read_array();
     UNITY_END();
-    return 0;
+    return;
 };

@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    max17205.cpp
  * @author  SO
- * @version v1.4.0
+ * @version v2.0.0
  * @date    14-November-2021
  * @brief   Driver for the MAX17205+ battery balancer and coulomb counter.
  ******************************************************************************

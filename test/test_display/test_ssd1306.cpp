@@ -30,7 +30,8 @@
 // === Includes ===
 #include <unity.h>
 #include <mock.h>
-#include "battery/ssd1306.h"
+#include "display/ssd1306.h"
+#include "display/ssd1306.cpp"
 
 /** === Test List ===
  * ✓ display driver initializes hardware correctly
@@ -42,7 +43,7 @@
 // === Fixtures ===
 
 // Mock the i2c driver
-class I2C_Mock: public I2C::Controller_Base, public Mock::Peripheral
+class I2C_Mock: public Mock::Peripheral
 {
 
 public:
@@ -57,19 +58,20 @@ public:
     // *** Constructor
     I2C_Mock() {};
 
-    // *** overrides for interface
-    void set_target_address  (const unsigned char address) override { call_set_target_address.add_call((int) address); };
-    bool send_data           (const I2C::Data_t payload, const unsigned char n_bytes) override { call_send_data.add_call((int) payload.word[0]); return true; };
-    bool send_byte           (const unsigned char data) override { call_send_byte.add_call((int) data); return true; };
-    bool send_word           (const unsigned int data) override { call_send_word.add_call((int) data); return true; };
-    bool send_array          (const unsigned char* data, const unsigned char n_bytes) override { call_send_array.add_call((int) n_bytes); return true; };
-    bool send_array_leader   (const unsigned char byte, const unsigned char* data, const unsigned char n_bytes) override { call_send_array_leader.add_call((int) byte); return true; };
-    bool read_data           (const unsigned char reg, unsigned char n_bytes) override { return true; };
-    bool read_byte           (const unsigned char reg) override { return true; };
-    bool read_word           (const unsigned char reg) override { return true; };
-    bool read_array          (const unsigned char reg, unsigned char* dest, const unsigned char n_bytes) override {return true; } ;
-    I2C::Data_t  get_rx_data (void) const override { I2C::Data_t data; return data; };
+    // *** s for interface
+    void set_target_address  (const unsigned char address)  { call_set_target_address.add_call((int) address); };
+    bool send_data           (const I2C::Data_t payload, const unsigned char n_bytes)  { call_send_data.add_call((int) payload.word[0]); return true; };
+    bool send_byte           (const unsigned char data)  { call_send_byte.add_call((int) data); return true; };
+    bool send_word           (const unsigned int data)  { call_send_word.add_call((int) data); return true; };
+    bool send_array          (const unsigned char* data, const unsigned char n_bytes)  { call_send_array.add_call((int) n_bytes); return true; };
+    bool send_array_leader   (const unsigned char byte, const unsigned char* data, const unsigned char n_bytes)  { call_send_array_leader.add_call((int) byte); return true; };
+    bool read_data           (const unsigned char reg, unsigned char n_bytes)  { return true; };
+    bool read_byte           (const unsigned char reg)  { return true; };
+    bool read_word           (const unsigned char reg)  { return true; };
+    bool read_array          (const unsigned char reg, unsigned char* dest, const unsigned char n_bytes)  {return true; } ;
+    I2C::Data_t  get_rx_data (void) const  { I2C::Data_t data; return data; };
 };
+template class SSD1306::Controller<I2C_Mock>;
 
 void setUp(void) {
 // set stuff up here

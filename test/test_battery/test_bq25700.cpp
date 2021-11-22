@@ -21,16 +21,14 @@
  ******************************************************************************
  * @file    test_bq25700.cpp
  * @author  SO
- * @version v1.4.0
+ * @version v2.0.0
  * @date    14-November-2021
  * @brief   Unit tests to test the driver for battery charger.
  ******************************************************************************
  */
 
 // === Includes ===
-#include <unity.h>
-#include <mock.h>
-#include "battery/bq25700.h"
+#include "test_bq25700.h"
 
 // === Fixtures ===
 
@@ -105,17 +103,17 @@ public:
  *      ▢ Sleep mode
  */
 
-void setUp(void) {
-// set stuff up here
-};
+// static void setUp(void) {
+// // set stuff up here
+// };
 
-void tearDown(void) {
-// clean stuff up here
-};
+// static void tearDown(void) {
+// // clean stuff up here
+// };
 
 // === Define Tests ===
 /// @brief Test the constructor
-void test_constructor(void)
+static void test_constructor(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -133,7 +131,7 @@ void test_constructor(void)
 };
 
 /// @brief Test initializing the controller
-void test_init(void)
+static void test_init(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -150,7 +148,7 @@ void test_init(void)
 };
 
 /// @brief Test sending options
-void test_set_options(void)
+static void test_set_options(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -187,13 +185,12 @@ void test_set_options(void)
     i2c.call_send_data.assert_called_once_with(0x320000); // BQ25700 expects MSB last
 };
 
-/// === Run Tests ===
-int main(int argc, char** argv)
+/// @brief Main test function for BQ25700
+void test_bq25700(void)
 {
     UNITY_BEGIN();
     test_constructor();
     test_init();
     test_set_options();
     UNITY_END();
-    return 0;
 };

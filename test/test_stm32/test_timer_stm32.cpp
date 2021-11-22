@@ -28,9 +28,7 @@
  */
 
 // ****** Includes ******
-#include "unity.h"
-#include "mock.h"
-#include "stm32/timer_stm32.h"
+#include "test_timer_stm32.h"
 
 /** === Test List ===
  * ▢ Timer instance can be created:
@@ -52,18 +50,18 @@
 // === Mocks ===
 
 // === Tests ===
-void setUp(void) {
+static void setUp_Timer(void) {
 // set stuff up here
 TIM1->registers_to_default();
 RCC->registers_to_default();
 };
 
-void tearDown(void) {
-// clean stuff up here
-};
+// void tearDown(void) {
+// // clean stuff up here
+// };
 
 /// @brief Test the initialization of the controller
-void test_init(void)
+static void test_init(void)
 {
     // Create timer
     Timer::Timer UUT(Timer::Instance::TIM_1);
@@ -72,10 +70,10 @@ void test_init(void)
 };
 
 /// @brief Test the reading of the counter value
-void test_get_count(void)
+static void test_get_count(void)
 {
     // Set stuff up
-    setUp();
+    setUp_Timer();
 
     // Create timer
     Timer::Timer UUT(Timer::Instance::TIM_1);
@@ -89,11 +87,11 @@ void test_get_count(void)
 };
 
 // === Main ===
-int main(int argc, char** argv)
+void test_timer_stm32(void)
 {
     UNITY_BEGIN();
     test_init();
     test_get_count();
     UNITY_END();
-    return 0;
+    return;
 };

@@ -8,6 +8,9 @@
 - Adds a mock interface for the CMSIS drivers of ARM<sup>&reg;</sup>.
 - Adds the method `enable_interrupt` to the GPIO driver. This methods takes care of everything
   which is necessary to enable an edge interrupt on a specific IO pin. [&rdca; v1.3.0](https://github.com/knuffel-v2/OTOS/releases/tag/v1.3.0)
+- Adds driver for IC which can be controlled via a bus system. The IC groups are:
+    - Battery Management ICs
+    - Display Controllers
 
 ### Fixed Issues:
 
