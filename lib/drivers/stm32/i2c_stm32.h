@@ -59,11 +59,11 @@ namespace I2C {
         void            generate_stop       (void);
         void            write_address       (bool read = false);
         bool            send_address        (bool read = false);
-        bool            send_data           (const Data_t payload, const unsigned char n_bytes)         final;
         bool            send_byte           (const unsigned char data)                                  final;
         bool            send_word           (const unsigned int data)                                   final;
         bool            send_array          (const unsigned char* data, const unsigned char n_bytes)    final;
         bool            send_array_leader   (const unsigned char byte, const unsigned char* data, const unsigned char n_bytes)    final;
+        bool                         send_data           (const Data_t payload, const unsigned char n_bytes);
         unsigned char   get_target_address  (void) const;
         bool            read_data           (const unsigned char reg, unsigned char n_bytes)            final;
         bool            read_byte           (const unsigned char reg)                                   final;

@@ -33,16 +33,25 @@ namespace Mock
     // === Class defines ===
 
     // Class for mocking functions and methods
+    template<typename return_type>
     class Callable
     {
     public:
         // *** Properties ***
-        int call_count;
+        int call_count{};
         int last_called_with;
 
         // *** Constructors ***
-        Callable(): call_count(0), last_called_with(0){};
-        Callable(const int count, const int args): call_count(count), last_called_with(args){};
+        // Callable(): call_count(0), last_called_with(0){};
+        // Callable(const int count, const arg_type args): call_count(count), last_called_with(args){};
+
+        // *** Operators ***
+        /**
+         * @brief Call operator which returns a specified value.
+         * @return Returns a value defined by the template parameter.
+         */
+        template<typename T1, typename... Ts>
+        return_type operator() (T1 arg, Ts... args) { this->call_count++; this->last_called_with = static_cast<int>(arg); return return_type{1}; };
 
         // *** Methods ***
         /**

@@ -31,7 +31,7 @@
 #include "cmsis_mock.h"
 
 // === Mocks ===
-Mock::Callable EnableIRQ;
+Mock::Callable<bool> EnableIRQ;
 
 // === Functions ===
 

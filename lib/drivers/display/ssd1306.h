@@ -75,11 +75,10 @@ namespace SSD1306 {
     private:
         // *** properties ***
         bus_controller* bus;
-        I2C::Data_t payload;
 
         // *** methods ***
-        bool        send_command_byte(const Command cmd);
-        bool        send_command_data(const unsigned char cmd);
+        bool        send_command_byte(const Command cmd) const;
+        bool        send_command_data(const unsigned char cmd) const;
 
     public:
         // *** Constructor ***
@@ -87,10 +86,10 @@ namespace SSD1306 {
 
         // *** Methods ***
 
-        bool        initialize  (void);
-        bool        on          (void);
-        bool        off         (void);
-        bool        draw        (const unsigned char* buffer);
+        bool        initialize  (void) const;
+        bool        on          (void) const;
+        bool        off         (void) const;
+        bool        draw        (const unsigned char* buffer) const;
     };
 };
 
