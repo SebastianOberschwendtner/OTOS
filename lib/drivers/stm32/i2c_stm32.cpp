@@ -902,3 +902,8 @@ bool I2C::Controller::bus_busy(void) const
     return this->peripheral->ISR & I2C_ISR_BUSY;
 #endif
 };
+
+bool Bus::send_word(I2C::Controller* bus, const unsigned int word)
+{
+    return bus->send_word(word);
+};

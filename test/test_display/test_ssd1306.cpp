@@ -31,7 +31,7 @@
 #include <unity.h>
 #include <mock.h>
 #include "display/ssd1306.h"
-#include "display/ssd1306.cpp"
+
 
 /** === Test List ===
  * ✓ display driver initializes hardware correctly
@@ -45,32 +45,31 @@
 // Mock the i2c driver
 class I2C_Mock : public Mock::Peripheral
 {
-
 public:
-    // *** Variables to track calls
-    Mock::Callable<bool> set_target_address;
-    Mock::Callable<bool> send_byte;
-    Mock::Callable<bool> send_word;
-    Mock::Callable<bool> send_array;
-    Mock::Callable<bool> send_array_leader;
-
     // *** Constructor
     I2C_Mock(){};
-
-    // *** s for interface
-    // void set_target_address  (const unsigned char address)  { call_set_target_address.add_call((int) address); };
-    // bool send_data           (const I2C::Data_t payload, const unsigned char n_bytes)  { call_send_data.add_call((int) payload.word[0]); return true; };
-    // bool send_byte           (const unsigned char data)  { call_send_byte.add_call((int) data); return true; };
-    // bool send_word           (const unsigned int data)  { call_send_word.add_call((int) data); return true; };
-    // bool send_array          (const unsigned char* data, const unsigned char n_bytes)  { call_send_array.add_call((int) n_bytes); return true; };
-    // bool send_array_leader   (const unsigned char byte, const unsigned char* data, const unsigned char n_bytes)  { /*call_send_array_leader.add_call((int) byte);*/ return true; };
-    // bool read_data           (const unsigned char reg, unsigned char n_bytes)  { return true; };
-    // bool read_byte           (const unsigned char reg)  { return true; };
-    // bool read_word           (const unsigned char reg)  { return true; };
-    // bool read_array          (const unsigned char reg, unsigned char* dest, const unsigned char n_bytes)  {return true; } ;
-    // I2C::Data_t  get_rx_data (void) const  { I2C::Data_t data; return data; };
+    Mock::Callable<bool> set_target_address;
+    Mock::Callable<bool> send_array;
+    Mock::Callable<bool> send_array_leader;
 };
-template class SSD1306::Controller<I2C_Mock>;
+
+namespace Mock {
+// *** Variables to track calls
+Callable<bool> send_byte;
+Callable<bool> send_word;
+};
+
+namespace Bus {
+
+    // bool send_word(I2C_Mock* bus, unsigned int word);
+    bool send_word(I2C_Mock* bus, unsigned int word)
+    {
+        return Mock::send_word(word);
+    };
+};
+// #include "display/ssd1306.cpp"
+// template class SSD1306::Controller<I2C_Mock>;
+
 
 void setUp(void){
     // set stuff up here
@@ -92,7 +91,7 @@ void test_init(void)
     // perform testing
     TEST_ASSERT_TRUE(UUT.initialize());
     i2c.set_target_address.assert_called_once_with(SSD1306::i2c_address);
-    TEST_ASSERT_TRUE(i2c.send_word.call_count > 0);
+    TEST_ASSERT_TRUE(Mock::send_word.call_count > 0);
 };
 
 /// @brief Test whether the display can be turned on and off
@@ -106,11 +105,11 @@ void test_on_and_off(void)
 
     // perform testing
     TEST_ASSERT_TRUE(UUT.on());
-    i2c.send_word.assert_called_last_with(
+    Mock::send_word.assert_called_last_with(
         static_cast<unsigned char>(SSD1306::Command::display_on));
 
     TEST_ASSERT_TRUE(UUT.off());
-    i2c.send_word.assert_called_last_with(
+    Mock::send_word.assert_called_last_with(
         static_cast<unsigned char>(SSD1306::Command::display_off));
 };
 

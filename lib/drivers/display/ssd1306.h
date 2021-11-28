@@ -22,74 +22,109 @@
 #define SSD1306_H_
 
 // === includes ===
-#include "interface.h"
+// #include "interface.h"
+#include "drivers.h"
 #include <variant>
 
 // === Command codes ===
-namespace SSD1306 {
-    constexpr unsigned char i2c_address         = 0x3C<<1; // 011110+SA0+RW - 0x3C or 0x3D
+namespace SSD1306
+{
+    constexpr unsigned char i2c_address = 0x3C << 1; // 011110+SA0+RW - 0x3C or 0x3D
 
     // commands
-    enum class Command: unsigned char
+    enum class Command : unsigned char
     {
-        set_contrast        = 0x81,
-        display_ram         = 0xA4,
-        display_all_on      = 0xA5,
-        display_normal      = 0xA6,
-        display_inverted    = 0xA7,
-        display_off         = 0xAE,
-        display_on          = 0xAF,
-        set_display_offset  = 0xD3,
-        set_com_pins        = 0xDA,
-        set_vcom_detect     = 0xDB,
-        set_disp_clock_div  = 0xD5,
-        set_precharge       = 0xD9,
-        set_multiplex       = 0xA8,
-        set_column_low      = 0x00,
-        set_column_high     = 0x10,
-        set_startline       = 0x40,
-        memory_mode         = 0x20,
-        column_address      = 0x21,
-        page_address        = 0x22,
-        com_scan_inc        = 0xC0,
-        com_scan_dec        = 0xC8,
-        seg_remap           = 0xA0,
-        charge_pump         = 0x8D,
-        external_vcc        = 0x01,
-        switch_cap_vcc      = 0x02,
-    
+        set_contrast = 0x81,
+        display_ram = 0xA4,
+        display_all_on = 0xA5,
+        display_normal = 0xA6,
+        display_inverted = 0xA7,
+        display_off = 0xAE,
+        display_on = 0xAF,
+        set_display_offset = 0xD3,
+        set_com_pins = 0xDA,
+        set_vcom_detect = 0xDB,
+        set_disp_clock_div = 0xD5,
+        set_precharge = 0xD9,
+        set_multiplex = 0xA8,
+        set_column_low = 0x00,
+        set_column_high = 0x10,
+        set_startline = 0x40,
+        memory_mode = 0x20,
+        column_address = 0x21,
+        page_address = 0x22,
+        com_scan_inc = 0xC0,
+        com_scan_dec = 0xC8,
+        seg_remap = 0xA0,
+        charge_pump = 0x8D,
+        external_vcc = 0x01,
+        switch_cap_vcc = 0x02,
+
         // Scrolling
-        scroll_activate     = 0x2F,
-        scroll_deactivate   = 0x2E,
+        scroll_activate = 0x2F,
+        scroll_deactivate = 0x2E,
         scroll_set_vertical = 0xA3,
-        scroll_hori_right   = 0x26,
-        scroll_hori_left    = 0x27,
-        scroll_vert_hori_left  = 0x29,
+        scroll_hori_right = 0x26,
+        scroll_hori_left = 0x27,
+        scroll_vert_hori_left = 0x29,
         scroll_vert_hori_right = 0x2A
     };
 
     // === Classes ===
-    template<class bus_controller>
+    class bus
+    {
+    private:
+        struct bus_concept
+        {
+            virtual ~bus_concept(){};
+            virtual bool send_word(unsigned int word) = 0;
+        };
+
+        template <class bus_used>
+        struct bus_model : public bus_concept
+        {
+            bus_used bus_object;
+            bus_model(bus_used const &mybus)
+                : bus_object{mybus} {};
+
+            bool send_word(unsigned int word) final
+            {
+                return Bus::send_word(bus_object, word);
+            }
+        };
+
+        friend bool send_word(bus const& model, unsigned int word)
+        {
+            return model.pimpl->send_word(word);
+        }
+        bus_concept *pimpl;
+
+    public:
+        template <class bus_used>
+        bus(bus_used const &mybus)
+            : pimpl{&bus_model<bus_used>(mybus)} {};
+    };
+
+    // template<class bus_controller>
     class Controller
     {
     private:
         // *** properties ***
-        bus_controller* bus;
+        bus mybus;
 
         // *** methods ***
-        bool        send_command_byte(const Command cmd) const;
-        bool        send_command_data(const unsigned char cmd) const;
+        bool send_command_byte(const Command cmd) const;
+        bool send_command_data(const unsigned char cmd) const;
 
     public:
         // *** Constructor ***
-        Controller(bus_controller& bus_used);
+        Controller(bus bus_used);
 
         // *** Methods ***
-
-        bool        initialize  (void) const;
-        bool        on          (void) const;
-        bool        off         (void) const;
-        bool        draw        (const unsigned char* buffer) const;
+        bool initialize(void) const;
+        bool on(void) const;
+        bool off(void) const;
+        bool draw(const unsigned char *buffer) const;
     };
 };
 
