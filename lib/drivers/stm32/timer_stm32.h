@@ -26,12 +26,14 @@
 #include "interface.h"
 
 // === Declarations ===
-namespace Timer {
+namespace Timer
+{
 
     // === Enums ===
     enum class Mode
     {
-        Normal, PWM
+        Normal,
+        PWM
     };
 
     // === Classes ===
@@ -39,8 +41,8 @@ namespace Timer {
     {
     private:
         // properties
-        volatile TIM_TypeDef*   thisTimer;
-        const    IO             thisInstance;
+        volatile TIM_TypeDef *thisTimer;
+        const IO thisInstance;
 
     public:
         // === Constructor ===
@@ -48,8 +50,7 @@ namespace Timer {
         Timer(const IO timer);
 
         // === Methods ===
-        unsigned int    get_count       (void) const;
-
+        unsigned int get_count(void) const;
     };
 };
 

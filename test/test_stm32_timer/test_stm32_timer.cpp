@@ -52,18 +52,19 @@
 // === Mocks ===
 
 // === Tests ===
-static void setUp_Timer(void) {
-// set stuff up here
-TIM1->registers_to_default();
-RCC->registers_to_default();
+void setUp(void)
+{
+    // set stuff up here
+    TIM1->registers_to_default();
+    RCC->registers_to_default();
 };
 
-// void tearDown(void) {
-// // clean stuff up here
-// };
+void tearDown(void){
+    // clean stuff up here
+};
 
 /// @brief Test the initialization of the controller
-static void test_init(void)
+void test_init(void)
 {
     // Create timer
     Timer::Timer UUT(IO::TIM_1);
@@ -72,10 +73,10 @@ static void test_init(void)
 };
 
 /// @brief Test the reading of the counter value
-static void test_get_count(void)
+void test_get_count(void)
 {
     // Set stuff up
-    setUp_Timer();
+    setUp();
 
     // Create timer
     Timer::Timer UUT(IO::TIM_1);
