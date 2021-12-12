@@ -35,12 +35,19 @@ legend Hardware or Processor specific levels are marked in **<color #SkyBlue> bl
 
 ' === Drivers ===
 **[#GreenYellow] drivers
+*** interface.h
+****_ error_codes.h
 *** drivers.h
+****_ battery
+*****[#SkyBlue] bq25700.h
+*****[#SkyBlue] max17205.h
+*****[#SkyBlue] tps65987.h
+****_ display
+*****[#SkyBlue] ssd1306.h
 ****_ stm32
 *****[#SkyBlue] gpio_stm32.h
 *****[#SkyBlue] i2c_stm32.h
-*** interface.h
-****_ error_codes.h
+*****[#SkyBlue] timer_stm32.h
 
 ' === Graphics ===
 **[#GreenYellow] graphics

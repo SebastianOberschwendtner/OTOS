@@ -5,45 +5,47 @@ hide empty members
 
 class Schedule{
     'Properties:
-    - ThreadPriority
-    - TickSchedule
-    - TickCounter
+    - priority
+    - schedule_ticks
+    - counter_ticks
 
     'Methods
     + Schedule()
-    + setSchedule()
-    + countTick()
-    + isRunable()
+    + set_schedule()
+    + count_tick()
+    + is_runable()
 }
 
 class Thread {
     'Properies:
-    - StackSize
-    - StackTop
-    + StackPointer
+    - Stacksize
+    - Stack_top
+    + Stack_pointer
 
     'Methods:
     + Thread()
-    + setStack()
-    + getStackSize()
-    + getStackOverflow()
+    + set_stack()
+    + get_stacksize()
+    + get_stackoverflow()
 }
 class Kernel{
     'Properties:
-    - CurrentThread
-    - ThreadCount
+    - active_thread
+    - thread_count
     - Thread[NUMBER_THREADS]
     - Stack[StackSize]
+    - Time_ms
 
     'Methods:
     + Kernel()
-    + scheduleThread()
-    ' + ScheduleThread_Hz()
+    + schedule_thread()
     + start()
-    - updateSchedule()
-    - getNextThread()
-    - switchThread()
-    ' - time_ms()
+    - update_schedule()
+    - get_next_thread()
+    - switch_thread()
+    + get_allocated_stacksize()
+    + count_time_ms()
+    + get_time_ms()
 }
 
 class Watchdog {
