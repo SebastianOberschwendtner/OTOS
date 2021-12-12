@@ -33,7 +33,7 @@
 #include "stm32/gpio_stm32.h"
 
 // === Mocks ===
-extern Mock::Callable EnableIRQ;
+extern Mock::Callable<bool> CMSIS_NVIC_EnableIRQ;
 
 // === Fixtures ===
 void setUp(void) {
@@ -336,7 +336,7 @@ void test_enable_interrupt(void)
     TEST_ASSERT_EQUAL(0b00, EXTI->FTSR);
     TEST_ASSERT_BIT_HIGH(14, RCC->APB2ENR);
     TEST_ASSERT_EQUAL(0x00, SYSCFG->EXTICR[0]);
-    EnableIRQ.assert_called_once_with((int)EXTI0_IRQn);
+    CMSIS_NVIC_EnableIRQ.assert_called_once_with((int)EXTI0_IRQn);
 
     // PA2
     TEST_ASSERT_TRUE(PA2.enable_interrupt(GPIO::Edge::Falling));
@@ -347,7 +347,7 @@ void test_enable_interrupt(void)
     TEST_ASSERT_BIT_HIGH(14, RCC->APB2ENR);
     TEST_ASSERT_EQUAL(0x00, SYSCFG->EXTICR[0]);
     TEST_ASSERT_EQUAL(0x00, SYSCFG->EXTICR[2]);
-    EnableIRQ.assert_called_once_with((int)EXTI2_IRQn);
+    CMSIS_NVIC_EnableIRQ.assert_called_once_with((int)EXTI2_IRQn);
 
     // PC5
     TEST_ASSERT_TRUE(PC5.enable_interrupt(GPIO::Edge::Both));
@@ -359,7 +359,7 @@ void test_enable_interrupt(void)
     TEST_ASSERT_EQUAL(0x00, SYSCFG->EXTICR[0]);
     TEST_ASSERT_EQUAL(0x00, SYSCFG->EXTICR[0]);
     TEST_ASSERT_EQUAL((2 << 4), SYSCFG->EXTICR[1]);
-    EnableIRQ.assert_called_once_with((int)EXTI9_5_IRQn);
+    CMSIS_NVIC_EnableIRQ.assert_called_once_with((int)EXTI9_5_IRQn);
 };
 
 /// @brief Test reseting a pending interrupt

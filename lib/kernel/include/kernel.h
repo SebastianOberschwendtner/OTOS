@@ -1,6 +1,7 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 Sebastian Oberschwendtner,
+ * sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,9 +23,10 @@
 #define KERNEL_H_
 
 // *** Includes ***
-#include "thread.h"
-#include "processors.h"
 #include <array>
+
+#include "processors.h"
+#include "thread.h"
 
 // *** Defines ****
 /** The defines are just default values here.
@@ -46,27 +48,26 @@ namespace OTOS
     {
     private:
         // Properties
-        u_base_t CurrentThread;              // The current running thread
-        u_base_t ThreadCount;                // Number of scheduled threads
+        u_base_t active_thread{0};                       // The current active thread
+        u_base_t thread_count{0};                        // Number of scheduled threads
         std::array<Thread, OTOS_NUMBER_THREADS> Threads; // Array with stack data of each thread
-        std::array<u_base_t, OTOS_STACK_SIZE> Stack;     // The total stack for the threads
-        static std::uint32_t Time_ms;           // Kernel timer with ms resolution
+        std::array<u_base_t, OTOS_STACK_SIZE> Stack{0};  // The total stack for the threads
+        static std::uint32_t Time_ms;                    // Kernel timer with ms resolution
 
         // Methods
-        void updateSchedule(void);
-        void getNextThread(void);
-        void switchThread(void);
+        void update_schedule(void);
+        void get_next_thread(void);
+        void switch_thread(void);
 
     public:
         // Methods
         Kernel();
-        void scheduleThread(taskpointer_t TaskFunc, u_base_t StackSize, Priority Priority);
-        // void ScheduleThread_Hz(void);
+        void schedule_thread(taskpointer_t TaskFunc, u_base_t StackSize, Priority Priority);
         void start(void);
-        u_base_t getAllocatedStackSize(void) const;
-        static void countTime_ms(void);
-        static std::uint32_t getTime_ms(void);
+        u_base_t get_allocated_stacksize(void) const;
+        static void count_time_ms(void);
+        static std::uint32_t get_time_ms(void);
     };
 
-};
+}; // namespace OTOS
 #endif

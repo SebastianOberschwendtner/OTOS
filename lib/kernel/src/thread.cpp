@@ -36,7 +36,6 @@
  * @brief Constructor for a ThreadHandler object.
  */
 OTOS::Thread::Thread(void)
-    : StackSize(0), StackTop(0), StackPointer(0)
 {
 
 };
@@ -46,12 +45,12 @@ OTOS::Thread::Thread(void)
  * @param StackPosition Pointer to beginning (top) of thread stack.
  * @param StackSize The size of the thread stack in words.
  */
-void OTOS::Thread::setStack(stackpointer_t StackPosition, u_base_t StackSize)
+void OTOS::Thread::set_stack(stackpointer_t stack_position, u_base_t stacksize)
 {
     // Set the stack information the kernel provides
-    this->StackPointer = StackPosition;
-    this->StackTop = StackPosition;
-    this->StackSize = StackSize;
+    this->Stack_pointer = stack_position;
+    this->Stack_top = stack_position;
+    this->Stacksize = stacksize;
 };
 
 /**
@@ -59,17 +58,17 @@ void OTOS::Thread::setStack(stackpointer_t StackPosition, u_base_t StackSize)
  * @return Allocated stack size of the thread in words.
  * @details getter
  */
-u_base_t OTOS::Thread::getStackSize(void) const
+u_base_t OTOS::Thread::get_stacksize(void) const
 {
-    return this->StackSize;
+    return this->Stacksize;
 };
 
 /**
  * @brief check whether the current thread shows a stack overflow.
  * @return Returns true when a stack overflow occurred.
  */
-bool OTOS::Thread::getStackOverflow(void) const
+bool OTOS::Thread::get_stackoverflow(void) const
 {
     // When the current stack pointer occupies more or all of the stack, return true
-    return (u_base_t)(this->StackTop - this->StackPointer) >= this->StackSize;
+    return (u_base_t)(this->Stack_top - this->Stack_pointer) >= this->Stacksize;
 };

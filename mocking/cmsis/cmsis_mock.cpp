@@ -30,9 +30,10 @@
 // === Includes ===
 #include "cmsis_mock.h"
 
+
 // === Mocks ===
-Mock::Callable<bool> EnableIRQ;
-Mock::Callable<uint32_t> SysTick_Configure;
+Mock::Callable<bool> CMSIS_NVIC_EnableIRQ;
+Mock::Callable<uint32_t> CMSIS_SysTick_Config;
 
 // === Functions ===
 
@@ -42,7 +43,7 @@ Mock::Callable<uint32_t> SysTick_Configure;
  */
 void NVIC_EnableIRQ(IRQn_Type IRQn)
 {
-    EnableIRQ.add_call(static_cast<int>(IRQn));
+    CMSIS_NVIC_EnableIRQ.add_call(static_cast<int>(IRQn));
 };
 
 /**
@@ -53,6 +54,6 @@ void NVIC_EnableIRQ(IRQn_Type IRQn)
  */
 uint32_t SysTick_Config(uint32_t ticks)
 {
-    SysTick_Configure.add_call(static_cast<int>(ticks));
+    CMSIS_SysTick_Config.add_call(static_cast<int>(ticks));
     return 0;
 };

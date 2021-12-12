@@ -41,7 +41,6 @@ std::uint32_t OTOS::Kernel::Time_ms = 0; // Initialize the kernel time with 0
  * Only one kernel object should exist in your project!
  */
 OTOS::Kernel::Kernel()
-    : CurrentThread(0), ThreadCount(0)
 {
     // Call assembler function to return to kernel in handler mode
     // Uses the thread stack as temporary memory
@@ -52,7 +51,7 @@ OTOS::Kernel::Kernel()
  * @brief Update the thread tick counters and determine which
  * thread is runable.
  */
-void OTOS::Kernel::updateSchedule(void)
+void OTOS::Kernel::update_schedule(void)
 {
     ///@todo Implement the scheduling!
 };
@@ -63,24 +62,24 @@ void OTOS::Kernel::updateSchedule(void)
  * @details This currently only implements a simple round-robin scheme.
  * @todo Add scheduling with priority.
  */
-void OTOS::Kernel::getNextThread(void)
+void OTOS::Kernel::get_next_thread(void)
 {
     // Increment to next thread
-    this->CurrentThread++;
+    this->active_thread++;
 
     // Check whether thread counter overflowed
-    if (this->CurrentThread >= this->ThreadCount)
-        this->CurrentThread = 0;
+    if (this->active_thread >= this->thread_count)
+        this->active_thread = 0;
 };
 
 /**
  * @brief Switch to the thread which is currently active and handover control.
  */
-void OTOS::Kernel::switchThread(void)
+void OTOS::Kernel::switch_thread(void)
 {
     // Invoke the assembler function to switch context
-    this->Threads[this->CurrentThread].StackPointer =
-        __otos_switch(this->Threads[this->CurrentThread].StackPointer);
+    this->Threads[this->active_thread].Stack_pointer =
+        __otos_switch(this->Threads[this->active_thread].Stack_pointer);
 };
 
 /**
@@ -89,24 +88,24 @@ void OTOS::Kernel::switchThread(void)
  * @param StackSize The size of the thread stack in words. => Should be checked with 'OTOS::Check::StackSize<Size>()' first.
  * @param Priority Priority of the scheduled thread.
  */
-void OTOS::Kernel::scheduleThread(taskpointer_t TaskFunc, const u_base_t StackSize, Priority Priority)
+void OTOS::Kernel::schedule_thread(taskpointer_t TaskFunc, const u_base_t StackSize, Priority Priority)
 {
     // Check whether maximum number of tasks is reached
-    if ( this->ThreadCount < (this->Threads.size()) )
+    if ( this->thread_count < (this->Threads.size()) )
     {
         // Get pointer to next thread
-        OTOS::Thread *_NewThread = &this->Threads[this->CurrentThread];
+        OTOS::Thread *_NewThread = &this->Threads[this->active_thread];
 
         // Get the top of the next thread stack
         stackpointer_t _newStack = 0;
 
         // The next thread stack begins at the end of the currently
         // allocated stack
-        _newStack = this->Stack.end() - this->getAllocatedStackSize();
+        _newStack = this->Stack.end() - this->get_allocated_stacksize();
 
         // Init the stack data
-        _NewThread->setStack(_newStack, StackSize);
-        _NewThread->setSchedule(0, Priority);
+        _NewThread->set_stack(_newStack, StackSize);
+        _NewThread->set_schedule(0, Priority);
         
         // Initialize and mimic the psp stack frame
         // -> See Stack-Layout.md for details
@@ -116,13 +115,13 @@ void OTOS::Kernel::scheduleThread(taskpointer_t TaskFunc, const u_base_t StackSi
         _newStack[8] = 0xFFFFFFFD; // Thread LR, Exception return mode
 
         // Init task
-        _NewThread->StackPointer = __otos_switch(_newStack);
+        _NewThread->Stack_pointer = __otos_switch(_newStack);
         
         // Set next thread active for scheduling
-        this->CurrentThread++;
+        this->active_thread++;
 
         // increase thread counter
-        this->ThreadCount++;
+        this->thread_count++;
     }
 };
 
@@ -134,15 +133,11 @@ void OTOS::Kernel::start(void)
     // Loop forever
     while(1)
     {
-        // Check whether the the SysTick timer overflowed
-        // if (__otos_tick_passed())
-        //     this->countTime_ms();
-
         // Determine the next thread to run
-        this->getNextThread();
+        this->get_next_thread();
 
         // Give the control to the next thread
-        this->switchThread();
+        this->switch_thread();
     };
 };
 
@@ -151,14 +146,14 @@ void OTOS::Kernel::start(void)
  * Loops through all the stack sizes of the scheduled threads.
  * @return Returns the currently allocated stack size in words.
  */
-u_base_t OTOS::Kernel::getAllocatedStackSize(void) const
+u_base_t OTOS::Kernel::get_allocated_stacksize(void) const
 {
     // Counter variable
     u_base_t _stack = 0;
 
     // Loop through all allocated stacks
-    for(u_base_t i = 0; i < this->ThreadCount; i++)
-        _stack += this->Threads[i].getStackSize();
+    for(u_base_t i = 0; i < this->thread_count; i++)
+        _stack += this->Threads[i].get_stacksize();
 
     // Return the total allocated stack size
     return _stack;
@@ -167,7 +162,7 @@ u_base_t OTOS::Kernel::getAllocatedStackSize(void) const
 /**
  * @brief Increase the milli-seconds timer by one milli-second.
  */
-void OTOS::Kernel::countTime_ms(void)
+void OTOS::Kernel::count_time_ms(void)
 {
     OTOS::Kernel::Time_ms++;
 };
@@ -176,7 +171,7 @@ void OTOS::Kernel::countTime_ms(void)
  * @brief Get the current system time in milli-seconds.
  * @return Returns the current time in milli-seconds.
  */
-std::uint32_t OTOS::Kernel::getTime_ms(void) 
+std::uint32_t OTOS::Kernel::get_time_ms(void) 
 {
     return OTOS::Kernel::Time_ms;
 };

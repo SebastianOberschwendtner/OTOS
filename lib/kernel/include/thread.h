@@ -1,6 +1,7 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 Sebastian Oberschwendtner,
+ * sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,36 +28,39 @@
 // *** Declarations ***
 namespace OTOS
 {
-    namespace Check{
-
+    namespace Check
+    {
         /**
-         * @brief Constexpr to check the minimum required stack size for a thread.
-         * @details The actual minimum size is 17, 42 is an arbitrary choice. ;)
-         */
+    * @brief Constexpr to check the minimum required stack size for a thread.
+    * @details The actual minimum size is 17, 42 is an arbitrary choice. ;)
+    */
         template <u_base_t Size>
-        constexpr u_base_t StackSize() {
-            static_assert( Size > 42, "Minimum Stack Size required for a thread is 42!");
+        constexpr u_base_t StackSize()
+        {
+            static_assert(Size > 42, "Minimum Stack Size required for a thread is 42!");
             return Size;
         };
-    };
+    }; // namespace Check
 
     // Class for stack data of one thread
     class Thread : public Schedule
     {
     private:
         // Properties
-        u_base_t StackSize;         // Allocated stack size of the thread
-        stackpointer_t StackTop;    // Pointer to the top of allocated stack for thread
+        u_base_t Stacksize{0}; // Allocated stack size of the thread
+        stackpointer_t Stack_top{
+            0}; // Pointer to the top of allocated stack for thread
 
     public:
-        //Properties
-        stackpointer_t StackPointer; // Pointer to the current top of stack of the thread
+        // Properties
+        stackpointer_t Stack_pointer{
+            0}; // Pointer to the current top of stack of the thread
 
         // Methods
         Thread(void);
-        void setStack(stackpointer_t StackPosition, u_base_t StackSize);
-        u_base_t getStackSize(void) const;
-        bool getStackOverflow(void) const;
+        void set_stack(stackpointer_t stack_position, u_base_t stacksize);
+        u_base_t get_stacksize(void) const;
+        bool get_stackoverflow(void) const;
     };
-};
+}; // namespace OTOS
 #endif

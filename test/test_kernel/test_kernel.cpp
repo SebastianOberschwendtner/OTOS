@@ -50,7 +50,7 @@ void tearDown(void) {
 void test_Constructor(void)
 {
     // There should be no allocated stack
-    TEST_ASSERT_EQUAL( 0, UUT.getAllocatedStackSize() );
+    TEST_ASSERT_EQUAL( 0, UUT.get_allocated_stacksize() );
 };
 
 /**
@@ -59,16 +59,16 @@ void test_Constructor(void)
 void test_scheduleThread(void)
 {
     // Schedule one thread
-    UUT.scheduleThread(0, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
+    UUT.schedule_thread(0, OTOS::Check::StackSize<256>(), OTOS::Priority::Normal);
 
     // Test the new stack size
-    TEST_ASSERT_EQUAL(256, UUT.getAllocatedStackSize());
+    TEST_ASSERT_EQUAL(256, UUT.get_allocated_stacksize());
 
     // Schedule another thread
-    UUT.scheduleThread(0, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
+    UUT.schedule_thread(0, OTOS::Check::StackSize<256>(), OTOS::Priority::Normal);
 
     // Test the new stack size
-    TEST_ASSERT_EQUAL(2*256, UUT.getAllocatedStackSize());
+    TEST_ASSERT_EQUAL(2*256, UUT.get_allocated_stacksize());
 };
 
 /**
@@ -77,11 +77,11 @@ void test_scheduleThread(void)
 void test_Time_ms(void)
 {
     //The initial time value should be 0
-    TEST_ASSERT_EQUAL( 0, UUT.getTime_ms());
+    TEST_ASSERT_EQUAL( 0, UUT.get_time_ms());
 
     //Increase the count by 1 ms
-    UUT.countTime_ms();
-    TEST_ASSERT_EQUAL( 1, UUT.getTime_ms());
+    UUT.count_time_ms();
+    TEST_ASSERT_EQUAL( 1, UUT.get_time_ms());
 };
 
 // *** Perform the tests ***

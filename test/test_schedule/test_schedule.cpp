@@ -47,29 +47,29 @@ void tearDown(void) {
 /**
  * @brief Test the state change of a schedule when it reaches the runnable state.
  */
-void test_isRunable(void)
+void test_is_runable(void)
 {
     // After initializing the thread should be runable
-    TEST_ASSERT_TRUE( UUT.isRunable() )
+    TEST_ASSERT_TRUE( UUT.is_runable() )
 
     // Set the thread schedule
-    UUT.setSchedule(1, OTOS::PrioNormal);
+    UUT.set_schedule(1, OTOS::Priority::Normal);
 
     // Thread should now not be runable
-    TEST_ASSERT_FALSE( UUT.isRunable() );
+    TEST_ASSERT_FALSE( UUT.is_runable() );
 
     // Increment tick counter
-    UUT.countTick();
+    UUT.count_tick();
 
     // Thread should now be runable
-    TEST_ASSERT_TRUE( UUT.isRunable() );
+    TEST_ASSERT_TRUE( UUT.is_runable() );
 };
 
 // *** Perform the tests ***
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();
-    test_isRunable();
+    test_is_runable();
     UNITY_END();
     return 0;
 };

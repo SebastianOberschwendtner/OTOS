@@ -33,48 +33,36 @@
 // *** Methods ***
 
 /**
- * @brief Constructor for a Schedule object.
- * When the TickSchedule is 0, the thread is executed as often as possible.
- * @param Priority The priority of the thread.
- * @param TickSchedule (Optional, Default: 0) Defines the fixed periode for the thread.
- */
-OTOS::Schedule::Schedule(void)
-    : ThreadPriority(PrioLow), TickSchedule(0), TickCounter(0)
-{
-
-};
-
-/**
  * @brief Set the schedule data of one thread
- * @param ThreadTicks The execution periode of the thread in Ticks.
- * @param ThreadPriority The execution priority of the thread.
+ * @param ticks The execution periode of the thread in Ticks.
+ * @param priority The execution priority of the thread.
  */
-void OTOS::Schedule::setSchedule(u_base_t ThreadTicks, Priority Threadpriority)
+void OTOS::Schedule::set_schedule(u_base_t ticks, Priority priority)
 {
     // Set schedule data
-    this->ThreadPriority = ThreadPriority;
-    this->TickSchedule = ThreadTicks;
+    this->priority = priority;
+    this->schedule_ticks = ticks;
 
     // Reset tick counter
-    this->TickCounter = ThreadTicks;    
+    this->counter_ticks = ticks;    
 };
 
 /**
  * @brief Count SysTicks to determine whether the thread is runable.
  */
-void OTOS::Schedule::countTick(void)
+void OTOS::Schedule::count_tick(void)
 {
     // Only count, when counter is not already at 0
-    if (this->TickCounter)
-        this->TickCounter--;
+    if (this->counter_ticks)
+        this->counter_ticks--;
 };
 
 /**
  * @brief Check whether the current thread is runable.
  * @return Returns true, when the thread is runable.
  */
-bool OTOS::Schedule::isRunable(void) const
+bool OTOS::Schedule::is_runable(void) const
 {
     // When the tick counter reached 0, the task is runable
-    return (this->TickCounter == 0);
+    return (this->counter_ticks == 0);
 };

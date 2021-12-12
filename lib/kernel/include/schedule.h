@@ -28,11 +28,11 @@
 namespace OTOS 
 {
     // Enumeration for task priority
-    enum Priority : u_base_t
+    enum class Priority : u_base_t
     {
-        PrioLow = 1,
-        PrioNormal = 2,
-        PrioHigh = 3
+        Low = 1,
+        Normal = 2,
+        High = 3
     };
 
     // Class for schedule data of one thread
@@ -40,16 +40,16 @@ namespace OTOS
     {
     private:
         // Properties:
-        Priority ThreadPriority; // Priority of task
-        u_base_t TickSchedule;   // The scheduled execution time of thread
-        u_base_t TickCounter;    // Ticks since last execution of thread
+        Priority priority{Priority::Low}; // Priority of task
+        u_base_t schedule_ticks{0};       // The scheduled execution time of thread
+        u_base_t counter_ticks{0};        // Ticks since last execution of thread
 
     public:
         // Methods
-        Schedule(void);
-        void setSchedule(u_base_t ThreadTicks, Priority ThreadPriority);
-        void countTick(void);
-        bool isRunable(void) const;
+        Schedule(void) = default;
+        void set_schedule(u_base_t ticks, Priority priority);
+        void count_tick(void);
+        bool is_runable(void) const;
     };
 };
 #endif
