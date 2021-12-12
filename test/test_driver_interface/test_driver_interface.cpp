@@ -105,7 +105,6 @@ void test_gpio_interface(void)
     mypin.set_alternate_function.assert_called_once_with(
         static_cast<int>(IO::I2C_1)
     );
-
 };
 
 /// @brief test the bus driver interface
@@ -161,6 +160,27 @@ void test_bus_interface(void)
     TEST_ASSERT_EQUAL(0x43, response.value());
 };
 
+/// @brief Test and define the interface for timers
+void test_timer_interface(void)
+{
+    // Timer fixture
+    struct Mock_Timer
+    {
+        Mock::Callable<bool> start;
+        Mock::Callable<bool> stop;
+        Mock::Callable<unsigned int> get_count;
+    };
+    Mock_Timer mytime{};
+
+    // Call interface
+    Timer::start(mytime);
+    mytime.start.assert_called_once();
+    Timer::stop(mytime);
+    mytime.stop.assert_called_once();
+    TEST_ASSERT_EQUAL(1, Timer::get_count(mytime));
+    mytime.get_count.assert_called_once();
+};
+
 // === Main ===
 int main(int argc, char** argv)
 {
@@ -170,6 +190,7 @@ int main(int argc, char** argv)
     test_timeout();
     test_gpio_interface();
     test_bus_interface();
+    test_timer_interface();
     UNITY_END();
     return 0;
 };
