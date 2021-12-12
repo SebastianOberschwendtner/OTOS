@@ -28,13 +28,15 @@
  */
 
 // === Includes ===
-#include "test_gpio_stm32.h"
+#include <unity.h>
+#include <mock.h>
+#include "stm32/gpio_stm32.h"
 
 // === Mocks ===
 extern Mock::Callable EnableIRQ;
 
 // === Fixtures ===
-static void setUp_GPIO(void) {
+void setUp(void) {
     // set stuff up here
     RCC->registers_to_default();
     GPIOA->registers_to_default();
@@ -48,14 +50,14 @@ static void setUp_GPIO(void) {
 // === Define Tests ===
 
 /// @brief Test initialization of pin.
-static void test_init_pin(void)
+void test_init_pin(void)
 {
-    setUp_GPIO();
+    setUp();
     // Assume the AHB1ENR register was already written to
     RCC->AHB1ENR = 0b1000;
 
     // Create GPIO object
-    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
+    GPIO::PIN UUT(GPIO::Port::A, 0);
 
     // Check whether clock for port was enabled and already
     // set bit was not deleted.
@@ -63,15 +65,15 @@ static void test_init_pin(void)
 };
 
 /// @brief Test initialization of pin with specifying the output mode.
-static void test_init_pin_with_mode(void)
+void test_init_pin_with_mode(void)
 {
-    setUp_GPIO();
+    setUp();
     // Assume the AHB1ENR register was already written to
     RCC->AHB1ENR = 0b1000;
 
     // Create GPIO objects
-    GPIO::PIN OUTPUT(GPIO::PORTA, GPIO::PIN0, GPIO::OUTPUT);
-    GPIO::PIN AF_MODE(GPIO::PORTA, GPIO::PIN1, GPIO::AF_Mode);
+    GPIO::PIN OUTPUT(GPIO::Port::A, 0, GPIO::Mode::Output);
+    GPIO::PIN AF_MODE(GPIO::Port::A, 1, GPIO::Mode::AF_Mode);
 
     // Check whether clock for port was enabled and already
     // set bit was not deleted.
@@ -80,137 +82,137 @@ static void test_init_pin_with_mode(void)
 };
 
 /// @brief Test the mode setting.
-static void test_set_mode(void)
+void test_set_mode(void)
 {
-    setUp_GPIO();
+    setUp();
     // Assume other outputs are already set
     GPIOA->MODER = 0b1100;
 
     // Create PIN object
-    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
+    GPIO::PIN UUT(GPIO::Port::A, 0);
 
     // Perform testing
     TEST_ASSERT_EQUAL(0b1100, GPIOA->MODER); // Output modes have not changed
-    UUT.setMode(GPIO::OUTPUT);
+    UUT.set_mode(GPIO::Mode::Output);
     TEST_ASSERT_EQUAL(0b1101, GPIOA->MODER); // Only output mode of pin has changed
-    UUT.setMode(GPIO::AF_Mode);
+    UUT.set_mode(GPIO::Mode::AF_Mode);
     TEST_ASSERT_EQUAL(0b1110, GPIOA->MODER); // Only output mode of pin has changed
 };
 
 /// @brief Test the output type setting.
-static void test_set_type(void)
+void test_set_type(void)
 {
-    setUp_GPIO();
+    setUp();
     // Assume other outputs are already set
     GPIOA->OTYPER = 0b1100;
 
     // Create PIN object
-    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
+    GPIO::PIN UUT(GPIO::Port::A, 0);
 
     // Perform testing
     TEST_ASSERT_EQUAL(0b1100, GPIOA->OTYPER);
-    UUT.setType(GPIO::PUSH_PULL);
+    UUT.set_output_type(GPIO::Output::Push_Pull);
     TEST_ASSERT_EQUAL(0b1100, GPIOA->OTYPER);
-    UUT.setType(GPIO::OPEN_DRAIN);
+    UUT.set_output_type(GPIO::Output::Open_Drain);
     TEST_ASSERT_EQUAL(0b1101, GPIOA->OTYPER);
 };
 
 /// @brief Test the output speed setting
-static void test_set_speed(void)
+void test_set_speed(void)
 {
-    setUp_GPIO();
+    setUp();
     // Assume other outputs are already set
     GPIOA->OSPEEDR = 0b1100;
 
     // Create PIN object
-    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
+    GPIO::PIN UUT(GPIO::Port::A, 0);
 
     // perform testing
     TEST_ASSERT_EQUAL(0b1100, GPIOA->OSPEEDR);
-    UUT.setSpeed(GPIO::LOW);
+    UUT.set_speed(GPIO::Speed::Low);
     TEST_ASSERT_EQUAL(0b1100, GPIOA->OSPEEDR);
-    UUT.setSpeed(GPIO::MEDIUM);
+    UUT.set_speed(GPIO::Speed::Medium);
     TEST_ASSERT_EQUAL(0b1101, GPIOA->OSPEEDR);
-    UUT.setSpeed(GPIO::HIGH);
+    UUT.set_speed(GPIO::Speed::High);
     TEST_ASSERT_EQUAL(0b1110, GPIOA->OSPEEDR);
-    UUT.setSpeed(GPIO::VERY_HIGH);
+    UUT.set_speed(GPIO::Speed::Very_High);
     TEST_ASSERT_EQUAL(0b1111, GPIOA->OSPEEDR);
 };
 
 /// @brief Test the push or pull output setting.
-static void test_set_pull(void)
+void test_set_pull(void)
 {
-    setUp_GPIO();
+    setUp();
     // Assume other outputs are already set
     GPIOA->PUPDR = 0b1100;
 
     // Create PIN object
-    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
+    GPIO::PIN UUT(GPIO::Port::A, 0);
 
     // perform testing
     TEST_ASSERT_EQUAL(0b1100, GPIOA->PUPDR);
-    UUT.setPull(GPIO::NO_PP);
+    UUT.set_pull(GPIO::Pull::No_Pull);
     TEST_ASSERT_EQUAL(0b1100, GPIOA->PUPDR);
-    UUT.setPull(GPIO::PULL_UP);
+    UUT.set_pull(GPIO::Pull::Pull_Up);
     TEST_ASSERT_EQUAL(0b1101, GPIOA->PUPDR);
-    UUT.setPull(GPIO::PULL_DOWN);
+    UUT.set_pull(GPIO::Pull::Pull_Down);
     TEST_ASSERT_EQUAL(0b1110, GPIOA->PUPDR);
 };
 
 /// @brief Test setting the output high.
-static void test_set_high(void)
+void test_set_high(void)
 {
-    setUp_GPIO();
+    setUp();
 
     // Create PIN object
-    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
+    GPIO::PIN UUT(GPIO::Port::A, 0);
 
     //Perform testing
     TEST_ASSERT_EQUAL(0b0000, GPIOA->BSRR);
-    UUT.setHigh();
+    UUT.set_high();
     TEST_ASSERT_EQUAL(0b0001, GPIOA->BSRR);
 };
 
 /// @brief Test setting the output low.
-static void test_set_low(void)
+void test_set_low(void)
 {
-    setUp_GPIO();
+    setUp();
 
     // Create PIN object
-    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
+    GPIO::PIN UUT(GPIO::Port::A, 0);
 
     //Perform testing
     TEST_ASSERT_EQUAL(0b0000, GPIOA->BSRR);
-    UUT.setLow();
+    UUT.set_low();
     TEST_ASSERT_EQUAL((1<<16), GPIOA->BSRR);
 };
 
 /// @brief Test the setting of the output state.
-static void test_set(void)
+void test_set_state(void)
 {
-    setUp_GPIO();
+    setUp();
 
     // Create PIN object
-    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
+    GPIO::PIN UUT(GPIO::Port::A, 0);
 
     // perform testing
     TEST_ASSERT_EQUAL(0b0000, GPIOA->BSRR);
-    UUT.set(true);
+    UUT.set_state(true);
     TEST_ASSERT_EQUAL(0b0001, GPIOA->BSRR);
     GPIOA->registers_to_default();
-    UUT.set(false);
+    UUT.set_state(false);
     TEST_ASSERT_EQUAL((1<<16), GPIOA->BSRR);
 };
 
 /// @brief Test the output toggle function.
-static void test_toggle(void)
+void test_toggle(void)
 {
-    setUp_GPIO();
+    setUp();
     // Assume other outputs are already set
     GPIOA->ODR = 0b1100;
 
     // Create PIN object
-    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
+    GPIO::PIN UUT(GPIO::Port::A, 0);
 
     // perform testing
     TEST_ASSERT_EQUAL(0b1100, GPIOA->ODR);
@@ -221,58 +223,69 @@ static void test_toggle(void)
 };
 
 /// @brief Test reading the input value.
-static void test_get(void)
+void test_get(void)
 {
-    setUp_GPIO();
+    setUp();
     // Assume other outputs are already set
     GPIOA->IDR = 0b1100;
 
     // Create PIN object
-    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
+    GPIO::PIN UUT(GPIO::Port::A, 0);
 
     // perform testing
-    TEST_ASSERT_FALSE(UUT.get());
+    TEST_ASSERT_FALSE(UUT.get_state());
     GPIOA->IDR = 0b1101;
-    TEST_ASSERT_TRUE(UUT.get());
+    TEST_ASSERT_TRUE(UUT.get_state());
 };
 
 /// @brief Test setting an alternate function in the low register
-static void test_alternate_function_low(void)
+void test_alternate_function_low(void)
 {
-    setUp_GPIO();
+    setUp();
     // Assume other AFs are already set
     GPIOA->AFR[0] = 0b1101;
+    GPIOA->MODER = 0b0011;
+    GPIOA->OTYPER = 0b0001;
 
     // Create Pin object
-    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN1);
-    UUT.set_alternate_function(GPIO::TIM_8);
+    GPIO::PIN UUT(GPIO::Port::A, 1);
+    UUT.set_alternate_function(IO::TIM_8);
 
     // perform testing
     TEST_ASSERT_EQUAL(0b00111101, GPIOA->AFR[0]);
+    TEST_ASSERT_EQUAL(0b1011, GPIOA->MODER);
+    TEST_ASSERT_EQUAL(0b0001, GPIOA->OTYPER);
+
+    // AF specific options
+    UUT.set_alternate_function(IO::I2C_1);
+
+    // perform testing
+    TEST_ASSERT_EQUAL(0b01001101, GPIOA->AFR[0]);
+    TEST_ASSERT_EQUAL(0b0011, GPIOA->OTYPER);
 };
 
 /// @brief Test setting an alternate function in the low register
-static void test_alternate_function_high(void)
+void test_alternate_function_high(void)
 {
-    setUp_GPIO();
+    setUp();
     // Assume other AFs are already set
     GPIOA->AFR[1] = 0b1101;
 
     // Create Pin object
-    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN9);
-    UUT.set_alternate_function(GPIO::ETH_);
+    GPIO::PIN UUT(GPIO::Port::A, 9);
+    UUT.set_alternate_function(IO::ETH_);
 
     // perform testing
     TEST_ASSERT_EQUAL(0b10111101, GPIOA->AFR[1]);
 };
 
 /// @brief Test the reading of rising and falling edges
-static void test_edges(void)
+void test_edges(void)
 {
-    setUp_GPIO();
+    setUp();
 
     // Create PIN object
-    GPIO::PIN UUT(GPIO::PORTA, GPIO::PIN0);
+    GPIO::PIN UUT(GPIO::Port::A, 0);
 
     // Perform testing
     UUT.read_edge();
@@ -305,14 +318,14 @@ static void test_edges(void)
 };
 
 /// @brief test enabling interrupts
-static void test_enable_interrupt(void)
+void test_enable_interrupt(void)
 {
-    setUp_GPIO();
+    setUp();
 
     // Create PIN object
-    GPIO::PIN PA0(GPIO::PORTA, GPIO::PIN0);
-    GPIO::PIN PA2(GPIO::PORTA, GPIO::PIN2);
-    GPIO::PIN PC5(GPIO::PORTC, GPIO::PIN5);
+    GPIO::PIN PA0(GPIO::Port::A, 0);
+    GPIO::PIN PA2(GPIO::Port::A, 2);
+    GPIO::PIN PC5(GPIO::Port::C, 5);
 
     // Perform testing
     // PA0
@@ -350,13 +363,13 @@ static void test_enable_interrupt(void)
 };
 
 /// @brief Test reseting a pending interrupt
-static void test_reset_pending_interrupt(void)
+void test_reset_pending_interrupt(void)
 {
-    setUp_GPIO();
+    setUp();
 
     // Create PIN object
-    GPIO::PIN PA0(GPIO::PORTA, GPIO::PIN0);
-    GPIO::PIN PA2(GPIO::PORTA, GPIO::PIN2);
+    GPIO::PIN PA0(GPIO::Port::A, 0);
+    GPIO::PIN PA2(GPIO::Port::A, 2);
     PA0.enable_interrupt(GPIO::Edge::Rising);
     PA2.enable_interrupt(GPIO::Edge::Both);
 
@@ -370,7 +383,7 @@ static void test_reset_pending_interrupt(void)
     TEST_ASSERT_EQUAL(0b101, EXTI->PR);
 }
 
-void test_gpio_stm32(void)
+int main(int argc, char **argv)
 {
     UNITY_BEGIN();
     test_init_pin();
@@ -381,7 +394,7 @@ void test_gpio_stm32(void)
     test_set_pull();
     test_set_high();
     test_set_low();
-    test_set();
+    test_set_state();
     test_toggle();
     test_get();
     test_alternate_function_low();
@@ -390,5 +403,5 @@ void test_gpio_stm32(void)
     test_enable_interrupt();
     test_reset_pending_interrupt();
     UNITY_END();
-    return;
+    return EXIT_SUCCESS;
 };

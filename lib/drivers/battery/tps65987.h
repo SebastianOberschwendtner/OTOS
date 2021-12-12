@@ -19,10 +19,10 @@
  */
 
 #ifndef TPS65987_H_
-#define TPS65987_h_
+#define TPS65987_H_
 
 // === includes ===
-#include "interface.h"
+#include "drivers.h"
 #include <array>
 
 // === Command codes ===
@@ -73,12 +73,14 @@ namespace TPS65987 {
         unsigned int  current; 
     };
      
+    using Bus::Data_t;
+    template<class bus_controller>
     class Controller
     {
     private:
         // *** properties ***
-        I2C::Controller_Base*         i2c;
-        I2C::Data_t                   i2c_data          = {0};
+        bus_controller                mybus;
+        Data_t                        i2c_data          = {0};
         std::array<char, 6>           buffer_cmd        = {0x08, 0x04, 0, 0, 0, 0};
         std::array<unsigned char, 66> buffer_data       = {0};
         Mode                          mode_active       = Mode::BOOT;
@@ -87,7 +89,14 @@ namespace TPS65987 {
 
     public:
         // *** Constructor ***
-        Controller(I2C::Controller_Base& i2c_controller);
+        /**
+         * @brief Constructor for PD controller.
+         * @param bus_used The reference to the used bus peripheral.
+         */
+        Controller(bus_controller bus_used)
+        : mybus{bus_used}
+        {  
+        };
 
         // Properties
 

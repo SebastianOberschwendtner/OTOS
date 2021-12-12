@@ -28,20 +28,27 @@
 // === Declarations ===
 namespace Timer {
 
+    // === Enums ===
+    enum class Mode
+    {
+        Normal, PWM
+    };
+
     // === Classes ===
-    class Timer final: public Timer_Base
+    class Timer
     {
     private:
         // properties
         volatile TIM_TypeDef*   thisTimer;
-        const Instance          thisInstance;
+        const    IO             thisInstance;
 
     public:
         // === Constructor ===
-        Timer(const Instance timer);
+        Timer() = delete;
+        Timer(const IO timer);
 
         // === Methods ===
-        unsigned int    get_count       (void) const final;
+        unsigned int    get_count       (void) const;
 
     };
 };

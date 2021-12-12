@@ -28,7 +28,9 @@
  */
 
 // ****** Includes ******
-#include "test_i2c_stm32.h"
+#include <unity.h>
+#include <mock.h>
+#include "stm32/i2c_stm32.h"
 
 /** === Test List ===
 * ▢ i2c controller can be created defining the clock speed:
@@ -70,36 +72,9 @@
 *   ✓ error -103: Bus busy during start of transfer
 */
 
-// === Mocks ===
-class Mock_Pin: public GPIO::PIN_Base, public Mock::Peripheral
-{
-public:
-    // === Functions to watch ===
-    Mock::Callable set_mode;
-    Mock::Callable set_type;
-    Mock::Callable set_alternate;
-
-    // === Mocked interface ===
-    Mock_Pin() {};
-
-    void setMode                (const GPIO::Mode NewMode)          override { set_mode.add_call((int)NewMode); };
-    void setType                (const GPIO::Type NewType)          override { set_type.add_call((int)NewType); };
-    void setSpeed               (const GPIO::Speed NewSpeed)        override {};
-    void setPull                (const GPIO::Pull NewPull)          override {};
-    void set_alternate_function (const GPIO::Alternate function)    override { set_alternate.add_call((int)function); };
-    void set                    (const bool NewState)               override {};
-    void setHigh                (void)                              override {};
-    void setLow                 (void)                              override {};
-    void toggle                 (void)                              override {};
-    bool get                    (void) const                        override {return false;};
-    void read_edge              (void)                              override {};
-    bool rising_edge            (void) const                        override {return false;};
-    bool falling_edge           (void) const                        override {return false;};
-    bool enable_interrupt       (const GPIO::Edge NewEdge) const    override {return true; };
-};
 
 // === Tests ===
-static void setUp_I2C(void) {
+void setUp(void) {
 // set stuff up here
 I2C1->registers_to_default();
 };
@@ -109,14 +84,14 @@ I2C1->registers_to_default();
 // };
 
 /// @brief Test the initialization of the controller
-static void test_init(void)
+void test_init(void)
 {
-    setUp_I2C();
+    setUp();
     // Assume other clocks in RCC are already set
     RCC->APB1ENR = (1<<23) | (1<<20);
 
     // Create object
-    I2C::Controller UUT(I2C::I2C_1, 400000);
+    I2C::Controller UUT(IO::I2C_1, 400000);
 
     // Perform testing
     TEST_ASSERT_EQUAL((1<<23) | (1<<21) | (1<<20), RCC->APB1ENR); // Enable the peripheral clock
@@ -128,13 +103,14 @@ static void test_init(void)
     TEST_ASSERT_EQUAL(0, UUT.get_target_address());  // Test that the target is address is 0
     TEST_ASSERT_EQUAL(0, UUT.get_rx_data().value); // The return data is initialized with 0
     TEST_ASSERT_EQUAL(0, UUT.get_error());  // Test that no errors exist after creating  the controller
+    TEST_ASSERT_EQUAL(IO::I2C_1, UUT.instance);
 };
 
 /// @brief Test the setting of the target address
-static void test_target_address(void)
+void test_target_address(void)
 {
     // Create object
-    I2C::Controller UUT(I2C::I2C_1, 400000);
+    I2C::Controller UUT(IO::I2C_1, 400000);
     UUT.set_target_address(0xEE);
 
     // test whether the address was set
@@ -145,32 +121,11 @@ static void test_target_address(void)
     TEST_ASSERT_EQUAL(0xFE, UUT.get_target_address());
 };
 
-/// @brief Test the assignment of the output pins.
-static void test_output_assignment(void)
-{
-    // Create object
-    I2C::Controller UUT(I2C::I2C_1, 400000);
-
-    // Assign the outputs
-    Mock_Pin SCL;
-    Mock_Pin SDA;
-    UUT.assign_pin(SCL);
-    UUT.assign_pin(SDA);
-
-    // Perform testing
-    SCL.set_mode.assert_called_once_with((int)GPIO::AF_Mode);
-    SCL.set_alternate.assert_called_once_with((int)GPIO::I2C_1);
-    SCL.set_type.assert_called_once_with((int) GPIO::OPEN_DRAIN);
-    SDA.set_mode.assert_called_once_with((int)GPIO::AF_Mode);
-    SDA.set_alternate.assert_called_once_with((int)GPIO::I2C_1);
-    SDA.set_type.assert_called_once_with((int) GPIO::OPEN_DRAIN);
-};
-
 /// @brief Test the enabling and disabling of the peripheral.
-static void test_enable(void)
+void test_enable(void)
 {
     // Create Object
-    I2C::Controller UUT(I2C::I2C_1, 400000);
+    I2C::Controller UUT(IO::I2C_1, 400000);
 
     // Perform testing
     TEST_ASSERT_BIT_LOW(0, I2C1->CR1);
@@ -181,10 +136,10 @@ static void test_enable(void)
 };
 
 /// @brief Test the start of an I2C communication
-static void test_start_communication(void)
+void test_start_communication(void)
 {
     // Create Object
-    I2C::Controller UUT(I2C::I2C_1, 400000);
+    I2C::Controller UUT(IO::I2C_1, 400000);
 
     // Start communication for write
     UUT.set_target_address(0xEE);
@@ -198,12 +153,12 @@ static void test_start_communication(void)
 };
 
 /// @brief Test whether controller can read its events
-static void test_events(void)
+void test_events(void)
 {
-    setUp_I2C();
+    setUp();
 
     // Create Object
-    I2C::Controller UUT(I2C::I2C_1, 100000);
+    I2C::Controller UUT(IO::I2C_1, 100000);
 
     // Check the events after init
     TEST_ASSERT_FALSE(UUT.in_controller_mode());
@@ -264,15 +219,15 @@ static void test_events(void)
 };
 
 /// @brief Test the i2c address transmission
-static void test_address_transmission(void)
+void test_address_transmission(void)
 {
-    setUp_I2C();
+    setUp();
     // Set the flags for a successfull data transmission
     I2C1->SR1 = I2C_SR1_ADDR | I2C_SR1_SB;
     I2C1->SR2 = I2C_SR2_MSL;
 
     // Create object
-    I2C::Controller UUT(I2C::I2C_1, 100000);
+    I2C::Controller UUT(IO::I2C_1, 100000);
     UUT.set_target_address(0xEE);
 
     // perform testing
@@ -293,74 +248,51 @@ static void test_address_transmission(void)
 };
 
 /// @brief Test sending a byte via the i2c bus
-static void test_send_byte(void)
+void test_send_data(void)
 {
-    setUp_I2C();
+    setUp();
     // Set the flags for a successfull data transmission
     I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
     I2C1->SR2 = I2C_SR2_MSL;
 
     // Create object
-    I2C::Controller UUT(I2C::I2C_1, 100000);
+    I2C::Controller UUT(IO::I2C_1, 100000);
     UUT.set_target_address(0xEE);
+    Bus::Data_t payload{0xCCBBAA};
 
     // Perform testing
-    TEST_ASSERT_TRUE(UUT.send_byte(0xAA));
+    TEST_ASSERT_TRUE(UUT.send_data(payload, 1));
     TEST_ASSERT_EQUAL(0xAA, I2C1->DR); 
+    payload.value = 0xAACCBB;
+    TEST_ASSERT_TRUE(UUT.send_data(payload, 2));
+    TEST_ASSERT_EQUAL(0xBB, I2C1->DR); 
     
     // Test the timeout
     I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
-    TEST_ASSERT_FALSE(UUT.send_byte(0xAA));
+    TEST_ASSERT_FALSE(UUT.send_data(payload, 1));
     TEST_ASSERT_EQUAL(Error::Code::I2C_Timeout, UUT.get_error());
 
     // Test an acknowledge error
     I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB | I2C_SR1_AF;
-    TEST_ASSERT_FALSE(UUT.send_byte(0xAA));
+    TEST_ASSERT_FALSE(UUT.send_data(payload, 1));
     TEST_ASSERT_EQUAL(Error::Code::I2C_Data_ACK_Error, UUT.get_error());
 
     // Test sending when bus is busy
     I2C1->SR2 |= I2C_SR2_BUSY;
-    TEST_ASSERT_FALSE(UUT.send_byte(0xAA));
+    TEST_ASSERT_FALSE(UUT.send_data(payload, 1));
     TEST_ASSERT_EQUAL(Error::Code::I2C_BUS_Busy_Error, UUT.get_error());
 };
 
-/// @brief Test sending a word via the i2c bus
-static void test_send_word(void)
-{
-    setUp_I2C();
-    // Set the flags for a successfull data transmission
-    I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
-    I2C1->SR2 = I2C_SR2_MSL;
-
-    // Create object
-    I2C::Controller UUT(I2C::I2C_1, 100000);
-    UUT.set_target_address(0xEE);
-
-    // Perform testing
-    TEST_ASSERT_TRUE(UUT.send_word(0xAAEE));
-    TEST_ASSERT_EQUAL(0xEE, I2C1->DR); 
-    
-    // Test the timeout
-    I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
-    TEST_ASSERT_FALSE(UUT.send_word(0xAAEE));
-    TEST_ASSERT_EQUAL(Error::Code::I2C_Timeout, UUT.get_error());
-
-    // Test an acknowledge error
-    I2C1->SR1 = I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB | I2C_SR1_AF;
-    TEST_ASSERT_FALSE(UUT.send_word(0xAAEE));
-    TEST_ASSERT_EQUAL(Error::Code::I2C_Data_ACK_Error, UUT.get_error());
-};
-
 /// @brief Test sending an array via the i2c bus
-static void test_send_array(void)
+void test_send_array(void)
 {
-    setUp_I2C();
+    setUp();
     // Set the flags for a successfull data transmission
     I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
     I2C1->SR2 = I2C_SR2_MSL;
 
     // Create object
-    I2C::Controller UUT(I2C::I2C_1, 100000);
+    I2C::Controller UUT(IO::I2C_1, 100000);
     UUT.set_target_address(0xEE);
 
     // Perform testing
@@ -381,15 +313,15 @@ static void test_send_array(void)
 };
 
 /// @brief Test sending an array with an preceeding byte via the i2c bus
-static void test_send_array_with_leading_byte(void)
+void test_send_array_with_leading_byte(void)
 {
-    setUp_I2C();
+    setUp();
     // Set the flags for a successfull data transmission
     I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_ADDR | I2C_SR1_SB;
     I2C1->SR2 = I2C_SR2_MSL;
 
     // Create object
-    I2C::Controller UUT(I2C::I2C_1, 100000);
+    I2C::Controller UUT(IO::I2C_1, 100000);
     UUT.set_target_address(0xEE);
 
     // Perform testing
@@ -410,15 +342,15 @@ static void test_send_array_with_leading_byte(void)
 };
 
 /// @brief Test receiving data via the i2c bus
-static void test_read_data(void)
+void test_read_data(void)
 {
-    setUp_I2C();
+    setUp();
     // Set the flags for a successfull data transmission
     I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_RXNE | I2C_SR1_ADDR | I2C_SR1_SB;
     I2C1->SR2 = I2C_SR2_MSL;
 
     // Create object
-    I2C::Controller UUT(I2C::I2C_1, 100000);
+    I2C::Controller UUT(IO::I2C_1, 100000);
     UUT.set_target_address(0xEE);
 
     // Perform testing
@@ -445,15 +377,15 @@ static void test_read_data(void)
 };
 
 /// @brief Test sending an array via the i2c bus
-static void test_read_array(void)
+void test_read_array(void)
 {
-    setUp_I2C();
+    setUp();
     // Set the flags for a successfull data transmission
     I2C1->SR1 = I2C_SR1_BTF | I2C_SR1_TXE | I2C_SR1_RXNE | I2C_SR1_ADDR | I2C_SR1_SB;
     I2C1->SR2 = I2C_SR2_MSL;
 
     // Create object
-    I2C::Controller UUT(I2C::I2C_1, 100000);
+    I2C::Controller UUT(IO::I2C_1, 100000);
     UUT.set_target_address(0xEE);
 
     // Perform testing
@@ -473,22 +405,20 @@ static void test_read_array(void)
 };
 
 // === Main ===
-void test_i2c_stm32(void)
+int main(int argc, char **argv)
 {
     UNITY_BEGIN();
     test_init();
     test_target_address();
-    test_output_assignment();
     test_enable();
     test_start_communication();
     test_events();
     test_address_transmission();
-    test_send_byte();
-    test_send_word();
+    test_send_data();
     test_send_array();
     test_send_array_with_leading_byte();
     test_read_data();
     test_read_array();
     UNITY_END();
-    return;
+    return EXIT_SUCCESS;
 };

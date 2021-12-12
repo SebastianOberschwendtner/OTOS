@@ -28,53 +28,45 @@
  */
 
 // === Includes ===
-#include "test_tps65987.h"
+#include <unity.h>
+#include <mock.h>
+#include <array>
 
 // === Fixtures ===
 
 // Mock the i2c driver
-class I2C_Mock: public I2C::Controller_Base, public Mock::Peripheral
-{
+struct I2C_Mock { };
+Mock::Callable<bool> send_word;
+Mock::Callable<bool> send_array;
+Mock::Callable<bool> send_array_leader;
+Mock::Callable<bool> read_array;
+std::array<unsigned char, 66> rx_buffer{0};
 
-public:
-    // *** Variables to track calls
-    Mock::Callable call_set_target_address;
-    Mock::Callable call_send_data;
-    Mock::Callable call_send_byte;
-    Mock::Callable call_send_word;
-    Mock::Callable call_send_array;
-    Mock::Callable call_send_array_leader;
-    Mock::Callable call_read_word;
-    Mock::Callable call_read_array;
-    I2C::Data_t rx_data;
-
-    // *** Constructor
-    I2C_Mock() {rx_data.value = 0; };
-
-    // *** overrides for interface
-    void set_target_address  (const unsigned char address) override { call_set_target_address.add_call((int) address); };
-    bool send_data           (const I2C::Data_t payload, const unsigned char n_bytes) override { call_send_data.add_call((int) payload.word[0]); return true; };
-    bool send_byte           (const unsigned char data) override { call_send_byte.add_call((int) data); return true; };
-    bool send_word           (const unsigned int data) override { call_send_word.add_call((int) data); return true; };
-    bool send_array          (const unsigned char* data, const unsigned char n_bytes) override { 
-        call_send_array.add_call((int) n_bytes); 
-        for (unsigned char nByte=0; nByte<4; nByte++) this->rx_data.byte[nByte] = *(data + nByte + 2);
-        return true; };
-    bool send_array_leader   (const unsigned char byte, const unsigned char* data, const unsigned char n_bytes) override { call_send_array_leader.add_call((int) byte); return true; };
-    bool read_data           (const unsigned char reg, unsigned char n_bytes) override { return true; };
-    bool read_byte           (const unsigned char reg) override { return true; };
-    bool read_word           (const unsigned char reg) override { 
-        call_read_word.add_call((int)reg);
-        if (reg == 0xFE) this->rx_data.value = 0x4000;
-        if (reg == 0xFF) this->rx_data.value = 0x7900;
-        return true; };
-    bool read_array          (const unsigned char reg, unsigned char* dest, const unsigned char n_bytes) override {
-        call_read_array.add_call((int) n_bytes);
-        for (unsigned char nByte=0; nByte<4; nByte++) *(dest+nByte) = this->rx_data.byte[nByte];
-        *(dest + 4) = n_bytes - 1;
-        return true; } ;
-    I2C::Data_t  get_rx_data (void) const override { return this->rx_data; };
+namespace Bus {
+    bool send_word(I2C_Mock& bus, unsigned int word)
+    {
+       return ::send_word(word);
+    };
+    bool send_array(I2C_Mock& bus, const unsigned char* data, const unsigned char n_bytes)
+    { 
+        std::copy(data, data + n_bytes, rx_buffer.begin());
+        return ::send_array(n_bytes); 
+    };
+    bool send_array_leader(I2C_Mock& bus, const unsigned char byte, const unsigned char* data, const unsigned char n_bytes)
+    { 
+        return ::send_array_leader(byte, data, n_bytes); 
+    };
+    bool read_array(I2C_Mock &bus, const unsigned char reg, unsigned char* dest, const unsigned char n_bytes)
+    {
+        std::copy(rx_buffer.begin(), rx_buffer.begin() + n_bytes, dest);
+        return ::read_array(n_bytes);
+    };
 };
+
+// Include the UUT
+#include "battery/tps65987.h"
+#include "battery/tps65987.cpp"
+template class TPS65987::Controller<I2C_Mock>;
 
 /** === Test List ===
  * ▢ Controller has properties:
@@ -105,7 +97,7 @@ public:
 
 // === Define Tests ===
 /// @brief Test the constructor
-static void test_init(void)
+void test_init(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -124,7 +116,7 @@ static void test_init(void)
 };
 
 /// @brief Test reading a register with variable length
-static void test_read_register(void)
+void test_read_register(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -134,15 +126,14 @@ static void test_read_register(void)
 
     // perform testing
     TEST_ASSERT_TRUE(UUT.read_register(TPS65987::Register::Data1));
-    i2c.call_set_target_address.assert_called_once_with(TPS65987::i2c_address);
-    i2c.call_read_array.assert_called_once_with(65);
+    ::read_array.assert_called_once_with(65);
 
     TEST_ASSERT_TRUE(UUT.read_register(TPS65987::Register::Cmd1));
-    i2c.call_read_array.assert_called_once_with(5);
+    ::read_array.assert_called_once_with(5);
 };
 
 /// @brief Test writing a register with variable length
-static void test_write_register(void)
+void test_write_register(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -152,15 +143,14 @@ static void test_write_register(void)
 
     // perform testing
     TEST_ASSERT_TRUE(UUT.write_register(TPS65987::Register::Data1));
-    i2c.call_set_target_address.assert_called_once_with(TPS65987::i2c_address);
-    i2c.call_send_array.assert_called_once_with(66);
+    ::send_array.assert_called_once_with(66);
 
     TEST_ASSERT_TRUE(UUT.write_register(TPS65987::Register::Cmd1));
-    i2c.call_send_array.assert_called_once_with(6);
+    ::send_array.assert_called_once_with(6);
 };
 
 /// @brief Test reading a command status
-static void test_read_active_command(void)
+void test_read_active_command(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -169,17 +159,17 @@ static void test_read_active_command(void)
     TPS65987::Controller UUT(i2c);
 
     // perform testing
-    i2c.rx_data.byte[0] = '!';
-    i2c.rx_data.byte[1] = 'D';
-    i2c.rx_data.byte[2] = 'M';
-    i2c.rx_data.byte[3] = 'C';
+    rx_buffer[0] = '!';
+    rx_buffer[1] = 'D';
+    rx_buffer[2] = 'M';
+    rx_buffer[3] = 'C';
     TEST_ASSERT_TRUE(UUT.read_active_command());
-    i2c.call_read_array.assert_called_once_with(5);
+    ::read_array.assert_called_once_with(5);
     TEST_ASSERT_EQUAL_CHAR_ARRAY("CMD!", UUT.get_active_command(), 4);
 };
 
 /// @brief Test writting a command
-static void test_write_command(void)
+void test_write_command(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -189,11 +179,11 @@ static void test_write_command(void)
 
     // perform testing
     TEST_ASSERT_TRUE(UUT.write_command("PTCc"));
-    TEST_ASSERT_EQUAL_CHAR_ARRAY("PTCc", i2c.rx_data.byte, 4);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY("PTCc", &rx_buffer[2], 4);
 };
 
 /// @brief Test reading the current mode of the controller
-static void test_read_mode(void)
+void test_read_mode(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -202,17 +192,17 @@ static void test_read_mode(void)
     TPS65987::Controller UUT(i2c);
 
     // perform testing
-    i2c.rx_data.byte[0] = 'H';
-    i2c.rx_data.byte[1] = 'C';
-    i2c.rx_data.byte[2] = 'T';
-    i2c.rx_data.byte[3] = 'P';
+    rx_buffer[0] = 'H';
+    rx_buffer[1] = 'C';
+    rx_buffer[2] = 'T';
+    rx_buffer[3] = 'P';
     TEST_ASSERT_TRUE(UUT.read_mode());
-    i2c.call_read_array.assert_called_once_with(5);
+    ::read_array.assert_called_once_with(5);
     TEST_ASSERT_EQUAL(1, static_cast<unsigned char>(UUT.get_mode()));
 };
 
 /// @brief Test the correct initialization of the controller
-static void test_initialization(void)
+void test_initialization(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -222,17 +212,17 @@ static void test_initialization(void)
 
     // perform testing
     // when controller is in patch mode -> exit by sending "PTCc" command
-    i2c.rx_data.byte[0] = 'H';
-    i2c.rx_data.byte[1] = 'C';
-    i2c.rx_data.byte[2] = 'T';
-    i2c.rx_data.byte[3] = 'P';
+    rx_buffer[0] = 'H';
+    rx_buffer[1] = 'C';
+    rx_buffer[2] = 'T';
+    rx_buffer[3] = 'P';
     TEST_ASSERT_TRUE(UUT.initialize());
-    i2c.call_read_array.assert_called_once_with(5);
-    TEST_ASSERT_EQUAL_CHAR_ARRAY("PTCc", i2c.rx_data.byte, 4);
+    ::read_array.assert_called_once_with(5);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY("PTCc", &rx_buffer[2], 4);
 };
 
 /// @brief Test the reading of the PD status
-static void test_read_PD_status(void)
+void test_read_PD_status(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -241,23 +231,22 @@ static void test_read_PD_status(void)
     TPS65987::Controller UUT(i2c);
 
     // Response with all zeros
-    i2c.rx_data.byte[0] = 0x00;
-    i2c.rx_data.byte[1] = 0x00;
-    i2c.rx_data.byte[2] = 0x00;
-    i2c.rx_data.byte[3] = 0x00;
+    rx_buffer[0] = 0x00;
+    rx_buffer[1] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[3] = 0x00;
     TEST_ASSERT_TRUE(UUT.read_PD_status());
-    i2c.call_set_target_address.assert_called_once_with(TPS65987::i2c_address);
-    i2c.call_read_array.assert_called_once_with(5);
+    ::read_array.assert_called_once_with(5);
     TEST_ASSERT_EQUAL(0, UUT.get_active_contract().role);
     TEST_ASSERT_EQUAL(3, UUT.get_active_contract().USB_type);
     TEST_ASSERT_EQUAL(0, UUT.get_active_contract().voltage);
     TEST_ASSERT_EQUAL(0, UUT.get_active_contract().current);
 
     // Plug type is USB2.0
-    i2c.rx_data.byte[0] = 0x00;
-    i2c.rx_data.byte[1] = 0x00;
-    i2c.rx_data.byte[2] = 0x00;
-    i2c.rx_data.byte[3] = TPS65987::PlugDetails_0;
+    rx_buffer[0] = 0x00;
+    rx_buffer[1] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[3] = TPS65987::PlugDetails_0;
     TEST_ASSERT_TRUE(UUT.read_PD_status());
     TEST_ASSERT_EQUAL(0, UUT.get_active_contract().role);
     TEST_ASSERT_EQUAL(2, UUT.get_active_contract().USB_type);
@@ -265,10 +254,10 @@ static void test_read_PD_status(void)
     TEST_ASSERT_EQUAL(0, UUT.get_active_contract().current);
 
     // USB default current
-    i2c.rx_data.byte[0] = 0x00;
-    i2c.rx_data.byte[1] = 0x00;
-    i2c.rx_data.byte[2] = 0x00;
-    i2c.rx_data.byte[3] = TPS65987::CCPullUp_0;
+    rx_buffer[0] = 0x00;
+    rx_buffer[1] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[3] = TPS65987::CCPullUp_0;
     TEST_ASSERT_TRUE(UUT.read_PD_status());
     TEST_ASSERT_EQUAL(0, UUT.get_active_contract().role);
     TEST_ASSERT_EQUAL(3, UUT.get_active_contract().USB_type);
@@ -276,10 +265,10 @@ static void test_read_PD_status(void)
     TEST_ASSERT_EQUAL(900, UUT.get_active_contract().current);
 
     // USB 1.5A
-    i2c.rx_data.byte[0] = 0x00;
-    i2c.rx_data.byte[1] = 0x00;
-    i2c.rx_data.byte[2] = 0x00;
-    i2c.rx_data.byte[3] = TPS65987::CCPullUp_1;
+    rx_buffer[0] = 0x00;
+    rx_buffer[1] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[3] = TPS65987::CCPullUp_1;
     TEST_ASSERT_TRUE(UUT.read_PD_status());
     TEST_ASSERT_EQUAL(0, UUT.get_active_contract().role);
     TEST_ASSERT_EQUAL(3, UUT.get_active_contract().USB_type);
@@ -287,10 +276,10 @@ static void test_read_PD_status(void)
     TEST_ASSERT_EQUAL(1500, UUT.get_active_contract().current);
 
     // USB 3.0A
-    i2c.rx_data.byte[0] = 0x00;
-    i2c.rx_data.byte[1] = 0x00;
-    i2c.rx_data.byte[2] = 0x00;
-    i2c.rx_data.byte[3] = TPS65987::CCPullUp_1 | TPS65987::CCPullUp_0;
+    rx_buffer[0] = 0x00;
+    rx_buffer[1] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[3] = TPS65987::CCPullUp_1 | TPS65987::CCPullUp_0;
     TEST_ASSERT_TRUE(UUT.read_PD_status());
     TEST_ASSERT_EQUAL(0, UUT.get_active_contract().role);
     TEST_ASSERT_EQUAL(3, UUT.get_active_contract().USB_type);
@@ -298,10 +287,10 @@ static void test_read_PD_status(void)
     TEST_ASSERT_EQUAL(3000, UUT.get_active_contract().current);
 
     // Role source
-    i2c.rx_data.byte[0] = 0x00;
-    i2c.rx_data.byte[1] = 0x00;
-    i2c.rx_data.byte[2] = 0x00;
-    i2c.rx_data.byte[3] = TPS65987::PresentRole;
+    rx_buffer[0] = 0x00;
+    rx_buffer[1] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[3] = TPS65987::PresentRole;
     TEST_ASSERT_TRUE(UUT.read_PD_status());
     TEST_ASSERT_EQUAL(1, UUT.get_active_contract().role);
     TEST_ASSERT_EQUAL(3, UUT.get_active_contract().USB_type);
@@ -310,7 +299,7 @@ static void test_read_PD_status(void)
 };
 
 /// === Run Tests ===
-void test_tps65987(void)
+int main(int argc, char** argv)
 {
     UNITY_BEGIN();
     test_init();
@@ -323,6 +312,5 @@ void test_tps65987(void)
     test_read_mode();
     test_read_PD_status();
     UNITY_END();
-    // return 0;
-    return;
+    return EXIT_SUCCESS;
 };

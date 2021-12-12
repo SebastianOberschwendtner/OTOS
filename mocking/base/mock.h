@@ -33,13 +33,13 @@ namespace Mock
     // === Class defines ===
 
     // Class for mocking functions and methods
-    template<typename return_type>
+    template<typename return_type = bool>
     class Callable
     {
     public:
         // *** Properties ***
-        int call_count{};
-        int last_called_with;
+        int call_count{0};
+        int last_called_with{0};
 
         // *** Constructors ***
         // Callable(): call_count(0), last_called_with(0){};
@@ -51,7 +51,15 @@ namespace Mock
          * @return Returns a value defined by the template parameter.
          */
         template<typename T1, typename... Ts>
-        return_type operator() (T1 arg, Ts... args) { this->call_count++; this->last_called_with = static_cast<int>(arg); return return_type{1}; };
+        return_type operator() (T1 arg, Ts... args) 
+        { 
+            this->call_count++;
+            if constexpr (std::is_pointer<T1>())
+                this->last_called_with = static_cast<int>(*arg);
+            else
+                this->last_called_with = static_cast<int>(arg);
+            return return_type{1}; 
+        };
 
         // *** Methods ***
         /**
@@ -65,7 +73,17 @@ namespace Mock
         };
 
         /**
+         * @brief Reset the function calls
+         */
+        void reset(void)
+        {
+            this->call_count = 0;
+            this->last_called_with = 0;
+        };
+
+        /**
          * @brief Assert wether the methods was called once.
+         * After calling this function, the callable state is resetted!
          * @details Calls the unit TEST_ macros.
          */
         void assert_called_once(void) { 
@@ -87,7 +105,7 @@ namespace Mock
          * @param Expected The last expected argument
          * @details Calls the unit TEST_ macros.
          */
-        void assert_called_last_with(const int Expected) const {
+        void assert_called_last_with(const int Expected) {
             // Prepare errors message
             const char *fmt = "Expected to be called last with ((int) %d), but was called with ((int) %d).";
             int sz = std::snprintf(nullptr, 0, fmt, Expected, this->last_called_with);
@@ -97,6 +115,9 @@ namespace Mock
             // Test the call args
             TEST_ASSERT_TRUE_MESSAGE(Expected == this->last_called_with, &buf[0]); 
             TEST_ASSERT_TRUE_MESSAGE(this->call_count > 0, "Expected to be called at least once, but was called 0 times.")
+
+            // Reset the call arg again
+            this->last_called_with = 0;
         };
 
         /**

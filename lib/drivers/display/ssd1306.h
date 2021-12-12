@@ -24,7 +24,6 @@
 // === includes ===
 // #include "interface.h"
 #include "drivers.h"
-#include <variant>
 
 // === Command codes ===
 namespace SSD1306
@@ -71,60 +70,26 @@ namespace SSD1306
     };
 
     // === Classes ===
-    class bus
-    {
-    private:
-        struct bus_concept
-        {
-            virtual ~bus_concept(){};
-            virtual bool send_word(unsigned int word) = 0;
-        };
-
-        template <class bus_used>
-        struct bus_model : public bus_concept
-        {
-            bus_used bus_object;
-            bus_model(bus_used const &mybus)
-                : bus_object{mybus} {};
-
-            bool send_word(unsigned int word) final
-            {
-                return Bus::send_word(bus_object, word);
-            }
-        };
-
-        friend bool send_word(bus const& model, unsigned int word)
-        {
-            return model.pimpl->send_word(word);
-        }
-        bus_concept *pimpl;
-
-    public:
-        template <class bus_used>
-        bus(bus_used const &mybus)
-            : pimpl{&bus_model<bus_used>(mybus)} {};
-    };
-
-    // template<class bus_controller>
+    template<class bus_controller>
     class Controller
     {
     private:
         // *** properties ***
-        bus mybus;
+        bus_controller mybus;
 
         // *** methods ***
-        bool send_command_byte(const Command cmd) const;
-        bool send_command_data(const unsigned char cmd) const;
+        bool send_command_byte(const Command cmd);
+        bool send_command_data(const unsigned char cmd);
 
     public:
         // *** Constructor ***
-        Controller(bus bus_used);
+        Controller(bus_controller& bus_used);
 
         // *** Methods ***
-        bool initialize(void) const;
-        bool on(void) const;
-        bool off(void) const;
-        bool draw(const unsigned char *buffer) const;
+        bool initialize(void);
+        bool on(void);
+        bool off(void);
+        bool draw(const unsigned char *buffer);
     };
 };
 

@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    main.c
  * @author  SO
- * @version v1.0.5
+ * @version v1.0.8
  * @date    09-March-2021
  * @brief   Main function for the OTOS. Mainly used to demonstrate how the OTOS
  *          functions work and should be used.
@@ -42,7 +42,7 @@
 void Blink_LED3(void)
 {
     volatile unsigned long counter = 0;
-    GPIO::PIN LED3(GPIO::PORTG, GPIO::PIN13, GPIO::OUTPUT);
+    GPIO::PIN LED3(GPIO::Port::G, 13, GPIO::Mode::Output);
 
     // LED3.setHigh();
     while(1)
@@ -65,10 +65,10 @@ void Blink_LED3(void)
 void Blink_LED4(void)
 {
     volatile unsigned long counter = 0;
-    GPIO::PIN LED4(GPIO::PORTG, GPIO::PIN14, GPIO::OUTPUT);
+    GPIO::PIN LED4(GPIO::Port::G, 14, GPIO::Mode::Output);
     // GPIO::PIN LED4(GPIO::PORTA, GPIO::PIN5, GPIO::OUTPUT);
 
-    LED4.setHigh();
+    LED4.set_high();
     while(1)
     {
         counter++;
@@ -88,31 +88,28 @@ void Blink_LED4(void)
  */
 void Task_I2C(void)
 {
-    GPIO::PIN Led_Green(GPIO::PORTG, GPIO::PIN13, GPIO::OUTPUT);
-    GPIO::PIN Led_Red(GPIO::PORTG, GPIO::PIN14, GPIO::OUTPUT);
-    Led_Green.setLow();
-    Led_Red.setLow();
+    // GPIO::PIN Led_Green(GPIO::PORTG, GPIO::PIN13, GPIO::OUTPUT);
+    // GPIO::PIN Led_Red(GPIO::PORTG, GPIO::PIN14, GPIO::OUTPUT);
+    // Led_Green.setLow();
+    // Led_Red.setLow();
 
-    I2C::Controller i2c(I2C::I2C_1, 100000);
-    GPIO::PIN SCL(GPIO::PORTB, GPIO::PIN8);
-    GPIO::PIN SDA(GPIO::PORTB, GPIO::PIN9);
-    i2c.assign_pin(SCL);
-    i2c.assign_pin(SDA);
+    GPIO::PIN OUT(GPIO::Port::A, 5, GPIO::Mode::Output);
+
+    I2C::Controller i2c(IO::I2C_1, 100000);
+    GPIO::PIN SCL(GPIO::Port::B, 8);
+    GPIO::PIN SDA(GPIO::Port::B, 9);
+    GPIO::assign(SCL, i2c);
+    GPIO::assign(SDA, i2c);
     i2c.enable();
 
     OTOS::Task::yield();
 
-    // Send address
+    // Set address
     i2c.set_target_address(0x78);
 
-    I2C::Data_t payload;
-
-    payload.byte[1] = 0b00000000;
-    payload.byte[0] = 0xA5;
-    i2c.send_word(payload.word[0]);
-    
-    payload.byte[0] = 0xAF;
-    i2c.send_word(payload.word[0]);
+    // Send 2 bytes
+    Bus::send_bytes(i2c, 0x00, 0xAF);
+    OUT.set_high();
     
     while (1)
     {
@@ -127,8 +124,8 @@ int main(void)
     OTOS::Kernel OS;
 
     // Schedule Threads
-    // OS.scheduleThread(&Blink_LED3, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
-    // OS.scheduleThread(&Blink_LED4, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
+    OS.scheduleThread(&Blink_LED3, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
+    OS.scheduleThread(&Blink_LED4, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
     OS.scheduleThread(&Task_I2C,   OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
 
     // Start the task execution

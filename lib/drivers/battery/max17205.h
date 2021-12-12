@@ -19,10 +19,10 @@
  */
 
 #ifndef MAX17205_H_
-#define MAX17205_h_
+#define MAX17205_H_
 
 // === includes ===
-#include "interface.h"
+#include "drivers.h"
 
 // === Command codes ===
 namespace MAX17205 {
@@ -61,12 +61,14 @@ namespace MAX17205 {
     };
 
     // === Classes ===
+    using Bus::Data_t;
+    template<class bus_controller>
     class Controller
     {
     private:
         // *** properties ***
-        I2C::Controller_Base* i2c;
-        I2C::Data_t     i2c_data;
+        bus_controller  mybus;
+        Data_t          i2c_data{0};
         unsigned int    voltage_battery = 0;
         signed int      current_battery = 0;
         unsigned int    voltage_cell[2] = {0};
@@ -86,7 +88,15 @@ namespace MAX17205 {
 
     public:
         // *** Constructor ***
-        Controller(I2C::Controller_Base& i2c_controller);
+        /**
+         * @brief Constructor for balancer controller.
+         * @param bus_used The reference to the used bus peripheral.
+         */
+        Controller() = delete;
+        Controller(bus_controller bus_used)
+        : mybus{bus_used}
+        {
+        };
 
         // *** Properties
 

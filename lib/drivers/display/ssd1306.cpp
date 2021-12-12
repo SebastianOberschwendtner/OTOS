@@ -30,7 +30,8 @@
 // === Includes ===
 #include "ssd1306.h"
 
-// template class SSD1306::Controller<I2C::Controller>;
+// Provide template instanciations with allowed bus controllers
+template class SSD1306::Controller<I2C::Controller>;
 
 // === Functions ===
 
@@ -38,8 +39,9 @@
  * @brief Constructor for display controller.
  * @param bus_used The reference to the used bus peripheral.
  */
-SSD1306::Controller::Controller(bus bus_used):
-mybus{bus_used}
+template<class bus_controller>
+SSD1306::Controller<bus_controller>::Controller(bus_controller& bus_used)
+: mybus{bus_used}
 {
 };
 
@@ -47,8 +49,8 @@ mybus{bus_used}
  * @brief Initialize the display controller.
  * @return Returns True when the display was initialized without any errors.
  */
-// template<class bus_controller>
-bool SSD1306::Controller::initialize(void) const
+template<class bus_controller>
+bool SSD1306::Controller<bus_controller>::initialize(void)
 {
     // Set the target address for the i2c controller
     // this->mybus->set_target_address(i2c_address);
@@ -94,7 +96,8 @@ bool SSD1306::Controller::initialize(void) const
  * @param cmd The command byte to send.
  * @return Returns True when the command was sent successfully.
  */
-bool SSD1306::Controller::send_command_byte(const Command cmd) const
+template<class bus_controller>
+bool SSD1306::Controller<bus_controller>::send_command_byte(const Command cmd)
 {
     // Set the payload, a single byte sends always two bytes:
     // The first byte (0x00) indicates that the following data
@@ -107,22 +110,23 @@ bool SSD1306::Controller::send_command_byte(const Command cmd) const
  * @param cmd The command byte to send.
  * @return Returns True when the command was sent successfully.
  */
-bool SSD1306::Controller::send_command_data(const unsigned char cmd) const
+template<class bus_controller>
+bool SSD1306::Controller<bus_controller>::send_command_data(const unsigned char cmd)
 {
     // Set the payload, a single byte sends always two bytes:
     // The first byte (0x00) indicates that the following data
     // is a command
     I2C::Data_t payload{0};
     payload.byte[0] = cmd;
-    return true;
-    // return Bus::send_word(this->mybus, payload.word[0]);
+    return Bus::send_word(this->mybus, payload.word[0]);
 };
 
 /**
  * @brief Turn the display on.
  * @return Returns True when the display did respond correctly.
  */
-bool SSD1306::Controller::on(void) const
+template<class bus_controller>
+bool SSD1306::Controller<bus_controller>::on(void)
 {
     return this->send_command_byte(Command::display_on);
 };
@@ -131,7 +135,8 @@ bool SSD1306::Controller::on(void) const
  * @brief Turn the display off.
  * @return Returns True when the dispaly did respond correctly.
  */
-bool SSD1306::Controller::off(void) const
+template<class bus_controller>
+bool SSD1306::Controller<bus_controller>::off(void)
 {
     return this->send_command_byte(Command::display_off);
 };
@@ -141,12 +146,13 @@ bool SSD1306::Controller::off(void) const
  * @param buffer Pointer to the buffer with the content.
  * @return Returns True when the buffer was sent successfully.
  */
-bool SSD1306::Controller::draw(const unsigned char* buffer) const
+template<class bus_controller>
+bool SSD1306::Controller<bus_controller>::draw(const unsigned char* buffer)
 {
     // Send all 4 pages of the buffer
-    // for (unsigned char iPage=0; iPage<4; iPage++)
-    //     if(!this->bus->send_array_leader(0x40, (buffer + 128*iPage), 128))
-    //         return false;
+    for (unsigned char iPage=0; iPage<4; iPage++)
+        if(!Bus::send_array_leader(this->mybus, 0x40, (buffer + 128*iPage), 128))
+            return false;
     
     // Sending was successfull
     return true;

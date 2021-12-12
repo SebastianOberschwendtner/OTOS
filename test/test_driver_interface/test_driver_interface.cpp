@@ -29,7 +29,9 @@
 
 // ****** Includes ******
 #include "unity.h"
+#include "mock.h"
 #include "interface.h"
+#include <array>
 
 /** === Test List ===
  * ✓ base class is initalized with no error
@@ -52,9 +54,13 @@ void test_init(void)
 {
     // create object
     Driver::Base UUT;
+    Driver::Base IO{IO::I2C_1};
 
     // perform testing
-    TEST_ASSERT_EQUAL(0, UUT.get_error());
+    TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
+    TEST_ASSERT_TRUE(UUT.timed_out())
+    TEST_ASSERT_EQUAL(IO::SYSTEM_, UUT.instance);
+    TEST_ASSERT_EQUAL(IO::I2C_1, IO.instance);
 };
 
 /// @brief Test whether errors can be set
@@ -83,6 +89,78 @@ void test_timeout(void)
     TEST_ASSERT_FALSE(UUT.timed_out());
 };
 
+/// @brief test the interface to GPIOs
+void test_gpio_interface(void)
+{
+    // Setup mocked GPIO Pin
+    struct Mock_Pin
+    {
+        Mock::Callable<bool> set_alternate_function;
+    };
+    Mock_Pin mypin{};
+    Driver::Base controller{IO::I2C_1};
+
+    // Test assigning alternate function
+    GPIO::assign(mypin, controller);
+    mypin.set_alternate_function.assert_called_once_with(
+        static_cast<int>(IO::I2C_1)
+    );
+
+};
+
+/// @brief test the bus driver interface
+void test_bus_interface(void)
+{
+    struct Mock_Bus
+    {
+        Bus::Data_t buffer{0};
+        Mock::Callable<bool> set_target_address;
+        Mock::Callable<bool> send_data;
+        Mock::Callable<bool> send_array;
+        Mock::Callable<bool> send_array_leader;
+        Mock::Callable<bool> read_array;
+        Mock::Callable<bool> read_data;
+        Bus::Data_t get_rx_data(void) { return this->buffer; };
+    };
+    Mock_Bus mybus{};
+
+    // Test address setting
+    Bus::change_address(mybus, 0x12);
+    mybus.set_target_address.assert_called_once_with(0x12);
+
+    // Test send byte(s)
+    TEST_ASSERT_TRUE(Bus::send_byte(mybus, 0x34));
+    mybus.send_data.assert_called_once_with(0x34);
+    TEST_ASSERT_TRUE(Bus::send_bytes(mybus, 0x12, 0x34));
+    mybus.send_data.assert_called_once_with(0x1234);
+    TEST_ASSERT_TRUE(Bus::send_bytes(mybus, 0x12, 0x34, 0x56));
+    mybus.send_data.assert_called_once_with(0x123456);
+
+    // Test send word
+    TEST_ASSERT_TRUE(Bus::send_word(mybus, 0x4312));
+    mybus.send_data.assert_called_once_with(0x4312);
+
+    // Test send_array
+    unsigned char temp = 69;
+    TEST_ASSERT_TRUE(Bus::send_array(mybus, &temp, 1));
+    mybus.send_array.assert_called_once_with(69);
+
+    // Test send array with leading byte
+    TEST_ASSERT_TRUE(Bus::send_array_leader(mybus, 0x34, &temp, 1));
+    mybus.send_array_leader.assert_called_once_with(0x34);
+
+    // test read array
+    TEST_ASSERT_TRUE(Bus::read_array(mybus, 0x56, &temp, 1));
+    mybus.read_array.assert_called_once_with(0x56);
+
+    // test read word
+    mybus.buffer.value = 0x43;
+    auto response = Bus::read_word(mybus, 0x20);
+    mybus.read_data.assert_called_once_with(0x20);
+    TEST_ASSERT_TRUE(response);
+    TEST_ASSERT_EQUAL(0x43, response.value());
+};
+
 // === Main ===
 int main(int argc, char** argv)
 {
@@ -90,6 +168,8 @@ int main(int argc, char** argv)
     test_init();
     test_set_error();
     test_timeout();
+    test_gpio_interface();
+    test_bus_interface();
     UNITY_END();
     return 0;
 };

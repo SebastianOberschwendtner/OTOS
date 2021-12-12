@@ -28,45 +28,84 @@
  */
 
 // === Includes ===
-#include "test_bq25700.h"
+#include <unity.h>
+#include <mock.h>
+#include "battery/bq25700.h"
+
+// === Fixtures ===
+
+#include <array>
+#include <optional>
+#include "interface.h"
 
 // === Fixtures ===
 
 // Mock the i2c driver
-class I2C_Mock: public I2C::Controller_Base, public Mock::Peripheral
-{
-
-public:
-    // *** Variables to track calls
-    Mock::Callable call_set_target_address;
-    Mock::Callable call_send_data;
-    Mock::Callable call_send_byte;
-    Mock::Callable call_send_word;
-    Mock::Callable call_send_array;
-    Mock::Callable call_send_array_leader;
-    Mock::Callable call_read_word;
-    I2C::Data_t rx_data;
-
-    // *** Constructor
-    I2C_Mock() {rx_data.value = 0; };
-
-    // *** overrides for interface
-    void set_target_address  (const unsigned char address) override { call_set_target_address.add_call((int) address); };
-    bool send_data           (const I2C::Data_t payload, const unsigned char n_bytes) override { call_send_data.add_call((int) payload.word[0]); return true; };
-    bool send_byte           (const unsigned char data) override { call_send_byte.add_call((int) data); return true; };
-    bool send_word           (const unsigned int data) override { call_send_word.add_call((int) data); return true; };
-    bool send_array          (const unsigned char* data, const unsigned char n_bytes) override { call_send_array.add_call((int) n_bytes); return true; };
-    bool send_array_leader   (const unsigned char byte, const unsigned char* data, const unsigned char n_bytes) override { call_send_array_leader.add_call((int) byte); return true; };
-    bool read_data           (const unsigned char reg, unsigned char n_bytes) override { return true; };
-    bool read_byte           (const unsigned char reg) override { return true; };
-    bool read_word           (const unsigned char reg) override { 
-        call_read_word.add_call((int)reg);
-        if (reg == 0xFE) this->rx_data.value = 0x4000;
-        if (reg == 0xFF) this->rx_data.value = 0x7900;
-        return true; };
-    bool read_array          (const unsigned char reg, unsigned char* dest, const unsigned char n_bytes) override {return true; } ;
-    I2C::Data_t  get_rx_data (void) const override { return this->rx_data; };
+struct I2C_Mock {
+    unsigned char buffer_position{0};
 };
+Mock::Callable<bool> set_target_address;
+Mock::Callable<bool> send_word;
+Mock::Callable<bool> send_bytes;
+Mock::Callable<bool> send_array;
+Mock::Callable<bool> send_array_leader;
+Mock::Callable<bool> read_array;
+Mock::Callable<bool> read_word;
+std::array<unsigned char, 66> rx_buffer{0};
+
+namespace Bus {
+    void change_address(I2C_Mock& bus, const unsigned char address)
+    {
+        ::set_target_address(address);
+        return;
+    };
+    bool send_bytes(
+        I2C_Mock& bus,
+        const unsigned char first_byte,
+        const unsigned char second_byte,
+        const unsigned char third_byte
+        )
+    {
+        // set the payload data
+        Bus::Data_t temp{};
+        temp.byte[2] = first_byte;
+        temp.byte[1] = second_byte;
+        temp.byte[0] = third_byte;
+
+        // send the data
+        return ::send_bytes(temp.value);
+    };
+    bool send_word(I2C_Mock& bus, unsigned int word)
+    {
+       return ::send_word(word);
+    };
+    bool send_array(I2C_Mock& bus, const unsigned char* data, const unsigned char n_bytes)
+    { 
+        std::copy(data, data + n_bytes, rx_buffer.begin());
+        return ::send_array(n_bytes); 
+    };
+    bool send_array_leader(I2C_Mock& bus, const unsigned char byte, const unsigned char* data, const unsigned char n_bytes)
+    { 
+        ::send_array_leader(byte, data, n_bytes); 
+    return (rx_buffer[0] << 8) | rx_buffer[1];
+    };
+    std::optional<unsigned int> read_word(I2C_Mock& bus, const unsigned char reg)
+    {
+        ::read_word(reg);
+        unsigned char pos = bus.buffer_position++;
+        return (rx_buffer[pos + 1] << 8) | rx_buffer[pos];
+    };
+    bool read_array(I2C_Mock &bus, const unsigned char reg, unsigned char* dest, const unsigned char n_bytes)
+    {
+        std::copy(rx_buffer.begin(), rx_buffer.begin() + n_bytes, dest);
+        return ::read_array(reg);
+    };
+};
+
+// Include the UUT
+#include "battery/bq25700.h"
+#include "battery/bq25700.cpp"
+template class BQ25700::Controller<I2C_Mock>;
 
 /** === Test List ===
  * ▢ controller has the properties:
@@ -113,7 +152,7 @@ public:
 
 // === Define Tests ===
 /// @brief Test the constructor
-static void test_constructor(void)
+void test_constructor(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -131,24 +170,25 @@ static void test_constructor(void)
 };
 
 /// @brief Test initializing the controller
-static void test_init(void)
+void test_init(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
+    rx_buffer[0] = BQ25700::manufacturer_id;
+    rx_buffer[2] = BQ25700::device_id;
 
     // create the controller object
     BQ25700::Controller UUT(i2c);
 
     // perform testing
     TEST_ASSERT_TRUE(UUT.initialize());
-    i2c.call_set_target_address.assert_called_last_with(0x12);
-    i2c.call_read_word.assert_called_last_with(0xFF);
-    TEST_ASSERT_EQUAL(2, i2c.call_read_word.call_count);
+    ::read_word.assert_called_last_with(0xFF);
+    TEST_ASSERT_EQUAL(2, ::read_word.call_count);
     TEST_ASSERT_EQUAL(0, static_cast<unsigned char>(UUT.get_state()));
 };
 
 /// @brief Test sending options
-static void test_set_options(void)
+void test_set_options(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -158,39 +198,40 @@ static void test_set_options(void)
 
     // Test writting a register
     TEST_ASSERT_TRUE(UUT.write_register(BQ25700::Register::Charge_Option_0, 0x1234));
-    i2c.call_send_data.assert_called_once_with(0x123412); // BQ25700 expects MSB last
+    ::send_bytes.assert_called_once_with(0x123412); // BQ25700 expects MSB last
 
     // Test setting the charge current
     TEST_ASSERT_TRUE(UUT.set_charge_current(1000));
     TEST_ASSERT_EQUAL(960U, UUT.get_charge_current());
-    i2c.call_send_data.assert_called_once_with(0x14C003); // BQ25700 expects MSB last
+    ::send_bytes.assert_called_once_with(0x14C003); // BQ25700 expects MSB last
 
     // Test setting the OTG voltage
     TEST_ASSERT_TRUE(UUT.set_OTG_voltage(5000));
     TEST_ASSERT_EQUAL(4992U, UUT.get_OTG_voltage());
-    i2c.call_send_data.assert_called_once_with(0x3B0002); // BQ25700 expects MSB last
+    ::send_bytes.assert_called_once_with(0x3B0002); // BQ25700 expects MSB last
 
     // Test setting the OTG current
     TEST_ASSERT_TRUE(UUT.set_OTG_current(3300));
     TEST_ASSERT_EQUAL(0x4200U, UUT.get_OTG_current());
-    i2c.call_send_data.assert_called_once_with(0x3C0042); // BQ25700 expects MSB last
+    ::send_bytes.assert_called_once_with(0x3C0042); // BQ25700 expects MSB last
 
     // Test enabling the OTG voltage
     TEST_ASSERT_TRUE(UUT.enable_OTG(true));
     TEST_ASSERT_EQUAL(3, static_cast<unsigned char>(UUT.get_state()));
-    i2c.call_send_data.assert_called_once_with(0x320010); // BQ25700 expects MSB last
+    ::send_bytes.assert_called_once_with(0x320010); // BQ25700 expects MSB last
     // Test disabling the OTG voltage again
     TEST_ASSERT_TRUE(UUT.enable_OTG(false));
     TEST_ASSERT_EQUAL(1, static_cast<unsigned char>(UUT.get_state()));
-    i2c.call_send_data.assert_called_once_with(0x320000); // BQ25700 expects MSB last
+    ::send_bytes.assert_called_once_with(0x320000); // BQ25700 expects MSB last
 };
 
 /// @brief Main test function for BQ25700
-void test_bq25700(void)
+int main(int argc, char** argv)
 {
     UNITY_BEGIN();
     test_constructor();
     test_init();
     test_set_options();
     UNITY_END();
+    return EXIT_SUCCESS;
 };

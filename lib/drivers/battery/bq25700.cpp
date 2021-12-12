@@ -30,35 +30,28 @@
 // === Includes ===
 #include "bq25700.h"
 
+// Provide template instanciations with allowed bus controllers
+template class BQ25700::Controller<I2C::Controller>;
+
 // === Functions ===
 
-/**
- * @brief Constructor for charger controller.
- * @param i2c_controller The reference to the used i2c peripheral.
- */
-BQ25700::Controller::Controller(I2C::Controller_Base& i2c_controller):
-i2c(&i2c_controller)
-{
-    // Reset i2c data buffer
-    this->i2c_data.value = 0x00;
-};
 
 /**
  * @brief Read a register byte of the target and return 
  * the data sorted into the right order.
  * @return Returns True when the register was read successfully.
  */
-bool BQ25700::Controller::read_register(const Register reg)
+template<class bus_controller>
+bool BQ25700::Controller<bus_controller>::read_register(const Register reg)
 {
-    // Set the target address
-    this->i2c->set_target_address(i2c_address);
-
-    // All read from the BQ25700 contain words
-    if(!this->i2c->read_word(static_cast<unsigned char>(reg))) return false;
+    // All reads from the BQ25700 contain words
+    std::optional<unsigned int> response = Bus::read_word(this->mybus, static_cast<unsigned char>(reg));
+    if(!response) 
+        return false;
 
     // Read successfull, sort the data
-    this->i2c_data.byte[0] = this->i2c->get_rx_data().byte[1];
-    this->i2c_data.byte[1] = this->i2c->get_rx_data().byte[0];
+    this->i2c_data.byte[0] = (response.value() >> 8) & 0xFF;
+    this->i2c_data.byte[1] = (response.value() >> 0) & 0xFF;
     return true;
 };
 
@@ -69,14 +62,12 @@ bool BQ25700::Controller::read_register(const Register reg)
  * @param data The data to be written to the register.
  * @return Returns True when the transfer was successful.
  */
-bool BQ25700::Controller::write_register(const Register reg,
+template<class bus_controller>
+bool BQ25700::Controller<bus_controller>::write_register(const Register reg,
     const unsigned int data)
 {
-    // Assemble the data
-    this->i2c_data.byte[2] = static_cast<unsigned char>(reg);
-    this->i2c_data.byte[1] = data & 0xFF;
-    this->i2c_data.byte[0] = data >> 8;
-    return this->i2c->send_data(this->i2c_data, 3);
+    // send the data bytes
+    return Bus::send_bytes(this->mybus, static_cast<unsigned char>(reg), (data & 0xFF), (data >> 8));
 };
 
 /**
@@ -84,7 +75,8 @@ bool BQ25700::Controller::write_register(const Register reg,
  * @return Returns True when the charger responds and was
  * initialized successfully.
  */
-bool BQ25700::Controller::initialize(void)
+template<class bus_controller>
+bool BQ25700::Controller<bus_controller>::initialize(void)
 {
     // check whether device is responding and the IDs match
     this->state = State::Error;
@@ -107,20 +99,12 @@ bool BQ25700::Controller::initialize(void)
 };
 
 /**
- * @brief Get the current state of the charger.
- * @return Returns the current state.
- */
-BQ25700::State BQ25700::Controller::get_state(void) const
-{
-    return this->state;
-};
-
-/**
  * @brief Set the charge current and send the value to the target.
  * @param current The new charge current in [mA]
  * @return Returns True when the charge current was send successfully.
  */
-bool BQ25700::Controller::set_charge_current(const unsigned int current)
+template<class bus_controller>
+bool BQ25700::Controller<bus_controller>::set_charge_current(const unsigned int current)
 {
     // Convert the current to the charger resolution
     this->current_charge = current & 0x1FC0;
@@ -134,7 +118,8 @@ bool BQ25700::Controller::set_charge_current(const unsigned int current)
  * @param voltage The OTG voltage in mV
  * @return Returns True when the charge current was send successfully.
  */
-bool BQ25700::Controller::set_OTG_voltage(const unsigned int voltage)
+template<class bus_controller>
+bool BQ25700::Controller<bus_controller>::set_OTG_voltage(const unsigned int voltage)
 {
     // Convert the value to the charger resolution and clamp to min voltage
     if (voltage >= 4480)
@@ -151,7 +136,8 @@ bool BQ25700::Controller::set_OTG_voltage(const unsigned int voltage)
  * @param current The OTG voltage in mA
  * @return Returns True when the charge current was send successfully.
  */
-bool BQ25700::Controller::set_OTG_current(const unsigned int current)
+template<class bus_controller>
+bool BQ25700::Controller<bus_controller>::set_OTG_current(const unsigned int current)
 {
     // Convert the value to the charger resolution
     this->current_OTG = (current/50) << 8;
@@ -165,7 +151,8 @@ bool BQ25700::Controller::set_OTG_current(const unsigned int current)
  * @param state Whether to turn the OTG on or off
  * @return Returns True when the action was performed without errors.
  */
-bool BQ25700::Controller::enable_OTG(const bool state)
+template<class bus_controller>
+bool BQ25700::Controller<bus_controller>::enable_OTG(const bool state)
 {
     if(state)
     {

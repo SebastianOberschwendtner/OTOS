@@ -86,6 +86,83 @@ public:
 extern RCC_TypeDef* RCC;
 extern unsigned long RCC_BASE;
 
+/********************  Bit definition for RCC_APB1ENR register  ***************/
+#define RCC_APB1ENR_TIM2EN_Pos             (0U)                                
+#define RCC_APB1ENR_TIM2EN_Msk             (0x1UL << RCC_APB1ENR_TIM2EN_Pos)    /*!< 0x00000001 */
+#define RCC_APB1ENR_TIM2EN                 RCC_APB1ENR_TIM2EN_Msk              
+#define RCC_APB1ENR_TIM3EN_Pos             (1U)                                
+#define RCC_APB1ENR_TIM3EN_Msk             (0x1UL << RCC_APB1ENR_TIM3EN_Pos)    /*!< 0x00000002 */
+#define RCC_APB1ENR_TIM3EN                 RCC_APB1ENR_TIM3EN_Msk              
+#define RCC_APB1ENR_TIM4EN_Pos             (2U)                                
+#define RCC_APB1ENR_TIM4EN_Msk             (0x1UL << RCC_APB1ENR_TIM4EN_Pos)    /*!< 0x00000004 */
+#define RCC_APB1ENR_TIM4EN                 RCC_APB1ENR_TIM4EN_Msk              
+#define RCC_APB1ENR_TIM5EN_Pos             (3U)                                
+#define RCC_APB1ENR_TIM5EN_Msk             (0x1UL << RCC_APB1ENR_TIM5EN_Pos)    /*!< 0x00000008 */
+#define RCC_APB1ENR_TIM5EN                 RCC_APB1ENR_TIM5EN_Msk              
+#define RCC_APB1ENR_TIM6EN_Pos             (4U)                                
+#define RCC_APB1ENR_TIM6EN_Msk             (0x1UL << RCC_APB1ENR_TIM6EN_Pos)    /*!< 0x00000010 */
+#define RCC_APB1ENR_TIM6EN                 RCC_APB1ENR_TIM6EN_Msk              
+#define RCC_APB1ENR_TIM7EN_Pos             (5U)                                
+#define RCC_APB1ENR_TIM7EN_Msk             (0x1UL << RCC_APB1ENR_TIM7EN_Pos)    /*!< 0x00000020 */
+#define RCC_APB1ENR_TIM7EN                 RCC_APB1ENR_TIM7EN_Msk              
+#define RCC_APB1ENR_TIM12EN_Pos            (6U)                                
+#define RCC_APB1ENR_TIM12EN_Msk            (0x1UL << RCC_APB1ENR_TIM12EN_Pos)   /*!< 0x00000040 */
+#define RCC_APB1ENR_TIM12EN                RCC_APB1ENR_TIM12EN_Msk             
+#define RCC_APB1ENR_TIM13EN_Pos            (7U)                                
+#define RCC_APB1ENR_TIM13EN_Msk            (0x1UL << RCC_APB1ENR_TIM13EN_Pos)   /*!< 0x00000080 */
+#define RCC_APB1ENR_TIM13EN                RCC_APB1ENR_TIM13EN_Msk             
+#define RCC_APB1ENR_TIM14EN_Pos            (8U)                                
+#define RCC_APB1ENR_TIM14EN_Msk            (0x1UL << RCC_APB1ENR_TIM14EN_Pos)   /*!< 0x00000100 */
+#define RCC_APB1ENR_TIM14EN                RCC_APB1ENR_TIM14EN_Msk             
+#define RCC_APB1ENR_WWDGEN_Pos             (11U)                               
+#define RCC_APB1ENR_WWDGEN_Msk             (0x1UL << RCC_APB1ENR_WWDGEN_Pos)    /*!< 0x00000800 */
+#define RCC_APB1ENR_WWDGEN                 RCC_APB1ENR_WWDGEN_Msk              
+#define RCC_APB1ENR_SPI2EN_Pos             (14U)                               
+#define RCC_APB1ENR_SPI2EN_Msk             (0x1UL << RCC_APB1ENR_SPI2EN_Pos)    /*!< 0x00004000 */
+#define RCC_APB1ENR_SPI2EN                 RCC_APB1ENR_SPI2EN_Msk              
+#define RCC_APB1ENR_SPI3EN_Pos             (15U)                               
+#define RCC_APB1ENR_SPI3EN_Msk             (0x1UL << RCC_APB1ENR_SPI3EN_Pos)    /*!< 0x00008000 */
+#define RCC_APB1ENR_SPI3EN                 RCC_APB1ENR_SPI3EN_Msk              
+#define RCC_APB1ENR_USART2EN_Pos           (17U)                               
+#define RCC_APB1ENR_USART2EN_Msk           (0x1UL << RCC_APB1ENR_USART2EN_Pos)  /*!< 0x00020000 */
+#define RCC_APB1ENR_USART2EN               RCC_APB1ENR_USART2EN_Msk            
+#define RCC_APB1ENR_USART3EN_Pos           (18U)                               
+#define RCC_APB1ENR_USART3EN_Msk           (0x1UL << RCC_APB1ENR_USART3EN_Pos)  /*!< 0x00040000 */
+#define RCC_APB1ENR_USART3EN               RCC_APB1ENR_USART3EN_Msk            
+#define RCC_APB1ENR_UART4EN_Pos            (19U)                               
+#define RCC_APB1ENR_UART4EN_Msk            (0x1UL << RCC_APB1ENR_UART4EN_Pos)   /*!< 0x00080000 */
+#define RCC_APB1ENR_UART4EN                RCC_APB1ENR_UART4EN_Msk             
+#define RCC_APB1ENR_UART5EN_Pos            (20U)                               
+#define RCC_APB1ENR_UART5EN_Msk            (0x1UL << RCC_APB1ENR_UART5EN_Pos)   /*!< 0x00100000 */
+#define RCC_APB1ENR_UART5EN                RCC_APB1ENR_UART5EN_Msk             
+#define RCC_APB1ENR_I2C1EN_Pos             (21U)                               
+#define RCC_APB1ENR_I2C1EN_Msk             (0x1UL << RCC_APB1ENR_I2C1EN_Pos)    /*!< 0x00200000 */
+#define RCC_APB1ENR_I2C1EN                 RCC_APB1ENR_I2C1EN_Msk              
+#define RCC_APB1ENR_I2C2EN_Pos             (22U)                               
+#define RCC_APB1ENR_I2C2EN_Msk             (0x1UL << RCC_APB1ENR_I2C2EN_Pos)    /*!< 0x00400000 */
+#define RCC_APB1ENR_I2C2EN                 RCC_APB1ENR_I2C2EN_Msk              
+#define RCC_APB1ENR_I2C3EN_Pos             (23U)                               
+#define RCC_APB1ENR_I2C3EN_Msk             (0x1UL << RCC_APB1ENR_I2C3EN_Pos)    /*!< 0x00800000 */
+#define RCC_APB1ENR_I2C3EN                 RCC_APB1ENR_I2C3EN_Msk              
+#define RCC_APB1ENR_CAN1EN_Pos             (25U)                               
+#define RCC_APB1ENR_CAN1EN_Msk             (0x1UL << RCC_APB1ENR_CAN1EN_Pos)    /*!< 0x02000000 */
+#define RCC_APB1ENR_CAN1EN                 RCC_APB1ENR_CAN1EN_Msk              
+#define RCC_APB1ENR_CAN2EN_Pos             (26U)                               
+#define RCC_APB1ENR_CAN2EN_Msk             (0x1UL << RCC_APB1ENR_CAN2EN_Pos)    /*!< 0x04000000 */
+#define RCC_APB1ENR_CAN2EN                 RCC_APB1ENR_CAN2EN_Msk              
+#define RCC_APB1ENR_PWREN_Pos              (28U)                               
+#define RCC_APB1ENR_PWREN_Msk              (0x1UL << RCC_APB1ENR_PWREN_Pos)     /*!< 0x10000000 */
+#define RCC_APB1ENR_PWREN                  RCC_APB1ENR_PWREN_Msk               
+#define RCC_APB1ENR_DACEN_Pos              (29U)                               
+#define RCC_APB1ENR_DACEN_Msk              (0x1UL << RCC_APB1ENR_DACEN_Pos)     /*!< 0x20000000 */
+#define RCC_APB1ENR_DACEN                  RCC_APB1ENR_DACEN_Msk               
+#define RCC_APB1ENR_UART7EN_Pos            (30U)                               
+#define RCC_APB1ENR_UART7EN_Msk            (0x1UL << RCC_APB1ENR_UART7EN_Pos)   /*!< 0x40000000 */
+#define RCC_APB1ENR_UART7EN                RCC_APB1ENR_UART7EN_Msk             
+#define RCC_APB1ENR_UART8EN_Pos            (31U)                               
+#define RCC_APB1ENR_UART8EN_Msk            (0x1UL << RCC_APB1ENR_UART8EN_Pos)   /*!< 0x80000000 */
+#define RCC_APB1ENR_UART8EN                RCC_APB1ENR_UART8EN_Msk             
+
 /********************  Bit definition for RCC_APB2ENR register  ***************/
 #define RCC_APB2ENR_TIM1EN_Pos             (0U)                                
 #define RCC_APB2ENR_TIM1EN_Msk             (0x1UL << RCC_APB2ENR_TIM1EN_Pos)    /*!< 0x00000001 */

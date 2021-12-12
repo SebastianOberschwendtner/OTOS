@@ -30,15 +30,26 @@
 
 // === Declarations ===
 namespace I2C {
+    // === Enums ===
+    enum class Instance: unsigned char
+    {
+        I2C_1 = 0, I2C_2, I2C_3
+    };
+
+    enum class State: unsigned char
+    {
+        Init = 1, Idle, Busy, Error
+    };
 
     // === Classes ===
+    using Bus::Data_t;
     class Controller: public Driver::Base
     {
     private:
         // *** Properties ***
         volatile I2C_TypeDef*   peripheral;
-        unsigned char           target;
-        Data_t                  rx_data;
+        unsigned char           target{0};
+        Data_t                  rx_data{0};
 
         // *** Methods ***
         void                         write_data_register (const unsigned char data);
@@ -48,26 +59,22 @@ namespace I2C {
 
     public:
         // *** Constructor ***
-        Controller(const Instance i2c_instance, const unsigned long frequency);
+        Controller() = delete;
+        Controller(const IO i2c_instance, const unsigned long frequency);
 
         // *** Methods ***
         void            set_target_address  (const unsigned char address);
-        void            assign_pin          (GPIO::PIN_Base& output_pin) const;
         void            enable              (void);
         void            disable             (void);
         void            generate_start      (void);
         void            generate_stop       (void);
         void            write_address       (bool read = false);
         bool            send_address        (bool read = false);
-        bool            send_byte           (const unsigned char data)  ;
-        bool            send_word           (const unsigned int data)   ;
         bool            send_array          (const unsigned char* data, const unsigned char n_bytes)   ;
         bool            send_array_leader   (const unsigned char byte, const unsigned char* data, const unsigned char n_bytes)    ;
-        bool                         send_data           (const Data_t payload, const unsigned char n_bytes);
+        bool            send_data           (const Data_t payload, const unsigned char n_bytes);
         unsigned char   get_target_address  (void) const;
         bool            read_data           (const unsigned char reg, unsigned char n_bytes)           ;
-        bool            read_byte           (const unsigned char reg)                                  ;
-        bool            read_word           (const unsigned char reg)                                  ;
         bool            read_array          (const unsigned char reg, unsigned char* dest, const unsigned char n_bytes)   ;
         Data_t          get_rx_data         (void) const                                                ;
         bool            in_controller_mode  (void) const;
@@ -81,7 +88,4 @@ namespace I2C {
     };
 };
 
-namespace Bus {
-    bool send_word(I2C::Controller* bus, const unsigned int word);
-};
 #endif

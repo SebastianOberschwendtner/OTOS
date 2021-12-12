@@ -19,10 +19,10 @@
  */
 
 #ifndef BQ25700_H_
-#define BQ25700_h_
+#define BQ25700_H_
 
 // === includes ===
-#include "interface.h"
+#include "drivers.h"
 
 // === Command codes ===
 namespace BQ25700 {
@@ -145,12 +145,13 @@ namespace BQ25700 {
 
 
     // === Classes ===
+    template<class bus_controller>
     class Controller
     {
     private:
         // *** properties ***
-        I2C::Controller_Base* i2c;
-        I2C::Data_t i2c_data;
+        bus_controller mybus;
+        I2C::Data_t i2c_data{};
         State state = State::Init;
         unsigned int voltage_system = 0;
         unsigned int voltage_input  = 0;
@@ -165,19 +166,26 @@ namespace BQ25700 {
 
     public:
         // *** Constructor ***
-        Controller(I2C::Controller_Base& i2c_controller);
+        /**
+         * @brief Constructor for charger controller.
+         * @param bus_used The reference to the used bus peripheral.
+         */
+        Controller(bus_controller& bus_used)
+        : mybus{bus_used}
+        {
+        };
 
         // *** Properties
 
         // *** Methods ***
-        unsigned int    get_system_voltage  (void) { return this->voltage_system; };
-        unsigned int    get_input_voltage   (void) { return this->voltage_input; };
-        signed int      get_input_current   (void) { return this->current_input; };
-        unsigned int    get_OTG_voltage     (void) { return this->voltage_OTG + 4480; };
-        unsigned int    get_OTG_current     (void) { return this->current_OTG; };
-        unsigned int    get_charge_current  (void) { return this->current_charge; };
+        unsigned int    get_system_voltage  (void) const { return this->voltage_system; };
+        unsigned int    get_input_voltage   (void) const { return this->voltage_input; };
+        signed int      get_input_current   (void) const { return this->current_input; };
+        unsigned int    get_OTG_voltage     (void) const { return this->voltage_OTG + 4480; };
+        unsigned int    get_OTG_current     (void) const { return this->current_OTG; };
+        unsigned int    get_charge_current  (void) const { return this->current_charge; };
+        State           get_state           (void) const { return this->state; };
         bool            initialize          (void);
-        State           get_state           (void) const;
         bool            write_register      (const Register reg, const unsigned int data);
         bool            set_charge_current  (const unsigned int current);
         bool            set_OTG_voltage     (const unsigned int voltage);

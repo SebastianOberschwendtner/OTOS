@@ -76,14 +76,14 @@ constexpr unsigned long get_TRISE(const unsigned long rise_time_ns)
  * @param instance The I2C hardware instance to be used as the controller hardware
  * @return The address of the hardware instance.
  */
-constexpr unsigned long get_peripheral_address(const I2C::Instance instance) {
+constexpr unsigned long get_peripheral_address(const IO instance) {
     switch (instance)
     {
-    case I2C::I2C_1:
+    case IO::I2C_1:
         return I2C1_BASE;
-    case I2C::I2C_2:
+    case IO::I2C_2:
         return I2C2_BASE;
-    case I2C::I2C_3:
+    case IO::I2C_3:
         return I2C3_BASE;
     default:
         return 0;
@@ -136,32 +136,27 @@ constexpr unsigned long get_clock_control(const unsigned long frequency) {
  * @param instance The I2C hardware instance to be used as the controller hardware
  * @param frequency The clock frequency for the i2c communication
  */
-I2C::Controller::Controller(const I2C::Instance i2c_instance, const unsigned long frequency):
-target(0)
+I2C::Controller::Controller(const IO i2c_instance, const unsigned long frequency)
+: Base{i2c_instance}
+, peripheral{reinterpret_cast<volatile I2C_TypeDef*>( get_peripheral_address(i2c_instance) )}
 {
     // Enable the peripheral clock
-#if defined(STM32F4)
-    unsigned long _reg = (1<< (21 + i2c_instance)); 
-#elif defined(STM32L0)
     unsigned long _reg = 0;
     switch (i2c_instance)
     {
-    case I2C::I2C_1:
+    case IO::I2C_1:
         _reg = RCC_APB1ENR_I2C1EN;
         break;
-    case I2C::I2C_2:
+    case IO::I2C_2:
         _reg = RCC_APB1ENR_I2C2EN;
         break;
-    case I2C::I2C_3:
+    case IO::I2C_3:
         _reg = RCC_APB1ENR_I2C3EN;
         break;
+    default:
+        break;
     };
-#endif
     RCC->APB1ENR |= _reg;
-
-    // set the peripheral address
-    peripheral = reinterpret_cast<volatile I2C_TypeDef*>
-        ( get_peripheral_address(i2c_instance) );
 
     // Set the configuration registers
     peripheral->CR1     = 0;
@@ -199,19 +194,19 @@ void I2C::Controller::set_target_address(const unsigned char address)
  * @brief Set the clock pin as an output
  * @param output_pin The PIN object for the clock pin.
  */
-void I2C::Controller::assign_pin(GPIO::PIN_Base& output_pin) const
-{
-    output_pin.setMode(GPIO::AF_Mode);
-    output_pin.setType(GPIO::OPEN_DRAIN);
+// void Bus::assign_pin(GPIO::PIN_Base& output_pin) 
+// {
+//     output_pin.setMode(GPIO::AF_Mode);
+//     output_pin.setType(GPIO::OPEN_DRAIN);
 
-    // Get the peripheral which is used, since the AF modes depend on that
-    if (this->peripheral == I2C1)
-        output_pin.set_alternate_function(GPIO::I2C_1);
-    else if (this->peripheral == I2C2)
-        output_pin.set_alternate_function(GPIO::I2C_2);
-    else
-        output_pin.set_alternate_function(GPIO::I2C_3);
-};
+//     // Get the peripheral which is used, since the AF modes depend on that
+//     if (this->peripheral == I2C1)
+//         output_pin.set_alternate_function(GPIO::I2C_1);
+//     else if (this->peripheral == I2C2)
+//         output_pin.set_alternate_function(GPIO::I2C_2);
+//     else
+//         output_pin.set_alternate_function(GPIO::I2C_3);
+// };
 
 /**
  * @brief Enable the hardware peripheral.
@@ -465,44 +460,6 @@ bool I2C::Controller::send_data(const I2C::Data_t payload,
 };
 
 /**
- * @brief Send a byte to an i2c target
- * Sets the following errors:
- * - I2C_Timeout
- * - I2C_Data_ACK_Error
- * @param data Byte in data representation to be sent
- * @return Returns True when the byte was sent successfully, False otherwise.
- * @details blocking function
- */
-bool I2C::Controller::send_byte(const unsigned char data)
-{
-    // set the payload data
-    I2C::Data_t payload;
-    payload.byte[0] = data;
-
-    // send the data
-    return this->send_data(payload, 1);
-};
-
-/**
- * @brief Send a word to an i2c target
- * Sets the following errors:
- * - I2C_Timeout
- * - I2C_Data_ACK_Error
- * @param data Word (2 bytes) in data representation to be sent
- * @return Returns True when the byte was sent successfully, False otherwise.
- * @details blocking function
- */
-bool I2C::Controller::send_word(const unsigned int data)
-{
-    // set the payload data
-    I2C::Data_t payload;
-    payload.word[0] = data;
-
-    // send the data
-    return this->send_data(payload, 2);
-};
-
-/**
  * @brief Send an array with n bytes to an i2c target.
  * The first element in the array is transmitted first!
  * Sets the following errors:
@@ -674,29 +631,6 @@ bool I2C::Controller::read_data(const unsigned char reg,
     return true;
 };
 
-/**
- * @brief Read a byte from the specified register.
- * The data is stored in the internal rx buffer.
- * @param reg The register address to read from.
- * @return Returns true when the register data was
- * read successfully, False otherwise.
- */
-bool I2C::Controller::read_byte(const unsigned char reg)
-{
-    return this->read_data(reg, 1);
-};
-
-/**
- * @brief Read a word from the specified register.
- * The data is stored in the internal rx buffer.
- * @param reg The register address to read from.
- * @return Returns true when the register data was
- * read successfully, False otherwise.
- */
-bool I2C::Controller::read_word(const unsigned char reg)
-{
-    return this->read_data(reg, 2);
-};
 
 /**
  * @brief Read an array with n from an i2c target
@@ -901,9 +835,4 @@ bool I2C::Controller::bus_busy(void) const
 #elif defined(STM32L0)
     return this->peripheral->ISR & I2C_ISR_BUSY;
 #endif
-};
-
-bool Bus::send_word(I2C::Controller* bus, const unsigned int word)
-{
-    return bus->send_word(word);
 };

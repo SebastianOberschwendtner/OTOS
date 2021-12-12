@@ -38,32 +38,32 @@
  * @param Port The identifier of the port.
  * @return Return the bit position of the enable bit.
  */
-constexpr unsigned char get_RCCEN_position(const GPIO::PinPort Port) {
+constexpr unsigned char get_RCCEN_position(const GPIO::Port Port) {
     // Return the bit position according to the used port
     switch(Port)
     {
-        case GPIO::PORTA:
+        case GPIO::Port::A:
             return 0;
-        case GPIO::PORTB:
+        case GPIO::Port::B:
             return 1;
-        case GPIO::PORTC:
+        case GPIO::Port::C:
             return 2;
-        case GPIO::PORTD:
+        case GPIO::Port::D:
             return 3;
-        case GPIO::PORTE:
+        case GPIO::Port::E:
             return 4;
-        case GPIO::PORTH:
+        case GPIO::Port::H:
             return 7;
 #ifdef STM32F4
-        case GPIO::PORTF:
+        case GPIO::Port::F:
             return 5;
-        case GPIO::PORTG:
+        case GPIO::Port::G:
             return 6;
-        case GPIO::PORTI:
+        case GPIO::Port::I:
             return 8;
-        case GPIO::PORTJ:
+        case GPIO::Port::J:
             return 9;
-        case GPIO::PORTK:
+        case GPIO::Port::K:
             return 10;
 #endif
         default:
@@ -76,41 +76,41 @@ constexpr unsigned char get_RCCEN_position(const GPIO::PinPort Port) {
  * @param Port The identifier of the port.
  * @return Returns the address of the port as an integer.
  */
-constexpr unsigned long get_port_address(const GPIO::PinPort Port) {
+constexpr unsigned long get_port_address(const GPIO::Port Port) {
     switch (Port)
     {
-    case GPIO::PORTA:
+    case GPIO::Port::A:
         return GPIOA_BASE;
         
-    case GPIO::PORTB:
+    case GPIO::Port::B:
         return GPIOB_BASE;
         
-    case GPIO::PORTC:
+    case GPIO::Port::C:
         return GPIOC_BASE;
         
-    case GPIO::PORTD:
+    case GPIO::Port::D:
         return GPIOD_BASE;
         
-    case GPIO::PORTE:
+    case GPIO::Port::E:
         return GPIOE_BASE;
         
-    case GPIO::PORTH:
+    case GPIO::Port::H:
         return GPIOH_BASE;
 
 #ifdef STM32F4
-    case GPIO::PORTF:
+    case GPIO::Port::F:
         return GPIOF_BASE;
         
-    case GPIO::PORTG:
+    case GPIO::Port::G:
         return GPIOG_BASE;
         
-    case GPIO::PORTI:
+    case GPIO::Port::I:
         return GPIOI_BASE;
         
-    case GPIO::PORTJ:
+    case GPIO::Port::J:
         return GPIOJ_BASE;
         
-    case GPIO::PORTK:
+    case GPIO::Port::K:
         return GPIOK_BASE;
 #endif
     default:
@@ -123,58 +123,59 @@ constexpr unsigned long get_port_address(const GPIO::PinPort Port) {
  * @param function The desired alternate function of a pin.
  * @return The AF code of the alternate function to put into the AF register.
  */
-unsigned char GPIO::PIN::get_af_code(const GPIO::Alternate function) const
+unsigned char GPIO::PIN::get_af_code(const IO function) const
 {
     switch (function)
     {
 #if defined(STM32F4)
-    case GPIO::SYSTEM_:
+    case IO::SYSTEM_:
         return 0;
-    case GPIO::TIM_1:
-    case GPIO::TIM_2:
+    case IO::TIM_1:
+    case IO::TIM_2:
         return 1;
-    case GPIO::TIM_3:
-    case GPIO::TIM_4:
-    case GPIO::TIM_5:
+    case IO::TIM_3:
+    case IO::TIM_4:
+    case IO::TIM_5:
         return 2;
-    case GPIO::TIM_8:
-    case GPIO::TIM_9:
-    case GPIO::TIM_10:
-    case GPIO::TIM_11:
+    case IO::TIM_8:
+    case IO::TIM_9:
+    case IO::TIM_10:
+    case IO::TIM_11:
         return 3;
-    case GPIO::I2C_1:
-    case GPIO::I2C_2:
-    case GPIO::I2C_3:
+    case IO::I2C_1:
+    case IO::I2C_2:
+    case IO::I2C_3:
         return 4;
-    case GPIO::SPI_1:
-    case GPIO::SPI_2:
+    case IO::SPI_1:
+    case IO::SPI_2:
         return 5;
-    case GPIO::SPI_3:
+    case IO::SPI_3:
         return 6;
-    case GPIO::USART_1:
-    case GPIO::USART_2:
-    case GPIO::USART_3:
+    case IO::USART_1:
+    case IO::USART_2:
+    case IO::USART_3:
         return 7;
-    case GPIO::CAN_1:
-    case GPIO::CAN_2:
-    case GPIO::TIM_12:
-    case GPIO::TIM_13:
-    case GPIO::TIM_14:
+    case IO::CAN_1:
+    case IO::CAN_2:
+    case IO::TIM_12:
+    case IO::TIM_13:
+    case IO::TIM_14:
         return 9;
-    case GPIO::OTG_FS_:
-    case GPIO::OTG_HS_:
+    case IO::OTG_FS_:
+    case IO::OTG_HS_:
         return 10;
-    case GPIO::ETH_:
+    case IO::ETH_:
         return 11;
-    case GPIO::FSMC_:
-    case GPIO::SDIO_:
+    case IO::FSMC_:
+    case IO::SDIO_:
         return 12;
-    case GPIO::DCMI_:
+    case IO::DCMI_:
         return 13;
-    case GPIO::EVENTOUT_:
+    case IO::EVENTOUT_:
         return 15;
 #elif defined(STM32L0)
-    case GPIO::I2C_1:
+    case IO::I2C_1:
+        // The L0 devices assign different AF functions depending on the pin number
         if (this->thisPort == GPIOA)
             return 6;
         if (this->thisPort == GPIOB)
@@ -186,7 +187,7 @@ unsigned char GPIO::PIN::get_af_code(const GPIO::Alternate function) const
         }
         return 0; //This pin cannot be assigned to I2C1
     
-    case GPIO::I2C_2:
+    case IO::I2C_2:
         if (this->thisPort == GPIOB)
         {
             if (this->thisPin < 12)
@@ -196,7 +197,7 @@ unsigned char GPIO::PIN::get_af_code(const GPIO::Alternate function) const
         }
         return 0; //This pin cannot be assigned to I2C2
     
-    case GPIO::I2C_3:
+    case IO::I2C_3:
         return 7;
 #endif
     default:
@@ -211,9 +212,12 @@ unsigned char GPIO::PIN::get_af_code(const GPIO::Alternate function) const
  * @param Port The Port the pin belongs to
  * @param Pin The pin number of the pin in the port
  */
-GPIO::PIN::PIN(const GPIO::PinPort Port, const GPIO::PinNumber Pin):
-    thisPin(Pin), PortID(Port)
+GPIO::PIN::PIN(const Port Port, const unsigned char Pin)
+: thisPort{reinterpret_cast<volatile GPIO_TypeDef*>(get_port_address(Port))} 
+, thisPin{Pin}
+, PortID{Port}
 {
+    // static_assert(pin_number_valid<1>());
     // enable the clock for this gpio port
 #if defined(STM32F4)
     RCC->AHB1ENR |= (1 << get_RCCEN_position(Port));
@@ -221,9 +225,6 @@ GPIO::PIN::PIN(const GPIO::PinPort Port, const GPIO::PinNumber Pin):
     RCC->IOPENR |= (1 << get_RCCEN_position(Port));
 #endif
 
-    // set the Port configuration
-    unsigned long Port_addr = get_port_address(Port);
-    this->thisPort = reinterpret_cast<volatile GPIO_TypeDef*>(Port_addr);
 };
 
 /**
@@ -231,81 +232,75 @@ GPIO::PIN::PIN(const GPIO::PinPort Port, const GPIO::PinNumber Pin):
  * @param Port The Port the pin belongs to
  * @param Pin The pin number of the pin in the port
  */
-GPIO::PIN::PIN(const GPIO::PinPort Port, const GPIO::PinNumber Pin, const GPIO::Mode PinMode):
-    thisPin(Pin), PortID(Port)
+GPIO::PIN::PIN(const Port Port, const unsigned char Pin, const GPIO::Mode PinMode)
+    : PIN{Port, Pin}
 {
-    // enable the clock for this gpio port
-#if defined(STM32F4)
-    RCC->AHB1ENR |= (1 << get_RCCEN_position(Port));
-#elif defined(STM32L0)
-    RCC->IOPENR |= (1 << get_RCCEN_position(Port));
-#endif
-
-    // set the Port configuration
-    unsigned long Port_addr = get_port_address(Port);
-    this->thisPort = reinterpret_cast<volatile GPIO_TypeDef*>(Port_addr);
-    this->setMode(PinMode);
+    this->set_mode(PinMode);
 };
 
 /**
  * @brief Set the output mode of the GPIO pin.
  * @param NewMode The new mode of the pin.
  */
- void GPIO::PIN::setMode(const GPIO::Mode NewMode)
+ void GPIO::PIN::set_mode(const GPIO::Mode NewMode)
 {
     // Save old register state and delete the part which will change
     uint32_t _Reg = this->thisPort->MODER & ~(0b11 << (2 * this->thisPin));
 
     // Combine the old and the new data and write the register
-    this->thisPort->MODER = _Reg | (NewMode << (2 * this->thisPin));
+    this->thisPort->MODER = _Reg | (static_cast<unsigned char>(NewMode) << (2 * this->thisPin));
 };
 
 /**
  * @brief Set the output type of the GPIO pin.
  * @param NewType The new output type of the pin.
  */
- void GPIO::PIN::setType(const GPIO::Type NewType) 
+ void GPIO::PIN::set_output_type(const GPIO::Output NewType) 
 {
     // Save old register state and delete the part which will change
     uint32_t _Reg = this->thisPort->OTYPER & ~(1 << this->thisPin);
 
     // Combine the old and the new data and write the register
-    this->thisPort->OTYPER = _Reg | (NewType << this->thisPin);
+    this->thisPort->OTYPER = _Reg | (static_cast<unsigned char>(NewType) << this->thisPin);
 };
 
 /**
  * @brief Set the output speed of the GPIO pin.
  * @param NewSpeed The new speed of the pin.
  */
- void GPIO::PIN::setSpeed(const GPIO::Speed NewSpeed)
+ void GPIO::PIN::set_speed(const GPIO::Speed NewSpeed)
 {
     // Save old register state and delete the part which will change
     uint32_t _Reg = this->thisPort->OSPEEDR & ~(0b11 << (2 * this->thisPin));
 
     // Combine the old and the new data and write the register
-    this->thisPort->OSPEEDR = _Reg | (NewSpeed << (2 * this->thisPin));
+    this->thisPort->OSPEEDR = _Reg | (static_cast<unsigned char>(NewSpeed) << (2 * this->thisPin));
 };
 
 /**
  * @brief Set the pull type of the GPIO pin.
  * @param NewPull The new pull state of the pin.
  */
- void GPIO::PIN::setPull(const GPIO::Pull NewPull)
+ void GPIO::PIN::set_pull(const GPIO::Pull NewPull)
 {
     // Save old register state and delete the part which will change
     uint32_t _Reg = this->thisPort->PUPDR & ~(0b11 << (2 * this->thisPin));
 
     // Combine the old and the new data and write the register
-    this->thisPort->PUPDR = _Reg | (NewPull << (2 * this->thisPin));
+    this->thisPort->PUPDR = _Reg | (static_cast<unsigned char>(NewPull) << (2 * this->thisPin));
 };
 
 /**
  * @brief Enable the desired alternate function of the pin.
  * @param function The alternate function of the pin.
  */
-void GPIO::PIN::set_alternate_function(const GPIO::Alternate function)
+void GPIO::PIN::set_alternate_function(const IO function)
 {
-    if(this->thisPin < GPIO::PIN8)
+    // Set AF mode
+    this->set_mode(Mode::AF_Mode);
+
+    // Assign the alternate function
+    if(this->thisPin < 8)
     {
         // Save old register state and delete the part which will change
         uint32_t _Reg = this->thisPort->AFR[0] & ~(0b1111 << (4 * this->thisPin));
@@ -319,26 +314,30 @@ void GPIO::PIN::set_alternate_function(const GPIO::Alternate function)
         // Get the code for teh alternate function and set the register
         this->thisPort->AFR[1] = _Reg | (get_af_code(function) << (4 * (this->thisPin - 8)));
     }
+
+    // Set AF specific options
+    if((function == IO::I2C_1) | (function == IO::I2C_2) | (function == IO::I2C_3))
+        this->set_output_type(Output::Open_Drain);
 };
 
 /**
  * @brief Set the logic output state of the GPIO pin.
  * @param NewState The new output state of the pin.
  */
- void GPIO::PIN::set(const bool NewState)
+ void GPIO::PIN::set_state(const bool NewState)
 {
     // Call the setHigh or setLow function according to NewState
     if (NewState)
-        this->setHigh();
+        this->set_high();
     else
-        this->setLow();
+        this->set_low();
 };
 
 /**
  * @brief Set the GPIO pin high. Atomic access, sets the pin
  * always high.
  */
-void GPIO::PIN::setHigh(void)
+void GPIO::PIN::set_high(void)
 {
     // Set the BS bit
     thisPort->BSRR = (1 << this->thisPin);
@@ -348,7 +347,7 @@ void GPIO::PIN::setHigh(void)
  * @brief Set the GPIO pin low. Atomic access, sets the pin
  * always low.
  */
- void GPIO::PIN::setLow(void)
+ void GPIO::PIN::set_low(void)
 {
     // Set the BR bit
     thisPort->BSRR = (1 << (this->thisPin + 16));
@@ -366,7 +365,7 @@ void GPIO::PIN::setHigh(void)
  * @brief Get the logical pin state of the GPIO pin.
  * @return The logical state of the pin.
  */
- bool GPIO::PIN::get(void) const
+ bool GPIO::PIN::get_state(void) const
 {
     return (this->thisPort->IDR & (1 << this->thisPin));
 };
@@ -381,13 +380,13 @@ void GPIO::PIN::setHigh(void)
 void GPIO::PIN::read_edge(void)
 {
     // Get the rising edge
-    this->edge_rising = (this->get() && !this->state_old);
+    this->edge_rising = (this->get_state() && !this->state_old);
 
     // Get the falling edge
-    this->edge_falling = (!this->get() && this->state_old);
+    this->edge_falling = (!this->get_state() && this->state_old);
 
     // Remember old state
-    this->state_old = this->get();
+    this->state_old = this->get_state();
 };
 
 /**
@@ -437,51 +436,51 @@ bool GPIO::PIN::enable_interrupt(const Edge NewEdge) const
     // Configure the pin of the EXTI line in the
     // System configuration
     RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
-    SYSCFG->EXTICR[this->thisPin / 4] |= (this->PortID << 4*(this->thisPin%4));
+    SYSCFG->EXTICR[this->thisPin / 4] |= (static_cast<unsigned char>(this->PortID) << 4*(this->thisPin%4));
 
     // Enable the EXTI line in the NVIC
     IRQn_Type ThisIRQn;
 #if defined(STM32F4)
     switch (this->thisPin)
     {
-    case PIN0: ThisIRQn = EXTI0_IRQn; break;
-    case PIN1: ThisIRQn = EXTI1_IRQn; break;
-    case PIN2: ThisIRQn = EXTI2_IRQn; break;
-    case PIN3: ThisIRQn = EXTI3_IRQn; break;
-    case PIN4: ThisIRQn = EXTI4_IRQn; break;
-    case PIN5:
-    case PIN6:
-    case PIN7:
-    case PIN8:
-    case PIN9: ThisIRQn = EXTI9_5_IRQn; break;
-    case PIN10:
-    case PIN11:
-    case PIN12:
-    case PIN13:
-    case PIN14:
-    case PIN15: ThisIRQn = EXTI15_10_IRQn; break;
+    case 0: ThisIRQn = EXTI0_IRQn; break;
+    case 1: ThisIRQn = EXTI1_IRQn; break;
+    case 2: ThisIRQn = EXTI2_IRQn; break;
+    case 3: ThisIRQn = EXTI3_IRQn; break;
+    case 4: ThisIRQn = EXTI4_IRQn; break;
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9: ThisIRQn = EXTI9_5_IRQn; break;
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15: ThisIRQn = EXTI15_10_IRQn; break;
     default:
         return false;
     }
 #elif defined(STM32L0)
     switch (this->thisPin)
     {
-    case PIN0:
-    case PIN1: ThisIRQn = EXTI0_1_IRQn; break;
-    case PIN2:
-    case PIN3: ThisIRQn = EXTI2_3_IRQn; break;
-    case PIN4: 
-    case PIN5:
-    case PIN6:
-    case PIN7:
-    case PIN8:
-    case PIN9: 
-    case PIN10:
-    case PIN11:
-    case PIN12:
-    case PIN13:
-    case PIN14:
-    case PIN15: ThisIRQn = EXTI4_15_IRQn; break;
+    case 0:
+    case 1: ThisIRQn = EXTI0_1_IRQn; break;
+    case 2:
+    case 3: ThisIRQn = EXTI2_3_IRQn; break;
+    case 4: 
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9: 
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15: ThisIRQn = EXTI4_15_IRQn; break;
     default:
         return false;
     }

@@ -35,14 +35,14 @@
  * @param timer The timer instance which is used.
  * @return Return the peripheral base address of the timer instance.
  */
-constexpr unsigned long get_timer_address(const Timer::Instance timer)
+constexpr unsigned long get_timer_address(const IO timer)
 {
     switch (timer)
     {
 #ifdef STM32F4
-    case Timer::Instance::TIM_1: return TIM1_BASE;
+    case IO::TIM_1: return TIM1_BASE;
 #endif
-    case Timer::Instance::TIM_2: return TIM2_BASE;
+    case IO::TIM_2: return TIM2_BASE;
     default: return 0;
     }
 };
@@ -53,13 +53,10 @@ constexpr unsigned long get_timer_address(const Timer::Instance timer)
  * @brief Constructor for timer object
  * @param timer The instance of the timer to be used.
  */
-Timer::Timer::Timer(const Instance timer):
-thisInstance(timer)
+Timer::Timer::Timer(const IO timer)
+: thisTimer{reinterpret_cast<volatile TIM_TypeDef*> ( get_timer_address(timer) )}
+, thisInstance(timer)
 {
-    // set the peripheral address
-    this->thisTimer = reinterpret_cast<volatile TIM_TypeDef*>
-        ( get_timer_address(timer) );
-
 };
 
 /**

@@ -28,47 +28,77 @@
  */
 
 // === Includes ===
-#include "test_max17205.h"
+#include <unity.h>
+#include <mock.h>
+#include <array>
+#include <optional>
+#include "interface.h"
 
 // === Fixtures ===
 
 // Mock the i2c driver
-class I2C_Mock: public I2C::Controller_Base, public Mock::Peripheral
-{
+struct I2C_Mock { };
+Mock::Callable<bool> set_target_address;
+Mock::Callable<bool> send_word;
+Mock::Callable<bool> send_data;
+Mock::Callable<bool> send_array;
+Mock::Callable<bool> send_array_leader;
+Mock::Callable<bool> read_array;
+Mock::Callable<bool> read_word;
+std::array<unsigned char, 66> rx_buffer{0};
 
-public:
-    // *** Variables to track calls
-    Mock::Callable call_set_target_address;
-    Mock::Callable call_send_data;
-    Mock::Callable call_send_byte;
-    Mock::Callable call_send_word;
-    Mock::Callable call_send_array;
-    Mock::Callable call_send_array_leader;
-    Mock::Callable call_read_word;
-    Mock::Callable call_read_array;
-    I2C::Data_t rx_data;
+namespace Bus {
+    void change_address(I2C_Mock& bus, const unsigned char address)
+    {
+        ::set_target_address(address);
+        return;
+    };
+    bool send_bytes(
+        I2C_Mock& bus,
+        const unsigned char first_byte,
+        const unsigned char second_byte,
+        const unsigned char third_byte
+        )
+    {
+        // set the payload data
+        Bus::Data_t temp{};
+        temp.byte[2] = first_byte;
+        temp.byte[1] = second_byte;
+        temp.byte[0] = third_byte;
 
-    // *** Constructor
-    I2C_Mock() {rx_data.value = 0; };
-
-    // *** overrides for interface
-    void set_target_address  (const unsigned char address) override { call_set_target_address.add_call((int) address); };
-    bool send_data           (const I2C::Data_t payload, const unsigned char n_bytes) override { call_send_data.add_call((int) payload.word[0]); return true; };
-    bool send_byte           (const unsigned char data) override { call_send_byte.add_call((int) data); return true; };
-    bool send_word           (const unsigned int data) override { call_send_word.add_call((int) data); return true; };
-    bool send_array          (const unsigned char* data, const unsigned char n_bytes) override { call_send_array.add_call((int) n_bytes); return true; };
-    bool send_array_leader   (const unsigned char byte, const unsigned char* data, const unsigned char n_bytes) override { call_send_array_leader.add_call((int) byte); return true; };
-    bool read_data           (const unsigned char reg, unsigned char n_bytes) override { return true; };
-    bool read_byte           (const unsigned char reg) override { return true; };
-    bool read_word           (const unsigned char reg) override { 
-        call_read_word.add_call((int)reg);
-        return true; };
-    bool read_array          (const unsigned char reg, unsigned char* dest, const unsigned char n_bytes) override {
-        call_read_array.add_call((int) reg);
-        for (unsigned char nByte=0; nByte<n_bytes; nByte++) *(dest + nByte) = this->rx_data.byte[nByte];
-        return true; } ;
-    I2C::Data_t  get_rx_data (void) const override { return this->rx_data; };
+        // send the data
+        return ::send_data(temp.value);
+    };
+    bool send_word(I2C_Mock& bus, unsigned int word)
+    {
+       return ::send_word(word);
+    };
+    bool send_array(I2C_Mock& bus, const unsigned char* data, const unsigned char n_bytes)
+    { 
+        std::copy(data, data + n_bytes, rx_buffer.begin());
+        return ::send_array(n_bytes); 
+    };
+    bool send_array_leader(I2C_Mock& bus, const unsigned char byte, const unsigned char* data, const unsigned char n_bytes)
+    { 
+        ::send_array_leader(byte, data, n_bytes); 
+    return (rx_buffer[0] << 8) | rx_buffer[1];
+    };
+    std::optional<unsigned int> read_word(I2C_Mock& bus, const unsigned char reg)
+    {
+        ::read_word(reg);
+        return (rx_buffer[1] << 8) | rx_buffer[0];
+    };
+    bool read_array(I2C_Mock &bus, const unsigned char reg, unsigned char* dest, const unsigned char n_bytes)
+    {
+        std::copy(rx_buffer.begin(), rx_buffer.begin() + n_bytes, dest);
+        return ::read_array(reg);
+    };
 };
+
+// Include the UUT
+#include "battery/max17205.h"
+#include "battery/max17205.cpp"
+template class MAX17205::Controller<I2C_Mock>;
 
 /** === Test List ===
  * ✓ controller has properties:
@@ -110,7 +140,7 @@ public:
 
 // === Define Tests ===
 /// @brief Test the constructor
-static void test_init(void)
+void test_init(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -132,11 +162,11 @@ static void test_init(void)
     
     // initialization
     TEST_ASSERT_TRUE(UUT.initialize());
-    i2c.call_read_word.assert_called_once_with(0xBD);
+    ::read_word.assert_called_once_with(0xBD);
 };
 
 /// @brief Test writting of registers
-static void test_write_register(void)
+void test_write_register(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -146,18 +176,20 @@ static void test_write_register(void)
 
     // perform test
     // send low address
+    ::set_target_address.reset();
+    ::send_data.reset();
     TEST_ASSERT_TRUE(UUT.write_register(MAX17205::Register::Cell_1, 0x1234));
-    i2c.call_set_target_address.assert_called_once_with(MAX17205::i2c_address_low);
-    i2c.call_send_data.assert_called_once_with(0xD83412);
+    ::set_target_address.assert_called_once_with(MAX17205::i2c_address_low);
+    ::send_data.assert_called_once_with(0xD83412);
 
     // send high address
     TEST_ASSERT_TRUE(UUT.write_register(MAX17205::Register::nConfig, 0x1234));
-    i2c.call_set_target_address.assert_called_once_with(MAX17205::i2c_address_high);
-    i2c.call_send_data.assert_called_once_with(0xB03412);
+    ::set_target_address.assert_called_once_with(MAX17205::i2c_address_high);
+    ::send_data.assert_called_once_with(0xB03412);
 };
 
 /// @brief Test reading of registers
-static void test_read_register(void)
+void test_read_register(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -168,17 +200,17 @@ static void test_read_register(void)
     // perform test
     // send low address
     TEST_ASSERT_TRUE(UUT.read_register(MAX17205::Register::Cell_1));
-    i2c.call_set_target_address.assert_called_once_with(MAX17205::i2c_address_low);
-    i2c.call_read_word.assert_called_once_with(0xD8);
+    ::set_target_address.assert_called_once_with(MAX17205::i2c_address_low);
+    ::read_word.assert_called_once_with(0xD8);
 
     // send high address
     TEST_ASSERT_TRUE(UUT.read_register(MAX17205::Register::nConfig));
-    i2c.call_set_target_address.assert_called_once_with(MAX17205::i2c_address_high);
-    i2c.call_read_word.assert_called_once_with(0xB0);
+    ::set_target_address.assert_called_once_with(MAX17205::i2c_address_high);
+    ::read_word.assert_called_once_with(0xB0);
 };
 
 /// @brief test reading the battery voltage
-static void test_read_battery_voltage(void)
+void test_read_battery_voltage(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -187,20 +219,24 @@ static void test_read_battery_voltage(void)
     MAX17205::Controller UUT(i2c);
 
     // perform test
-    i2c.rx_data.word[1] = 0x00;
-    i2c.rx_data.word[0] = 0xA00F;
+    rx_buffer[3] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[1] = 0xA0;
+    rx_buffer[0] = 0x0F;
     TEST_ASSERT_TRUE(UUT.read_battery_voltage());
     TEST_ASSERT_EQUAL(5000, UUT.get_battery_voltage());
-    i2c.call_read_word.assert_called_once_with(0xDA);
+    ::read_word.assert_called_once_with(0xDA);
 
-    i2c.rx_data.word[1] = 0;
-    i2c.rx_data.word[0] = 0xC012;
+    rx_buffer[3] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[1] = 0xC0;
+    rx_buffer[0] = 0x12;
     TEST_ASSERT_TRUE(UUT.read_battery_voltage());
     TEST_ASSERT_EQUAL(6000, UUT.get_battery_voltage());
 };
 
 /// @brief test reading the battery current
-static void test_read_battery_current(void)
+void test_read_battery_current(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -209,18 +245,25 @@ static void test_read_battery_current(void)
     MAX17205::Controller UUT(i2c);
 
     // perform test
-    i2c.rx_data.word[0] = 0x800C;
+    rx_buffer[3] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[1] = 0x80;
+    rx_buffer[0] = 0x0C;
+    ::read_word.reset();
     TEST_ASSERT_TRUE(UUT.read_battery_current());
     TEST_ASSERT_EQUAL(1000, UUT.get_battery_current());
-    i2c.call_read_word.assert_called_once_with(0x0A);
+    ::read_word.assert_called_once_with(0x0A);
 
-    i2c.rx_data.word[0] = 0x4006;
+    rx_buffer[3] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[1] = 0x40;
+    rx_buffer[0] = 0x06;
     TEST_ASSERT_TRUE(UUT.read_battery_current());
     TEST_ASSERT_EQUAL(500, UUT.get_battery_current());
 };
 
 /// @brief test reading the cell voltage
-static void test_read_cell_voltage(void)
+void test_read_cell_voltage(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -229,18 +272,18 @@ static void test_read_cell_voltage(void)
     MAX17205::Controller UUT(i2c);
 
     // perform test
-    i2c.rx_data.byte[3] = 0x00;
-    i2c.rx_data.byte[2] = 0xA5;
-    i2c.rx_data.byte[1] = 0x00;
-    i2c.rx_data.byte[0] = 0xD2;
+    rx_buffer[3] = 0x00;
+    rx_buffer[2] = 0xA5;
+    rx_buffer[1] = 0x00;
+    rx_buffer[0] = 0xD2;
     TEST_ASSERT_TRUE(UUT.read_cell_voltage());
     TEST_ASSERT_EQUAL( 3300, UUT.get_cell_voltage(1));
     TEST_ASSERT_EQUAL( 4200, UUT.get_cell_voltage(2));
-    i2c.call_read_array.assert_called_once_with(0xD7);
+    ::read_array.assert_called_once_with(0xD7);
 };
 
 /// @brief test reading the battery current
-static void test_read_battery_current_avg(void)
+void test_read_battery_current_avg(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -249,18 +292,25 @@ static void test_read_battery_current_avg(void)
     MAX17205::Controller UUT(i2c);
 
     // perform test
-    i2c.rx_data.word[0] = 0x800C;
+    rx_buffer[3] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[1] = 0x80;
+    rx_buffer[0] = 0x0C;
+    ::read_word.reset();
     TEST_ASSERT_TRUE(UUT.read_battery_current_avg());
     TEST_ASSERT_EQUAL(1000, UUT.get_battery_current());
-    i2c.call_read_word.assert_called_once_with(0x0B);
+    ::read_word.assert_called_once_with(0x0B);
 
-    i2c.rx_data.word[0] = 0x4006;
+    rx_buffer[3] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[1] = 0x40;
+    rx_buffer[0] = 0x06;
     TEST_ASSERT_TRUE(UUT.read_battery_current_avg());
     TEST_ASSERT_EQUAL(500, UUT.get_battery_current());
 };
 
 /// @brief test reading the cell voltage
-static void test_read_cell_voltage_avg(void)
+void test_read_cell_voltage_avg(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -269,18 +319,18 @@ static void test_read_cell_voltage_avg(void)
     MAX17205::Controller UUT(i2c);
 
     // perform test
-    i2c.rx_data.byte[3] = 0x00;
-    i2c.rx_data.byte[2] = 0xA5;
-    i2c.rx_data.byte[1] = 0x00;
-    i2c.rx_data.byte[0] = 0xD2;
+    rx_buffer[3] = 0x00;
+    rx_buffer[2] = 0xA5;
+    rx_buffer[1] = 0x00;
+    rx_buffer[0] = 0xD2;
     TEST_ASSERT_TRUE(UUT.read_cell_voltage_avg());
     TEST_ASSERT_EQUAL( 3300, UUT.get_cell_voltage(1));
     TEST_ASSERT_EQUAL( 4200, UUT.get_cell_voltage(2));
-    i2c.call_read_array.assert_called_once_with(0xD3);
+    ::read_array.assert_called_once_with(0xD3);
 };
 
 /// === Run Tests ===
-void test_max17205(void)
+int main(int argc, char** argv)
 {
     UNITY_BEGIN();
     test_init();
@@ -292,6 +342,5 @@ void test_max17205(void)
     test_read_battery_current_avg();
     test_read_cell_voltage_avg();
     UNITY_END();
-    // return 0;
-    return;
+    return EXIT_SUCCESS;
 };
