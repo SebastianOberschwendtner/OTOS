@@ -32,6 +32,7 @@
 
 // === Mocks ===
 Mock::Callable<bool> EnableIRQ;
+Mock::Callable<uint32_t> SysTick_Configure;
 
 // === Functions ===
 
@@ -42,4 +43,16 @@ Mock::Callable<bool> EnableIRQ;
 void NVIC_EnableIRQ(IRQn_Type IRQn)
 {
     EnableIRQ.add_call(static_cast<int>(IRQn));
+};
+
+/**
+ * @brief Mock the configuration of the SysTick timer using CMSIS.
+ * 
+ * @param ticks The amount of ticks between interrupts
+ * @return Returns 0 when SysTick timer was initialized successfully, 1 when there was an error.
+ */
+uint32_t SysTick_Config(uint32_t ticks)
+{
+    SysTick_Configure.add_call(static_cast<int>(ticks));
+    return 0;
 };

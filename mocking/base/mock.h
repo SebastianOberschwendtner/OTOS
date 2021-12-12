@@ -61,6 +61,13 @@ namespace Mock
             return return_type{1}; 
         };
 
+        // Call Operator with no arguments
+        return_type operator() () 
+        { 
+            this->call_count++;
+            return return_type{1}; 
+        };
+
         // *** Methods ***
         /**
          * @brief Remember the function call

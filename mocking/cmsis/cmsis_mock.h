@@ -138,7 +138,8 @@ typedef enum
 } IRQn_Type;
 
 // === Mocked Functions ===
-void NVIC_EnableIRQ(IRQn_Type IRQn);
+void        NVIC_EnableIRQ(IRQn_Type IRQn);
+uint32_t    SysTick_Config(uint32_t ticks);
 
 #endif
 
