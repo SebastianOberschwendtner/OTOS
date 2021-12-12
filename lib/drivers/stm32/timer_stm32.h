@@ -52,6 +52,9 @@ namespace Timer
         // === Methods ===
         unsigned int get_count(void) const;
     };
+
+    // === Functions ===
+    void SysTick_Configure(void);
 };
 
 #endif

@@ -50,6 +50,8 @@
 */
 
 // === Mocks ===
+extern Mock::Callable<bool> CMSIS_NVIC_EnableIRQ;
+extern Mock::Callable<uint32_t> CMSIS_SysTick_Config;
 
 // === Tests ===
 void setUp(void)
@@ -70,6 +72,20 @@ void test_init(void)
     Timer::Timer UUT(IO::TIM_1);
 
     // perform tests
+};
+
+/// @brief Test the SysTick configuration
+void test_configure_SysTick(void)
+{
+    // Reset mocked function
+    CMSIS_SysTick_Config.reset();   
+
+    // Configure SysTick
+    Timer::SysTick_Configure();
+
+    // Test whether function was called with the correct parameters
+    unsigned int Expected = F_CPU / 1000;
+    CMSIS_SysTick_Config.assert_called_once_with(Expected);
 };
 
 /// @brief Test the reading of the counter value
@@ -94,6 +110,7 @@ int main(int argc, char **argv)
 {
     UNITY_BEGIN();
     test_init();
+    test_configure_SysTick();
     test_get_count();
     UNITY_END();
     return EXIT_SUCCESS;

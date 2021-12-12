@@ -47,7 +47,19 @@ constexpr unsigned long get_timer_address(const IO timer)
     }
 };
 
-// *** Functions ***
+// === Functions ===
+/**
+ * @brief Configure the SysTick timer for interrupts every 1 ms. 
+ */
+void Timer::SysTick_Configure(void)
+{
+    // Compute the ticks per ms
+    constexpr unsigned int ticks_ms = (F_CPU / 1000);
+
+    // Configure the SysTick timer
+    SysTick_Config(ticks_ms);
+    return;
+};
 
 /**
  * @brief Constructor for timer object

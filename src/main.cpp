@@ -64,20 +64,15 @@ void Blink_LED3(void)
  */
 void Blink_LED4(void)
 {
-    volatile unsigned long counter = 0;
     GPIO::PIN LED4(GPIO::Port::G, 14, GPIO::Mode::Output);
-    // GPIO::PIN LED4(GPIO::PORTA, GPIO::PIN5, GPIO::OUTPUT);
+    LED4.set_low();
 
-    LED4.set_high();
     while(1)
     {
-        counter++;
-
-        if(counter == 50000)
-        {
-            counter = 0;
-            LED4.toggle();
-        }
+        if ((OTOS::Kernel::get_time_ms()%1000) == 0)
+            LED4.set_high();
+        else
+            LED4.set_low();
         OTOS::Task::yield();
     }
 };
@@ -108,7 +103,7 @@ void Task_I2C(void)
     i2c.set_target_address(0x78);
 
     // Send 2 bytes
-    Bus::send_bytes(i2c, 0x00, 0xAF);
+    // Bus::send_bytes(i2c, 0x00, 0xAF);
     OUT.set_high();
     
     while (1)
@@ -123,14 +118,26 @@ int main(void)
     // Create the kernel object
     OTOS::Kernel OS;
 
+    // Configure Systick timer for interrupts every 1 ms
+    Timer::SysTick_Configure();
+
     // Schedule Threads
-    OS.scheduleThread(&Blink_LED3, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
-    OS.scheduleThread(&Blink_LED4, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
-    OS.scheduleThread(&Task_I2C,   OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
+    OS.schedule_thread(&Blink_LED3, OTOS::Check::StackSize<256>(), OTOS::Priority::Normal);
+    OS.schedule_thread(&Blink_LED4, OTOS::Check::StackSize<256>(), OTOS::Priority::Normal);
+    OS.schedule_thread(&Task_I2C,   OTOS::Check::StackSize<256>(), OTOS::Priority::Normal);
 
     // Start the task execution
     OS.start();
 
     // Never reached
     return 0;
+};
+
+/** 
+ * @brief Provide a Interrupt handler for the systick timer,
+ * which gets called every 1 ms.
+ */
+extern "C" void SysTick_Handler(void)
+{
+    OTOS::Kernel::count_time_ms();
 };

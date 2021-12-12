@@ -11,9 +11,9 @@
 - Adds driver for IC which can be controlled via a bus system. The IC groups are:
     - Battery Management ICs
     - Display Controllers
-
 ### Fixed Issues:
 
+- #3: Add ms Timer for Threads
 
 
 ## [v1.1.0](https://github.com/knuffel-v2/OTOS/releases/tag/v1.1.0) *(2021-09-21)*
