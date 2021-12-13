@@ -3,30 +3,23 @@ title Class Diagram for **OTOS**\n
 
 hide empty members
 
-class Schedule{
+class Thread {
     'Properties:
+    + Stack_pointer
+    - Stacksize
+    - Stack_top
     - priority
     - schedule_ticks
     - counter_ticks
-
-    'Methods
-    + Schedule()
-    + set_schedule()
-    + count_tick()
-    + is_runable()
-}
-
-class Thread {
-    'Properies:
-    - Stacksize
-    - Stack_top
-    + Stack_pointer
 
     'Methods:
     + Thread()
     + set_stack()
     + get_stacksize()
     + get_stackoverflow()
+    + set_schedule()
+    + count_tick()
+    + is_runable()
 }
 class Kernel{
     'Properties:
@@ -34,18 +27,18 @@ class Kernel{
     - thread_count
     - Thread[NUMBER_THREADS]
     - Stack[StackSize]
-    - Time_ms
+    - //static// Time_ms
 
     'Methods:
     + Kernel()
     + schedule_thread()
     + start()
+    + get_allocated_stacksize()
+    + //static// count_time_ms()
+    + //static// get_time_ms()
     - update_schedule()
     - get_next_thread()
     - switch_thread()
-    + get_allocated_stacksize()
-    + count_time_ms()
-    + get_time_ms()
 }
 
 class Watchdog {
@@ -59,12 +52,12 @@ class Task{
 
     ' Methods:
     + Task()
-    + //static// Lock()
-    + //static// Unlock()
-    + //static// WaitFor()
+    ' + //static// Lock()
+    ' + //static// Unlock()
+    ' + //static// WaitFor()
     + //static// Yield()
-    + Sleep()
-    - GetSysTick()
+    ' + Sleep()
+    ' - GetSysTick()
 }
 
 class IPC{
@@ -74,7 +67,6 @@ class IPC{
    '+ PushQueue()
 }
 
-Thread --|> Schedule
 Thread "*"-*"1" Kernel
 Kernel --|> Watchdog
 Task --|> IPC

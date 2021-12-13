@@ -27,29 +27,6 @@
 // *** Declarations ***
 namespace OTOS 
 {
-    // Enumeration for task priority
-    enum class Priority : u_base_t
-    {
-        Low = 1,
-        Normal = 2,
-        High = 3
-    };
 
-    // Class for schedule data of one thread
-    class Schedule
-    {
-    private:
-        // Properties:
-        Priority priority{Priority::Low}; // Priority of task
-        u_base_t schedule_ticks{0};       // The scheduled execution time of thread
-        u_base_t counter_ticks{0};        // Ticks since last execution of thread
-
-    public:
-        // Methods
-        Schedule(void) = default;
-        void set_schedule(u_base_t ticks, Priority priority);
-        void count_tick(void);
-        bool is_runable(void) const;
-    };
 };
 #endif

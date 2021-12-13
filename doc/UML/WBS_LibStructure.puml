@@ -8,8 +8,7 @@ legend Hardware or Processor specific levels are marked in **<color #SkyBlue> bl
 **[#GreenYellow] kernel
 *** kernel.h
 ****_ processors.h
-****_ //array//
-*** schedule.h
+' *** schedule.h
 *** types.h
 *** thread.h
 
@@ -52,7 +51,6 @@ legend Hardware or Processor specific levels are marked in **<color #SkyBlue> bl
 ' === Graphics ===
 **[#GreenYellow] graphics
 *** graphics.h
-****_ //array//
 *** font.h
 
 @endwbs

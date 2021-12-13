@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    test_thread.c
  * @author  SO
- * @version v1.0.0
+ * @version v1.6.0
  * @date    16-March-2021
  * @brief   Unit tests for the thread handler of OTOS.
  ==============================================================================
@@ -98,6 +98,27 @@ void test_StackOverflow(void)
 
 };
 
+/**
+ * @brief Test the state change of a schedule when it reaches the runnable state.
+ */
+void test_is_runable(void)
+{
+    // After initializing the thread should be runable
+    TEST_ASSERT_TRUE( UUT.is_runable() )
+
+    // Set the thread schedule
+    UUT.set_schedule(1, OTOS::Priority::Normal);
+
+    // Thread should now not be runable
+    TEST_ASSERT_FALSE( UUT.is_runable() );
+
+    // Increment tick counter
+    UUT.count_tick();
+
+    // Thread should now be runable
+    TEST_ASSERT_TRUE( UUT.is_runable() );
+};
+
 // *** Perform the tests *** 
 int main(int argc, char** argv)
 {
@@ -105,6 +126,7 @@ int main(int argc, char** argv)
     test_Constructor();
     test_SetStack();
     test_StackOverflow();
+    test_is_runable();
     UNITY_END();
     return 0;
 };

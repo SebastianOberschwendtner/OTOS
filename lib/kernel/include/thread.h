@@ -23,7 +23,7 @@
 #define THREAD_H_
 
 // *** Includes ***
-#include "schedule.h"
+#include "types.h"
 
 // *** Declarations ***
 namespace OTOS
@@ -42,25 +42,47 @@ namespace OTOS
         };
     }; // namespace Check
 
+    // === Enums ===
+    // Enumeration for task priority
+    enum class Priority : u_base_t
+    {
+        Low = 1,
+        Normal = 2,
+        High = 3
+    };
+
+    // State of thread execution
+    enum class State
+    {
+        Runable, Running, Blocked, Suspended
+    };
+
+    // === Classes === 
     // Class for stack data of one thread
-    class Thread : public Schedule
+    class Thread
     {
     private:
         // Properties
-        u_base_t Stacksize{0}; // Allocated stack size of the thread
-        stackpointer_t Stack_top{
-            0}; // Pointer to the top of allocated stack for thread
+        u_base_t Stacksize{0};              // Allocated stack size of the thread
+        stackpointer_t Stack_top{0};        // Pointer to the top of allocated stack for thread
+        Priority priority{Priority::Low};   // Priority of task
+        u_base_t schedule_ticks{0};         // The scheduled execution time of thread
+        u_base_t counter_ticks{0};          // Ticks since last execution of thread
 
     public:
+        // Constructor
+        Thread() = default;
+
         // Properties
-        stackpointer_t Stack_pointer{
-            0}; // Pointer to the current top of stack of the thread
+        stackpointer_t Stack_pointer{0};    // Pointer to the current top of stack of the thread
 
         // Methods
-        Thread(void);
         void set_stack(stackpointer_t stack_position, u_base_t stacksize);
         u_base_t get_stacksize(void) const;
         bool get_stackoverflow(void) const;
+        void set_schedule(u_base_t ticks, Priority priority);
+        void count_tick(void);
+        bool is_runable(void) const;
     };
 }; // namespace OTOS
 #endif

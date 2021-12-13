@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    thread.c
  * @author  SO
- * @version v1.0.0
+ * @version v1.6.0
  * @date    16-March-2021
  * @brief   The internal thread handler for the OTOS kernel.
  ==============================================================================
@@ -31,14 +31,6 @@
 #include "thread.h"
 
 // *** Methods ***
-
-/**
- * @brief Constructor for a ThreadHandler object.
- */
-OTOS::Thread::Thread(void)
-{
-
-};
 
 /**
  * @brief Initialize the stack information of the thread.
@@ -71,4 +63,39 @@ bool OTOS::Thread::get_stackoverflow(void) const
 {
     // When the current stack pointer occupies more or all of the stack, return true
     return (u_base_t)(this->Stack_top - this->Stack_pointer) >= this->Stacksize;
+};
+
+/**
+ * @brief Set the schedule data of one thread
+ * @param ticks The execution periode of the thread in Ticks.
+ * @param priority The execution priority of the thread.
+ */
+void OTOS::Thread::set_schedule(u_base_t ticks, Priority priority)
+{
+    // Set schedule data
+    this->priority = priority;
+    this->schedule_ticks = ticks;
+
+    // Reset tick counter
+    this->counter_ticks = ticks;    
+};
+
+/**
+ * @brief Count SysTicks to determine whether the thread is runable.
+ */
+void OTOS::Thread::count_tick(void)
+{
+    // Only count, when counter is not already at 0
+    if (this->counter_ticks)
+        this->counter_ticks--;
+};
+
+/**
+ * @brief Check whether the current thread is runable.
+ * @return Returns true, when the thread is runable.
+ */
+bool OTOS::Thread::is_runable(void) const
+{
+    // When the tick counter reached 0, the task is runable
+    return (this->counter_ticks == 0);
 };
