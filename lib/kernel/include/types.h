@@ -32,7 +32,7 @@ typedef void(*taskpointer_t)(void);
  * This enables the OS to be used in 8bit and 
  * 32bit systems, hopefully.
  */
-#ifdef STM32F4
+#if defined(STM32F4)
     // For ARM 32-bit microcontrollers, base is 16-bit or int.
     typedef int s_base_t;           // 32-bit signed base type
     typedef unsigned int u_base_t;  // 32-bit unsigned base type
@@ -40,7 +40,7 @@ typedef void(*taskpointer_t)(void);
     // Define a type for the stack pointers
     typedef unsigned int* stackpointer_t;
 
-#elif AVR
+#elif defined(AVR)
     // For AVR 8-bit microcontrollers, base is 8-bit or char.
     typedef char s_base_t;           // 8-bit signed base type
     typedef unsigned char u_base_t;  // 8-bit unsigned base type
@@ -49,22 +49,13 @@ typedef void(*taskpointer_t)(void);
     ///@todo What is the base type of a function pointer of 8-bit micros? Also 16-bit?
     typedef unsigned int* stackpointer_t;
 
-#elif UNIT_TEST
+#else
     // for unit testing in the native environment
     typedef long s_base_t;           // 8-bit signed base type
     typedef unsigned long u_base_t;  // 8-bit unsigned base type
 
     // Define a type for the stack pointers
     typedef unsigned long* stackpointer_t;
-
-#else
-    // For other environments
-    typedef int s_base_t;           // native signed base type
-    typedef unsigned int u_base_t;  // native unsigned base type
-
-    // Define a type for the stack pointers
-    typedef unsigned int* stackpointer_t;
-
 #endif
 
 
