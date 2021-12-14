@@ -69,7 +69,7 @@ void Blink_LED4(void)
 
     while(1)
     {
-        if ((OTOS::Kernel::get_time_ms()%1000) == 0)
+        if ((OTOS::get_time_ms()%1000) == 0)
             LED4.set_high();
         else
             LED4.set_low();

@@ -44,6 +44,7 @@
 // *** Declarations ***
 namespace OTOS
 {
+    // === Classes ===
     class Kernel
     {
     private:
@@ -68,6 +69,9 @@ namespace OTOS
         static void count_time_ms(void);
         static std::uint32_t get_time_ms(void);
     };
+
+    // === Functions ===
+    std::uint32_t   get_time_ms         (void);
 
 }; // namespace OTOS
 #endif

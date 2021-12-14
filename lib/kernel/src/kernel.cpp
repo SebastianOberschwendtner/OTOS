@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    kernel.c
  * @author  SO
- * @version v1.0.3
+ * @version v1.6.0
  * @date    09-March-2021
  * @brief   The kernel of the OTOS. It manages the task scheduling and context
  *          switching.
@@ -174,4 +174,15 @@ void OTOS::Kernel::count_time_ms(void)
 std::uint32_t OTOS::Kernel::get_time_ms(void) 
 {
     return OTOS::Kernel::Time_ms;
+};
+
+/**
+ * @brief Get the current system time in milli-seconds as
+ * a function call.
+ * 
+ * @return Returns the current time in milli-seconds.
+ */
+std::uint32_t OTOS::get_time_ms(void)
+{
+    return OTOS::Kernel::get_time_ms();
 };
