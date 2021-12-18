@@ -44,6 +44,10 @@
 // *** Declarations ***
 namespace OTOS
 {
+    // === Parameters ===
+    constexpr size_t stack_size     = OTOS_STACK_SIZE;
+    constexpr size_t number_threads = OTOS_NUMBER_THREADS;
+
     // === Classes ===
     class Kernel
     {
@@ -51,8 +55,8 @@ namespace OTOS
         // Properties
         u_base_t active_thread{0};                       // The current active thread
         u_base_t thread_count{0};                        // Number of scheduled threads
-        std::array<Thread, OTOS_NUMBER_THREADS> Threads; // Array with stack data of each thread
-        std::array<u_base_t, OTOS_STACK_SIZE> Stack{0};  // The total stack for the threads
+        std::array<Thread, number_threads> Threads; // Array with stack data of each thread
+        std::array<u_base_t, stack_size> Stack{0};  // The total stack for the threads
         static std::uint32_t Time_ms;                    // Kernel timer with ms resolution
 
         // Methods
@@ -66,8 +70,8 @@ namespace OTOS
         void schedule_thread(taskpointer_t TaskFunc, u_base_t StackSize, Priority Priority);
         void start(void);
         u_base_t get_allocated_stacksize(void) const;
-        static void count_time_ms(void);
         static std::uint32_t get_time_ms(void);
+        static void count_time_ms(void);
     };
 
     // === Functions ===
