@@ -22,10 +22,7 @@
 #define MOCK_PROCESSORS_H
 
 // *** Includes ***
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#include "mock.h"
 
 // *** Function Declarations ***
 unsigned long*  __otos_switch       (unsigned long* ThreadStack);
@@ -33,7 +30,4 @@ void            __otos_yield        (void);
 void            __otos_call_kernel  (void);
 void            __otos_init_kernel  (unsigned long* ThreadStack);
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 #endif

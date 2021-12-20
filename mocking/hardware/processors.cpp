@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    mocks/processors.c
  * @author  SO
- * @version v1.0.6
+ * @version v1.6.0
  * @date    16-March-2021
  * @brief   Mock the processor assembler functions for unit testing.
  ==============================================================================
@@ -29,6 +29,13 @@
 
 // *** Includes ***
 #include "processors.h"
+
+// *** Mocks ***
+Mock::Callable<unsigned long> otos_switch;
+Mock::Callable<bool> otos_yield;
+Mock::Callable<bool> otos_call_kernel;
+Mock::Callable<bool> otos_init_kernel;
+
 
 // *** Functions ***
 
@@ -44,6 +51,7 @@
  */
 unsigned long* __otos_switch(unsigned long* ThreadStack)
 {
+    otos_switch.add_call(0);
     // Return the current task stack pointer, when resuming kernel operation
     return ThreadStack;
 };
@@ -57,6 +65,7 @@ unsigned long* __otos_switch(unsigned long* ThreadStack)
  */
 void __otos_yield(void)
 {
+    otos_yield.add_call(0);
 };
 
 /**
@@ -67,6 +76,7 @@ void __otos_yield(void)
  */
 void __otos_call_kernel(void)
 {
+    otos_call_kernel.add_call(0);
 };
   
 /**
@@ -91,13 +101,5 @@ void SVC_Handler(void)
  */
 void __otos_init_kernel(unsigned long* ThreadStack)
 {
+    otos_init_kernel.add_call(0);
 };
-
-/**
- * @brief Check whether the SysTick timer overflowed since the last call.
- * @return Returns 1 when the timer overflowed and 0 otherwise.
- */
-// int __otos_tick_passed(void)
-// {
-//     return 1;
-// };
