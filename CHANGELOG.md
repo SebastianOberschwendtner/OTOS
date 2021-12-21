@@ -1,5 +1,5 @@
 # Changelog for OTOS
-## [v2.0.0](https://github.com/knuffel-v2/OTOS/releases/tag/v2.r01.0) *(2021-xx-xx)*
+## [v2.0.0](https://github.com/knuffel-v2/OTOS/releases/tag/v2.0.0) *(2021-12-21)*
 
 >Released by `SO`
 

@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    main.c
  * @author  SO
- * @version v1.0.8
+ * @version v2.0.0
  * @date    09-March-2021
  * @brief   Main function for the OTOS. Mainly used to demonstrate how the OTOS
  *          functions work and should be used.
@@ -41,19 +41,11 @@
  */
 void Blink_LED3(void)
 {
-    volatile unsigned long counter = 0;
     GPIO::PIN LED3(GPIO::Port::G, 13, GPIO::Mode::Output);
 
-    // LED3.setHigh();
-    while(1)
+    while (1)
     {
-        counter++;
-
-        if(counter == 100000)
-        {
-            counter = 0;
-            LED3.toggle();
-        }
+        LED3.toggle();
         OTOS::Task::yield();
     }
 };
@@ -65,14 +57,10 @@ void Blink_LED3(void)
 void Blink_LED4(void)
 {
     GPIO::PIN LED4(GPIO::Port::G, 14, GPIO::Mode::Output);
-    LED4.set_low();
 
-    while(1)
+    while (1)
     {
-        if ((OTOS::get_time_ms()%1000) == 0)
-            LED4.set_high();
-        else
-            LED4.set_low();
+        LED4.toggle();
         OTOS::Task::yield();
     }
 };
@@ -105,26 +93,27 @@ void Task_I2C(void)
     // Send 2 bytes
     // Bus::send_bytes(i2c, 0x00, 0xAF);
     OUT.set_high();
-    
+
     while (1)
     {
         OTOS::Task::yield();
     }
 };
 
+// Create the kernel object
+OTOS::Kernel OS;
+
 // *** Main ***
 int main(void)
 {
-    // Create the kernel object
-    OTOS::Kernel OS;
 
     // Configure Systick timer for interrupts every 1 ms
     Timer::SysTick_Configure();
 
     // Schedule Threads
-    OS.schedule_thread(&Blink_LED3, OTOS::Check::StackSize<256>(), OTOS::Priority::Normal);
-    OS.schedule_thread(&Blink_LED4, OTOS::Check::StackSize<256>(), OTOS::Priority::Normal);
-    OS.schedule_thread(&Task_I2C,   OTOS::Check::StackSize<256>(), OTOS::Priority::Normal);
+    OS.schedule_thread<256>(&Blink_LED3, OTOS::Priority::Normal, 10);
+    OS.schedule_thread<256>(&Blink_LED4, OTOS::Priority::High, 2);
+    OS.schedule_thread<256>(&Task_I2C, OTOS::Priority::Normal);
 
     // Start the task execution
     OS.start();
@@ -139,5 +128,6 @@ int main(void)
  */
 extern "C" void SysTick_Handler(void)
 {
-    OTOS::Kernel::count_time_ms();
+    OS.count_time_ms();
+    OS.update_schedule();
 };

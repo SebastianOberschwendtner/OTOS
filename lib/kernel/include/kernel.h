@@ -24,11 +24,14 @@
 
 // *** Includes ***
 #include <array>
+#include <optional>
+#include <algorithm>
+// #include <ranges>
 
 #include "processors.h"
 #include "thread.h"
 
-// *** Defines ****
+// *** Defines ***
 /** The defines are just default values here.
  * They can be overritten by defining them before including kernel.h
  * => that is why they are not defined with constexpr...
@@ -45,37 +48,75 @@
 namespace OTOS
 {
     // === Parameters ===
-    constexpr size_t stack_size     = OTOS_STACK_SIZE;
-    constexpr size_t number_threads = OTOS_NUMBER_THREADS;
+    constexpr std::size_t stack_size = OTOS_STACK_SIZE;
+    constexpr std::size_t number_threads = OTOS_NUMBER_THREADS;
+    constexpr u_base_t ms_per_tick = 1;
+    constexpr u_base_t number_priorities = std::size(Available_Priorities);
 
     // === Classes ===
     class Kernel
     {
     private:
         // Properties
-        u_base_t active_thread{0};                       // The current active thread
-        u_base_t thread_count{0};                        // Number of scheduled threads
-        std::array<Thread, number_threads> Threads; // Array with stack data of each thread
-        std::array<u_base_t, stack_size> Stack{0};  // The total stack for the threads
-        static std::uint32_t Time_ms;                    // Kernel timer with ms resolution
+        u_base_t thread_count{0};                       // Number of scheduled threads
+        std::array<Thread, number_threads> Threads{};   // Array with stack data and schedule of each thread
+        std::array<u_base_t, stack_size> Stack{0};      // The total stack for the threads
+        std::array<u_base_t, number_priorities> last_thread{0};          // The ID of the last thread which ran for every priority level
+        static std::uint32_t Time_ms;                   // Kernel timer with ms resolution
 
         // Methods
-        void update_schedule(void);
-        void get_next_thread(void);
-        void switch_thread(void);
+        void schedule_thread(
+            const taskpointer_t TaskFunc,
+            const u_base_t StackSize,
+            const Priority Priority,
+            const u_base_t Schedule);
+        std::optional<u_base_t> find_next_thread(const OTOS::Priority thread_priority) const;
 
     public:
         // Methods
         Kernel();
-        void schedule_thread(taskpointer_t TaskFunc, u_base_t StackSize, Priority Priority);
+        void switch_to_thread(const u_base_t next_thread);
+        std::optional<u_base_t> get_next_thread(void) const;
+        void update_schedule(void);
         void start(void);
         u_base_t get_allocated_stacksize(void) const;
         static std::uint32_t get_time_ms(void);
         static void count_time_ms(void);
+
+        // Templated methods
+
+        /**
+         * @brief Add a thread schedule to the kernel and activate its execution.
+         * No timing is specified with this. The task is executed when calling this function!
+         * @tparam stack_size The size of the thread stack in words.
+         * @param TaskFunc Function pointer to the task of the thread.
+         * @param Priority Priority of the scheduled thread.
+         */
+        template<u_base_t stack_size>
+        void schedule_thread(const taskpointer_t TaskFunc, const Priority Priority)
+        {
+            this->schedule_thread(TaskFunc, Check::StackSize<stack_size>(), Priority, 0);
+        };
+        
+        /**
+         * @brief Add a thread schedule to the kernel and activate its execution.
+         * The task is executed when calling this function!
+         * @tparam stack_size The size of the thread stack in words.
+         * @param TaskFunc Function pointer to the task of the thread.
+         * @param Priority Priority of the scheduled thread.
+         * @param Frequency The frequency of execution in [Hz].
+         */
+        template<u_base_t stack_size>
+        void schedule_thread(const taskpointer_t TaskFunc, const Priority Priority, const u_base_t Frequency)
+        {
+            const u_base_t time_ms = 1000/Frequency;
+            const u_base_t schedule = time_ms / ms_per_tick;
+            this->schedule_thread(TaskFunc, Check::StackSize<stack_size>(), Priority, schedule);
+        };
     };
 
     // === Functions ===
-    std::uint32_t   get_time_ms         (void);
+    std::uint32_t get_time_ms(void);
 
 }; // namespace OTOS
 #endif

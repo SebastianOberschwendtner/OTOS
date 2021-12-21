@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    test_kernel.c
  * @author  SO
- * @version v1.6.0
+ * @version v2.0.0
  * @date    16-March-2021
  * @brief   Unit tests for the OTOS kernel to be executed on the host.
  ==============================================================================
@@ -29,10 +29,11 @@
 
 // *** Includes ***
 #include <unity.h>
+#include <mock.h>
 #include <kernel.h>
 
-// Create UUT
-OTOS::Kernel UUT;
+// === Text Fixtures ===
+extern Mock::Callable<unsigned long> otos_switch;
 
 void setUp(void) {
 // set stuff up here
@@ -49,6 +50,9 @@ void tearDown(void) {
  */
 void test_Constructor(void)
 {
+    // Create UUT
+    OTOS::Kernel UUT;
+
     // There should be no allocated stack
     TEST_ASSERT_EQUAL( 0, UUT.get_allocated_stacksize() );
 };
@@ -58,17 +62,139 @@ void test_Constructor(void)
  */
 void test_scheduleThread(void)
 {
+    // Create UUT
+    OTOS::Kernel UUT;
+
     // Schedule one thread
-    UUT.schedule_thread(0, OTOS::Check::StackSize<256>(), OTOS::Priority::Normal);
+    UUT.schedule_thread<256>(0, OTOS::Priority::Normal);
 
     // Test the new stack size
     TEST_ASSERT_EQUAL(256, UUT.get_allocated_stacksize());
 
     // Schedule another thread
-    UUT.schedule_thread(0, OTOS::Check::StackSize<256>(), OTOS::Priority::Normal);
+    UUT.schedule_thread<256>(0, OTOS::Priority::Normal);
 
     // Test the new stack size
     TEST_ASSERT_EQUAL(2*256, UUT.get_allocated_stacksize());
+};
+
+/**
+ * @brief Test switching the threads 
+ */
+void test_switch_to_thread(void)
+{
+    // Create UUT
+    OTOS::Kernel UUT;
+    UUT.schedule_thread<256>(0, OTOS::Priority::Normal);
+    UUT.schedule_thread<256>(0, OTOS::Priority::Normal);
+
+    // Reset assembly function calls
+    otos_switch.reset();
+
+    // Switch the context
+    UUT.switch_to_thread(0);
+    otos_switch.assert_called_once();
+};
+
+/**
+ * @brief Test getting the next thread without timing or priority requirements.
+ */
+void test_scheduling_no_timing_no_priority(void)
+{
+    // Create UUT
+    OTOS::Kernel UUT;
+    UUT.schedule_thread<256>(0, OTOS::Priority::Normal);
+    UUT.schedule_thread<256>(0, OTOS::Priority::Normal);
+    UUT.schedule_thread<256>(0, OTOS::Priority::Normal);
+
+    // Next thread is 0
+    TEST_ASSERT_EQUAL(0, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(0);
+    // Next thread is 1
+    TEST_ASSERT_EQUAL(1, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(1);
+    // Next thread is 2
+    TEST_ASSERT_EQUAL(2, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(2);
+    // Next thread is 0
+    TEST_ASSERT_EQUAL(0, UUT.get_next_thread().value_or(-1));
+};
+
+/**
+ * @brief Test getting the next thread with timing but no priority requirements.
+ */
+void test_scheduling_with_timing_no_priority(void)
+{
+    // Create UUT
+    OTOS::Kernel UUT;
+    UUT.schedule_thread<256>(0, OTOS::Priority::Normal);
+    UUT.schedule_thread<256>(0, OTOS::Priority::Normal, 500);
+
+    // Next thread is 0
+    TEST_ASSERT_EQUAL(0, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(0);
+
+    // Next thread is still 0
+    TEST_ASSERT_EQUAL(0, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(0);
+
+    // Next thread is 1 when schedule was updated
+    UUT.update_schedule();
+    TEST_ASSERT_EQUAL(0, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(0);
+    UUT.update_schedule();
+    TEST_ASSERT_EQUAL(1, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(1);
+
+    // Next thread is 0 after updating the schedule
+    UUT.update_schedule();
+    TEST_ASSERT_EQUAL(0, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(0);
+
+    // Next thread is 1 after updating the schedule
+    UUT.update_schedule();
+    TEST_ASSERT_EQUAL(1, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(1);
+};
+
+/**
+ * @brief Test getting the next thread with timing and priority requirements.
+ */
+void test_scheduling_with_timing_with_priority(void)
+{
+    // Create UUT
+    OTOS::Kernel UUT;
+    UUT.schedule_thread<256>(0, OTOS::Priority::Normal);
+    UUT.schedule_thread<256>(0, OTOS::Priority::Normal, 500);
+    UUT.schedule_thread<256>(0, OTOS::Priority::High, 500);
+
+    // Next thread is 0
+    TEST_ASSERT_EQUAL(0, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(0);
+
+    // Next thread is still 0
+    TEST_ASSERT_EQUAL(0, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(0);
+
+    // Next thread is 2 when schedule was updated
+    UUT.update_schedule();
+    TEST_ASSERT_EQUAL(0, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(0);
+    UUT.update_schedule();
+    TEST_ASSERT_EQUAL(2, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(2);
+
+    // Next thread is 1 after updating the schedule
+    UUT.update_schedule();
+    TEST_ASSERT_EQUAL(1, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(1);
+    TEST_ASSERT_EQUAL(0, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(0);
+
+    // Next thread is 1 after updating the schedule
+    UUT.update_schedule();
+    TEST_ASSERT_EQUAL(2, UUT.get_next_thread().value_or(-1));
+    UUT.switch_to_thread(2);
 };
 
 /**
@@ -76,6 +202,9 @@ void test_scheduleThread(void)
  */
 void test_Time_ms(void)
 {
+    // Create UUT
+    OTOS::Kernel UUT;
+
     //The initial time value should be 0
     TEST_ASSERT_EQUAL( 0, UUT.get_time_ms());
     TEST_ASSERT_EQUAL( 0, OTOS::get_time_ms());
@@ -92,6 +221,10 @@ int main(int argc, char** argv)
     UNITY_BEGIN();
     test_Constructor();
     test_scheduleThread();
+    test_switch_to_thread();
+    test_scheduling_no_timing_no_priority();
+    test_scheduling_with_timing_no_priority();
+    test_scheduling_with_timing_with_priority();
     test_Time_ms();
     UNITY_END();
     return 0;
