@@ -1,4 +1,13 @@
 # Changelog for OTOS
+## [v3.0.0](https://github.com/knuffel-v2/OTOS/releases/tag/v3.0.0) *(2021-xx-xx)*
+
+>Released by `SO`
+
+### Release Notes:
+- Fixes bug in `types.h` for STM32L0 devices.
+
+### Fixed Issues:
+
 ## [v2.0.0](https://github.com/knuffel-v2/OTOS/releases/tag/v2.0.0) *(2021-12-21)*
 
 >Released by `SO`

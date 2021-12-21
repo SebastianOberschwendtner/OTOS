@@ -32,7 +32,7 @@ typedef void(*taskpointer_t)(void);
  * This enables the OS to be used in 8bit and 
  * 32bit systems, hopefully.
  */
-#if defined(STM32F4)
+#if (defined(STM32F4) | defined(STM32L0))
     // For ARM 32-bit microcontrollers, base is 16-bit or int.
     typedef int s_base_t;           // 32-bit signed base type
     typedef unsigned int u_base_t;  // 32-bit unsigned base type
