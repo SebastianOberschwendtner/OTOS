@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    thread.c
  * @author  SO
- * @version v1.6.0
+ * @version v2.0.0
  * @date    16-March-2021
  * @brief   The internal thread handler for the OTOS kernel.
  ==============================================================================
@@ -66,6 +66,16 @@ bool OTOS::Thread::get_stackoverflow(void) const
 };
 
 /**
+ * @brief Get the priority of the thread.
+ * 
+ * @return OTOS::Priority 
+ */
+OTOS::Priority OTOS::Thread::get_priority(void) const
+{
+    return this->priority;
+};
+
+/**
  * @brief Set the schedule data of one thread
  * @param ticks The execution periode of the thread in Ticks.
  * @param priority The execution priority of the thread.
@@ -77,25 +87,62 @@ void OTOS::Thread::set_schedule(u_base_t ticks, Priority priority)
     this->schedule_ticks = ticks;
 
     // Reset tick counter
-    this->counter_ticks = ticks;    
+    this->counter_ticks = ticks;
+
+    // When ticks is zero, thread is runnable immediately
+    if (ticks == 0)
+        this->state = State::Runnable;
+    else
+        this->state = State::Blocked;
 };
 
 /**
- * @brief Count SysTicks to determine whether the thread is runable.
+ * @brief Set the thread as running.
+ * 
+ */
+void OTOS::Thread::set_running(void)
+{
+    this->state = State::Running;
+};
+
+/**
+ * @brief Set the thread as blocked. Resets the thread tick counter.
+ * 
+ */
+void OTOS::Thread::set_blocked(void)
+{
+    // only go to blocked state when schedule is not zero
+    if (this->schedule_ticks)
+    {
+        this->counter_ticks = this->schedule_ticks;
+        this->state = State::Blocked;
+    }
+    else // thread is runnable immediately
+        this->state = State::Runnable;
+};
+
+/**
+ * @brief Count SysTicks to determine whether the thread is runnable.
  */
 void OTOS::Thread::count_tick(void)
 {
     // Only count, when counter is not already at 0
     if (this->counter_ticks)
+    {
         this->counter_ticks--;
+
+        // When counter reached zero, thread is runnable
+        if (this->counter_ticks == 0)
+            this->state = State::Runnable;
+    }
 };
 
 /**
- * @brief Check whether the current thread is runable.
- * @return Returns true, when the thread is runable.
+ * @brief Check whether the current thread is runnable.
+ * @return Returns true, when the thread is runnable.
  */
-bool OTOS::Thread::is_runable(void) const
+bool OTOS::Thread::is_runnable(void) const
 {
-    // When the tick counter reached 0, the task is runable
-    return (this->counter_ticks == 0);
+    // Return whether task is runnable
+    return this->state == State::Runnable;
 };
