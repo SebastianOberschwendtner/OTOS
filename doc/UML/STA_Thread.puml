@@ -2,10 +2,13 @@
 title State Diagram of Threads\n
 caption OTOS
 
-[*] --> Runable
-Runable --> Running: Execute Thread
+[*] --> Runnable
+Runnable --> Running: Execute Thread
 Running --> Blocked: Finished Execution
-Blocked --> Runable: Schedule is Valid
-Blocked --> Suspended: Error occured
+Blocked --> Runnable: Schedule is Valid
+Blocked --> Inactive: Error occured
+Blocked --> Inactive: Set Inactive
+Running --> Inactive: Set Inactive
+Inactive --> Blocked: Set Active
 
 @enduml

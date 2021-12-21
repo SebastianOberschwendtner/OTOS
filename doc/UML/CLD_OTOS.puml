@@ -8,6 +8,7 @@ class Thread {
     + Stack_pointer
     - Stacksize
     - Stack_top
+    - state
     - priority
     - schedule_ticks
     - counter_ticks
@@ -17,16 +18,19 @@ class Thread {
     + set_stack()
     + get_stacksize()
     + get_stackoverflow()
+    + get_priority()
     + set_schedule()
+    + set_running()
+    + set_blocked()
     + count_tick()
-    + is_runable()
+    + is_runnable()
 }
 class Kernel{
     'Properties:
-    - active_thread
     - thread_count
     - Thread[NUMBER_THREADS]
     - Stack[StackSize]
+    - last_thread[Number of Priorities]
     - //static// Time_ms
 
     'Methods:
@@ -36,9 +40,10 @@ class Kernel{
     + get_allocated_stacksize()
     + //static// count_time_ms()
     + //static// get_time_ms()
-    - update_schedule()
-    - get_next_thread()
-    - switch_thread()
+    + update_schedule()
+    + get_next_thread()
+    + switch_to_thread()
+    - find_next_thread()
 }
 
 class Watchdog {

@@ -11,6 +11,8 @@
 - Adds driver for IC which can be controlled via a bus system. The IC groups are:
     - Battery Management ICs
     - Display Controllers
+- Adds priority and time based scheduling using a round-robin scheme. Still no preemption, see #1 for more information.
+
 ### Fixed Issues:
 
 - #3: Add ms Timer for Threads
