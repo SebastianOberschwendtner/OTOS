@@ -58,6 +58,8 @@ enum class IO : unsigned char
     USART_4,
     USART_5,
     USART_6,
+    USART_7,
+    USART_8,
     CAN_1,
     CAN_2,
     OTG_FS_,

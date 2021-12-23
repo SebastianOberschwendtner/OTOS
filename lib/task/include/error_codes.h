@@ -38,7 +38,9 @@ namespace Error {
         I2C_Data_ACK_Error          = -102,
         I2C_BUS_Busy_Error          = -103,
         SPI_Timeout                 = -110,
-        SPI_BUS_Busy_Error          = -111
+        SPI_BUS_Busy_Error          = -111,
+        USART_Timeout               = -120,
+        USART_BUS_Busy_Error        = -121
     };
 };
 

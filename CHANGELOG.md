@@ -7,6 +7,7 @@
 - Fixes bug in `types.h` for STM32L0 devices.
 - Adds peripheral drivers for:
     - SPI *(tx only)*
+    - USART *(tx only)*
 
 ### Fixed Issues:
 
