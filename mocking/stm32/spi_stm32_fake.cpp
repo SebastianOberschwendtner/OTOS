@@ -19,38 +19,51 @@
  */
 /**
  ==============================================================================
- * @file    clock_stm32_fake.cpp
+ * @file    spi_stm32_fake.cpp
  * @author  SO
- * @version v1.0.7
- * @date    27-August-2021
- * @brief   Fakes the clock interface for STM32 microcontrollers.
+ * @version v2.1.0
+ * @date    22-Dezember-2021
+ * @brief   Fakes the spi interface for STM32 microcontrollers.
  ==============================================================================
  */
 
 // *** Includes ***
-#include "clock_stm32_fake.h"
+#include "spi_stm32_fake.h"
 
 // *** Fakes ***
 // Fake Peripheral
-static RCC_TypeDef RCC_Fake;
+static SPI_TypeDef SPI1_Fake;
+static SPI_TypeDef SPI2_Fake;
+static SPI_TypeDef SPI3_Fake;
+static SPI_TypeDef SPI4_Fake;
+static SPI_TypeDef SPI5_Fake;
+static SPI_TypeDef SPI6_Fake;
 
 // Public Pointer to fake which mimics peripheral behaviour.
-RCC_TypeDef* RCC = &RCC_Fake;
+SPI_TypeDef *SPI1 = &SPI1_Fake;
+SPI_TypeDef *SPI2 = &SPI2_Fake;
+SPI_TypeDef *SPI3 = &SPI3_Fake;
+SPI_TypeDef *SPI4 = &SPI4_Fake;
+SPI_TypeDef *SPI5 = &SPI5_Fake;
+SPI_TypeDef *SPI6 = &SPI6_Fake;
 
 // Fake register address
-unsigned long RCC_BASE = reinterpret_cast<unsigned long>(RCC);
-
-// *** Methods ***
+unsigned long SPI1_BASE = reinterpret_cast<unsigned long>(SPI1);
+unsigned long SPI2_BASE = reinterpret_cast<unsigned long>(SPI2);
+unsigned long SPI3_BASE = reinterpret_cast<unsigned long>(SPI3);
+unsigned long SPI4_BASE = reinterpret_cast<unsigned long>(SPI4);
+unsigned long SPI5_BASE = reinterpret_cast<unsigned long>(SPI5);
+unsigned long SPI6_BASE = reinterpret_cast<unsigned long>(SPI6);
 
 /**
- * @brief Constructor for the fake RCC peripheral. Initializes the
+ * @brief Constructor for the fake SPI peripheral. Initializes the
  * register values to the default values as defined in the datasheet
  * of the STM32.
  * @details There should only be one instance of this object during testing.
  * This static instance is made available by the pointer to the object, which
  * fakes the peripheral during testing.
  */
-RCC_TypeDef::RCC_TypeDef()
+SPI_TypeDef::SPI_TypeDef()
 {
     // Reinit to default
     registers_to_default();
@@ -59,34 +72,15 @@ RCC_TypeDef::RCC_TypeDef()
 /**
  * @brief Reset all the registers to the default values
  */
-void RCC_TypeDef::registers_to_default(void)
+void SPI_TypeDef::registers_to_default(void)
 {
-    this->CR        = 0x83;
-    this->PLLCFGR   = 0x24003010;
-    this->CFGR = 0;
-    this->CIR = 0;
-    this->AHB1RSTR = 0;
-    this->AHB2RSTR = 0;
-    this->AHB3RSTR = 0;
-    this->RESERVED0 = 0;
-    this->APB1RSTR = 0;
-    this->APB2RSTR = 0;
-    this->AHB1ENR = 0;
-    this->AHB2ENR = 0;
-    this->AHB3ENR = 0;
-    this->RESERVED2 = 0;
-    this->APB1ENR = 0;
-    this->APB2ENR = 0;
-    this->AHB1LPENR = 0;
-    this->AHB2LPENR = 0;
-    this->AHB3LPENR = 0;
-    this->RESERVED4 = 0;
-    this->APB1LPENR = 0;
-    this->APB2LPENR = 0;
-    this->BDCR = 0;
-    this->CSR = 0;
-    this->SSCGR = 0;
-    this->PLLI2SCFGR = 0;
-    this->PLLSAICFGR = 0;
-    this->DCKCFGR = 0;
+    this->CR1 = 0;
+    this->CR2 = 0;
+    this->SR = 0;
+    this->DR = 0;
+    this->CRCPR = 0;
+    this->RXCRCR = 0;
+    this->TXCRCR = 0;
+    this->I2SCFGR = 0;
+    this->I2SPR = 0;
 };

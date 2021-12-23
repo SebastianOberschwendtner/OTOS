@@ -25,8 +25,8 @@
     // ---------- STM32 -------------
     #define STM32F4 // => The library fakes the STM32F4 microcontroller family
     // === Clock defines ===
-    #define F_CPU 40000000
-    #define F_I2C 20000000
+    #define F_CPU 4'000'000
+    #define F_I2C 2'000'000
 
     // === Mocked CMSIS Driver ===
     #include "../cmsis/cmsis_mock.h"
@@ -35,6 +35,7 @@
     #include "../stm32/clock_stm32_fake.h"
     #include "../stm32/gpio_stm32_fake.h"
     #include "../stm32/i2c_stm32_fake.h"
+    #include "../stm32/spi_stm32_fake.h"
     #include "../stm32/exti_stm32_fake.h"
     #include "../stm32/timer_stm32_fake.h"
 
