@@ -1,10 +1,12 @@
 # Changelog for OTOS
-## [v3.0.0](https://github.com/knuffel-v2/OTOS/releases/tag/v3.0.0) *(2021-xx-xx)*
+## [v3.0.0](https://github.com/knuffel-v2/OTOS/releases/tag/v3.0.0) *(2022-xx-xx)*
 
 >Released by `SO`
 
 ### Release Notes:
 - Fixes bug in `types.h` for STM32L0 devices.
+- Adds peripheral drivers for:
+    - SPI *(tx only)*
 
 ### Fixed Issues:
 

@@ -100,6 +100,43 @@ void Task_I2C(void)
     }
 };
 
+/**
+ * @brief Example task which uses a spi controller
+ * @details Example Task
+ */
+void Task_SPI(void)
+{
+    GPIO::PIN DX(GPIO::Port::D, 13, GPIO::Mode::Output);
+    GPIO::PIN CS(GPIO::Port::C,  2, GPIO::Mode::Output);
+    GPIO::PIN SCK(GPIO::Port::F, 7, GPIO::Mode::Output);
+    GPIO::PIN MOSI(GPIO::Port::F, 9, GPIO::Mode::Input);
+    
+    CS.set_high();
+
+    SPI::Controller<IO::SPI_5> spi(1'000'000);
+    spi.set_use_hardware_chip_select(false);
+    GPIO::assign(SCK, spi);
+    GPIO::assign(MOSI, spi);
+    spi.enable();
+
+    DX.set_low();
+    CS.set_low();
+    Bus::send_byte(spi, 0x01);
+    CS.set_high();
+    OTOS::Task::yield();
+
+    DX.set_low();
+    CS.set_low();
+    Bus::send_byte(spi, 0x11);
+    CS.set_high();
+    OTOS::Task::yield();
+
+    while (1)
+    {
+        OTOS::Task::yield();
+    }
+};
+
 // Create the kernel object
 OTOS::Kernel OS;
 
@@ -114,6 +151,7 @@ int main(void)
     OS.schedule_thread<256>(&Blink_LED3, OTOS::Priority::Normal, 10);
     OS.schedule_thread<256>(&Blink_LED4, OTOS::Priority::High, 2);
     OS.schedule_thread<256>(&Task_I2C, OTOS::Priority::Normal);
+    OS.schedule_thread<256>(&Task_SPI, OTOS::Priority::Normal, 10);
 
     // Start the task execution
     OS.start();

@@ -34,6 +34,7 @@
 /// @todo Check for the microcontroller type (STM32/AVR/...) before including the drivers.
 #include "stm32/gpio_stm32.h"
 #include "stm32/i2c_stm32.h"
+#include "stm32/spi_stm32.h"
 #include "stm32/timer_stm32.h"
 
 // === Chip driver ===
