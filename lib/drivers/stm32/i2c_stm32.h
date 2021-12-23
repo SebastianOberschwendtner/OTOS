@@ -30,16 +30,6 @@
 
 // === Declarations ===
 namespace I2C {
-    // === Enums ===
-    enum class Instance: unsigned char
-    {
-        I2C_1 = 0, I2C_2, I2C_3
-    };
-
-    enum class State: unsigned char
-    {
-        Init = 1, Idle, Busy, Error
-    };
 
     // === Classes ===
     using Bus::Data_t;

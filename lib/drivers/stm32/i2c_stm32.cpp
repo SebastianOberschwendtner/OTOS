@@ -41,8 +41,8 @@
 constexpr unsigned long get_FREQ(void) 
 {
     // Check whether peripheral clock frequency is valid is valid
-    static_assert(F_I2C > 2000000, "Minimum APB clock speed for I2C peripheral is 2 MHz!");
-    static_assert(F_I2C < 50000000, "Maximum APB clock speed for I2C peripheral is 50 MHz!");
+    static_assert(F_I2C >= 2'000'000, "Minimum APB clock speed for I2C peripheral is 2 MHz!");
+    static_assert(F_I2C < 50'000'000, "Maximum APB clock speed for I2C peripheral is 50 MHz!");
 
     // Return F_I2C in MHz
     return F_I2C/1000000;

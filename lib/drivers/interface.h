@@ -49,6 +49,9 @@ enum class IO : unsigned char
     SPI_1,
     SPI_2,
     SPI_3,
+    SPI_4,
+    SPI_5,
+    SPI_6,
     USART_1,
     USART_2,
     USART_3,
@@ -64,6 +67,19 @@ enum class IO : unsigned char
     SDIO_,
     DCMI_,
     EVENTOUT_
+};
+
+// Common enums
+enum class Edge: bool
+{
+    Falling = false,
+    Rising = true
+};
+
+enum class Level: bool
+{
+    Low = false,
+    High = true
 };
 
 // === Common base class for every driver ===
@@ -116,6 +132,12 @@ namespace GPIO
 // => Bus Communication Interface
 namespace Bus
 {
+    // === Enums ===
+    // Bus state
+    enum class State: unsigned char
+    {
+        Init = 1, Idle, Busy, Error
+    };
 
     // Data type to handle different byte formats
     union Data_t
