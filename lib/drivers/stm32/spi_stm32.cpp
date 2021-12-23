@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    spi_stm32.cpp
  * @author  SO
- * @version v2.1.0
+ * @version v2.2.0
  * @date    22-Dezember-2021
  * @brief   SPI driver for STM32 microcontrollers.
  ==============================================================================
@@ -113,6 +113,34 @@ namespace SPI
             RCC->APB2ENR |= RCC_APB2ENR_SPI6EN;
 #endif
     }
+
+    /**
+     * @brief Get the prescaler for teh desired baudrate.
+     * The prescaler value depends on the APB clock which
+     * is conencted to the SPI peripheral.
+     * 
+     * @tparam instance SPI peripheral instance.
+     * @param baudrate The desired baudrate of teh bus.
+     * @return Returns the 3 significant bits for the prescaler.
+     */
+    template<IO instance>
+    constexpr unsigned char calculate_prescaler(const unsigned long baudrate)
+    {
+        if constexpr (instance == IO::SPI_1)
+            return (F_APB2 / baudrate) & 0b111;
+        if constexpr (instance == IO::SPI_2)
+            return (F_APB1 / baudrate) & 0b111;
+#ifdef STM32F4
+        if constexpr (instance == IO::SPI_3)
+            return (F_APB1 / baudrate) & 0b111;
+        if constexpr (instance == IO::SPI_4)
+            return (F_APB2 / baudrate) & 0b111;
+        if constexpr (instance == IO::SPI_5)
+            return (F_APB2 / baudrate) & 0b111;
+        if constexpr (instance == IO::SPI_6)
+            return (F_APB2 / baudrate) & 0b111;
+#endif
+    }
 };
 
 // === Methods ===
@@ -125,14 +153,14 @@ namespace SPI
  */
 template <IO spi_instance>
 SPI::Controller<spi_instance>::Controller(const unsigned long baudrate)
-    : Base{spi_instance}, peripheral{
-                              reinterpret_cast<SPI_TypeDef *>(SPI::get_peripheral_address<spi_instance>())}
+    : Base{spi_instance}
+    , peripheral{ reinterpret_cast<SPI_TypeDef *>(SPI::get_peripheral_address<spi_instance>())}
 {
     // Enable the peripheral clock
     SPI::enable_rcc_clock<spi_instance>();
 
     // Calculate prescaler (3 significant bits) for the desired baudrate
-    unsigned char prescaler = (F_CPU / baudrate) & 0b111;
+    unsigned char prescaler = calculate_prescaler<spi_instance>(baudrate);
 
     // Set the configuration register
     this->peripheral->CR1 |= (prescaler << 1) | SPI_CR1_MSTR;
@@ -268,7 +296,7 @@ bool SPI::Controller<spi_instance>::send_data_byte(const unsigned char data)
  * @brief Send n bytes to a spi target
  * The highest byte in the payload is transmitted first!
  * 
- * Be aware, that this functions exits when the lsat byte
+ * Be aware, that this functions exits when the last byte
  * is still beeing sent! So when you need to perform actions
  * after the last byte is sent, use the method `last_transmit_finished()`
  * to check whether the last byte is sent or not.
@@ -280,7 +308,7 @@ bool SPI::Controller<spi_instance>::send_data_byte(const unsigned char data)
  * @tparam spi_instance The SPI peripheral to be used.
  * @param payload Data struct with maximum 4 bytes
  * @param n_bytes How many bytes should be sent
- * @return Returns True when the byte was sent successfully, False otherwise.
+ * @return Returns True when the data was sent successfully, False otherwise.
  * @details blocking function
  */
 template <IO spi_instance>

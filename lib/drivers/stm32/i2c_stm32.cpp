@@ -41,11 +41,11 @@
 constexpr unsigned long get_FREQ(void) 
 {
     // Check whether peripheral clock frequency is valid is valid
-    static_assert(F_I2C >= 2'000'000, "Minimum APB clock speed for I2C peripheral is 2 MHz!");
-    static_assert(F_I2C < 50'000'000, "Maximum APB clock speed for I2C peripheral is 50 MHz!");
+    static_assert(F_APB1 >= 2'000'000, "Minimum APB clock speed for I2C peripheral is 2 MHz!");
+    static_assert(F_APB1 < 50'000'000, "Maximum APB clock speed for I2C peripheral is 50 MHz!");
 
     // Return F_I2C in MHz
-    return F_I2C/1'000'000;
+    return F_APB1/1'000'000;
 };
 
 /**
@@ -55,7 +55,7 @@ constexpr unsigned long get_FREQ(void)
  */
 constexpr unsigned char get_prescaler(const unsigned long frequency)
 {
-    return (1 + ((F_I2C / frequency) / 255)) & 0b1111;
+    return (1 + ((F_APB1 / frequency) / 255)) & 0b1111;
 };
 
 /**
@@ -122,8 +122,8 @@ constexpr unsigned long get_clock_control(const unsigned long frequency) {
     }
 #elif defined(STM32L0)
     unsigned char _pre      = get_prescaler(frequency);
-    unsigned char _pre_l    = ((F_I2C / (_pre * frequency)) / 2) & 0b11111111; 
-    unsigned char _pre_h    = ((F_I2C / (_pre * frequency)) / 2) & 0b11111111; 
+    unsigned char _pre_l    = ((F_APB1 / (_pre * frequency)) / 2) & 0b11111111; 
+    unsigned char _pre_h    = ((F_APB1 / (_pre * frequency)) / 2) & 0b11111111; 
     reg_val = (--_pre << 28) | (--_pre_h << 8) | (--_pre_l << 0);
 #endif
     return reg_val;
