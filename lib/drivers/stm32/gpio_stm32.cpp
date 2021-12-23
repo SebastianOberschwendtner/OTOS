@@ -148,6 +148,8 @@ unsigned char GPIO::PIN::get_af_code(const IO function) const
         return 4;
     case IO::SPI_1:
     case IO::SPI_2:
+    case IO::SPI_4:
+    case IO::SPI_5:
         return 5;
     case IO::SPI_3:
         return 6;
