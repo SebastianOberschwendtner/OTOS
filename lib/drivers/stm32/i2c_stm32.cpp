@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    i2c_stm32.cpp
  * @author  SO
- * @version v1.0.14
+ * @version v2.1.1
  * @date    02-September-2021
  * @brief   I2C driver for STM32 microcontrollers.
  ==============================================================================
@@ -34,7 +34,7 @@
 
 /**
  * @brief Get the APB clock speed in MHz and check whether it is valid for the
- * i2c peripherl
+ * i2c peripheral
  * @return Returns the defined APB clock speed in MHz.
  * @details constexpr
  */
@@ -45,7 +45,7 @@ constexpr unsigned long get_FREQ(void)
     static_assert(F_I2C < 50'000'000, "Maximum APB clock speed for I2C peripheral is 50 MHz!");
 
     // Return F_I2C in MHz
-    return F_I2C/1000000;
+    return F_I2C/1'000'000;
 };
 
 /**
@@ -102,10 +102,10 @@ constexpr unsigned long get_clock_control(const unsigned long frequency) {
     unsigned long reg_val = 0;
 #if defined(STM32F4)
     // Set F/S and DUTY bits according to output frequency
-    if (frequency <= 100000)
+    if (frequency <= 100'000)
     {
         // get the CCR value
-        reg_val = (get_FREQ()*1000000)/(2*frequency);
+        reg_val = (get_FREQ()*1'000'000)/(2*frequency);
         // limit CCR to 0x01 since SM is enabled with this frequency
         if (reg_val < 0x04)
             reg_val = 0x04;
@@ -115,7 +115,7 @@ constexpr unsigned long get_clock_control(const unsigned long frequency) {
     else
     {
         // get the CCR value
-        reg_val = (get_FREQ()*1000000)/(25*frequency);
+        reg_val = (get_FREQ()*1'000'000)/(25*frequency) + 1;
         // limit CCR value to 12 bits
         reg_val &= 0xFFF;
         reg_val |= I2C_CCR_FS | I2C_CCR_DUTY;

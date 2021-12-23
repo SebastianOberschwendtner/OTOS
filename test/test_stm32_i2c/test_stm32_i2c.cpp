@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_i2c_stm32.cpp
  * @author  SO
- * @version v1.3.0
+ * @version v2.1.1
  * @date    30-August-2021
  * @brief   Unit tests for testing the i2c driver for stm32 microcontrollers.
  ******************************************************************************
@@ -96,9 +96,9 @@ void test_init(void)
     // Perform testing
     TEST_ASSERT_EQUAL((1<<23) | (1<<21) | (1<<20), RCC->APB1ENR); // Enable the peripheral clock
     TEST_ASSERT_EQUAL( 0, I2C1->CR1);
-    TEST_ASSERT_EQUAL(20, I2C1->CR2);
-    TEST_ASSERT_EQUAL((1<<15) | (1<<14) | 2, I2C1->CCR);
-    TEST_ASSERT_EQUAL(11, I2C1->TRISE);
+    TEST_ASSERT_EQUAL( 2, I2C1->CR2);
+    TEST_ASSERT_EQUAL((1<<15) | (1<<14) | 1, I2C1->CCR);
+    TEST_ASSERT_EQUAL(2, I2C1->TRISE);
     TEST_ASSERT_EQUAL(0, I2C1->FLTR);
     TEST_ASSERT_EQUAL(0, UUT.get_target_address());  // Test that the target is address is 0
     TEST_ASSERT_EQUAL(0, UUT.get_rx_data().value); // The return data is initialized with 0
