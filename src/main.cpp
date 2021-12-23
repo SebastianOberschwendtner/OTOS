@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    main.c
  * @author  SO
- * @version v2.0.0
+ * @version v2.1.1
  * @date    09-March-2021
  * @brief   Main function for the OTOS. Mainly used to demonstrate how the OTOS
  *          functions work and should be used.
@@ -113,7 +113,7 @@ void Task_SPI(void)
     
     CS.set_high();
 
-    SPI::Controller<IO::SPI_5> spi(1'000'000);
+    SPI::Controller<IO::SPI_1> spi(1'000'000);
     spi.set_use_hardware_chip_select(false);
     GPIO::assign(SCK, spi);
     GPIO::assign(MOSI, spi);

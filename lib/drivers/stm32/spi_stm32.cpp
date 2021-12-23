@@ -33,8 +33,8 @@
 // Provide template instanciations with all allowed bus instances
 template class SPI::Controller<IO::SPI_1>;
 template class SPI::Controller<IO::SPI_2>;
-template class SPI::Controller<IO::SPI_3>;
 #ifdef STM32F4
+template class SPI::Controller<IO::SPI_3>;
 template class SPI::Controller<IO::SPI_4>;
 template class SPI::Controller<IO::SPI_5>;
 template class SPI::Controller<IO::SPI_6>;
