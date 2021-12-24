@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    spi_stm32.cpp
  * @author  SO
- * @version v2.2.0
+ * @version v2.2.2
  * @date    22-Dezember-2021
  * @brief   SPI driver for STM32 microcontrollers.
  ==============================================================================
@@ -120,26 +120,48 @@ namespace SPI
      * is conencted to the SPI peripheral.
      * 
      * @tparam instance SPI peripheral instance.
-     * @param baudrate The desired baudrate of teh bus.
+     * @param baudrate The desired baudrate of the bus.
      * @return Returns the 3 significant bits for the prescaler.
      */
     template<IO instance>
     constexpr unsigned char calculate_prescaler(const unsigned long baudrate)
     {
+        // Variable for calculation
+        unsigned long prescaler = 0;
+
+        // Get the prescaler for the according peripheral
         if constexpr (instance == IO::SPI_1)
-            return (F_APB2 / baudrate) & 0b111;
+            prescaler = (F_APB2 / baudrate);
         if constexpr (instance == IO::SPI_2)
-            return (F_APB1 / baudrate) & 0b111;
+            prescaler = (F_APB1 / baudrate);
 #ifdef STM32F4
         if constexpr (instance == IO::SPI_3)
-            return (F_APB1 / baudrate) & 0b111;
+            prescaler = (F_APB1 / baudrate);
         if constexpr (instance == IO::SPI_4)
-            return (F_APB2 / baudrate) & 0b111;
+            prescaler = (F_APB2 / baudrate);
         if constexpr (instance == IO::SPI_5)
-            return (F_APB2 / baudrate) & 0b111;
+            prescaler = (F_APB2 / baudrate);
         if constexpr (instance == IO::SPI_6)
-            return (F_APB2 / baudrate) & 0b111;
+            prescaler = (F_APB2 / baudrate);
 #endif
+        // Compute the exponent: prescaler = 2^(N+1)
+        // See how many times 2 fits in prescaler
+        if (prescaler <= (1<<1))
+            return 0;
+        else if (prescaler <= (1<<2))
+            return 1; 
+        else if (prescaler <= (1<<3))
+            return 2;
+        else if (prescaler <= (1<<4))
+            return 3;
+        else if (prescaler <= (1<<5))
+            return 4;
+        else if (prescaler <= (1<<6))
+            return 5;
+        else if (prescaler <= (1<<7))
+            return 6;
+        else 
+            return 7;
     }
 };
 
@@ -163,7 +185,8 @@ SPI::Controller<spi_instance>::Controller(const unsigned long baudrate)
     unsigned char prescaler = calculate_prescaler<spi_instance>(baudrate);
 
     // Set the configuration register
-    this->peripheral->CR1 |= (prescaler << 1) | SPI_CR1_MSTR;
+    this->peripheral->CR1 &= ~(SPI_CR1_BR_2 | SPI_CR1_BR_1 | SPI_CR1_BR_0); // Clear BR bits
+    this->peripheral->CR1 |= (prescaler << 3) | SPI_CR1_MSTR;
 
     // Set the timeout limit
     this->set_timeout(100);
@@ -274,6 +297,7 @@ bool SPI::Controller<spi_instance>::is_busy(void) const
 template <IO spi_instance>
 bool SPI::Controller<spi_instance>::send_data_byte(const unsigned char data)
 {
+
     // Wait until TX buffer is empty
     this->reset_timeout(); 
     while ( not this->last_transmit_finished() )
@@ -286,20 +310,16 @@ bool SPI::Controller<spi_instance>::send_data_byte(const unsigned char data)
             return false;
         }
     }
-    
     // Send data when DR is empty
     this->peripheral->DR = data;
+    
+    // return success
     return true;
 };
 
 /**
  * @brief Send n bytes to a spi target
  * The highest byte in the payload is transmitted first!
- * 
- * Be aware, that this functions exits when the last byte
- * is still beeing sent! So when you need to perform actions
- * after the last byte is sent, use the method `last_transmit_finished()`
- * to check whether the last byte is sent or not.
  * 
  * Sets the following errors:
  * - SPI_Timeout
@@ -328,6 +348,19 @@ bool SPI::Controller<spi_instance>::send_data(const Bus::Data_t payload,
         if(!this->send_data_byte(payload.byte[i-1]))
             return false;
     }
+
+    // Wait for transfer to finish
+    this->reset_timeout();
+    while(this->is_busy())
+    {
+        if (this->timed_out())
+        {
+            this->set_error(Error::Code::SPI_Timeout);
+            return false;
+        }
+    }
+
+    // Send was successfull
     return true;
 };
 

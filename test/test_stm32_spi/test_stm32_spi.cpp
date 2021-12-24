@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_stm32_spi.cpp
  * @author  SO
- * @version v2.1.0
+ * @version v2.2.2
  * @date    22-December-2021
  * @brief   Unit tests for testing the spi driver for stm32 microcontrollers.
  ******************************************************************************
@@ -94,18 +94,54 @@ void test_constructor(void)
     setUp();
 
     // Create Object
-    SPI::Controller<IO::SPI_1> UUT(1'000'000);
+    SPI::Controller<IO::SPI_1> UUT1(1'000'000);
 
     // Test side effects
-    // Prescaler for baudrate
-    constexpr unsigned char Expected = F_CPU / 1'000'000;
-    TEST_ASSERT_BITS(0b111000, (Expected<<1), SPI1->CR1);
-
     // in Master Mode
     TEST_ASSERT_BIT_HIGH(SPI_CR1_MSTR_Pos, SPI1->CR1);
 
     // Peripheral is not enabled
     TEST_ASSERT_BIT_LOW(SPI_CR1_SPE_Pos, SPI1->CR1);
+};
+
+/// @brief Test the prescaler configuration
+void test_set_presaler(void)
+{
+    setUp();
+
+    // *** Assume F_APBx = 4'000'000 ***
+
+    // Test different baudrates
+    SPI::Controller<IO::SPI_1> UUT1(2'000'000);
+    TEST_ASSERT_BITS(SPI_CR1_BR_Msk, (0 << SPI_CR1_BR_Pos), SPI1->CR1);
+
+    // Test different baudrates
+    SPI::Controller<IO::SPI_1> UUT2(1'000'000);
+    TEST_ASSERT_BITS(SPI_CR1_BR_Msk, (1 << SPI_CR1_BR_Pos), SPI1->CR1);
+
+    // Test different baudrates
+    SPI::Controller<IO::SPI_1> UUT3(500'000);
+    TEST_ASSERT_BITS(SPI_CR1_BR_Msk, (2 << SPI_CR1_BR_Pos), SPI1->CR1);
+
+    // Test different baudrates
+    SPI::Controller<IO::SPI_1> UUT4(250'000);
+    TEST_ASSERT_BITS(SPI_CR1_BR_Msk, (3 << SPI_CR1_BR_Pos), SPI1->CR1);
+
+    // Test different baudrates
+    SPI::Controller<IO::SPI_1> UUT5(125'000);
+    TEST_ASSERT_BITS(SPI_CR1_BR_Msk, (4 << SPI_CR1_BR_Pos), SPI1->CR1);
+
+    // Test different baudrates
+    SPI::Controller<IO::SPI_1> UUT6(62'500);
+    TEST_ASSERT_BITS(SPI_CR1_BR_Msk, (5 << SPI_CR1_BR_Pos), SPI1->CR1);
+
+    // Test different baudrates
+    SPI::Controller<IO::SPI_1> UUT7(31'250);
+    TEST_ASSERT_BITS(SPI_CR1_BR_Msk, (6 << SPI_CR1_BR_Pos), SPI1->CR1);
+
+    // Test different baudrates
+    SPI::Controller<IO::SPI_1> UUT8(15'625);
+    TEST_ASSERT_BITS(SPI_CR1_BR_Msk, (7 << SPI_CR1_BR_Pos), SPI1->CR1);
 };
 
 /// @brief Test the correct setting of the clocking timing
@@ -273,6 +309,7 @@ int main(int argc, char **argv)
     UNITY_BEGIN();
     test_rcc_clock_enable();
     test_constructor();
+    test_set_presaler();
     test_set_clock_properties();
     test_set_target_selection();
     test_enable();
