@@ -119,36 +119,41 @@ namespace USART
     constexpr unsigned short calculate_prescaler(const unsigned long baudrate)
     {
         // Calculation variables
-        float pre = 0;
+        unsigned long prescaler = 0;
         unsigned short mantissa = 0;
         unsigned char fraction = 0;
+        constexpr unsigned long scaling = 100;
+
+        // Scale baudrate to get significant digits for
+        // the integer prescaler
+        const unsigned long baudrate_scaled = baudrate / scaling;
 
         // Get the prescaler according to the used clock
         if constexpr (instance == IO::USART_1)
-            pre = F_APB2  / baudrate;
+            prescaler = F_APB2  / baudrate_scaled;
         if constexpr (instance == IO::USART_2)
-            pre = F_APB1  / baudrate;
+            prescaler = F_APB1  / baudrate_scaled;
         if constexpr (instance == IO::USART_3)
-            pre = F_APB1  / baudrate;
+            prescaler = F_APB1  / baudrate_scaled;
         if constexpr (instance == IO::USART_4)
-            pre = F_APB1  / baudrate;
+            prescaler = F_APB1  / baudrate_scaled;
         if constexpr (instance == IO::USART_5)
-            pre = F_APB1  / baudrate;
+            prescaler = F_APB1  / baudrate_scaled;
         if constexpr (instance == IO::USART_6)
-            pre = F_APB2  / baudrate;
+            prescaler = F_APB2  / baudrate_scaled;
         if constexpr (instance == IO::USART_7)
-            pre = F_APB1  / baudrate;
+            prescaler = F_APB1  / baudrate_scaled;
         if constexpr (instance == IO::USART_8)
-            pre = F_APB1  / baudrate;
+            prescaler = F_APB1  / baudrate_scaled;
 
         // Convert the integer value to mantissa
-        pre /= 8 * (2 - 0);
-        mantissa = static_cast<unsigned short>(pre);
+        prescaler /= 8 * (2 - 0);
+        mantissa = static_cast<unsigned short>(prescaler/scaling);
 
         // Get the fraction of the prescaler to calculate the fraction part
-        pre -= static_cast<float>(mantissa);
-        pre *= 16;
-        fraction = static_cast<unsigned char>(pre);
+        prescaler -= static_cast<unsigned short>(mantissa) * scaling;
+        prescaler *= 16;
+        fraction = static_cast<unsigned char>(prescaler / scaling);
 
         return static_cast<unsigned short>((mantissa<<4) | (fraction & 0b1111));
     };
