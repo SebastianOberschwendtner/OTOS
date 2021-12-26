@@ -46,5 +46,6 @@
 
 // *** Display driver chips
 #include "display/ssd1306.h"
+#include "display/ili9341.h"
 
 #endif

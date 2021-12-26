@@ -43,10 +43,13 @@ legend Hardware or Processor specific levels are marked in **<color #SkyBlue> bl
 *****[#SkyBlue] tps65987.h
 ****_ display
 *****[#SkyBlue] ssd1306.h
+*****[#SkyBlue] ili9341.h
 ****_ stm32
 *****[#SkyBlue] gpio_stm32.h
 *****[#SkyBlue] i2c_stm32.h
+*****[#SkyBlue] spi_stm32.h
 *****[#SkyBlue] timer_stm32.h
+*****[#SkyBlue] usart_stm32.h
 
 ' === Graphics ===
 **[#GreenYellow] graphics
