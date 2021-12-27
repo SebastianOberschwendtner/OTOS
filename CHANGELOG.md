@@ -8,6 +8,8 @@
 - Adds peripheral drivers for:
     - SPI *(tx only)*
     - USART *(tx only)*
+- Adds driver for display chip driver *ILI9341*.
+- Adds timing and wait fucntions to tasks.
 
 ### Fixed Issues:
 

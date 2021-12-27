@@ -260,6 +260,10 @@ std::uint32_t OTOS::Kernel::get_time_ms(void)
  * @brief Get the current system time in milli-seconds as
  * a function call.
  * 
+ * The return type is hardcoded to be 32-bit, because the
+ * system should also have 32bit on 8-bit systems, where
+ * u_base_t would evaluate to char.
+ * 
  * @return Returns the current time in milli-seconds.
  */
 std::uint32_t OTOS::get_time_ms(void)

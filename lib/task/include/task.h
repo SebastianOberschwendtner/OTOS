@@ -23,6 +23,7 @@
 
 // === Includes ===
 #include "processors.h"
+#include "types.h"
 
 // === defines ===
 
@@ -30,23 +31,49 @@
  * @brief This macro can be used to wait as long as 
  * the condition is true without blocking other tasks.
  */
-
 #define YIELD_WHILE(condition) while(condition) { __otos_yield(); }
 
 namespace OTOS {
 
-    // *** Class Definitions ***
-    class Task
+    // === Class Definitions ===
+    struct Task
+    {
+        Task() = delete;
+        static void yield(void) { __otos_yield(); };
+    };
+
+    class Timed_Task
     {
     private:
-        unsigned int LastTick;
+        // *** Properties ***
+        std::uint32_t time_last{0};
+        std::uint32_t (*const get_time_ms)();
+
     public:
-        Task();
-        static void lock(void);
-        static void unlock(void);
-        // static void waitFor(bool Condition);
-        static void yield(void);
-        void sleep(unsigned int Time);
+        // *** Constructor ***
+        Timed_Task() = delete;
+        Timed_Task(std::uint32_t(*timer_handle)());
+
+        // *** Methods ***
+        void yield(void);
+        void tic(void);
+        std::uint32_t toc(void) const;
+        std::uint32_t time_elapsed_ms(void) const;
+
+        // *** Method templates ***
+        /**
+         * @brief Wait for a specified amount of time. The
+         * task yields as long as the wait time is not over.
+         * 
+         * @param time_ms The wait time in [ms].
+         */
+        template<typename T>
+        void wait_ms(const T time_ms)
+        {
+            this->tic();
+            while(this->time_elapsed_ms() < static_cast<std::uint32_t>(time_ms))
+                this->yield();
+        };
     };
 };
 

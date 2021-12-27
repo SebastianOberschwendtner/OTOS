@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    task.c
  * @author  SO
- * @version v1.0.0
+ * @version v2.3.0
  * @date    09-March-2021
  * @brief   The basic functions for task interaction are defined here.
  ==============================================================================
@@ -31,59 +31,50 @@
 #include "task.h"
 
 // *** Methods ***
-
 /**
- * @brief Create instance of thread class.
- * @details Only necessary when the thread uses Sleep()
+ * @brief Construct a new timed Task object.
+ * 
+ * @param timer_handle The function handle to the timer which provides the time in ms.
  */
-OTOS::Task::Task()
+OTOS::Timed_Task::Timed_Task(std::uint32_t(*timer_handle)())
+: get_time_ms{timer_handle}
 {
-    this->LastTick = 0;
-};
 
-/**
- * @brief Disable the SysTick interrupt, so that this thread
- * cannot be interrupted. Make sure to enable interrupts again
- * after important section is finished!
- */
-void OTOS::Task::lock(void)
-{
-    ///@todo Disable SysTick interrupt
 };
-
-/**
- * @brief Enable the SysTick interrupt again, after important
- * section finished execution.
- */
-void OTOS::Task::unlock(void)
-{
-    ///@todo Enable SysTick interrupt
-};
-
-/**
- * @brief Yield the execution until a condition becomes true.
- * @param Condition This value has to be true in order to resume execution.
- * @todo the wait for has to take a reference not a value as the condition.
- */
-// void OTOS::Task::waitFor(bool Condition)
-// {
-//     while (!Condition)
-//         __otos_yield();
-// };
 
 /**
  * @brief Yield execution and give control to kernel.
  */
-void OTOS::Task::yield(void)
+void OTOS::Timed_Task::yield(void)
 {
     __otos_yield();
 };
 
 /**
- * @brief Yield execution for a specific amount of time.
- * @param Time Time to sleep in SysTicks.
+ * @brief Start a time measurement by saving the current time.
+ * 
  */
-void OTOS::Task::sleep(unsigned int Time)
+void OTOS::Timed_Task::tic(void)
 {
-    ///@todo Add sleep function.
+    this->time_last = this->get_time_ms();
+};
+
+/**
+ * @brief Return the current time of the assigned timer in ms.
+ * 
+ * @return std::uint32_t: Current time in [ms].
+ */
+std::uint32_t OTOS::Timed_Task::toc(void) const
+{
+    return this->get_time_ms();
+};
+
+/**
+ * @brief Measure the elapsed time since tic() was called.
+ * 
+ * @return std::uint32_t Elapsed time in [ms].
+ */
+std::uint32_t OTOS::Timed_Task::time_elapsed_ms(void) const
+{
+    return this->get_time_ms() - this->time_last;
 };
