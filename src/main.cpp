@@ -104,32 +104,41 @@ void Task_I2C(void)
  * @brief Example task which uses a spi controller
  * @details Example Task
  */
+Graphics::Buffer_BW<240, 320> buffer;
 void Task_SPI(void)
 {
+    OTOS::Timed_Task task(&OTOS::get_time_ms);
+
     GPIO::PIN DX(GPIO::Port::D, 13, GPIO::Mode::Output);
     GPIO::PIN CS(GPIO::Port::C,  2, GPIO::Mode::Output);
     GPIO::PIN SCK(GPIO::Port::F, 7, GPIO::Mode::Output);
     GPIO::PIN MOSI(GPIO::Port::F, 9, GPIO::Mode::Input);
-    
-    CS.set_high();
 
-    SPI::Controller<IO::SPI_1> spi(1'000'000);
-    spi.set_use_hardware_chip_select(false);
+    SPI::Controller<IO::SPI_5> spi(5'000'000);
     GPIO::assign(SCK, spi);
     GPIO::assign(MOSI, spi);
-    spi.enable();
 
-    DX.set_low();
-    CS.set_low();
-    Bus::send_byte(spi, 0x01);
-    CS.set_high();
-    OTOS::Task::yield();
+    Graphics::Canvas_BW frame(buffer.data.data(), buffer.width_px, buffer.height_px);
+    frame.set_fontsize(Font::Size::Normal);
+    frame.add_string("\nTeststring\n");
+    frame.add_line_h({0, 40}, 200);
+    frame.add_line_v({200,0}, 41);
 
-    DX.set_low();
-    CS.set_low();
-    Bus::send_byte(spi, 0x11);
-    CS.set_high();
-    OTOS::Task::yield();
+    ILI9341::setup_spi_bus(spi);
+    ILI9341::Controller display(spi, DX, CS);
+
+    display.wake_up();
+    task.wait_ms(100);
+    display.initialize();
+
+    display.draw(
+        buffer.data.cbegin(),
+        buffer.data.cend(),
+        ILI9341::RGB_16bit<0xA2, 0xAD, 0x00>(),
+        0x0000,
+        OTOS::Task::yield
+    );
+    display.on();
 
     while (1)
     {
@@ -143,15 +152,14 @@ OTOS::Kernel OS;
 // *** Main ***
 int main(void)
 {
-
     // Configure Systick timer for interrupts every 1 ms
     Timer::SysTick_Configure();
 
     // Schedule Threads
     OS.schedule_thread<256>(&Blink_LED3, OTOS::Priority::Normal, 10);
     OS.schedule_thread<256>(&Blink_LED4, OTOS::Priority::High, 2);
-    OS.schedule_thread<256>(&Task_I2C, OTOS::Priority::Normal);
-    OS.schedule_thread<256>(&Task_SPI, OTOS::Priority::Normal, 10);
+    // OS.schedule_thread<256>(&Task_I2C, OTOS::Priority::Normal);
+    OS.schedule_thread<256>(&Task_SPI, OTOS::Priority::Low);
 
     // Start the task execution
     OS.start();

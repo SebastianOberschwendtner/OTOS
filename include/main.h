@@ -26,5 +26,6 @@
 #include "kernel.h"
 #include "task.h"
 #include "drivers.h"
+#include "graphics.h"
 
 #endif
