@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    main.c
  * @author  SO
- * @version v2.1.1
+ * @version v2.3.0
  * @date    09-March-2021
  * @brief   Main function for the OTOS. Mainly used to demonstrate how the OTOS
  *          functions work and should be used.
@@ -114,7 +114,7 @@ void Task_SPI(void)
     GPIO::PIN SCK(GPIO::Port::F, 7, GPIO::Mode::Output);
     GPIO::PIN MOSI(GPIO::Port::F, 9, GPIO::Mode::Input);
 
-    SPI::Controller<IO::SPI_5> spi(5'000'000);
+    SPI::Controller<IO::SPI_1> spi(5'000'000);
     GPIO::assign(SCK, spi);
     GPIO::assign(MOSI, spi);
 

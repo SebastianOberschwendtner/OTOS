@@ -97,9 +97,7 @@ namespace UC1611
         // *** methods ***
         bool send_command_byte(const unsigned char cmd);
         bool send_command_bytes(const unsigned char byte0, const unsigned char byte1);
-        // bool send_data_byte(const unsigned char data);
-        // bool send_command(const Command cmd, const unsigned char byte0);
-        // bool send_command(const Command cmd, const unsigned char byte0, const unsigned char byte1);
+        bool send_data_byte(const unsigned char data);
 
     public:
         // *** Constructor ***
@@ -107,21 +105,17 @@ namespace UC1611
         Controller(bus_controller& bus_used, gpio& dx_used, gpio& cs_used );
 
         // *** Methods ***
-        // bool initialize(void);
-        // bool on(void);
-        // bool off(void);
-        // bool reset(void);
-        // bool wake_up(void);
         bool set_temperature_compensation( const TC curve );
         bool set_contrast( const unsigned char value );
         bool set_line_rate( const unsigned char rate );
         bool enable_bw(void);
         bool show_pattern(const unsigned char pattern);
         bool set_COM_end(const unsigned char com_end);
-        // // bool fill(const unsigned int color);
-        // bool draw(const unsigned short *buffer_begin, const unsigned short* buffer_end);
-        // bool draw(const unsigned char *buffer_begin, const unsigned char* buffer_end, const unsigned int color, const unsigned int background);
-        // bool draw(const unsigned char *buffer_begin, const unsigned char* buffer_end, const unsigned int color, const unsigned int background, void (*hook)());
+        bool set_partial_start(const unsigned char start);
+        bool set_partial_end(const unsigned char end);
+        bool set_mirrored(const bool x_mirror, const bool y_mirror);
+        bool draw(const unsigned char *buffer_begin, const unsigned char* buffer_end);
+        bool draw(const unsigned char *buffer_begin, const unsigned char* buffer_end, void (*hook)());
     };
 
     // === Functions ===
@@ -137,6 +131,27 @@ namespace UC1611
         bus_used.set_clock_timing(Level::High, Edge::Rising);
         bus_used.set_use_hardware_chip_select(false);
         bus_used.enable();
+    };
+
+    /**
+     * @brief Configure the controller to be used for
+     * the DOGXL 240-7 displays from Electronic Assembly.
+     * 
+     * @tparam spi_bus The SPI bus instance used
+     * @param controller The reference to the used controller object.
+     */
+    template<class bus_controller, class gpio>
+    void configure_DOGXL240(Controller<bus_controller, gpio>& controller)
+    {
+        controller.set_COM_end(127);
+        controller.set_partial_start(0);
+        controller.set_partial_end(127);
+        controller.set_contrast(143);
+        controller.set_mirrored(false, true);
+        controller.set_line_rate(3);
+        controller.set_temperature_compensation(TC::_0_10_per_degC);
+        controller.enable_bw();
+        controller.show_pattern(0);
     };
 };
 

@@ -245,12 +245,79 @@ void test_set_partial_display_start(void)
     CS.set_high.reset();
 
     // Test the command
-    TEST_ASSERT_TRUE( UUT.set_(127) );
+    TEST_ASSERT_TRUE( UUT.set_partial_start(12) );
     CS.set_low.assert_called_once();
     DX.set_low.assert_called_once();
-    int Expected = ( static_cast<int>(UC1611::Command::Set_COM_End) << 8 )
-        | 127;
+    int Expected = ( static_cast<int>(UC1611::Command::Set_Partial_Display_Start) << 8 )
+        | 12;
     ::send_byte.assert_called_once_with( Expected );
+};
+
+/// @brief Test setting partial display end
+void test_set_partial_display_end(void)
+{
+    setUp();
+    // Setup the mocked spi driver
+    Bus_Mock bus;
+    GPIO_Mock DX;
+    GPIO_Mock CS;
+
+    // create the controller object
+    UC1611::Controller UUT(bus, DX, CS);
+    CS.set_high.reset();
+
+    // Test the command
+    TEST_ASSERT_TRUE( UUT.set_partial_end(124) );
+    CS.set_low.assert_called_once();
+    DX.set_low.assert_called_once();
+    int Expected = ( static_cast<int>(UC1611::Command::Set_Partial_Display_End) << 8 )
+        | 124;
+    ::send_byte.assert_called_once_with( Expected );
+};
+
+/// @brief Test setting mirror options
+void test_set_mirrored(void)
+{
+    setUp();
+    // Setup the mocked spi driver
+    Bus_Mock bus;
+    GPIO_Mock DX;
+    GPIO_Mock CS;
+
+    // create the controller object
+    UC1611::Controller UUT(bus, DX, CS);
+    CS.set_high.reset();
+
+    // Test the command
+    TEST_ASSERT_TRUE( UUT.set_mirrored(true, true) );
+    CS.set_low.assert_called_once();
+    DX.set_low.assert_called_once();
+    int Expected = ( static_cast<int>(UC1611::Command::Set_LCD_Mapping_Ctrl) << 8 )
+        | 0b110;
+    ::send_byte.assert_called_once_with( Expected );
+};
+
+/// @brief Test drawing a display buffer
+void test_draw(void)
+{
+    setUp();
+    // Setup the mocked spi driver
+    Bus_Mock bus;
+    GPIO_Mock DX;
+    GPIO_Mock CS;
+
+    // create the controller object and buffer
+    UC1611::Controller UUT(bus, DX, CS);
+    CS.set_high.reset();
+    std::array<unsigned char, 240*128/8> buffer{0};
+    buffer.fill(13);
+
+    // Test the command
+    TEST_ASSERT_TRUE( UUT.draw(buffer.begin(), buffer.end()) );
+    CS.set_low.assert_called_once();
+    DX.set_high.assert_called_once();
+    ::send_byte.assert_called_last_with( 13 );
+    TEST_ASSERT_EQUAL( buffer.size(), ::send_byte.call_count);
 };
 
 /// === Run Tests ===
@@ -264,6 +331,10 @@ int main(int argc, char **argv)
     test_enable_bw();
     test_set_display_pattern();
     test_set_COM_end();
+    test_set_partial_display_start();
+    test_set_partial_display_end();
+    test_set_mirrored();
+    test_draw();
     UNITY_END();
     return EXIT_SUCCESS;
 };

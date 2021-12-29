@@ -8,8 +8,10 @@
 - Adds peripheral drivers for:
     - SPI *(tx only)*
     - USART *(tx only)*
-- Adds driver for display chip driver *ILI9341*.
-- Adds timing and wait fucntions to tasks.
+- Adds chip drivers for:
+    - Display Controller *ILI9341*
+    - Display Controller *UC1611S*
+- Adds timing and wait functions to tasks.
 
 ### Fixed Issues:
 
