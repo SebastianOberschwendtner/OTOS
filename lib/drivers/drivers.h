@@ -35,6 +35,7 @@
 #include "stm32/gpio_stm32.h"
 #include "stm32/i2c_stm32.h"
 #include "stm32/spi_stm32.h"
+#include "stm32/sdio_stm32.h"
 #include "stm32/timer_stm32.h"
 #include "stm32/usart_stm32.h"
 

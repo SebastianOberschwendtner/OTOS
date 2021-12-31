@@ -40,7 +40,9 @@ namespace Error {
         SPI_Timeout                 = -110,
         SPI_BUS_Busy_Error          = -111,
         USART_Timeout               = -120,
-        USART_BUS_Busy_Error        = -121
+        USART_BUS_Busy_Error        = -121,
+        SDIO_Timeout                = -130,
+        SDIO_BUS_Busy_Error         = -131
     };
 };
 

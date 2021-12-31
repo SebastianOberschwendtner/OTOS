@@ -292,6 +292,56 @@ namespace Bus
     };
 };
 
+// => SD Card Interface
+namespace SD
+{
+    /*
+    * The following functions are just wrapper for the SDIO controller class
+    * You can provide your own specialized overloads when you want to use an SPI bus
+    * to communicate with an sd card.
+    */
+    template<class sdio>
+    bool send_command_no_response(sdio& card, const unsigned char command, const unsigned char arguments)
+    {
+        return card.send_command_no_response(command, arguments);
+    };
+    template<class sdio>
+    std::optional<unsigned long> send_command_R1_response(sdio& card, const unsigned char command, const unsigned char arguments)
+    {
+        return card.send_command_R1_response(command, arguments);
+    };
+    template<class sdio>
+    std::optional<unsigned long> send_command_R2_response(sdio& card, const unsigned char command, const unsigned char arguments)
+    {
+        return card.send_command_R2_response(command, arguments);
+    };
+    template<class sdio>
+    std::optional<unsigned long> send_command_R3_response(sdio& card, const unsigned char command, const unsigned char arguments)
+    {
+        return card.send_command_R3_response(command, arguments);
+    };
+    template<class sdio>
+    std::optional<unsigned long> send_command_R6_response(sdio& card, const unsigned char command, const unsigned char arguments)
+    {
+        return card.send_command_R6_response(command, arguments);
+    };
+    template<class sdio>
+    std::optional<unsigned long> send_command_R7_response(sdio& card, const unsigned char command, const unsigned char arguments)
+    {
+        return card.send_command_R1_response(command, arguments);
+    };
+    template<class sdio>
+    bool read_single_block(sdio& card, const unsigned long* buffer_begin, const unsigned long* buffer_end)
+    {
+        return card.read_single_block(buffer_begin, buffer_end);
+    };
+    template<class sdio>
+    bool write_single_block(sdio& card, const unsigned long* buffer_begin, const unsigned long* buffer_end)
+    {
+        return card.write_single_block(buffer_begin, buffer_end);
+    };
+};
+
 // => Timer Interface
 namespace Timer
 {

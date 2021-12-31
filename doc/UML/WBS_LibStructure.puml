@@ -44,10 +44,12 @@ legend Hardware or Processor specific levels are marked in **<color #SkyBlue> bl
 ****_ display
 *****[#SkyBlue] ssd1306.h
 *****[#SkyBlue] ili9341.h
+*****[#SkyBlue] uc1611.h
 ****_ stm32
 *****[#SkyBlue] gpio_stm32.h
 *****[#SkyBlue] i2c_stm32.h
 *****[#SkyBlue] spi_stm32.h
+*****[#SkyBlue] sdio_stm32.h
 *****[#SkyBlue] timer_stm32.h
 *****[#SkyBlue] usart_stm32.h
 
@@ -55,5 +57,15 @@ legend Hardware or Processor specific levels are marked in **<color #SkyBlue> bl
 **[#GreenYellow] graphics
 *** graphics.h
 *** font.h
+
+' === Files ===
+**[#GreenYellow] files
+*** file.h 
+*** disk.h 
+***_ memory 
+**** sdhc.h
+*****_ interface.h
+***_ filesystem
+**** fat32.h
 
 @endwbs

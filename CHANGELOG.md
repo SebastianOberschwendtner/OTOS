@@ -5,9 +5,10 @@
 
 ### Release Notes:
 - Fixes bug in `types.h` for STM32L0 devices.
-- Adds peripheral drivers for:
+- Adds STM32 peripheral drivers for:
     - SPI *(tx only)*
     - USART *(tx only)*
+    - SDIO *(STM32F4 devices only)*
 - Adds chip drivers for:
     - Display Controller *ILI9341*
     - Display Controller *UC1611S*
