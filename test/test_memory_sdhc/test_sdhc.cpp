@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_sdhc.cpp
  * @author  SO
- * @version v2.4.0
+ * @version v2.4.1
  * @date    29-December-2021
  * @brief   Unit tests for testing the SDHC interface.
  ******************************************************************************
@@ -91,11 +91,11 @@ struct Mock_SDIO : public SDHC::interface
     };
     bool read_single_block(const unsigned long* buffer_begin, const unsigned long* buffer_end) override
     {
-        return call_read_single_block(reinterpret_cast<int>(buffer_begin));
+        return call_read_single_block();
     };
     bool write_single_block(const unsigned long* buffer_begin, const unsigned long* buffer_end) override
     {
-        return call_write_single_block(reinterpret_cast<int>(buffer_begin));
+        return call_write_single_block();
     };
 };
 Mock_SDIO sdio;
@@ -316,7 +316,7 @@ void test_read_single_block(void)
     // Test a successful read of one block for SDSC cards
     TEST_ASSERT_TRUE( UUT.read_single_block(buffer.begin(), 1) );
     sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<17>());
-    sdio.call_read_single_block.assert_called_once_with(reinterpret_cast<int>(buffer.begin()));
+    sdio.call_read_single_block.assert_called_once();
     TEST_ASSERT_EQUAL(1*SDHC::BLOCKLENGTH, sdio.last_argument);
 
     // Test a successful read of one block for SDHC cards
@@ -324,7 +324,7 @@ void test_read_single_block(void)
     UUT.type_sdsc = false;
     TEST_ASSERT_TRUE( UUT.read_single_block(buffer.begin(), 1) );
     sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<17>());
-    sdio.call_read_single_block.assert_called_once_with(reinterpret_cast<int>(buffer.begin()));
+    sdio.call_read_single_block.assert_called_once();
     TEST_ASSERT_EQUAL(1, sdio.last_argument);
 };
 
@@ -339,7 +339,7 @@ void test_write_single_block(void)
     // Test a successful read of one block for SDSC cards
     TEST_ASSERT_TRUE( UUT.write_single_block(buffer.begin(), 1) );
     sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<24>());
-    sdio.call_write_single_block.assert_called_once_with(reinterpret_cast<int>(buffer.begin()));
+    sdio.call_write_single_block.assert_called_once();
     TEST_ASSERT_EQUAL(1*SDHC::BLOCKLENGTH, sdio.last_argument);
 
     // Test a successful read of one block for SDHC cards
@@ -347,7 +347,7 @@ void test_write_single_block(void)
     UUT.type_sdsc = false;
     TEST_ASSERT_TRUE( UUT.write_single_block(buffer.begin(), 1) );
     sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<24>());
-    sdio.call_write_single_block.assert_called_once_with(reinterpret_cast<int>(buffer.begin()));
+    sdio.call_write_single_block.assert_called_once();
     TEST_ASSERT_EQUAL(1, sdio.last_argument);
 };
 
