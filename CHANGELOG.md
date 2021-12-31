@@ -13,6 +13,7 @@
     - Display Controller *ILI9341*
     - Display Controller *UC1611S*
 - Adds timing and wait functions to tasks.
+- Adds basic driver for *SDHC*<sup>&trade;</sup> memory cards.
 
 ### Fixed Issues:
 
