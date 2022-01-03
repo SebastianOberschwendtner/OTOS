@@ -109,6 +109,7 @@ namespace ST_Core
 
     struct Flash
     {
+#ifdef STM32F4
         /**
          * @brief Set the access control of the flash
          * according to the VCC voltage range and
@@ -141,6 +142,7 @@ namespace ST_Core
             else
                 FLASH->ACR = 0;
         };
+#endif
     };
 
     template<unsigned char f_cpu, unsigned char f_apb1>
@@ -248,9 +250,6 @@ namespace ST_Core
         static_assert(f_apb2 <= 84, "F_APB2 too high!");
         static_assert(f_cpu <= 168, "F_CPU too high!");
 
-        // Set the Flash wait states
-        Flash::configure<VCC::_2_7V_to_3_6V, f_cpu>();
-
         // Get the APB1 prescaler
         constexpr unsigned long APB1_Prescaler = get_APB1_prescaler<f_cpu, f_apb1>();
         static_assert(APB1_Prescaler != 1, "F_APB1 cannot be achieved with current clocks!");
@@ -258,6 +257,10 @@ namespace ST_Core
         // Get the APB2 prescaler
         constexpr unsigned long APB2_Prescaler = get_APB2_prescaler<f_cpu, f_apb2>();
         static_assert(APB2_Prescaler != 1, "F_APB2 cannot be achieved with current clocks!");
+
+#ifdef STM32F4
+        // Set the Flash wait states
+        Flash::configure<VCC::_2_7V_to_3_6V, f_cpu>();
 
         // Set PLL Parameters
         static_assert(source != Clock::HSE, "Configuring the PLL source with HSE is not yet supported!");
@@ -269,6 +272,7 @@ namespace ST_Core
             constexpr unsigned int P = ST_Core::PLL::get_P_HSI<120>();
             RCC->PLLCFGR = (Q << RCC_PLLCFGR_PLLQ_Pos) | (P << RCC_PLLCFGR_PLLP_Pos) | (N << RCC_PLLCFGR_PLLN_Pos) | M;
         }
+#endif
 
         // Enable the desired clocks
         RCC->CR |= clock_enable<source>();

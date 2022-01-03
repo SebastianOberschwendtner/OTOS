@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    core_stm32.cpp
  * @author  SO
- * @version v2.6.0
+ * @version v2.6.1
  * @date    31-Dezember-2021
  * @brief   Core functions for configuring STM32 microcontrollers.
  ==============================================================================
