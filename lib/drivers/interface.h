@@ -92,8 +92,8 @@ namespace Driver
     private:
         // *** Properties ***
         Error::Code error{Error::Code::None};
-        unsigned char timeout{0};
-        unsigned char called{0};
+        unsigned int timeout{0};
+        unsigned int called{0};
 
     public:
         // *** Constructor ***
@@ -102,7 +102,7 @@ namespace Driver
 
         // *** Methods ***
         void set_error(const Error::Code err) { this->error = err; };
-        void set_timeout(const unsigned char call_count) { this->timeout = call_count; };
+        void set_timeout(const unsigned int call_count) { this->timeout = call_count; };
         void reset_timeout(void) { this->called = 0; };
         bool timed_out(void) { return (++this->called > this->timeout); };
         Error::Code get_error(void) const { return this->error; };
@@ -301,32 +301,32 @@ namespace SD
     * to communicate with an sd card.
     */
     template<class sdio>
-    bool send_command_no_response(sdio& card, const unsigned char command, const unsigned char arguments)
+    bool send_command_no_response(sdio& card, const unsigned char command, const unsigned long arguments)
     {
         return card.send_command_no_response(command, arguments);
     };
     template<class sdio>
-    std::optional<unsigned long> send_command_R1_response(sdio& card, const unsigned char command, const unsigned char arguments)
+    std::optional<unsigned long> send_command_R1_response(sdio& card, const unsigned char command, const unsigned long arguments)
     {
         return card.send_command_R1_response(command, arguments);
     };
     template<class sdio>
-    std::optional<unsigned long> send_command_R2_response(sdio& card, const unsigned char command, const unsigned char arguments)
+    std::optional<unsigned long> send_command_R2_response(sdio& card, const unsigned char command, const unsigned long arguments)
     {
         return card.send_command_R2_response(command, arguments);
     };
     template<class sdio>
-    std::optional<unsigned long> send_command_R3_response(sdio& card, const unsigned char command, const unsigned char arguments)
+    std::optional<unsigned long> send_command_R3_response(sdio& card, const unsigned char command, const unsigned long arguments)
     {
         return card.send_command_R3_response(command, arguments);
     };
     template<class sdio>
-    std::optional<unsigned long> send_command_R6_response(sdio& card, const unsigned char command, const unsigned char arguments)
+    std::optional<unsigned long> send_command_R6_response(sdio& card, const unsigned char command, const unsigned long arguments)
     {
         return card.send_command_R6_response(command, arguments);
     };
     template<class sdio>
-    std::optional<unsigned long> send_command_R7_response(sdio& card, const unsigned char command, const unsigned char arguments)
+    std::optional<unsigned long> send_command_R7_response(sdio& card, const unsigned char command, const unsigned long arguments)
     {
         return card.send_command_R1_response(command, arguments);
     };

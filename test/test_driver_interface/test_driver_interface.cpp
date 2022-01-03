@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_i2c_stm32.cpp
  * @author  SO
- * @version v1.0.7
+ * @version v2.5.0
  * @date    30-August-2021
  * @brief   Unit tests for testing the i2c driver for stm32 microcontrollers.
  ******************************************************************************
@@ -83,6 +83,15 @@ void test_timeout(void)
 
     // perform testing
     for (int count = 0; count < 5; count++)
+        TEST_ASSERT_FALSE(UUT.timed_out());
+    TEST_ASSERT_TRUE(UUT.timed_out())
+    UUT.reset_timeout();
+    TEST_ASSERT_FALSE(UUT.timed_out());
+
+    // perform testing for larger timeoutvalues
+    UUT.set_timeout(65000);
+    UUT.reset_timeout();
+    for (unsigned int count = 0; count < 65000; count++)
         TEST_ASSERT_FALSE(UUT.timed_out());
     TEST_ASSERT_TRUE(UUT.timed_out())
     UUT.reset_timeout();

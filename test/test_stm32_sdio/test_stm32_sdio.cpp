@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_stm32_sdio.cpp
  * @author  SO
- * @version v2.4.0
+ * @version v2.5.0
  * @date    29-December-2021
  * @brief   Unit tests for testing the sdio driver for stm32 microcontrollers.
  ******************************************************************************
@@ -117,7 +117,7 @@ void test_set_timeout(void)
     SD::Controller UUT(1'000'000);
 
     // Test the side effects
-    UUT.set_timeout(0xFF);
+    UUT.set_hardware_timeout(0xFF);
     TEST_ASSERT_EQUAL(0xFF, SDIO->DTIMER);
 };
 

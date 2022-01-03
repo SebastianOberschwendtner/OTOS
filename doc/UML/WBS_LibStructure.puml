@@ -46,6 +46,7 @@ legend Hardware or Processor specific levels are marked in **<color #SkyBlue> bl
 *****[#SkyBlue] ili9341.h
 *****[#SkyBlue] uc1611.h
 ****_ stm32
+*****[#SkyBlue] core_stm32.h
 *****[#SkyBlue] gpio_stm32.h
 *****[#SkyBlue] i2c_stm32.h
 *****[#SkyBlue] spi_stm32.h
@@ -61,7 +62,7 @@ legend Hardware or Processor specific levels are marked in **<color #SkyBlue> bl
 ' === Files ===
 **[#GreenYellow] files
 *** file.h 
-*** disk.h 
+*** drive.h 
 ***_ memory 
 **** sdhc.h
 *****_ interface.h

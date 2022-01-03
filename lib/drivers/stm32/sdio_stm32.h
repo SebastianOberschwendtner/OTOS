@@ -59,7 +59,7 @@ namespace SD
         // *** Methods ***
         void set_clock(const unsigned long clock_rate, const bool enable_save_power = false);
         void set_bus_width(const Width width);
-        void set_timeout(const unsigned long sdio_ticks);
+        void set_hardware_timeout(const unsigned long sdio_ticks);
         void set_data_length(const unsigned long number_bytes);
         void enable(void);
         bool command_sent(void);
@@ -72,6 +72,7 @@ namespace SD
         bool hardware_timeout(void);
         void clear_command_flags(void);
         void clear_data_flags(void);
+        void clear_error_flags(void);
         bool send_command_no_response(const unsigned char command, const unsigned long argument);
         std::optional<unsigned long> send_command_R1_response(const unsigned char command, const unsigned long argument);
         std::optional<unsigned long> send_command_R2_response(const unsigned char command, const unsigned long argument);

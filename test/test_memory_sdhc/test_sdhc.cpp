@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_sdhc.cpp
  * @author  SO
- * @version v2.4.1
+ * @version v2.5.0
  * @date    29-December-2021
  * @brief   Unit tests for testing the SDHC interface.
  ******************************************************************************
@@ -179,7 +179,7 @@ void test_initialize_card(void)
 
     // Test the successfull initialization of SDSC card
     sdio.R1_response = SDHC::R1::APP_CMD;
-    sdio.R3_response = 0;
+    sdio.R3_response = SDHC::R3::NOT_BUSY;
     TEST_ASSERT_TRUE( UUT.initialize_card() );
     sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<55>() );
     sdio.call_command_R3_response.assert_called_once_with(SDHC::ACMD<41>() );
@@ -190,7 +190,7 @@ void test_initialize_card(void)
     // Test the successfull initialization of SDSC card
     setUp();
     sdio.R1_response = SDHC::R1::APP_CMD;
-    sdio.R3_response = SDHC::R3::CCS;
+    sdio.R3_response = SDHC::R3::CCS | SDHC::R3::NOT_BUSY;
     TEST_ASSERT_TRUE( UUT.initialize_card() );
     sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<55>() );
     sdio.call_command_R3_response.assert_called_once_with(SDHC::ACMD<41>() );
@@ -201,7 +201,7 @@ void test_initialize_card(void)
     // Test sending the command while card is busy
     setUp();
     sdio.R1_response = SDHC::R1::APP_CMD;
-    sdio.R3_response = SDHC::R3::BUSY;
+    sdio.R3_response = 0;
     TEST_ASSERT_FALSE( UUT.initialize_card() );
     sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<55>() );
     sdio.call_command_R3_response.assert_called_once_with(SDHC::ACMD<41>() );
@@ -211,7 +211,7 @@ void test_initialize_card(void)
     // Test sending the command when card does not accept the command
     setUp();
     sdio.R1_response = 0;
-    sdio.R3_response = 0;
+    sdio.R3_response = SDHC::R3::NOT_BUSY;
     TEST_ASSERT_FALSE( UUT.initialize_card() );
     sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<55>() );
     TEST_ASSERT_EQUAL(0 ,sdio.call_command_R3_response.call_count);
@@ -351,6 +351,22 @@ void test_write_single_block(void)
     TEST_ASSERT_EQUAL(1, sdio.last_argument);
 };
 
+void test_data_access(void)
+{
+    // auto buffer = SDHC::create_block_buffer<1>();
+    std::array<unsigned int, 128> buffer{0};
+    buffer[0] = 0x03020100;
+    buffer[1] = 0x07060504;
+
+    unsigned char* char_pointer = reinterpret_cast<unsigned char*>(buffer.begin());
+
+    TEST_ASSERT_EQUAL( 0x00, *(char_pointer + 0));
+    TEST_ASSERT_EQUAL( 0x01, *(char_pointer + 1));
+    TEST_ASSERT_EQUAL( 0x02, *(char_pointer + 2));
+    TEST_ASSERT_EQUAL( 0x03, *(char_pointer + 3));
+    TEST_ASSERT_EQUAL( 0x04, *(char_pointer + 4));
+}
+
 // === Main ===
 int main(int argc, char **argv)
 {
@@ -365,6 +381,7 @@ int main(int argc, char **argv)
     test_eject();
     test_read_single_block();
     test_write_single_block();
+    test_data_access();
     UNITY_END();
     return EXIT_SUCCESS;
 };

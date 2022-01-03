@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    sdhc.cpp
  * @author  SO
- * @version v2.4.0
+ * @version v2.5.0
  * @date    29-December-2021
  * @brief   Interface with SDHC (and SDSC) cards for file transfer.
  ******************************************************************************
@@ -87,7 +87,7 @@ bool SDHC::Card::initialize_card(void)
     response = this->mybus->send_command_R3_response(ACMD<41>(), ACMD41::HCS | ACMD41::XPC | OCR::_3_0V);
 
     // Check whether card is still busy
-    if (response.value() & R3::BUSY)
+    if ( !(response.value() & R3::NOT_BUSY) )
         return false;
 
     // Check card type in response
@@ -210,8 +210,8 @@ bool SDHC::Card::read_single_block(const unsigned long* buffer_begin, const unsi
     if(!this->mybus->send_command_R1_response(CMD<17>(), address_adjusted))
         return false;
 
-    // Receive the single block data
-    if(!this->mybus->read_single_block(buffer_begin, buffer_begin + BLOCKLENGTH))
+    // Receive the single block data, buffer holds 4 bytes per entry
+    if(!this->mybus->read_single_block(buffer_begin, buffer_begin + (BLOCKLENGTH/4)))
         return false;
 
     // Block was read successfully

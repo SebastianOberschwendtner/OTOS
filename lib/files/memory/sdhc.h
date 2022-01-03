@@ -79,7 +79,7 @@ namespace SDHC
 
     enum R3: unsigned long
     {
-        BUSY     = (1U<<31),  //Card indicates whether initialization is completed
+        NOT_BUSY     = (1U<<31),  //Card indicates whether initialization is completed
         CCS      = (1U<<30)   //Card Capacity Status
     };
 
@@ -125,35 +125,35 @@ namespace SDHC
         // Provide the implementations
         bool send_command_no_response(const unsigned char command, const unsigned long argument) final
         {
-            return SD::send_command_no_response(this->pimpl, command, argument);
+            return SD::send_command_no_response(*this->pimpl, command, argument);
         };
         std::optional<unsigned long> send_command_R1_response(const unsigned char command, const unsigned long argument) final
         {
-            return SD::send_command_R1_response(this->pimpl, command, argument);
+            return SD::send_command_R1_response(*this->pimpl, command, argument);
         };
         std::optional<unsigned long> send_command_R2_response(const unsigned char command, const unsigned long argument) final
         {
-            return SD::send_command_R2_response(this->pimpl, command, argument);
+            return SD::send_command_R2_response(*this->pimpl, command, argument);
         };
         std::optional<unsigned long> send_command_R3_response(const unsigned char command, const unsigned long argument) final
         {
-            return SD::send_command_R3_response(this->pimpl, command, argument);
+            return SD::send_command_R3_response(*this->pimpl, command, argument);
         };
         std::optional<unsigned long> send_command_R6_response(const unsigned char command, const unsigned long argument) final
         {
-            return SD::send_command_R6_response(this->pimpl, command, argument);
+            return SD::send_command_R6_response(*this->pimpl, command, argument);
         };
         std::optional<unsigned long> send_command_R7_response(const unsigned char command, const unsigned long argument) final
         {
-            return SD::send_command_R7_response(this->pimpl, command, argument);
+            return SD::send_command_R7_response(*this->pimpl, command, argument);
         };
         bool read_single_block(const unsigned long* buffer_begin, const unsigned long* buffer_end) final
         {
-            return SD::read_single_block(this->pimpl, buffer_begin, buffer_end);
+            return SD::read_single_block(*this->pimpl, buffer_begin, buffer_end);
         };
         bool write_single_block(const unsigned long* buffer_begin, const unsigned long* buffer_end) final
         {
-            return SD::write_single_block(this->pimpl, buffer_begin, buffer_end);
+            return SD::write_single_block(*this->pimpl, buffer_begin, buffer_end);
         };
     };
 
@@ -185,6 +185,19 @@ namespace SDHC
         void eject(void);
         bool read_single_block(const unsigned long* buffer_begin, const unsigned long block);
         bool write_single_block(const unsigned long* buffer_begin, const unsigned long block);
+    };
+
+    template<class bus>
+    class service
+    {
+    private:
+        interface_impl<bus> bus_impl;
+    
+    public:
+        Card card;
+
+        service() = delete;
+        service(bus& bus_used): bus_impl{bus_used}, card{bus_impl} {};
     };
 };
 #endif

@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    sdio_stm32.cpp
  * @author  SO
- * @version v2.4.0
+ * @version v2.5.0
  * @date    29-Dezember-2021
  * @brief   SDIO driver for STM32 microcontrollers.
  ==============================================================================
@@ -49,8 +49,10 @@ SD::Controller::Controller(const unsigned long clock_rate)
     // Set the initial clock rate
     this->set_clock(clock_rate);
 
-    // Set the timeout limit
-    this->set_timeout(100);
+    // Set the timeout limit -> This value is high, because
+    // during the card identification the clock speed 
+    // has to be 400 kHz.
+    this->set_timeout(65000);
 };
 
 /**
@@ -97,7 +99,7 @@ void SD::Controller::set_bus_width( const Width width)
  * 
  * @param sdio_ticks The hardware timeout value.
  */
-void SD::Controller::set_timeout( const unsigned long sdio_ticks )
+void SD::Controller::set_hardware_timeout( const unsigned long sdio_ticks )
 {
     this->peripheral->DTIMER = sdio_ticks;
 };
@@ -211,6 +213,14 @@ void SD::Controller::clear_command_flags(void)
 void SD::Controller::clear_data_flags(void)
 {
     this->peripheral->ICR = (SDIO_ICR_DBCKENDC | SDIO_ICR_DATAENDC);
+};
+
+/**
+ * @brief Clear all error flags
+ */
+void SD::Controller::clear_error_flags(void)
+{
+    this->peripheral->ICR = SDIO_ICR_RXOVERRC | SDIO_ICR_TXUNDERRC | SDIO_ICR_DTIMEOUTC | SDIO_ICR_CTIMEOUTC | SDIO_ICR_DCRCFAILC | SDIO_ICR_CCRCFAILC;
 };
 
 /**
@@ -458,7 +468,7 @@ bool SD::Controller::read_single_block(
     * for the DCTRL register.
     * The buffer has 4 bytes per entry -> n_bytes = 4 * len(buffer)
     */
-    const unsigned long n_bytes = (buffer_end - buffer_begin) * 4;
+    const unsigned long n_bytes = std::distance(buffer_begin, buffer_end) * 4;
 
     // Calculate the exponent of the byte length
     unsigned char byte_exponent = 0;
