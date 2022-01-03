@@ -17,16 +17,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
+/**
+ ==============================================================================
+ * @file    core_stm32.cpp
+ * @author  SO
+ * @version v2.6.0
+ * @date    31-Dezember-2021
+ * @brief   Core functions for configuring STM32 microcontrollers.
+ ==============================================================================
+ */
 
-#ifndef MAIN_H_
-#define MAIN_H_
-// *** Defines ***
+// === Includes ===
+#include "core_stm32.h"
 
-// *** Includes ***
-#include "kernel.h"
-#include "task.h"
-#include "drivers.h"
-#include "graphics.h"
-#include "drive.h"
+// === Helper functions ===
 
-#endif
+// === Methods ===

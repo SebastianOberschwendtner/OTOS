@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2022 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,38 +19,38 @@
  */
 /**
  ==============================================================================
- * @file    clock_stm32_fake.cpp
+ * @file    system_stm32_fake.cpp
  * @author  SO
- * @version v2.6.0
- * @date    27-August-2021
- * @brief   Fakes the clock interface for STM32 microcontrollers.
+ * @version v2.5.0
+ * @date    02-January-2022
+ * @brief   Fakes the system interface for STM32 microcontrollers.
  ==============================================================================
  */
 
 // *** Includes ***
-#include "clock_stm32_fake.h"
+#include "system_stm32_fake.h"
 
 // *** Fakes ***
 // Fake Peripheral
-static RCC_TypeDef RCC_Fake;
+static FLASH_TypeDef FLASH_Fake;
 
 // Public Pointer to fake which mimics peripheral behaviour.
-RCC_TypeDef* RCC = &RCC_Fake;
+FLASH_TypeDef* FLASH = &FLASH_Fake;
 
 // Fake register address
-unsigned long RCC_BASE = reinterpret_cast<unsigned long>(RCC);
+unsigned long FLASH_BASE = reinterpret_cast<unsigned long>(FLASH);
 
 // *** Methods ***
 
 /**
- * @brief Constructor for the fake RCC peripheral. Initializes the
+ * @brief Constructor for the fake FLASH peripheral. Initializes the
  * register values to the default values as defined in the datasheet
  * of the STM32.
  * @details There should only be one instance of this object during testing.
  * This static instance is made available by the pointer to the object, which
  * fakes the peripheral during testing.
  */
-RCC_TypeDef::RCC_TypeDef()
+FLASH_TypeDef::FLASH_TypeDef()
 {
     // Reinit to default
     registers_to_default();
@@ -59,34 +59,13 @@ RCC_TypeDef::RCC_TypeDef()
 /**
  * @brief Reset all the registers to the default values
  */
-void RCC_TypeDef::registers_to_default(void)
+void FLASH_TypeDef::registers_to_default(void)
 {
-    this->CR        = 0x83;
-    this->PLLCFGR   = 0x24003010;
-    this->CFGR = 0;
-    this->CIR = 0;
-    this->AHB1RSTR = 0;
-    this->AHB2RSTR = 0;
-    this->AHB3RSTR = 0;
-    this->RESERVED0 = 0;
-    this->APB1RSTR = 0;
-    this->APB2RSTR = 0;
-    this->AHB1ENR = 0;
-    this->AHB2ENR = 0;
-    this->AHB3ENR = 0;
-    this->RESERVED2 = 0;
-    this->APB1ENR = 0;
-    this->APB2ENR = 0;
-    this->AHB1LPENR = 0;
-    this->AHB2LPENR = 0;
-    this->AHB3LPENR = 0;
-    this->RESERVED4 = 0;
-    this->APB1LPENR = 0;
-    this->APB2LPENR = 0;
-    this->BDCR = 0;
-    this->CSR = 0;
-    this->SSCGR = 0;
-    this->PLLI2SCFGR = 0;
-    this->PLLSAICFGR = 0;
-    this->DCKCFGR = 0;
+    this->ACR = 0;
+    this->KEYR = 0;
+    this->OPTKEYR = 0;
+    this->SR = 0;
+    this->CR = 0;  
+    this->OPTCR = 0;
+    this->OPTCR1 = 0;
 };

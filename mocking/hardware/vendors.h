@@ -35,6 +35,7 @@
     #include "../cmsis/cmsis_mock.h"
 
     // === Fake peripherals ===
+    #include "../stm32/system_stm32_fake.h"
     #include "../stm32/clock_stm32_fake.h"
     #include "../stm32/gpio_stm32_fake.h"
     #include "../stm32/i2c_stm32_fake.h"
