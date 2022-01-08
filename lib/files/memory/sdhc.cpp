@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    sdhc.cpp
  * @author  SO
- * @version v2.5.0
+ * @version v2.7.0
  * @date    29-December-2021
  * @brief   Interface with SDHC (and SDSC) cards for file transfer.
  ******************************************************************************
@@ -238,8 +238,8 @@ bool SDHC::Card::write_single_block(const unsigned long* buffer_begin, const uns
     if(!this->mybus->send_command_R1_response(CMD<24>(), address_adjusted))
         return false;
 
-    // Receive the single block data
-    if(!this->mybus->write_single_block(buffer_begin, buffer_begin + BLOCKLENGTH))
+    // Write the single block data, BLOCKLENGTH need to be divided by 4 -> 4 bytes per long
+    if(!this->mybus->write_single_block(buffer_begin, buffer_begin + BLOCKLENGTH/4))
         return false;
 
     // Block was written successfully

@@ -187,17 +187,19 @@ namespace SDHC
         bool write_single_block(const unsigned long* buffer_begin, const unsigned long block);
     };
 
-    template<class bus>
+    template<class Bus_Controller>
     class service
     {
+    public:
+        Bus_Controller bus;
     private:
-        interface_impl<bus> bus_impl;
-    
+        interface_impl<Bus_Controller> bus_impl;
     public:
         Card card;
 
-        service() = delete;
-        service(bus& bus_used): bus_impl{bus_used}, card{bus_impl} {};
+        service():service{400'000} {};
+        service(const unsigned long frequency): bus{frequency}, bus_impl{bus}, card{bus_impl} {};
+        
     };
 };
 #endif

@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_sdhc.cpp
  * @author  SO
- * @version v2.5.0
+ * @version v2.7.0
  * @date    29-December-2021
  * @brief   Unit tests for testing the SDHC interface.
  ******************************************************************************
