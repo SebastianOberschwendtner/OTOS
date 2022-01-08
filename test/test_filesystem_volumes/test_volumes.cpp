@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_volumes.cpp
  * @author  SO
- * @version v2.7.0
+ * @version v2.7.1
  * @date    04-January-2022
  * @brief   Unit tests for testing the Volume interface.
  ******************************************************************************
@@ -652,7 +652,7 @@ void test_make_file_entry(void)
 {
     // Provide test date
     std::tm date_time = {4, 15, 20, 23, 1, 94};
-    time_t now = std::mktime(&date_time);
+    time_t file_time = std::mktime(&date_time);
 
     // Setup Test
     setUp();
@@ -671,7 +671,7 @@ void test_make_file_entry(void)
     unsigned long id = 2, start_cluster = 0x01020304;
     unsigned char attributes = FAT32::Attribute::Read_Only;
     std::array<char, 12> name = {"Test    txt"};
-    TEST_ASSERT_TRUE( UUT.make_directory_entry(directory, id, start_cluster, name, attributes, now));
+    TEST_ASSERT_TRUE( UUT.make_directory_entry(directory, id, start_cluster, name, attributes, file_time));
     ::write_single_block.assert_called_once_with(0x02 + 0*0x40);
     TEST_ASSERT_EQUAL( 'T', directory.block_buffer[id*32 + 0]);
     TEST_ASSERT_EQUAL( 'e', directory.block_buffer[id*32 + 1]);
