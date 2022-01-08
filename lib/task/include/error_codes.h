@@ -32,6 +32,16 @@ namespace Error {
         IPC_PID_Overflow            = -10,
         IPC_Multiple_Registrations  = -11,
 
+        // File System errors/status
+        File_System_Invalid         = -90,
+        End_of_File_Reached         = -91,
+        Bad_Sector                  = -93,
+        FAT_Corrupted               = -95,
+        File_ID_not_found           = -96,
+        Not_a_Directory             = -97,
+        Not_a_File                  = -98,
+        No_Memory_Left              = -99,
+
         // === Driver Errors ===
         I2C_Timeout                 = -100,
         I2C_Address_Error           = -101,

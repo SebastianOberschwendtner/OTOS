@@ -15,6 +15,7 @@
     - Display Controller *UC1611S*
 - Adds timing and wait functions to tasks.
 - Adds basic driver for *SDHC*<sup>&trade;</sup> memory cards.
+- Adds driver for interfacing with *FAT32* volumes.
 
 ### Fixed Issues:
 
