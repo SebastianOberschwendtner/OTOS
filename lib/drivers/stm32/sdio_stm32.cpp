@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    sdio_stm32.cpp
  * @author  SO
- * @version v2.5.0
+ * @version v2.7.0
  * @date    29-Dezember-2021
  * @brief   SDIO driver for STM32 microcontrollers.
  ==============================================================================
@@ -35,7 +35,8 @@
 
 // === Methods ===
 /**
- * @brief Construct a new SDIO controller object
+ * @brief Construct a new SDIO controller object.
+ * The constructor sets everything up for default communication.
  * 
  * @param clock_rate The desired bus clock in [Hz].
  */
@@ -47,12 +48,16 @@ SD::Controller::Controller(const unsigned long clock_rate)
     RCC->APB2ENR |= RCC_APB2ENR_SDIOEN;
 
     // Set the initial clock rate
-    this->set_clock(clock_rate);
+    this->set_clock(clock_rate, true);
 
     // Set the timeout limit -> This value is high, because
     // during the card identification the clock speed 
     // has to be 400 kHz.
     this->set_timeout(65000);
+    this->set_hardware_timeout( 0xFFFFFFFF );
+
+    // enable the peripheral
+    this->enable();
 };
 
 /**
@@ -71,7 +76,7 @@ void SD::Controller::set_clock(
     const unsigned char prescaler = ((48'000'000 / clock_rate) - 2);
     
     // Save the old register value without the prescaler bits
-    const unsigned long register_old = (this->peripheral->CLKCR & 0b1111101000000000);
+    const unsigned long register_old = (this->peripheral->CLKCR & 0b1111101100000000);
 
     // Set the new clock configuration
     this->peripheral->CLKCR  = register_old | prescaler;
@@ -587,10 +592,10 @@ bool SD::Controller::write_single_block(
     // Wait for transfer to finish
     unsigned long* iter = const_cast<unsigned long*>(buffer_begin);
     this->reset_timeout();
-    while(not this->data_block_transfer_finished())
+    while((not this->data_block_transfer_finished()) || this->is_busy())
     {
         // Check for timeouts
-        if(this->hardware_timeout() || this->timed_out() )
+        if(this->hardware_timeout())// || this->timed_out() )
         {
             this->set_error(Error::Code::SDIO_Timeout);
             return false;

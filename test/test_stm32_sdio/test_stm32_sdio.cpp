@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_stm32_sdio.cpp
  * @author  SO
- * @version v2.5.0
+ * @version v2.7.0
  * @date    29-December-2021
  * @brief   Unit tests for testing the sdio driver for stm32 microcontrollers.
  ******************************************************************************
@@ -69,15 +69,20 @@ void test_set_clock(void)
     SD::Controller UUT(1'000'000);
 
     // Test the side effects
-    TEST_ASSERT_EQUAL(46, SDIO->CLKCR);
+    TEST_ASSERT_BITS(SDIO_CLKCR_CLKDIV_Msk, 46, SDIO->CLKCR);
+    TEST_ASSERT_BIT_HIGH(SDIO_CLKCR_CLKEN_Pos, SDIO->CLKCR);
 
     // Change clock rate again
+    SDIO->CLKCR &= ~SDIO_CLKCR_CLKEN;
     UUT.set_clock(400'000);
-    TEST_ASSERT_EQUAL(118, SDIO->CLKCR);
+    TEST_ASSERT_BITS(SDIO_CLKCR_CLKDIV_Msk, 118, SDIO->CLKCR);
+    TEST_ASSERT_BIT_LOW(SDIO_CLKCR_CLKEN_Pos, SDIO->CLKCR);
 
     // Change the powersave option
+    SDIO->CLKCR |= SDIO_CLKCR_CLKEN;
     UUT.set_clock(400'000, true);
     TEST_ASSERT_BIT_HIGH(SDIO_CLKCR_PWRSAV_Pos, SDIO->CLKCR);
+    TEST_ASSERT_BIT_HIGH(SDIO_CLKCR_CLKEN_Pos, SDIO->CLKCR);
 };
 
 /// @brief Test setting the width of the bus
