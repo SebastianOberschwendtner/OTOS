@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    graphics.c
  * @author  SO
- * @version v1.2.0
+ * @version v2.7.2
  * @date    13-September-2021
  * @brief   Graphics interface for the OTOS.
  ==============================================================================
@@ -86,7 +86,7 @@ void Graphics::Canvas_BW::draw_pixel(const unsigned int x_px, const unsigned int
     if (x_px < this->width && y_px < this->height)
     {
         unsigned int page = y_px / 8;
-        unsigned char y_page = (y_px - page);
+        unsigned char y_page = y_px % 8;
         unsigned char bit_mask = (1 << y_page);
         switch(color)
         {
