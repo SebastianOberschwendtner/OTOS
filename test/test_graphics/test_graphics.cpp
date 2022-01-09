@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_graphics.c
  * @author  SO
- * @version v1.0.11
+ * @version v2.7.2
  * @date    16-March-2021
  * @brief   Unit tests to test the graphics driver.
  ******************************************************************************
@@ -116,6 +116,28 @@ void test_canvas_write_pixel(void)
     // Test when pixel position is out of bounds
     UUT.draw_pixel(8, 0, Graphics::White);
     TEST_ASSERT_EQUAL(0, buffer.data[8]);
+
+    // Test when width is greater than 8, fixes a bug in write_pixel
+    Graphics::Buffer_BW<16, 16> buffer2;
+    Graphics::Canvas_BW UUT2(buffer2.data.data(), buffer2.width_px, buffer2.height_px);
+
+    // Write pixel
+    UUT2.draw_pixel(0, 8, Graphics::White);
+    TEST_ASSERT_EQUAL(0x01, buffer2.data[16]);
+    UUT2.draw_pixel(0, 8, Graphics::Black);
+    TEST_ASSERT_EQUAL(0x00, buffer2.data[16]);
+    UUT2.draw_pixel(1, 8, Graphics::White);
+    TEST_ASSERT_EQUAL(0x01, buffer2.data[17]);
+    UUT2.draw_pixel(1, 8, Graphics::Black);
+    TEST_ASSERT_EQUAL(0x00, buffer2.data[17]);
+    UUT2.draw_pixel(0, 9, Graphics::White);
+    TEST_ASSERT_EQUAL(0x02, buffer2.data[16]);
+    UUT2.draw_pixel(0, 9, Graphics::Black);
+    TEST_ASSERT_EQUAL(0x00, buffer2.data[16]);
+    UUT2.draw_pixel(1, 10, Graphics::White);
+    TEST_ASSERT_EQUAL(0x04, buffer2.data[17]);
+    UUT2.draw_pixel(1, 10, Graphics::Black);
+    TEST_ASSERT_EQUAL(0x00, buffer2.data[17]);
 };
 
 /// @brief test the filling of the canvas
