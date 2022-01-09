@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    volumes.cpp
  * @author  SO
- * @version v2.7.0
+ * @version v2.7.1
  * @date    04-January-2022
  * @brief   Interface for Volumes for file exchange.
  ******************************************************************************
@@ -689,7 +689,7 @@ bool FAT32::Volume<Memory>::make_directory_entry(
     write_byte(directory.block_buffer.begin(), DIR_Entry::Attributes + offset, attributes);
 
     // Convert the seconds since epoch to FAT format
-    std::tm* utc = std::gmtime(&time);
+    std::tm* utc = std::localtime(&time);
     const unsigned short time_entry =
         (utc->tm_hour << FAT32::Time_Pos::Hours) 
         | (utc->tm_min << FAT32::Time_Pos::Minutes) 

@@ -690,9 +690,9 @@ void test_make_file_entry(void)
     TEST_ASSERT_EQUAL( 0x01, directory.block_buffer[id*32 + FAT32::DIR_Entry::First_Cluster_H + 1]);
     TEST_ASSERT_EQUAL( FAT32::Attribute::Read_Only, directory.block_buffer[id*32 + FAT32::DIR_Entry::Attributes]);
     TEST_ASSERT_EQUAL( 0xE2, directory.block_buffer[id*32 + FAT32::DIR_Entry::Creation_Time]);
-    TEST_ASSERT_EQUAL( 0x99, directory.block_buffer[id*32 + FAT32::DIR_Entry::Creation_Time + 1]);
+    TEST_ASSERT_EQUAL( 0xA1, directory.block_buffer[id*32 + FAT32::DIR_Entry::Creation_Time + 1]);
     TEST_ASSERT_EQUAL( 0xE2, directory.block_buffer[id*32 + FAT32::DIR_Entry::Write_Time]);
-    TEST_ASSERT_EQUAL( 0x99, directory.block_buffer[id*32 + FAT32::DIR_Entry::Write_Time + 1]);
+    TEST_ASSERT_EQUAL( 0xA1, directory.block_buffer[id*32 + FAT32::DIR_Entry::Write_Time + 1]);
     TEST_ASSERT_EQUAL( 0x57, directory.block_buffer[id*32 + FAT32::DIR_Entry::Creation_Date]);
     TEST_ASSERT_EQUAL( 0x1C, directory.block_buffer[id*32 + FAT32::DIR_Entry::Creation_Date + 1]);
     TEST_ASSERT_EQUAL( 0x57, directory.block_buffer[id*32 + FAT32::DIR_Entry::Write_Date]);
