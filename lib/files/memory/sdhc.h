@@ -27,6 +27,7 @@
 
 // === Needed Interfaces ===
 #include "interface.h"
+#include "task.h"
 
 // === Declarations ===
 namespace SDHC
@@ -199,6 +200,24 @@ namespace SDHC
 
         service():service{400'000} {};
         service(const unsigned long frequency): bus{frequency}, bus_impl{bus}, card{bus_impl} {};
+
+        bool initialize(OTOS::Timed_Task& mytask)
+        {
+            if (not this->card.reset())
+                return false;
+            mytask.wait_ms(100);
+
+            if (not this->card.set_supply_voltage())
+                return false;
+
+            while(not this->card.initialize_card())
+            {
+                mytask.wait_ms(100);
+            }
+            this->card.get_RCA();
+            this->card.select();
+            return true;
+        }
         
     };
 };
