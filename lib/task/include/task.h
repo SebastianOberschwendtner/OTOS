@@ -24,6 +24,7 @@
 // === Includes ===
 #include "processors.h"
 #include "types.h"
+#include <chrono>
 
 // === defines ===
 
@@ -67,8 +68,7 @@ namespace OTOS {
          * 
          * @param time_ms The wait time in [ms].
          */
-        template<typename T>
-        void wait_ms(const T time_ms)
+        void wait_ms(const unsigned long time_ms)
         {
             this->tic();
             while(this->time_elapsed_ms() < static_cast<std::uint32_t>(time_ms))
