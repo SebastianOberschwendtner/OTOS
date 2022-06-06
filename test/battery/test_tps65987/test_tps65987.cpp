@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_tps65987.cpp
  * @author  SO
- * @version v2.7.3
+ * @version v2.7.4
  * @date    14-November-2021
  * @brief   Unit tests to test the driver for USB-3 PD controller.
  ******************************************************************************
@@ -36,6 +36,7 @@
 
 // Mock the i2c driver
 struct I2C_Mock { };
+Mock::Callable<bool> set_target_address;
 Mock::Callable<bool> send_word;
 Mock::Callable<bool> send_array;
 Mock::Callable<bool> send_array_leader;
@@ -43,6 +44,11 @@ Mock::Callable<bool> read_array;
 std::array<unsigned char, 66> rx_buffer{0};
 
 namespace Bus {
+    void change_address(I2C_Mock& bus, const unsigned char address)
+    {
+        ::set_target_address(address);
+        return;
+    };
     bool send_word(I2C_Mock& bus, unsigned int word)
     {
        return ::send_word(word);
@@ -88,7 +94,11 @@ template class TPS65987::Controller<I2C_Mock>;
  */
 
 void setUp(void) {
-// set stuff up here
+    set_target_address.reset();
+    send_word.reset();
+    send_array.reset();
+    send_array_leader.reset();
+    read_array.reset();
 };
 
 void tearDown(void) {
@@ -217,6 +227,7 @@ void test_initialization(void)
     rx_buffer[2] = 'T';
     rx_buffer[3] = 'P';
     TEST_ASSERT_TRUE(UUT.initialize());
+    ::set_target_address.assert_called_once_with(TPS65987::i2c_address);
     ::read_array.assert_called_once_with(5);
     TEST_ASSERT_EQUAL_CHAR_ARRAY("PTCc", &rx_buffer[2], 4);
 };

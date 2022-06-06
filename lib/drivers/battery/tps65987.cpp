@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    tps65987.cpp
  * @author  SO
- * @version v2.0.0
+ * @version v2.7.4
  * @date    14-November-2021
  * @brief   Driver for the TPS65987DDH(K) USB-3 PD controller.
  ******************************************************************************
@@ -42,6 +42,9 @@ template class TPS65987::Controller<I2C::Controller>;
 template <class bus_controller>
 bool TPS65987::Controller<bus_controller>::initialize(void)
 {
+    // set the i2c address
+    Bus::change_address(this->mybus, TPS65987::i2c_address);
+
     // First read the current mode of the IC
     if (!this->read_mode())
         return false;

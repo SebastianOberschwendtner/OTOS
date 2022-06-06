@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    bq25700.cpp
  * @author  SO
- * @version v2.7.3
+ * @version v2.7.4
  * @date    14-November-2021
  * @brief   Driver for the BQ25700 battery charger controller.
  ******************************************************************************
@@ -78,6 +78,9 @@ bool BQ25700::Controller<bus_controller>::write_register(const Register reg,
 template<class bus_controller>
 bool BQ25700::Controller<bus_controller>::initialize(void)
 {
+    // Set the target address
+    Bus::change_address(this->mybus, BQ25700::i2c_address);
+
     // check whether device is responding and the IDs match
     this->state = State::Error;
     if(this->read_register(Register::Manufacturer_ID))

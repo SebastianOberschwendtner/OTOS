@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    ssd1306.cpp
  * @author  SO
- * @version v2.0.0
+ * @version v2.7.4
  * @date    14-November-2021
  * @brief   Driver for the SSD1306 display controller.
  ******************************************************************************
@@ -53,7 +53,7 @@ template<class bus_controller>
 bool SSD1306::Controller<bus_controller>::initialize(void)
 {
     // Set the target address for the i2c controller
-    // this->mybus->set_target_address(i2c_address);
+    Bus::change_address(this->mybus, SSD1306::i2c_address);
 
     // send the initialization data
     if (!this->send_command_byte(Command::display_off))          return false;

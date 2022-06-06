@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_display.cpp
  * @author  SO
- * @version v2.7.3
+ * @version v2.7.4
  * @date    14-November-2021
  * @brief   Unit tests to test the display driver.
  ******************************************************************************
@@ -42,10 +42,16 @@
 
 // Mock the i2c driver
 struct I2C_Mock { };
+Mock::Callable<bool> set_target_address;
 Mock::Callable<bool> send_word;
 Mock::Callable<bool> send_array_leader;
 
 namespace Bus {
+    void change_address(I2C_Mock& bus, const unsigned char address)
+    {
+        ::set_target_address(address);
+        return;
+    };
     bool send_word(I2C_Mock& bus, unsigned int word)
     {
        return ::send_word(word);
@@ -62,7 +68,9 @@ namespace Bus {
 template class SSD1306::Controller<I2C_Mock>;
 
 void setUp(void){
-    // set stuff up here
+    ::set_target_address.reset();
+    ::send_word.reset();
+    ::send_array_leader.reset();
 };
 
 void tearDown(void){
@@ -80,6 +88,7 @@ void test_init(void)
 
     // perform testing
     TEST_ASSERT_TRUE(UUT.initialize());
+    ::set_target_address.assert_called_once_with(SSD1306::i2c_address);
     TEST_ASSERT_TRUE(::send_word.call_count > 0);
 };
 

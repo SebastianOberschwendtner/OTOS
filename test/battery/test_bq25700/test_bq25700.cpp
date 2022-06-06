@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_bq25700.cpp
  * @author  SO
- * @version v2.7.3
+ * @version v2.7.4
  * @date    14-November-2021
  * @brief   Unit tests to test the driver for battery charger.
  ******************************************************************************
@@ -183,6 +183,7 @@ void test_init(void)
 
     // perform testing
     TEST_ASSERT_TRUE(UUT.initialize());
+    ::set_target_address.assert_called_once_with(BQ25700::i2c_address);
     TEST_ASSERT_EQUAL(2, ::read_word.call_count);
     TEST_ASSERT_EQUAL(0, static_cast<unsigned char>(UUT.get_state()));
 };
