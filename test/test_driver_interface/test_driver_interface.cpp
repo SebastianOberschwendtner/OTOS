@@ -84,7 +84,7 @@ void test_timeout(void)
     // perform testing
     for (int count = 0; count < 5; count++)
         TEST_ASSERT_FALSE(UUT.timed_out());
-    TEST_ASSERT_TRUE(UUT.timed_out())
+    TEST_ASSERT_TRUE(UUT.timed_out());
     UUT.reset_timeout();
     TEST_ASSERT_FALSE(UUT.timed_out());
 
@@ -93,7 +93,7 @@ void test_timeout(void)
     UUT.reset_timeout();
     for (unsigned int count = 0; count < 65000; count++)
         TEST_ASSERT_FALSE(UUT.timed_out());
-    TEST_ASSERT_TRUE(UUT.timed_out())
+    TEST_ASSERT_TRUE(UUT.timed_out());
     UUT.reset_timeout();
     TEST_ASSERT_FALSE(UUT.timed_out());
 };
