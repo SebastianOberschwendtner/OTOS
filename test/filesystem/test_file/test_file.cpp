@@ -203,10 +203,9 @@ void test_read_file_and_sector(void)
 int main(int argc, char **argv)
 {
     UNITY_BEGIN();
-    test_constructor();
-    test_open_file();
-    test_read_file();
-    test_read_file_and_sector();
-    UNITY_END();
-    return EXIT_SUCCESS;
+    RUN_TEST(test_constructor);
+    RUN_TEST(test_open_file);
+    RUN_TEST(test_read_file);
+    RUN_TEST(test_read_file_and_sector);
+    return UNITY_END();
 };
