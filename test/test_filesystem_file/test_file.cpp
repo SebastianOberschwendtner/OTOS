@@ -51,6 +51,8 @@ struct Mock_Volume
     Mock::Callable<bool> call_get_file;
     Mock::Callable<bool> call_read_last_sector_of_file;
     Mock::Callable<bool> call_read_root;
+    Mock::Callable<bool> call_read_cluster;
+    Mock::Callable<bool> call_read_next_sector_of_cluster;
 
     // === Provide the expected interface ===
     std::optional<unsigned long> get_fileid(FAT32::Filehandler& directory, const std::array<char, 12> filename)
@@ -74,6 +76,16 @@ struct Mock_Volume
     bool read_root(FAT32::Filehandler& file)
     {
         return call_read_root(0);
+    };
+
+    bool read_cluster(FAT32::Filehandler& file, const unsigned long cluster)
+    {
+        return call_read_cluster(cluster);
+    };
+
+    bool read_next_sector_of_cluster(FAT32::Filehandler& file)
+    {
+        return call_read_next_sector_of_cluster(0);
     };
 };
 Mock_Volume volume;
@@ -116,6 +128,7 @@ void test_open_file(void)
     volume.id_return = 3;
     volume.file_return.id = 3;
     volume.file_return.size = 12;
+    volume.file_return.start_cluster = 4;
 
     // open a file
     auto file = FAT32::open(volume, "0:/Test.txt");
@@ -126,7 +139,7 @@ void test_open_file(void)
     TEST_ASSERT_EQUAL(Files::State::Open, file.state );
     volume.call_get_file.assert_called_once_with(3);
     volume.call_get_fileid.assert_called_once();
-    volume.call_read_last_sector_of_file.assert_called_once_with(3);
+    volume.call_read_cluster.assert_called_once_with(4);
     volume.call_read_root.assert_called_once();
 
     // Test opening a file which does not exist
@@ -140,12 +153,60 @@ void test_open_file(void)
     volume.call_read_root.assert_called_once();
 };
 
+/// @brief Test reading data from the file
+void test_read_file(void)
+{
+    // Setup data
+    setUp();
+    FAT32::Filehandler dummy;
+    dummy.block_buffer[0] = 5;
+    dummy.block_buffer[1] = 6;
+    dummy.size = 2;
+    FAT32::File file(dummy, volume);
+    
+    // Read from file when data is valid
+    TEST_ASSERT_EQUAL( 0, file.tell() );
+    TEST_ASSERT_EQUAL( 5, file.read() );
+    TEST_ASSERT_EQUAL( 1, file.tell() );
+    TEST_ASSERT_EQUAL( 6, file.read() );
+    TEST_ASSERT_EQUAL( 2, file.tell() );
+
+    // Additional reads should only return 0
+    // because the filesize only indicates 1 byte
+    TEST_ASSERT_EQUAL( 0, file.read() );
+    TEST_ASSERT_EQUAL( 2, file.tell() );
+};
+
+/// @brief Test reading data from the file when a new sector has to be read
+void test_read_file_and_sector(void)
+{
+    // Setup data
+    setUp();
+    FAT32::Filehandler dummy;
+    dummy.block_buffer[0] = 5;
+    dummy.block_buffer[1] = 6;
+    dummy.size = 600;
+    FAT32::File file(dummy, volume);
+    
+    // Read from file when data is valid
+    for(unsigned int count = 0; count<512; count++)
+        file.read();
+    TEST_ASSERT_EQUAL( 512, file.tell() );
+
+    // Now a new sector has to be read
+    TEST_ASSERT_EQUAL(5, file.read() );
+    TEST_ASSERT_EQUAL( 513, file.tell() );
+    volume.call_read_next_sector_of_cluster.assert_called_once();
+};
+
 // === Main ===
 int main(int argc, char **argv)
 {
     UNITY_BEGIN();
     test_constructor();
     test_open_file();
+    test_read_file();
+    test_read_file_and_sector();
     UNITY_END();
     return EXIT_SUCCESS;
 };

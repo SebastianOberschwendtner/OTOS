@@ -60,6 +60,7 @@ namespace FAT32
     private:
         FAT32::Filehandler handle;
         Volume_t* volume;
+        unsigned long access_position{0};
 
     public:
 
@@ -70,11 +71,11 @@ namespace FAT32
 
         // *** Methods ***
         unsigned long size(void) const final;
+        unsigned long tell(void) const;
+        unsigned char read(void);
         // seek();
-        // tell();
         // write();
         // write_line();
-        // read();
         // read_line();
         // save();
         // close();
@@ -121,7 +122,7 @@ namespace FAT32
             [](char character){return std::toupper(character);}
         );
 
-        // Only when volume is active
+        // Only when volume is active -> it is assumed that volume keeps responding
         if (volume_responding)
         {
             // Read the file from memory
@@ -131,7 +132,7 @@ namespace FAT32
             if ( id )
             {
                 volume_used.get_file(ref, id.value());
-                volume_used.read_last_sector_of_file(ref);
+                volume_used.read_cluster(ref, ref.start_cluster);
                 file_state = Files::State::Open;
             }
         }
