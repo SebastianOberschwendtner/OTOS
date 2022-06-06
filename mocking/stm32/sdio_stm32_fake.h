@@ -29,6 +29,7 @@
 
 // *** Includes ***
 #include "../base/fake.h"
+#include <cstdint>
 
 /******************************************************************************/
 /*                                                                            */
@@ -425,6 +426,6 @@ struct SDIO_TypeDef: Fake::Peripheral
 // *** Public references to fake peripherals
 // Public pointer to SPI peripherals which are faked
 extern SDIO_TypeDef *SDIO;
-extern unsigned long SDIO_BASE;
+extern std::uintptr_t SDIO_BASE;
 
 #endif

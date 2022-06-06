@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    i2c_stm32_fake.cpp
  * @author  SO
- * @version v1.0.7
+ * @version v2.7.3
  * @date    02-September-2021
  * @brief   Fakes the i2c interface for STM32 microcontrollers.
  ==============================================================================
@@ -42,9 +42,9 @@ I2C_TypeDef* I2C2 = &I2C2_Fake;
 I2C_TypeDef* I2C3 = &I2C3_Fake;
 
 // Fake register address
-unsigned long I2C1_BASE = reinterpret_cast<unsigned long>(I2C1);
-unsigned long I2C2_BASE = reinterpret_cast<unsigned long>(I2C2);
-unsigned long I2C3_BASE = reinterpret_cast<unsigned long>(I2C3);
+std::uintptr_t I2C1_BASE = reinterpret_cast<std::uintptr_t>(I2C1);
+std::uintptr_t I2C2_BASE = reinterpret_cast<std::uintptr_t>(I2C2);
+std::uintptr_t I2C3_BASE = reinterpret_cast<std::uintptr_t>(I2C3);
 
 /**
  * @brief Constructor for the fake I2C peripheral. Initializes the

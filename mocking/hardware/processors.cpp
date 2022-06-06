@@ -49,7 +49,7 @@ Mock::Callable<bool> otos_init_kernel;
  * The address of this pointer is used to catch stack overflows.
  * @details: Handler Mode, Stack: msp
  */
-unsigned long* __otos_switch(unsigned long* ThreadStack)
+std::uintptr_t* __otos_switch(std::uintptr_t* ThreadStack)
 {
     otos_switch.add_call(0);
     // Return the current task stack pointer, when resuming kernel operation
@@ -99,7 +99,7 @@ void SVC_Handler(void)
  * @param Ticks The number of SysTicks between the SysTick interrupts.
  * @details Thread Mode -> Handler Mode, Stack: msp
  */
-void __otos_init_kernel(unsigned long* ThreadStack)
+void __otos_init_kernel(std::uintptr_t* ThreadStack)
 {
     otos_init_kernel.add_call(0);
 };

@@ -52,7 +52,7 @@ namespace USART
      * @return constexpr unsigned long Address of the SPI peripheral
      */
     template <IO instance>
-    constexpr unsigned long get_peripheral_address()
+    constexpr std::uintptr_t get_peripheral_address()
     {
         // Return the peripheral address
         if constexpr (instance == IO::USART_1)

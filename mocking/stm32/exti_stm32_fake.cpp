@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    exti_stm32_fake.cpp
  * @author  SO
- * @version v1.3.0
+ * @version v2.7.3
  * @date    04-Oktober-2021
  * @brief   Fakes for the stm32 EXTI peripheral for unit testing.
  ==============================================================================
@@ -40,8 +40,8 @@ EXTI_TypeDef* EXTI = &EXTI_Fake;
 SYSCFG_TypeDef* SYSCFG = &SYSCFG_Fake;
 
 // Base addresses to peripherals
-unsigned long EXTI_BASE = reinterpret_cast<unsigned long>(EXTI);
-unsigned long SYSCFG_BASE = reinterpret_cast<unsigned long>(SYSCFG);
+std::uintptr_t EXTI_BASE = reinterpret_cast<std::uintptr_t>(EXTI);
+std::uintptr_t SYSCFG_BASE = reinterpret_cast<std::uintptr_t>(SYSCFG);
 
 // *** Methods ***
 

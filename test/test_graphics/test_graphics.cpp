@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_graphics.c
  * @author  SO
- * @version v2.7.2
+ * @version v2.7.3
  * @date    16-March-2021
  * @brief   Unit tests to test the graphics driver.
  ******************************************************************************
@@ -392,16 +392,15 @@ void test_font_normal(void)
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();
-    test_buffer();
-    test_canvas_init();
-    test_canvas_write_pixel();
-    test_canvas_fill();
-    test_canvas_add_horizontal_line();
-    test_canvas_add_vertical_line();
-    test_cursor();
-    test_add_character();
-    test_add_string();
-    test_font_normal();
-    UNITY_END();
-    return 0;
+    RUN_TEST(test_buffer);
+    RUN_TEST(test_canvas_init);
+    RUN_TEST(test_canvas_write_pixel);
+    RUN_TEST(test_canvas_fill);
+    RUN_TEST(test_canvas_add_horizontal_line);
+    RUN_TEST(test_canvas_add_vertical_line);
+    RUN_TEST(test_cursor);
+    RUN_TEST(test_add_character);
+    RUN_TEST(test_add_string);
+    RUN_TEST(test_font_normal);
+    return UNITY_END();
 };

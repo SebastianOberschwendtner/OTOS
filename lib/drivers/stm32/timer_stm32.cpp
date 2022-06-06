@@ -35,7 +35,7 @@
  * @param timer The timer instance which is used.
  * @return Return the peripheral base address of the timer instance.
  */
-constexpr unsigned long get_timer_address(const IO timer)
+constexpr std::uintptr_t get_timer_address(const IO timer)
 {
     switch (timer)
     {

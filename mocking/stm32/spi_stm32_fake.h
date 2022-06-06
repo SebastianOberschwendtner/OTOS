@@ -29,6 +29,7 @@
 
 // *** Includes ***
 #include "../base/fake.h"
+#include <cstdint>
 
 /******************************************************************************/
 /*                                                                            */
@@ -240,11 +241,11 @@ extern SPI_TypeDef *SPI3;
 extern SPI_TypeDef *SPI5;
 extern SPI_TypeDef *SPI5;
 extern SPI_TypeDef *SPI6;
-extern unsigned long SPI1_BASE;
-extern unsigned long SPI2_BASE;
-extern unsigned long SPI3_BASE;
-extern unsigned long SPI4_BASE;
-extern unsigned long SPI5_BASE;
-extern unsigned long SPI6_BASE;
+extern std::uintptr_t SPI1_BASE;
+extern std::uintptr_t SPI2_BASE;
+extern std::uintptr_t SPI3_BASE;
+extern std::uintptr_t SPI4_BASE;
+extern std::uintptr_t SPI5_BASE;
+extern std::uintptr_t SPI6_BASE;
 
 #endif

@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_i2c_stm32.cpp
  * @author  SO
- * @version v2.5.0
+ * @version v2.7.3
  * @date    30-August-2021
  * @brief   Unit tests for testing the i2c driver for stm32 microcontrollers.
  ******************************************************************************
@@ -194,12 +194,11 @@ void test_timer_interface(void)
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();
-    test_init();
-    test_set_error();
-    test_timeout();
-    test_gpio_interface();
-    test_bus_interface();
-    test_timer_interface();
-    UNITY_END();
-    return 0;
+    RUN_TEST(test_init);
+    RUN_TEST(test_set_error);
+    RUN_TEST(test_timeout);
+    RUN_TEST(test_gpio_interface);
+    RUN_TEST(test_bus_interface);
+    RUN_TEST(test_timer_interface);
+    return UNITY_END();
 };

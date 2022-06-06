@@ -51,11 +51,11 @@ typedef void(*taskpointer_t)(void);
 
 #else
     // for unit testing in the native environment
-    typedef long s_base_t;           // 8-bit signed base type
-    typedef unsigned long u_base_t;  // 8-bit unsigned base type
+    typedef std::intptr_t s_base_t;           // 8-bit signed base type
+    typedef std::uintptr_t u_base_t;  // 8-bit unsigned base type
 
     // Define a type for the stack pointers
-    typedef unsigned long* stackpointer_t;
+    typedef std::uintptr_t* stackpointer_t;
 #endif
 
 

@@ -76,7 +76,7 @@ constexpr unsigned char get_RCCEN_position(const GPIO::Port Port) {
  * @param Port The identifier of the port.
  * @return Returns the address of the port as an integer.
  */
-constexpr unsigned long get_port_address(const GPIO::Port Port) {
+constexpr std::uintptr_t get_port_address(const GPIO::Port Port) {
     switch (Port)
     {
     case GPIO::Port::A:

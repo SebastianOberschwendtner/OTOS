@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    spi_stm32_fake.cpp
  * @author  SO
- * @version v2.1.0
+ * @version v2.7.3
  * @date    22-Dezember-2021
  * @brief   Fakes the spi interface for STM32 microcontrollers.
  ==============================================================================
@@ -52,14 +52,14 @@ USART_TypeDef *UART7 = &UART7_Fake;
 USART_TypeDef *UART8 = &UART8_Fake;
 
 // Fake register address
-unsigned long USART1_BASE = reinterpret_cast<unsigned long>(USART1);
-unsigned long USART2_BASE = reinterpret_cast<unsigned long>(USART2);
-unsigned long USART3_BASE = reinterpret_cast<unsigned long>(USART3);
-unsigned long UART4_BASE = reinterpret_cast<unsigned long>(UART4);
-unsigned long UART5_BASE = reinterpret_cast<unsigned long>(UART5);
-unsigned long USART6_BASE = reinterpret_cast<unsigned long>(USART6);
-unsigned long UART7_BASE = reinterpret_cast<unsigned long>(UART7);
-unsigned long UART8_BASE = reinterpret_cast<unsigned long>(UART8);
+std::uintptr_t USART1_BASE = reinterpret_cast<std::uintptr_t>(USART1);
+std::uintptr_t USART2_BASE = reinterpret_cast<std::uintptr_t>(USART2);
+std::uintptr_t USART3_BASE = reinterpret_cast<std::uintptr_t>(USART3);
+std::uintptr_t UART4_BASE = reinterpret_cast<std::uintptr_t>(UART4);
+std::uintptr_t UART5_BASE = reinterpret_cast<std::uintptr_t>(UART5);
+std::uintptr_t USART6_BASE = reinterpret_cast<std::uintptr_t>(USART6);
+std::uintptr_t UART7_BASE = reinterpret_cast<std::uintptr_t>(UART7);
+std::uintptr_t UART8_BASE = reinterpret_cast<std::uintptr_t>(UART8);
 
 /**
  * @brief Constructor for the fake USART peripheral. Initializes the

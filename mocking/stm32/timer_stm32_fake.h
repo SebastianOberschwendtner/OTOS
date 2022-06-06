@@ -29,6 +29,7 @@
 
 // *** Includes ***
 #include "../base/fake.h"
+#include <cstdint>
 
 // *** Class defines for fake peripherals
 /** 
@@ -71,8 +72,8 @@ extern TIM_TypeDef* TIM1;
 extern TIM_TypeDef* TIM2;
 
 // Fake addresses
-extern unsigned long TIM1_BASE;
-extern unsigned long TIM2_BASE;
+extern std::uintptr_t TIM1_BASE;
+extern std::uintptr_t TIM2_BASE;
 
 // === Bitmasks ===
 

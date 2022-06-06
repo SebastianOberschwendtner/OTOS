@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_ipc.cpp
  * @author  SO
- * @version v1.0.12
+ * @version v2.7.3
  * @date    16-September-2021
  * @brief   Unit tests for testing the inter process communication within OTOS.
  ******************************************************************************
@@ -118,8 +118,7 @@ int main(int argc, char** argv)
 {
     UNITY_BEGIN();
     // test_init();
-    test_register_data();
-    test_get_data();
-    UNITY_END();
-    return 0;
+    RUN_TEST(test_register_data);
+    RUN_TEST(test_get_data);
+    return UNITY_END();
 };

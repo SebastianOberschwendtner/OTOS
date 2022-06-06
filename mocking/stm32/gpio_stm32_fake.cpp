@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    gpio_stm32_fake.cpp
  * @author  SO
- * @version v1.0.7
+ * @version v2.7.3
  * @date    26-August-2021
  * @brief   Fakes for the stm32 GPIO peripheral for unit testing.
  ==============================================================================
@@ -58,17 +58,17 @@ GPIO_TypeDef* GPIOJ = &GPIOJ_Fake;
 GPIO_TypeDef* GPIOK = &GPIOK_Fake;
 
 // Base addresses to peripherals
-unsigned long GPIOA_BASE = reinterpret_cast<unsigned long>(GPIOA);
-unsigned long GPIOB_BASE = reinterpret_cast<unsigned long>(GPIOB);
-unsigned long GPIOC_BASE = reinterpret_cast<unsigned long>(GPIOC);
-unsigned long GPIOD_BASE = reinterpret_cast<unsigned long>(GPIOD);
-unsigned long GPIOE_BASE = reinterpret_cast<unsigned long>(GPIOE);
-unsigned long GPIOF_BASE = reinterpret_cast<unsigned long>(GPIOF);
-unsigned long GPIOG_BASE = reinterpret_cast<unsigned long>(GPIOG);
-unsigned long GPIOH_BASE = reinterpret_cast<unsigned long>(GPIOH);
-unsigned long GPIOI_BASE = reinterpret_cast<unsigned long>(GPIOI);
-unsigned long GPIOJ_BASE = reinterpret_cast<unsigned long>(GPIOJ);
-unsigned long GPIOK_BASE = reinterpret_cast<unsigned long>(GPIOK);
+std::uintptr_t GPIOA_BASE = reinterpret_cast<std::uintptr_t>(GPIOA);
+std::uintptr_t GPIOB_BASE = reinterpret_cast<std::uintptr_t>(GPIOB);
+std::uintptr_t GPIOC_BASE = reinterpret_cast<std::uintptr_t>(GPIOC);
+std::uintptr_t GPIOD_BASE = reinterpret_cast<std::uintptr_t>(GPIOD);
+std::uintptr_t GPIOE_BASE = reinterpret_cast<std::uintptr_t>(GPIOE);
+std::uintptr_t GPIOF_BASE = reinterpret_cast<std::uintptr_t>(GPIOF);
+std::uintptr_t GPIOG_BASE = reinterpret_cast<std::uintptr_t>(GPIOG);
+std::uintptr_t GPIOH_BASE = reinterpret_cast<std::uintptr_t>(GPIOH);
+std::uintptr_t GPIOI_BASE = reinterpret_cast<std::uintptr_t>(GPIOI);
+std::uintptr_t GPIOJ_BASE = reinterpret_cast<std::uintptr_t>(GPIOJ);
+std::uintptr_t GPIOK_BASE = reinterpret_cast<std::uintptr_t>(GPIOK);
 
 // *** Methods ***
 

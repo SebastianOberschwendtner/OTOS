@@ -29,6 +29,7 @@
 
 // *** Includes ***
 #include "../base/fake.h"
+#include <cstdint>
 
 // *** The peripheral typedefs
 /** 
@@ -80,7 +81,7 @@ extern EXTI_TypeDef* EXTI;
 extern SYSCFG_TypeDef* SYSCFG;
 
 // Fake addresses
-extern unsigned long EXTI_BASE;
-extern unsigned long SYSCFG_BASE;
+extern std::uintptr_t EXTI_BASE;
+extern std::uintptr_t SYSCFG_BASE;
 
 #endif

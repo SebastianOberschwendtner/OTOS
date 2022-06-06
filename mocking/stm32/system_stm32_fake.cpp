@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    system_stm32_fake.cpp
  * @author  SO
- * @version v2.5.0
+ * @version v2.7.3
  * @date    02-January-2022
  * @brief   Fakes the system interface for STM32 microcontrollers.
  ==============================================================================
@@ -38,7 +38,7 @@ static FLASH_TypeDef FLASH_Fake;
 FLASH_TypeDef* FLASH = &FLASH_Fake;
 
 // Fake register address
-unsigned long FLASH_BASE = reinterpret_cast<unsigned long>(FLASH);
+std::uintptr_t FLASH_BASE = reinterpret_cast<std::uintptr_t>(FLASH);
 
 // *** Methods ***
 

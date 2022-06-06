@@ -25,9 +25,9 @@
 #include "mock.h"
 
 // *** Function Declarations ***
-unsigned long*  __otos_switch       (unsigned long* ThreadStack);
+std::uintptr_t*  __otos_switch       (std::uintptr_t* ThreadStack);
 void            __otos_yield        (void);
 void            __otos_call_kernel  (void);
-void            __otos_init_kernel  (unsigned long* ThreadStack);
+void            __otos_init_kernel  (std::uintptr_t* ThreadStack);
 
 #endif
