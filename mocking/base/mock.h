@@ -121,7 +121,7 @@ namespace Mock
 
             // Test the call args
             TEST_ASSERT_TRUE_MESSAGE(Expected == this->last_called_with, &buf[0]); 
-            TEST_ASSERT_TRUE_MESSAGE(this->call_count > 0, "Expected to be called at least once, but was called 0 times.")
+            TEST_ASSERT_TRUE_MESSAGE(this->call_count > 0, "Expected to be called at least once, but was called 0 times.");
 
             // Reset the call arg again
             this->last_called_with = 0;
