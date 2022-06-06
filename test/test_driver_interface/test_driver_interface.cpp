@@ -58,7 +58,7 @@ void test_init(void)
 
     // perform testing
     TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
-    TEST_ASSERT_TRUE(UUT.timed_out())
+    TEST_ASSERT_TRUE(UUT.timed_out());
     TEST_ASSERT_EQUAL(IO::SYSTEM_, UUT.instance);
     TEST_ASSERT_EQUAL(IO::I2C_1, IO.instance);
 };
