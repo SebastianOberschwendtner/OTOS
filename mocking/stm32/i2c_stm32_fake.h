@@ -29,6 +29,7 @@
 
 // *** Includes ***
 #include "../base/fake.h"
+#include <cstdint>
 
 /******************************************************************************/
 /*                                                                            */
@@ -283,8 +284,8 @@ public:
 extern I2C_TypeDef* I2C1;
 extern I2C_TypeDef* I2C2;
 extern I2C_TypeDef* I2C3;
-extern unsigned long I2C1_BASE;
-extern unsigned long I2C2_BASE;
-extern unsigned long I2C3_BASE;
+extern std::uintptr_t I2C1_BASE;
+extern std::uintptr_t I2C2_BASE;
+extern std::uintptr_t I2C3_BASE;
 
 #endif

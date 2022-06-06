@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    main.c
  * @author  SO
- * @version v2.3.0
+ * @version v2.7.3
  * @date    09-March-2021
  * @brief   Main function for the OTOS. Mainly used to demonstrate how the OTOS
  *          functions work and should be used.

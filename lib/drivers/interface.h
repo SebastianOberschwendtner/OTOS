@@ -24,6 +24,7 @@
 // === Includes ===
 #include "error_codes.h"
 #include <optional>
+#include <cstdint>
 
 // === Common identifier for specialized IOs ===
 enum class IO : unsigned char

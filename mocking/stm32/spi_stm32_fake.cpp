@@ -48,12 +48,12 @@ SPI_TypeDef *SPI5 = &SPI5_Fake;
 SPI_TypeDef *SPI6 = &SPI6_Fake;
 
 // Fake register address
-unsigned long SPI1_BASE = reinterpret_cast<unsigned long>(SPI1);
-unsigned long SPI2_BASE = reinterpret_cast<unsigned long>(SPI2);
-unsigned long SPI3_BASE = reinterpret_cast<unsigned long>(SPI3);
-unsigned long SPI4_BASE = reinterpret_cast<unsigned long>(SPI4);
-unsigned long SPI5_BASE = reinterpret_cast<unsigned long>(SPI5);
-unsigned long SPI6_BASE = reinterpret_cast<unsigned long>(SPI6);
+std::uintptr_t SPI1_BASE = reinterpret_cast<std::uintptr_t>(SPI1);
+std::uintptr_t SPI2_BASE = reinterpret_cast<std::uintptr_t>(SPI2);
+std::uintptr_t SPI3_BASE = reinterpret_cast<std::uintptr_t>(SPI3);
+std::uintptr_t SPI4_BASE = reinterpret_cast<std::uintptr_t>(SPI4);
+std::uintptr_t SPI5_BASE = reinterpret_cast<std::uintptr_t>(SPI5);
+std::uintptr_t SPI6_BASE = reinterpret_cast<std::uintptr_t>(SPI6);
 
 /**
  * @brief Constructor for the fake SPI peripheral. Initializes the

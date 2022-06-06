@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    timer_stm32_fake.cpp
  * @author  SO
- * @version v1.4.0
+ * @version v2.7.3
  * @date    31-October-2021
  * @brief   Fakes the timer interface for STM32 microcontrollers.
  ==============================================================================
@@ -40,8 +40,8 @@ TIM_TypeDef* TIM1 = &TIM1_Fake;
 TIM_TypeDef* TIM2 = &TIM2_Fake;
 
 // Fake register address
-unsigned long TIM1_BASE = reinterpret_cast<unsigned long>(TIM1);
-unsigned long TIM2_BASE = reinterpret_cast<unsigned long>(TIM2);
+std::uintptr_t TIM1_BASE = reinterpret_cast<std::uintptr_t>(TIM1);
+std::uintptr_t TIM2_BASE = reinterpret_cast<std::uintptr_t>(TIM2);
 
 // *** Methods ***
 

@@ -76,7 +76,7 @@ constexpr unsigned long get_TRISE(const unsigned long rise_time_ns)
  * @param instance The I2C hardware instance to be used as the controller hardware
  * @return The address of the hardware instance.
  */
-constexpr unsigned long get_peripheral_address(const IO instance) {
+constexpr std::uintptr_t get_peripheral_address(const IO instance) {
     switch (instance)
     {
     case IO::I2C_1:

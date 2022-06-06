@@ -68,7 +68,7 @@ namespace SPI
  * @return constexpr unsigned long Address of the SPI peripheral
  */
     template <IO instance>
-    constexpr unsigned long get_peripheral_address()
+    constexpr std::uintptr_t get_peripheral_address()
     {
         // Check for valid SPI
         static_assert(is_valid_spi<instance>(), "IO Instance is not a valid SPI peripheral!");

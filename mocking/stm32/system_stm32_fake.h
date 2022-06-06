@@ -29,6 +29,7 @@
 
 // *** Includes ***
 #include "../base/fake.h"
+#include <cstdint>
 
 // *** Class defines for fake peripherals
 
@@ -57,7 +58,7 @@ struct FLASH_TypeDef: public Fake::Peripheral
 // *** Public references to fake peripherals
 // Public pointer to RCC peripheral which is faked
 extern FLASH_TypeDef* FLASH;
-extern unsigned long FLASH_BASE;
+extern std::uintptr_t FLASH_BASE;
 
 /******************************************************************************/
 /*                                                                            */

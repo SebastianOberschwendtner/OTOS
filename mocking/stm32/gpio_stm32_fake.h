@@ -29,6 +29,7 @@
 
 // *** Includes ***
 #include "../base/fake.h"
+#include <cstdint>
 
 // *** The peripheral typedefs
 /** 
@@ -71,16 +72,16 @@ extern GPIO_TypeDef* GPIOJ;
 extern GPIO_TypeDef* GPIOK;
 
 // Fake addresses
-extern unsigned long GPIOA_BASE;
-extern unsigned long GPIOB_BASE;
-extern unsigned long GPIOC_BASE;
-extern unsigned long GPIOD_BASE;
-extern unsigned long GPIOE_BASE;
-extern unsigned long GPIOF_BASE;
-extern unsigned long GPIOG_BASE;
-extern unsigned long GPIOH_BASE;
-extern unsigned long GPIOI_BASE;
-extern unsigned long GPIOJ_BASE;
-extern unsigned long GPIOK_BASE;
+extern std::uintptr_t GPIOA_BASE;
+extern std::uintptr_t GPIOB_BASE;
+extern std::uintptr_t GPIOC_BASE;
+extern std::uintptr_t GPIOD_BASE;
+extern std::uintptr_t GPIOE_BASE;
+extern std::uintptr_t GPIOF_BASE;
+extern std::uintptr_t GPIOG_BASE;
+extern std::uintptr_t GPIOH_BASE;
+extern std::uintptr_t GPIOI_BASE;
+extern std::uintptr_t GPIOJ_BASE;
+extern std::uintptr_t GPIOK_BASE;
 
 #endif

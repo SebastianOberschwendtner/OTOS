@@ -29,6 +29,7 @@
 
 // *** Includes ***
 #include "../base/fake.h"
+#include <cstdint>
 
 /******************************************************************************/
 /*                                                                            */
@@ -248,13 +249,13 @@ extern USART_TypeDef *UART5;
 extern USART_TypeDef *USART6;
 extern USART_TypeDef *UART7;
 extern USART_TypeDef *UART8;
-extern unsigned long USART1_BASE;
-extern unsigned long USART2_BASE;
-extern unsigned long USART3_BASE;
-extern unsigned long UART4_BASE;
-extern unsigned long UART5_BASE;
-extern unsigned long USART6_BASE;
-extern unsigned long UART7_BASE;
-extern unsigned long UART8_BASE;
+extern std::uintptr_t USART1_BASE;
+extern std::uintptr_t USART2_BASE;
+extern std::uintptr_t USART3_BASE;
+extern std::uintptr_t UART4_BASE;
+extern std::uintptr_t UART5_BASE;
+extern std::uintptr_t USART6_BASE;
+extern std::uintptr_t UART7_BASE;
+extern std::uintptr_t UART8_BASE;
 
 #endif

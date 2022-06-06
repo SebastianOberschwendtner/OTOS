@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    test_kernel.c
  * @author  SO
- * @version v2.0.0
+ * @version v2.7.3
  * @date    16-March-2021
  * @brief   Unit tests for the OTOS kernel to be executed on the host.
  ==============================================================================
@@ -219,13 +219,12 @@ void test_Time_ms(void)
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();
-    test_Constructor();
-    test_scheduleThread();
-    test_switch_to_thread();
-    test_scheduling_no_timing_no_priority();
-    test_scheduling_with_timing_no_priority();
-    test_scheduling_with_timing_with_priority();
-    test_Time_ms();
-    UNITY_END();
-    return 0;
+    RUN_TEST(test_Constructor);
+    RUN_TEST(test_scheduleThread);
+    RUN_TEST(test_switch_to_thread);
+    RUN_TEST(test_scheduling_no_timing_no_priority);
+    RUN_TEST(test_scheduling_with_timing_no_priority);
+    RUN_TEST(test_scheduling_with_timing_with_priority);
+    RUN_TEST(test_Time_ms);
+    return UNITY_END();
 }

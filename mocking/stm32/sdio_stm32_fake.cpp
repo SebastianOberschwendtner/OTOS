@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    sdio_stm32_fake.cpp
  * @author  SO
- * @version v2.4.0
+ * @version v2.7.3
  * @date    29-Dezember-2021
  * @brief   Fakes the SDIO interface for STM32 microcontrollers.
  ==============================================================================
@@ -38,7 +38,7 @@ static SDIO_TypeDef SDIO_Fake;
 SDIO_TypeDef *SDIO = &SDIO_Fake;
 
 // Fake register address
-unsigned long SDIO_BASE = reinterpret_cast<unsigned long>(SDIO);
+std::uintptr_t SDIO_BASE = reinterpret_cast<std::uintptr_t>(SDIO);
 
 /**
  * @brief Constructor for the fake SPI peripheral. Initializes the
