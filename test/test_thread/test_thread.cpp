@@ -144,7 +144,7 @@ void test_is_runnable_with_schedule(void)
     OTOS::Thread UUT;
 
     // After initializing the thread should not be runnable
-    TEST_ASSERT_FALSE( UUT.is_runnable() )
+    TEST_ASSERT_FALSE( UUT.is_runnable() );
 
     // Set the thread schedule to run every second tick 
     UUT.set_schedule(1, OTOS::Priority::Normal);
