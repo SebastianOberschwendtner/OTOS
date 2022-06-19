@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    max17205.cpp
  * @author  SO
- * @version v2.0.0
+ * @version v2.8.0
  * @date    14-November-2021
  * @brief   Driver for the MAX17205+ battery balancer and coulomb counter.
  ******************************************************************************
@@ -136,6 +136,18 @@ inline unsigned int MAX17205::Controller<bus_controller>::to_resistance( const u
 };
 
 /**
+ * @brief Convert a raw time value.
+ * @param raw The raw register value.
+ * @return Returns the converted value.
+ */
+template<class bus_controller>
+inline unsigned int MAX17205::Controller<bus_controller>::to_time( const unsigned int raw )
+{
+    // time = raw * 5.625s = 5*raw + 5*raw/8
+    return (5*raw) + (5*raw >> 3);
+};
+
+/**
  * @brief Get the voltage of the battery pack.
  * @return Returns the voltage in [mV].
  */
@@ -224,6 +236,36 @@ template<class bus_controller>
 signed int MAX17205::Controller<bus_controller>::get_temperature(void) const
 {
     return this->temperature;    
+};
+
+/**
+ * @brief Get the SOC of the battery pack.
+ * @return Returns the SOC in [%].
+ */
+template<class bus_controller>
+unsigned int MAX17205::Controller<bus_controller>::get_SOC(void) const
+{
+    return this->soc;    
+};
+
+/**
+ * @brief Get the time until the battery pack is empty.
+ * @return Returns the time in [s].
+ */
+template<class bus_controller>
+unsigned int MAX17205::Controller<bus_controller>::get_TTE(void) const
+{
+    return this->time2empty;
+};
+
+/**
+ * @brief Get the time until the battery pack is fully charged.
+ * @return Returns the time in [s].
+ */
+template<class bus_controller>
+unsigned int MAX17205::Controller<bus_controller>::get_TTF(void) const
+{
+    return this->time2full;
 };
 
 /**
@@ -377,6 +419,86 @@ bool MAX17205::Controller<bus_controller>::read_cell_voltage_avg(void)
     temp = this->i2c_data.byte[1];
     temp += this->i2c_data.byte[0] << 8;
     this->voltage_cell[1] = this->to_voltage(temp);
+
+    return true;
+};
+
+/**
+ * @brief Read the remaining capacity from the balancer and convert to mAh.
+ * @return Returns true when the capacity is updated successfully.
+ */
+template<class bus_controller>
+bool MAX17205::Controller<bus_controller>::read_remaining_capacity(void)
+{
+    // Read the raw values
+    unsigned char reg = static_cast<unsigned char>(Register::Cap_Remaining);
+    if(!Bus::read_array(this->mybus, reg, &this->i2c_data.byte[0], 4)) return false;
+
+    // Convert the data
+    unsigned int temp = 0;
+    temp = this->i2c_data.byte[1];
+    temp += this->i2c_data.byte[0] << 8;
+    this->capacity[1] = this->to_capacity(temp);
+
+    return true;
+};
+
+/**
+ * @brief Read the SOC from the balancer and convert to %.
+ * @return Returns true when the soc is updated successfully.
+ */
+template<class bus_controller>
+bool MAX17205::Controller<bus_controller>::read_soc(void)
+{
+    // Read the raw values
+    unsigned char reg = static_cast<unsigned char>(Register::SOC);
+    if(!Bus::read_array(this->mybus, reg, &this->i2c_data.byte[0], 4)) return false;
+
+    // Convert the data
+    unsigned int temp = 0;
+    temp = this->i2c_data.byte[1];
+    temp += this->i2c_data.byte[0] << 8;
+    this->soc = this->to_percentage(temp);
+
+    return true;
+};
+
+/**
+ * @brief Read the time until the battery is empty and convert to [s].
+ * @return Returns true when the TTE is updated successfully.
+ */
+template<class bus_controller>
+bool MAX17205::Controller<bus_controller>::read_TTE(void)
+{
+    // Read the raw values
+    unsigned char reg = static_cast<unsigned char>(Register::TTE);
+    if(!Bus::read_array(this->mybus, reg, &this->i2c_data.byte[0], 4)) return false;
+
+    // Convert the data
+    unsigned int temp = 0;
+    temp = this->i2c_data.byte[1];
+    temp += this->i2c_data.byte[0] << 8;
+    this->time2empty = this->to_time(temp);
+
+    return true;
+};
+
+/**
+ * @brief Read the time until the battery is full and convert to [s].
+ * @return Returns true when the TTF is updated successfully.
+ */
+template<class bus_controller>
+bool MAX17205::Controller<bus_controller>::read_TTF(void)
+{
+    // Read the raw values
+    unsigned char reg = static_cast<unsigned char>(Register::TTF);
+    if(!Bus::read_array(this->mybus, reg, &this->i2c_data.byte[0], 4)) return false;
+
+    // Convert the data
+    unsigned int temp = 0;
+    temp = this->i2c_data.byte[1];
+    temp += this->i2c_data.byte[0] << 8;
+    this->time2full = this->to_time(temp);
 
     return true;
 };

@@ -16,6 +16,7 @@
 - Adds timing and wait functions to tasks.
 - Adds basic driver for *SDHC*<sup>&trade;</sup> memory cards.
 - Adds driver for interfacing with *FAT32* volumes.
+- Extends the *MAX17205* driver.
 
 ### Fixed Issues:
 

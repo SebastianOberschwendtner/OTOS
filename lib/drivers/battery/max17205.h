@@ -44,6 +44,10 @@ namespace MAX17205 {
     // === Registers ===
     enum class Register: unsigned int
     {
+        Cap_Remaining   = 0x005,
+        SOC             = 0x006,
+        TTE             = 0x011,    
+        TTF             = 0x020,    
         Current         = 0x00A,
         Avg_Current     = 0x00B,
         PackCfg         = 0x0BD,
@@ -73,10 +77,13 @@ namespace MAX17205 {
         signed int      current_battery = 0;
         unsigned int    voltage_cell[2] = {0};
         unsigned int    capacity[2]     = {0};
+        unsigned int    soc             = 0;
         unsigned int    cycles          = 0;
         unsigned int    age             = 0;
         unsigned int    esr             = 0;
         signed int      temperature     = 0;    
+        unsigned int    time2empty      = 0;
+        unsigned int    time2full       = 0;
 
         // *** methods ***
         static unsigned int    to_voltage       (const unsigned int raw);
@@ -85,6 +92,7 @@ namespace MAX17205 {
         static unsigned int    to_percentage    (const unsigned int raw);
         static signed int      to_temperature   (const unsigned int raw);
         static unsigned int    to_resistance    (const unsigned int raw);
+        static unsigned int    to_time          (const unsigned int raw);
 
     public:
         // *** Constructor ***
@@ -111,6 +119,9 @@ namespace MAX17205 {
         unsigned int    get_age                 (void) const;
         unsigned int    get_ESR                 (void) const;
         signed int      get_temperature         (void) const;    
+        unsigned int    get_SOC                 (void) const;
+        unsigned int    get_TTE                 (void) const;
+        unsigned int    get_TTF                 (void) const;
         bool            read_register           (const Register reg);
         bool            write_register          (const Register reg, const unsigned int data);
         bool            read_battery_voltage    (void);
@@ -118,8 +129,10 @@ namespace MAX17205 {
         bool            read_battery_current_avg(void);
         bool            read_cell_voltage       (void);
         bool            read_cell_voltage_avg   (void);
-
-
+        bool            read_remaining_capacity (void);
+        bool            read_soc                (void);
+        bool            read_TTE                (void);
+        bool            read_TTF                (void);
     };
 };
 #endif
