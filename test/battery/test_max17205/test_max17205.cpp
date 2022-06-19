@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_max17205.cpp
  * @author  SO
- * @version v2.8.0
+ * @version v2.8.1
  * @date    14-November-2021
  * @brief   Unit tests to test the driver for battery balancer and coulomb counter.
  ******************************************************************************
@@ -132,7 +132,14 @@ template class MAX17205::Controller<I2C_Mock>;
  */
 
 void setUp(void) {
-// set stuff up here
+    // set stuff up here
+    set_target_address.reset();
+    send_word.reset();
+    send_data.reset();
+    send_array.reset();
+    send_array_leader.reset();
+    read_array.reset();
+    read_word.reset();
 };
 
 void tearDown(void) {
@@ -349,7 +356,7 @@ void test_read_remaining_capacity(void)
     rx_buffer[0] = 0x00;
     TEST_ASSERT_TRUE(UUT.read_remaining_capacity());
     TEST_ASSERT_EQUAL( 10, UUT.get_remaining_capacity());
-    ::read_array.assert_called_once_with(0x05);
+    ::read_word.assert_called_once_with(0x05);
 };
 
 /// @brief test reading the soc
@@ -364,11 +371,11 @@ void test_read_soc(void)
     // perform test
     rx_buffer[3] = 0x00;
     rx_buffer[2] = 0x00;
-    rx_buffer[1] = 0x0A;
+    rx_buffer[1] = 0x00;
     rx_buffer[0] = 0x0B;
     TEST_ASSERT_TRUE(UUT.read_soc());
     TEST_ASSERT_EQUAL( 11, UUT.get_SOC());
-    ::read_array.assert_called_once_with(0x06);
+    ::read_word.assert_called_once_with(0x06);
 };
 
 /// @brief test reading the time to empty
@@ -387,7 +394,7 @@ void test_read_TTE(void)
     rx_buffer[0] = 0x00;
     TEST_ASSERT_TRUE(UUT.read_TTE());
     TEST_ASSERT_EQUAL( 16, UUT.get_TTE());
-    ::read_array.assert_called_once_with(0x11);
+    ::read_word.assert_called_once_with(0x11);
 };
 
 /// @brief test reading the time to full
@@ -406,7 +413,7 @@ void test_read_TTF(void)
     rx_buffer[0] = 0x00;
     TEST_ASSERT_TRUE(UUT.read_TTF());
     TEST_ASSERT_EQUAL( 16, UUT.get_TTF());
-    ::read_array.assert_called_once_with(0x20);
+    ::read_word.assert_called_once_with(0x20);
 };
 
 /// === Run Tests ===

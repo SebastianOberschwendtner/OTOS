@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    max17205.cpp
  * @author  SO
- * @version v2.8.0
+ * @version v2.8.1
  * @date    14-November-2021
  * @brief   Driver for the MAX17205+ battery balancer and coulomb counter.
  ******************************************************************************
@@ -291,7 +291,7 @@ bool MAX17205::Controller<bus_controller>::read_register(const Register reg)
     std::optional<unsigned int> response = Bus::read_word(this->mybus, reg_byte);
     if (!response) return false;
 
-    // Read successfull, sort the data
+    // Read successful, sort the data
     this->i2c_data.byte[0] = (response.value() >> 8) & 0xFF;
     this->i2c_data.byte[1] = response.value() & 0xFF;
     return true;
@@ -431,13 +431,12 @@ template<class bus_controller>
 bool MAX17205::Controller<bus_controller>::read_remaining_capacity(void)
 {
     // Read the raw values
-    unsigned char reg = static_cast<unsigned char>(Register::Cap_Remaining);
-    if(!Bus::read_array(this->mybus, reg, &this->i2c_data.byte[0], 4)) return false;
+    if(!this->read_register(Register::Cap_Remaining)) return false;
 
     // Convert the data
     unsigned int temp = 0;
-    temp = this->i2c_data.byte[1];
-    temp += this->i2c_data.byte[0] << 8;
+    temp += this->i2c_data.byte[0];
+    temp += (this->i2c_data.byte[1] << 8);
     this->capacity[1] = this->to_capacity(temp);
 
     return true;
@@ -451,13 +450,12 @@ template<class bus_controller>
 bool MAX17205::Controller<bus_controller>::read_soc(void)
 {
     // Read the raw values
-    unsigned char reg = static_cast<unsigned char>(Register::SOC);
-    if(!Bus::read_array(this->mybus, reg, &this->i2c_data.byte[0], 4)) return false;
+    if(!this->read_register(Register::SOC)) return false;
 
     // Convert the data
     unsigned int temp = 0;
-    temp = this->i2c_data.byte[1];
-    temp += this->i2c_data.byte[0] << 8;
+    temp += this->i2c_data.byte[0];
+    temp += (this->i2c_data.byte[1] << 8);
     this->soc = this->to_percentage(temp);
 
     return true;
@@ -471,13 +469,12 @@ template<class bus_controller>
 bool MAX17205::Controller<bus_controller>::read_TTE(void)
 {
     // Read the raw values
-    unsigned char reg = static_cast<unsigned char>(Register::TTE);
-    if(!Bus::read_array(this->mybus, reg, &this->i2c_data.byte[0], 4)) return false;
+    if(!this->read_register(Register::TTE)) return false;
 
     // Convert the data
     unsigned int temp = 0;
-    temp = this->i2c_data.byte[1];
-    temp += this->i2c_data.byte[0] << 8;
+    temp += this->i2c_data.byte[0];
+    temp += (this->i2c_data.byte[1] << 8);
     this->time2empty = this->to_time(temp);
 
     return true;
@@ -491,13 +488,12 @@ template<class bus_controller>
 bool MAX17205::Controller<bus_controller>::read_TTF(void)
 {
     // Read the raw values
-    unsigned char reg = static_cast<unsigned char>(Register::TTF);
-    if(!Bus::read_array(this->mybus, reg, &this->i2c_data.byte[0], 4)) return false;
+    if(!this->read_register(Register::TTF)) return false;
 
     // Convert the data
     unsigned int temp = 0;
-    temp = this->i2c_data.byte[1];
-    temp += this->i2c_data.byte[0] << 8;
+    temp += this->i2c_data.byte[0];
+    temp += (this->i2c_data.byte[1] << 8);
     this->time2full = this->to_time(temp);
 
     return true;
