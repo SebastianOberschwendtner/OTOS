@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_task.cpp
  * @author  SO
- * @version v2.3.0
+ * @version v2.8.2
  * @date    26-Dezember-2021
  * @brief   Unit tests to test the task functionality.
  ******************************************************************************
@@ -104,9 +104,9 @@ void test_waiting(void)
 int main(int argc, char **argv)
 {
     UNITY_BEGIN();
-    test_constructor();
-    test_time_elapsed();
-    test_waiting();
+    RUN_TEST(test_constructor);
+    RUN_TEST(test_time_elapsed);
+    RUN_TEST(test_waiting);
     UNITY_END();
     return EXIT_SUCCESS;
 };
