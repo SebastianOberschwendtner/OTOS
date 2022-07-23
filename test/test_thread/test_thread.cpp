@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    test_thread.c
  * @author  SO
- * @version v2.0.0
+ * @version v2.8.2
  * @date    16-March-2021
  * @brief   Unit tests for the thread handler of OTOS.
  ==============================================================================
@@ -30,6 +30,7 @@
 // *** Includes ***
 #include <array>
 #include <unity.h>
+#include <mock.h>
 #include <thread.h>
 
 // Mock Stack Memory
@@ -193,12 +194,12 @@ void test_priority(void)
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();
-    test_Constructor();
-    test_SetStack();
-    test_StackOverflow();
-    test_is_runnable_execute_always();
-    test_is_runnable_with_schedule();
-    test_priority();
+    RUN_TEST(test_Constructor);
+    RUN_TEST(test_SetStack);
+    RUN_TEST(test_StackOverflow);
+    RUN_TEST(test_is_runnable_execute_always);
+    RUN_TEST(test_is_runnable_with_schedule);
+    RUN_TEST(test_priority);
     UNITY_END();
     return 0;
 };
