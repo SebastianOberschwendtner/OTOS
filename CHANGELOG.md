@@ -10,6 +10,7 @@
     - USART *(tx only)*
     - SDIO *(STM32F4 devices only)*
     - Basic interface for System Clock and PLL settings.
+    - DMA
 - Adds chip drivers for:
     - Display Controller *ILI9341*
     - Display Controller *UC1611S*

@@ -44,6 +44,7 @@
     #include "../stm32/exti_stm32_fake.h"
     #include "../stm32/timer_stm32_fake.h"
     #include "../stm32/usart_stm32_fake.h"
+    #include "../stm32/dma_stm32_fake.h"
 
 #endif
 

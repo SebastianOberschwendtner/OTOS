@@ -47,6 +47,7 @@ legend Hardware or Processor specific levels are marked in **<color #SkyBlue> bl
 *****[#SkyBlue] uc1611.h
 ****_ stm32
 *****[#SkyBlue] core_stm32.h
+*****[#SkyBlue] dma_stm32.h
 *****[#SkyBlue] gpio_stm32.h
 *****[#SkyBlue] i2c_stm32.h
 *****[#SkyBlue] spi_stm32.h

@@ -375,4 +375,15 @@ namespace Timer
     template <class timer>
     unsigned int get_count(timer &my_timer) { return my_timer.get_count(); };
 };
+
+namespace DMA
+{
+    // === Enums ===
+    enum class Direction
+    {
+        peripheral_to_memory = 0,
+        memory_to_peripheral,
+        memory_to_memory
+    };
+};
 #endif
