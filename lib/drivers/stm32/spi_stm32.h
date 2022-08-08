@@ -69,6 +69,27 @@ namespace SPI
         // bool            ack_received        (void) const;
         // bool            RX_data_valid       (void) const;
         // bool            transfer_finished   (void) const;
+
+        // *** Templated Methods ***
+
+        /**
+         * @brief Create a dma stream object for the SPI controller.
+         * This function should be called with a rvalue reference to a DMA Stream object.
+         * 
+         * @tparam DMA_Stream The type of the DMA Stream.
+         * @param stream The rvalue reference to the DMA Stream object.
+         * @param direction The direction of the DMA Stream.
+         * @return Returns the DMA Stream object which is set up for the SPI controller.
+         */
+        template<class DMA_Stream>
+        DMA_Stream create_dma_stream( DMA_Stream &&stream, const DMA::Direction direction ) const
+        {
+            this->peripheral->CR2 |= SPI_CR2_TXDMAEN;
+            stream.assign_peripheral(this->peripheral->DR);
+            stream.set_direction(direction);
+
+            return stream;
+        };
     };
 };
 

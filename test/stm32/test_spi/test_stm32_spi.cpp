@@ -35,22 +35,30 @@
 #include "stm32/spi_stm32.h"
 
 /** === Test List ===
-* ▢ error codes:
-*   ✓ error -110: Timeout during transfer
-*   ✓ error -111: Bus busy during start of transfer
-*/
+ * ▢ error codes:
+ *   ✓ error -110: Timeout during transfer
+ *   ✓ error -111: Bus busy during start of transfer
+ */
 
+// === Fixtures ===
 
-
-// === Tests ===
-void setUp(void) {
-// set stuff up here
-RCC->registers_to_default();
-SPI1->registers_to_default();
+// Mock DMA Stream
+struct DMA_Stream
+{
+    Mock::Callable<> assign_peripheral;
+    Mock::Callable<DMA::Direction> set_direction;
 };
 
-void tearDown(void) {
-// clean stuff up here
+// === Tests ===
+void setUp(void)
+{
+    // set stuff up here
+    RCC->registers_to_default();
+    SPI1->registers_to_default();
+};
+
+void tearDown(void){
+    // clean stuff up here
 };
 
 /// @brief Test the initialization of the controller
@@ -202,7 +210,7 @@ void test_enable(void)
     // Enable bus
     UUT.enable();
     TEST_ASSERT_BIT_HIGH(SPI_CR1_SPE_Pos, SPI1->CR1);
-    
+
     // Disable bus again
     UUT.disable();
     TEST_ASSERT_BIT_LOW(SPI_CR1_SPE_Pos, SPI1->CR1);
@@ -216,11 +224,11 @@ void test_last_transmit_finished(void)
 
     // Test register empty
     SPI1->SR = SPI_SR_TXE;
-    TEST_ASSERT_TRUE( UUT.last_transmit_finished() );
+    TEST_ASSERT_TRUE(UUT.last_transmit_finished());
 
     // Test register not empty
     SPI1->SR = 0;
-    TEST_ASSERT_FALSE( UUT.last_transmit_finished() );
+    TEST_ASSERT_FALSE(UUT.last_transmit_finished());
 };
 
 /// @brief Test status bus busy
@@ -231,11 +239,11 @@ void test_bus_busy(void)
 
     // Test register empty
     SPI1->SR = SPI_SR_BSY;
-    TEST_ASSERT_TRUE( UUT.is_busy() );
+    TEST_ASSERT_TRUE(UUT.is_busy());
 
     // Test register not empty
     SPI1->SR = 0;
-    TEST_ASSERT_FALSE( UUT.is_busy() );
+    TEST_ASSERT_FALSE(UUT.is_busy());
 };
 
 /// @brief Test sending data
@@ -285,22 +293,37 @@ void test_send_array(void)
     SPI::Controller<IO::SPI_1> UUT(1'000'000);
 
     // fill array with consecutive numbers
-    std::iota( buffer.begin(), buffer.end(), 0);
+    std::iota(buffer.begin(), buffer.end(), 0);
 
     // Test sending the array
     SPI1->SR = SPI_SR_TXE;
     UUT.set_error(Error::Code::None);
-    TEST_ASSERT_TRUE( UUT.send_array(buffer.data(), 6) );
+    TEST_ASSERT_TRUE(UUT.send_array(buffer.data(), 6));
     TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
-    TEST_ASSERT_EQUAL( 5, SPI1->DR);
+    TEST_ASSERT_EQUAL(5, SPI1->DR);
 
     // Test sending an array, when the bus is busy
     SPI1->SR = SPI_SR_BSY;
     SPI1->DR = 0;
     UUT.set_error(Error::Code::None);
-    TEST_ASSERT_FALSE( UUT.send_array(buffer.data(), 6) );
+    TEST_ASSERT_FALSE(UUT.send_array(buffer.data(), 6));
     TEST_ASSERT_EQUAL(Error::Code::SPI_BUS_Busy_Error, UUT.get_error());
-    TEST_ASSERT_EQUAL( 0, SPI1->DR);
+    TEST_ASSERT_EQUAL(0, SPI1->DR);
+};
+
+/// @brief Test creating a DMA Stream with the SPI as target/source
+void test_create_dma_stream(void)
+{
+    // Create SPI Controller
+    SPI::Controller<IO::SPI_1> UUT(1'000'000);
+
+    // Create a DMA stream
+    auto stream = UUT.create_dma_stream(DMA_Stream{}, DMA::Direction::peripheral_to_memory);
+
+    // Test side effects
+    TEST_ASSERT_BIT_HIGH(SPI_CR2_TXDMAEN_Pos, SPI1->CR2);
+    stream.assign_peripheral.assert_called_once();
+    stream.set_direction.assert_called_once_with(static_cast<int>(DMA::Direction::peripheral_to_memory));
 };
 
 // === Main ===
@@ -317,5 +340,6 @@ int main(int argc, char **argv)
     RUN_TEST(test_bus_busy);
     RUN_TEST(test_send_data);
     RUN_TEST(test_send_array);
+    RUN_TEST(test_create_dma_stream);
     return UNITY_END();
 };
