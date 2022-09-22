@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    gpio_stm32.cpp
  * @author  SO
- * @version v1.3.3
+ * @version v2.9.0
  * @date    25-August-2021
  * @brief   GPIO driver for STM32 microcontrollers.
  ==============================================================================
@@ -90,10 +90,10 @@ constexpr std::uintptr_t get_port_address(const GPIO::Port Port) {
         
     case GPIO::Port::D:
         return GPIOD_BASE;
-        
+#ifndef STM32L053xx
     case GPIO::Port::E:
         return GPIOE_BASE;
-        
+#endif 
     case GPIO::Port::H:
         return GPIOH_BASE;
 

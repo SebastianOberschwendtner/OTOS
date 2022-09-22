@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    i2c_stm32.cpp
  * @author  SO
- * @version v2.2.0
+ * @version v2.9.0
  * @date    02-September-2021
  * @brief   I2C driver for STM32 microcontrollers.
  ==============================================================================
@@ -83,8 +83,10 @@ constexpr std::uintptr_t get_peripheral_address(const IO instance) {
         return I2C1_BASE;
     case IO::I2C_2:
         return I2C2_BASE;
+#ifndef STM32L053xx
     case IO::I2C_3:
         return I2C3_BASE;
+#endif
     default:
         return 0;
     }
@@ -150,9 +152,11 @@ I2C::Controller::Controller(const IO i2c_instance, const unsigned long frequency
     case IO::I2C_2:
         _reg = RCC_APB1ENR_I2C2EN;
         break;
+#ifndef STM32L053xx
     case IO::I2C_3:
         _reg = RCC_APB1ENR_I2C3EN;
         break;
+#endif
     default:
         break;
     };

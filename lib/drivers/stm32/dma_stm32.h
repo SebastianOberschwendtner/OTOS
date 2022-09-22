@@ -38,10 +38,36 @@ namespace DMA
     };
 
     // === Declarations ===
+    /**
+     * @brief This class/struct is used to define the used
+     * DMA channel and the used stream.
+     * 
+     * For F4 and L0 devices the naming scheme in the datasheet differ.
+     * The following table shows the equivalent names:
+     * | F4 | L0 |
+     * |---|---|
+     * | DMA    | Not applicable => always 1 |
+     * |Stream  | Channel                    |
+     * |Channel | Request Mapping            |
+     */
     struct Stream_t
     {
         unsigned char DMA{0}, Stream{0}, Channel{0};
     };
+
+#ifdef STM32L0
+    /**
+     * @brief Class to make the L0 device compatible with the F4 device.
+     */
+    struct DMA_Stream_TypeDef
+    {
+        // === Registers ===
+        __IO uint32_t CCR;   /*!< DMA stream x configuration register      */
+        __IO uint32_t CNDTR; /*!< DMA stream x number of data register     */
+        __IO uint32_t CPAR;  /*!< DMA stream x peripheral address register */
+        __IO uint32_t CMAR; /*!< DMA stream x memory 0 address register   */
+    };
+#endif
 
     class Stream
     {
@@ -74,11 +100,20 @@ namespace DMA
         void assign_peripheral(peripheral_t &peripheral, const bool enable_increment = false)
         {
             // Set the peripheral address
+#if defined(STM32F4)
             this->Instance->PAR = reinterpret_cast<std::uintptr_t>(&peripheral);
+#elif defined(STM32L0)
+            this->Instance->CPAR = reinterpret_cast<std::uintptr_t>(&peripheral);
+#endif
 
             // Clear flag and enable incrementing of the peripheral address
+#if defined(STM32F4)
             this->Instance->CR &= ~DMA_SxCR_PINC;
             this->Instance->CR |= (enable_increment ? DMA_SxCR_PINC : 0);
+#elif defined(STM32L0)
+            this->Instance->CCR &= ~DMA_CCR_PINC;
+            this->Instance->CCR |= (enable_increment ? DMA_CCR_PINC : 0);
+#endif
             return;
         };
 
@@ -93,19 +128,37 @@ namespace DMA
         void assign_memory(memory_t &memory, const bool enable_increment = false)
         {
             // Set the peripheral address
+#if defined(STM32F4)
             this->Instance->M0AR = reinterpret_cast<std::uintptr_t>(&memory);
+#elif defined(STM32L0)
+            this->Instance->CMAR = reinterpret_cast<std::uintptr_t>(&memory);
+#endif
 
             // Clear flag and enable incrementing of the memory address
+#if defined(STM32F4)
             this->Instance->CR &= ~DMA_SxCR_MINC;
             this->Instance->CR |= (enable_increment ? DMA_SxCR_MINC : 0);
+#elif defined(STM32L0)
+            this->Instance->CCR &= ~DMA_CCR_MINC;
+            this->Instance->CCR |= (enable_increment ? DMA_CCR_MINC : 0);
+#endif
 
             // Get the memory size of the template parameter and assign the memory size to the DMA stream
+#if defined(STM32F4)
             this->Instance->CR &= ~DMA_SxCR_MSIZE_Msk;
             if constexpr (sizeof(memory_t) == 2)
                 this->Instance->CR |= DMA_SxCR_MSIZE_0;
             else if constexpr (sizeof(memory_t) == 4)
                 this->Instance->CR |= DMA_SxCR_MSIZE_1;
             return;
+#elif defined(STM32L0)
+            this->Instance->CCR &= ~DMA_CCR_MSIZE_Msk;
+            if constexpr (sizeof(memory_t) == 2)
+                this->Instance->CCR |= DMA_CCR_MSIZE_0;
+            else if constexpr (sizeof(memory_t) == 4)
+                this->Instance->CCR |= DMA_CCR_MSIZE_1;
+            return;
+#endif
         };
 
         /**
@@ -127,7 +180,11 @@ namespace DMA
             this->assign_memory(array[0], enable_increment);
 
             // Set number of memory transfers
+#if defined(STM32F4)
             this->Instance->NDTR = size;
+#elif defined(STM32L0)
+            this->Instance->CNDTR = size;
+#endif
         };
 
         // *** Methods ***

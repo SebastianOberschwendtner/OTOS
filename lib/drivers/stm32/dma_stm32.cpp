@@ -34,14 +34,19 @@
 DMA::Stream::Stream(const Stream_t &stream)
 {
     // Enable the DMA clock
+#if defined(STM32F4)
     if (stream.DMA == 1)
         RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
     else
         RCC->AHB2ENR |= RCC_AHB1ENR_DMA2EN;
+#elif defined(STM32L0)
+    RCC->AHBENR |= RCC_AHBENR_DMAEN;
+#endif
 
     // Set the instance
     switch (stream.Stream)
     {
+#if defined(STM32F4)
     case 0: // Stream 0
         this->Instance = (stream.DMA == 1) ? DMA1_Stream0 : DMA2_Stream0;
         this->Flags = reinterpret_cast<volatile std::uintptr_t*>((stream.DMA == 1) ? &DMA1->LISR : &DMA2->LISR);
@@ -90,13 +95,47 @@ DMA::Stream::Stream(const Stream_t &stream)
         this->ClearFlags = reinterpret_cast<volatile std::uintptr_t*>((stream.DMA == 1) ? &DMA1->HIFCR : &DMA2->HIFCR);
         this->flag_offset = 22;
         break;
+#elif defined(STM32L0)
+    case 1: // Channel 1
+        this->Instance = reinterpret_cast<volatile DMA::DMA_Stream_TypeDef*>(DMA1_Channel1_BASE);
+        break;
+    case 2: // Channel 2
+        this->Instance = reinterpret_cast<volatile DMA::DMA_Stream_TypeDef*>(DMA1_Channel2_BASE);
+        break;
+    case 3: // Channel 3
+        this->Instance = reinterpret_cast<volatile DMA::DMA_Stream_TypeDef*>(DMA1_Channel3_BASE);
+        break;
+    case 4: // Channel 4
+        this->Instance = reinterpret_cast<volatile DMA::DMA_Stream_TypeDef*>(DMA1_Channel4_BASE);
+        break;
+    case 5: // Channel 5
+        this->Instance = reinterpret_cast<volatile DMA::DMA_Stream_TypeDef*>(DMA1_Channel5_BASE);
+        break;
+    case 6: // Channel 6
+        this->Instance = reinterpret_cast<volatile DMA::DMA_Stream_TypeDef*>(DMA1_Channel6_BASE);
+        break;
+    case 7: // Channel 7
+        this->Instance = reinterpret_cast<volatile DMA::DMA_Stream_TypeDef*>(DMA1_Channel7_BASE);
+        break;
+#endif
     default:
         break;
     }
 
     // Set the channel
+#if defined(STM32F4)
     this->Instance->CR &= ~DMA_SxCR_CHSEL_Msk;
     this->Instance->CR |= (stream.Channel << DMA_SxCR_CHSEL_Pos) & DMA_SxCR_CHSEL_Msk;
+#elif defined(STM32L0)
+    // L0 has only one interrupt register
+    this->Flags = reinterpret_cast<volatile std::uintptr_t*>(&DMA1->ISR);
+    this->ClearFlags = reinterpret_cast<volatile std::uintptr_t*>(&DMA1->IFCR);
+    this->flag_offset = (stream.Stream - 1) * 4;
+
+    // Set the Channel or Request mapping for the selected Stream/Channel
+    DMA1_CSELR->CSELR &= ~(DMA_CSELR_C1S_Msk << ((stream.Stream - 1) * 4));
+    DMA1_CSELR->CSELR |= (stream.Channel << ((stream.Stream - 1) * 4));
+#endif
 };
 
 /**
@@ -106,11 +145,22 @@ DMA::Stream::Stream(const Stream_t &stream)
  */
 void DMA::Stream::set_direction(const Direction &direction)
 {
+#if defined(STM32F4)
     // clear old direction
     this->Instance->CR &= ~DMA_SxCR_DIR_Msk;
 
     // set new direction
     this->Instance->CR |= (static_cast<unsigned char>(direction) << DMA_SxCR_DIR_Pos) & DMA_SxCR_DIR_Msk;
+#elif defined(STM32L0)
+    // clear old direction
+    this->Instance->CCR &= ~(DMA_CCR_MEM2MEM_Msk | DMA_CCR_DIR_Msk);
+
+    // set new direction
+    if (direction == Direction::memory_to_memory)
+        this->Instance->CCR |= DMA_CCR_MEM2MEM | DMA_CCR_DIR;
+    else if (direction == Direction::memory_to_peripheral)
+        this->Instance->CCR |= DMA_CCR_DIR;
+#endif
 };
 
 /**
@@ -121,7 +171,7 @@ void DMA::Stream::set_direction(const Direction &direction)
  */
 void DMA::Stream::clear_interrupt_flag(const Flag &flag)
 {
-    *this->ClearFlags = ( 0b111101 << this->flag_offset);
+    *this->ClearFlags = ( 0b1111 << this->flag_offset);
 };
 
 /**
@@ -140,7 +190,11 @@ bool DMA::Stream::enable(void)
         this->clear_interrupt_flag(Flag::All);
 
         // Enable DMA stream
+#if defined(STM32F4)
         this->Instance->CR |= DMA_SxCR_EN;
+#elif defined(STM32L0)
+        this->Instance->CCR |= DMA_CCR_EN;
+#endif
 
         // Stream was successfully enabled
         return true;
@@ -156,7 +210,11 @@ bool DMA::Stream::enable(void)
  */
 bool DMA::Stream::is_enabled(void) const
 {
+#if defined(STM32F4)
     return this->Instance->CR & DMA_SxCR_EN;
+#elif defined(STM32L0)
+    return this->Instance->CCR & DMA_CCR_EN;
+#endif
 };
 
 /**
@@ -165,9 +223,13 @@ bool DMA::Stream::is_enabled(void) const
  */
 bool DMA::Stream::is_transfer_complete(void) const
 {
+#if defined(STM32F4)
     /* 
      * The interrupt flags are derived from the definition of Stream 0
      * to make the intention of the offset clearer.
      */
     return *this->Flags & (1 << (this->flag_offset + DMA_LISR_TCIF0_Pos));
+#elif defined(STM32L0)
+    return *this->Flags & (1 << (this->flag_offset + DMA_ISR_TCIF1_Pos));
+#endif
 };

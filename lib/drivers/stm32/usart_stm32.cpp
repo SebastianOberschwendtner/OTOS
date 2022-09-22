@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    usart_stm32.cpp
  * @author  SO
- * @version v2.2.1
+ * @version v2.9.0
  * @date    23-Dezember-2021
  * @brief   USART driver for STM32 microcontrollers.
  ==============================================================================
@@ -59,7 +59,7 @@ namespace USART
             return USART1_BASE;
         if constexpr (instance == IO::USART_2)
             return USART2_BASE;
-#ifdef STM32L0
+#if defined(STM32L0) && !defined(STM32L053xx)
         if constexpr (instance == IO::USART_4)
             return USART4_BASE;
         if constexpr (instance == IO::USART_5)
@@ -93,7 +93,7 @@ namespace USART
             RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
         if constexpr (instance == IO::USART_2)
             RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
-#ifdef STM32L0
+#if defined(STM32L0) && !defined(STM32L053xx)
         if constexpr (instance == IO::USART_4)
             RCC->APB1ENR |= RCC_APB1ENR_USART4EN;
         if constexpr (instance == IO::USART_5)

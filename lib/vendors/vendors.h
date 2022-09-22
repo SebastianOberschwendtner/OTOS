@@ -20,13 +20,21 @@
 
 #ifndef VENDORS_H_
 #define VENDORS_H_
+    /*
+     * Macros to check for supported Mic
+     */
+    // Supported STM32F4 Devices
+    #define IS_STM32F4 defined(STM32F429xx)
+    //Supported STM32L0 Devices
+    #define IS_STM32L0 defined(STM32L073xx) || defined(STM32L053xx)
+
     /* 
     * Check which microcontroller is used and 
     * include the corresponding implementation
     * of the vendors specific peripheral libraries.
     */
 
-    #if defined(STM32F4)
+    #if IS_STM32F4
     /*-----------------------------
     * Controller:   STM32F4xx
     * Processor:    ARM Cortex M4
@@ -35,7 +43,7 @@
     #include "stm32f4xx.h"
 
     
-    #elif defined(STM32L0)
+    #elif IS_STM32L0
     /*-----------------------------
     * Controller:   STM32L0xx
     * Processor:    ARM Cortex M0+
