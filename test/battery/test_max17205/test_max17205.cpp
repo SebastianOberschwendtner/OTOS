@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_max17205.cpp
  * @author  SO
- * @version v2.7.3
+ * @version v2.8.1
  * @date    14-November-2021
  * @brief   Unit tests to test the driver for battery balancer and coulomb counter.
  ******************************************************************************
@@ -116,8 +116,8 @@ template class MAX17205::Controller<I2C_Mock>;
  * ✓ controller can read registers
  * ✓ controller can set correct initialization data
  * ▢ controller read and convert correctly:
- *      ▢ Capacity
- *      ▢ Percentage
+ *      ✓ Capacity
+ *      ✓ Percentage
  *      ✓ Voltage
  *      ✓ Cell Voltage
  *      ▢ Average Cell Voltage
@@ -125,13 +125,21 @@ template class MAX17205::Controller<I2C_Mock>;
  *      ✓ Average Current
  *      ▢ Temperature
  *      ▢ Resistance
- *      ▢ Time
+ *      ✓ Time
+ *      ✓ SOC
  * ▢ controller can enable/disable balancing
  * ▢ controller can enable/disable sleep mode
  */
 
 void setUp(void) {
-// set stuff up here
+    // set stuff up here
+    set_target_address.reset();
+    send_word.reset();
+    send_data.reset();
+    send_array.reset();
+    send_array_leader.reset();
+    read_array.reset();
+    read_word.reset();
 };
 
 void tearDown(void) {
@@ -155,10 +163,13 @@ void test_init(void)
     TEST_ASSERT_EQUAL(0, UUT.get_cell_voltage(2));
     TEST_ASSERT_EQUAL(0, UUT.get_total_capacity());
     TEST_ASSERT_EQUAL(0, UUT.get_remaining_capacity());
+    TEST_ASSERT_EQUAL(0, UUT.get_SOC());
     TEST_ASSERT_EQUAL(0, UUT.get_number_cycles());
     TEST_ASSERT_EQUAL(0, UUT.get_age());
     TEST_ASSERT_EQUAL(0, UUT.get_ESR());
     TEST_ASSERT_EQUAL(0, UUT.get_temperature());
+    TEST_ASSERT_EQUAL(0, UUT.get_TTE());
+    TEST_ASSERT_EQUAL(0, UUT.get_TTF());
     
     // initialization
     TEST_ASSERT_TRUE(UUT.initialize());
@@ -329,6 +340,82 @@ void test_read_cell_voltage_avg(void)
     ::read_array.assert_called_once_with(0xD3);
 };
 
+/// @brief test reading the remaining capacity
+void test_read_remaining_capacity(void)
+{
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+
+    // create the controller object
+    MAX17205::Controller UUT(i2c);
+
+    // perform test
+    rx_buffer[3] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[1] = 0x0A;
+    rx_buffer[0] = 0x00;
+    TEST_ASSERT_TRUE(UUT.read_remaining_capacity());
+    TEST_ASSERT_EQUAL( 10, UUT.get_remaining_capacity());
+    ::read_word.assert_called_once_with(0x05);
+};
+
+/// @brief test reading the soc
+void test_read_soc(void)
+{
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+
+    // create the controller object
+    MAX17205::Controller UUT(i2c);
+
+    // perform test
+    rx_buffer[3] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[1] = 0x00;
+    rx_buffer[0] = 0x0B;
+    TEST_ASSERT_TRUE(UUT.read_soc());
+    TEST_ASSERT_EQUAL( 11, UUT.get_SOC());
+    ::read_word.assert_called_once_with(0x06);
+};
+
+/// @brief test reading the time to empty
+void test_read_TTE(void)
+{
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+
+    // create the controller object
+    MAX17205::Controller UUT(i2c);
+
+    // perform test
+    rx_buffer[3] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[1] = 0x03;
+    rx_buffer[0] = 0x00;
+    TEST_ASSERT_TRUE(UUT.read_TTE());
+    TEST_ASSERT_EQUAL( 16, UUT.get_TTE());
+    ::read_word.assert_called_once_with(0x11);
+};
+
+/// @brief test reading the time to full
+void test_read_TTF(void)
+{
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+
+    // create the controller object
+    MAX17205::Controller UUT(i2c);
+
+    // perform test
+    rx_buffer[3] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[1] = 0x03;
+    rx_buffer[0] = 0x00;
+    TEST_ASSERT_TRUE(UUT.read_TTF());
+    TEST_ASSERT_EQUAL( 16, UUT.get_TTF());
+    ::read_word.assert_called_once_with(0x20);
+};
+
 /// === Run Tests ===
 int main(int argc, char** argv)
 {
@@ -341,5 +428,9 @@ int main(int argc, char** argv)
     RUN_TEST(test_read_cell_voltage);
     RUN_TEST(test_read_battery_current_avg);
     RUN_TEST(test_read_cell_voltage_avg);
+    RUN_TEST(test_read_remaining_capacity);
+    RUN_TEST(test_read_soc);
+    RUN_TEST(test_read_TTE);
+    RUN_TEST(test_read_TTF);
     return UNITY_END();
 };

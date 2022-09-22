@@ -95,14 +95,13 @@ namespace Mock
          */
         void assert_called_once(void) { 
             // Prepare errors message
-            // const char *fmt = "Expected to be called once, but was called %d times.";
-            // int sz = std::snprintf(nullptr, 0, fmt, this->call_count);
-            // std::vector<char> buf(sz + 1); // note +1 for null terminator
-            // std::snprintf(&buf[0], buf.size(), fmt, this->call_count);
+            const char *fmt = "Expected to be called once, but was called %d times.";
+            int sz = std::snprintf(nullptr, 0, fmt, this->call_count);
+            std::vector<char> buf(sz + 1); // note +1 for null terminator
+            std::snprintf(&buf[0], buf.size(), fmt, this->call_count);
 
             // Test the call count
-            // TEST_ASSERT_TRUE_MESSAGE(this->call_count==1, &buf[0]); 
-            TEST_ASSERT_TRUE_MESSAGE(this->call_count==1, "Was not called once."); 
+            TEST_ASSERT_TRUE_MESSAGE(this->call_count==1, &buf[0]); 
             // Reset the call count again
             this->call_count = 0;
         };
