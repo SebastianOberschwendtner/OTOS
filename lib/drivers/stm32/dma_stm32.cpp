@@ -171,7 +171,11 @@ void DMA::Stream::set_direction(const Direction &direction)
  */
 void DMA::Stream::clear_interrupt_flag(const Flag &flag)
 {
+#if defined(STM32F4)
+    *this->ClearFlags = ( 0b111101 << this->flag_offset);
+#elif defined(STM32L0)
     *this->ClearFlags = ( 0b1111 << this->flag_offset);
+#endif
 };
 
 /**
