@@ -61,10 +61,12 @@ constexpr unsigned char get_RCCEN_position(const GPIO::Port Port) {
             return 6;
         case GPIO::Port::I:
             return 8;
+#ifdef STM32F429xx
         case GPIO::Port::J:
             return 9;
         case GPIO::Port::K:
             return 10;
+#endif
 #endif
         default:
             return 32;
@@ -106,12 +108,14 @@ constexpr std::uintptr_t get_port_address(const GPIO::Port Port) {
         
     case GPIO::Port::I:
         return GPIOI_BASE;
-        
+
+#ifdef STM32F429xx 
     case GPIO::Port::J:
         return GPIOJ_BASE;
-        
+
     case GPIO::Port::K:
         return GPIOK_BASE;
+#endif
 #endif
     default:
         return 0;

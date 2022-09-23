@@ -38,8 +38,10 @@ template class USART::Controller<IO::USART_5>;
 #ifdef STM32F4
 template class USART::Controller<IO::USART_3>;
 template class USART::Controller<IO::USART_6>;
+#ifdef STM32F429xx
 template class USART::Controller<IO::USART_7>;
 template class USART::Controller<IO::USART_8>;
+#endif
 #endif
 
 // === Helper functions ===
@@ -74,10 +76,12 @@ namespace USART
             return UART5_BASE;
         if constexpr (instance == IO::USART_6)
             return USART6_BASE;
+#ifdef STM32F429xx
         if constexpr (instance == IO::USART_7)
             return UART7_BASE;
         if constexpr (instance == IO::USART_8)
             return UART8_BASE;
+#endif
 #endif
     };
 
@@ -108,10 +112,12 @@ namespace USART
             RCC->APB1ENR |= RCC_APB1ENR_UART5EN;
         if constexpr (instance == IO::USART_6)
             RCC->APB2ENR |= RCC_APB2ENR_USART6EN;
+#ifdef STM32F429xx
         if constexpr (instance == IO::USART_7)
             RCC->APB1ENR |= RCC_APB1ENR_UART7EN;
         if constexpr (instance == IO::USART_8)
             RCC->APB1ENR |= RCC_APB1ENR_UART8EN;
+#endif
 #endif
     };
 

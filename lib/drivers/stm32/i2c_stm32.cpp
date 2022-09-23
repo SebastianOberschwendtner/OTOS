@@ -168,7 +168,9 @@ I2C::Controller::Controller(const IO i2c_instance, const unsigned long frequency
     peripheral->CR2     = get_FREQ();
     peripheral->CCR     = get_clock_control(frequency);
     peripheral->TRISE   = get_TRISE(500); /** @todo Rise time is fixed to 500ns for now. Adjust that later. */
+#ifdef STM32F429xx
     peripheral->FLTR    = 0;
+#endif
 #elif defined(STM32L0)
     peripheral->CR2     = 0;
     peripheral->TIMINGR = get_clock_control(frequency);

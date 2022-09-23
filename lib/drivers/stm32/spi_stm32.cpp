@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    spi_stm32.cpp
  * @author  SO
- * @version v2.2.2
+ * @version v2.9.0
  * @date    22-Dezember-2021
  * @brief   SPI driver for STM32 microcontrollers.
  ==============================================================================
@@ -81,12 +81,14 @@ namespace SPI
 #ifdef STM32F4
         if constexpr (instance == IO::SPI_3)
             return SPI3_BASE;
+#ifdef STM32F429xx
         if constexpr (instance == IO::SPI_4)
             return SPI4_BASE;
         if constexpr (instance == IO::SPI_5)
             return SPI5_BASE;
         if constexpr (instance == IO::SPI_6)
             return SPI6_BASE;
+#endif
 #endif
     };
 
@@ -105,12 +107,14 @@ namespace SPI
 #ifdef STM32F4
         if constexpr (instance == IO::SPI_3)
             RCC->APB1ENR |= RCC_APB1ENR_SPI3EN;
+#ifdef STM32F429xx
         if constexpr (instance == IO::SPI_4)
             RCC->APB2ENR |= RCC_APB2ENR_SPI4EN;
         if constexpr (instance == IO::SPI_5)
             RCC->APB2ENR |= RCC_APB2ENR_SPI5EN;
         if constexpr (instance == IO::SPI_6)
             RCC->APB2ENR |= RCC_APB2ENR_SPI6EN;
+#endif
 #endif
     }
 
