@@ -21,12 +21,12 @@
 #ifndef VENDORS_H_
 #define VENDORS_H_
     /*
-     * Macros to check for supported Mic
+     * Macros to check for supported Microcontrollers
      */
     // Supported STM32F4 Devices
-    #define IS_STM32F4 defined(STM32F429xx)
+    #define IS_STM32F4 defined(STM32F429xx) || defined(STM32F405xx)
     //Supported STM32L0 Devices
-    #define IS_STM32L0 defined(STM32L073xx) || defined(STM32L053xx)
+    #define IS_STM32L0 defined(STM32L073xx) || defined(STM32L072xx) || defined(STM32L053xx)
 
     /* 
     * Check which microcontroller is used and 

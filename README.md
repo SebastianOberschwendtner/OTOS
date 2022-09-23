@@ -24,8 +24,11 @@ Bear bones realtime operating system for embedded systems. Focus lies on KISS (*
 
 |Device | Core | FPU | Header |
 |---|---|:---:|---|
-|STM32F4xx|*ARM* Cortex M4<sup>&reg;</sub>|:x:|`arm_cm4_nofpu.h`|
-|STM32L0xx|*ARM* Cortex M0+<sup>&reg;</sub>|:x:|`arm_cm0plus_nofpu.h`|
+|STM32F429|*ARM* Cortex M4<sup>&reg;</sub>|:x:|`arm_cm4_nofpu.h`|
+|STM32F405|*ARM* Cortex M4<sup>&reg;</sub>|:x:|`arm_cm4_nofpu.h`|
+|STM32L073|*ARM* Cortex M0+<sup>&reg;</sub>|:x:|`arm_cm0plus_nofpu.h`|
+|STM32L072|*ARM* Cortex M0+<sup>&reg;</sub>|:x:|`arm_cm0plus_nofpu.h`|
+|STM32L053|*ARM* Cortex M0+<sup>&reg;</sub>|:x:|`arm_cm0plus_nofpu.h`|
 
 - Atmel<sup>&reg;</sub>
 
@@ -57,11 +60,22 @@ OTOS::Kernel OS;
 Each thread handles **one** task. You can bundle multiple actions in one task, or use separate tasks for each action.
 The tasks are scheduled using their *function name*:
 ```cpp
-// Schedule task with the function name MyTask
-OS.scheduleTask(&MyTask, OTOS::Check::Stack(256), OTOS:PrioNormal);
+// Schedule task with the function name MyTask and a stack size of 128 bytes
+OS.scheduleTask<128>(&MyTask, OTOS:PrioNormal);
 ```
 - You have to schedule the thread in the file where your *kernel* object is created.
 - The task can be defined in a separate file.
+
+When you do not give an execution rate, the task will run whenever it is possible to run it.
+That means:
+- No higher priority task can be run.
+- No other task with a defined execution frequency can run.
+
+To define a execution frequency the task is allowed to execute use this task constructor:
+```cpp
+// Schedule task with the function name MyTask and run it with 10 Hz
+OS.scheduleTask<128>(&MyTask, OTOS:PrioNormal, 10);
+```
 
 ### Control within Thread/Task
 The OS **does not** implement a *preemptive* scheduling (yet). So your scheduled task has
@@ -70,6 +84,39 @@ to periodically yield its execution and tell the OS that another task can be exe
 // Tell the OS that it can give the control to another task
 OTOS::Thread::yield();
 ```
+
+### Timing within Tasks
+You can use `Timed_Task` for timing within tasks.
+The function will use the `yield()` function for waiting and timing. 
+Currently, only the *SysTick* timer is used as a time base, but you can give the task any function handle which returns a time as an integer type.
+To create a task using the *SysTick* timer use this:
+```cpp
+// Create a timed task using SysTick as the timebase
+OTOS::Timed_Task MyTask(OTOS::get_time_ms);
+```
+
+The function `get_time_ms()` is a static class method of the OTOS kernel and can be called from anywhere to get the current time in *[ms]* since the system was started.
+
+>:warning: The SysTick Interrupt has to be enabled!
+
+Within the *SysTick* interrupt execute the following kernel timing functions:
+```cpp
+/** 
+ * @brief Provide a Interrupt handler for the systick timer,
+ * which gets called every 1 ms.
+ */
+extern "C" void SysTick_Handler(void)
+{
+    OS.count_time_ms();
+    OS.update_schedule();
+};
+```
+In the main function configure the interrupt using the following function:
+```cpp
+// Configure SysTick timer for interrupts every 1 ms
+Timer::SysTick_Configure();
+```
+The function takes the configured CPU clock into account and configures the *SysTick* interrupt for an interrupt every 1ms.
 
 ### Start Executing the Threads
 Once all threads are scheduled, you can start the kernel execution with:
