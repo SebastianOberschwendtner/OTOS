@@ -24,6 +24,7 @@
     // *** Includes which mock vendor specific peripherals
     // ---------- STM32 -------------
     #define STM32F4 // => The library fakes the STM32F4 microcontroller family
+    #define STM32F429xx // => The library fakes the STM32F429 microcontroller
     // === Clock defines ===
     #define F_CPU 4'000'000
     #define F_APB1 2'000'000
