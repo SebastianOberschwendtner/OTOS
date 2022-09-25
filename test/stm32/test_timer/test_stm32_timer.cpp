@@ -51,6 +51,7 @@
 
 // === Mocks ===
 extern Mock::Callable<bool> CMSIS_NVIC_EnableIRQ;
+extern Mock::Callable<bool> CMSIS_NVIC_SetPriority;
 extern Mock::Callable<uint32_t> CMSIS_SysTick_Config;
 
 // === Tests ===
@@ -86,6 +87,7 @@ void test_configure_SysTick(void)
     // Test whether function was called with the correct parameters
     unsigned int Expected = F_CPU / 1000;
     CMSIS_SysTick_Config.assert_called_once_with(Expected);
+    TEST_ASSERT_EQUAL(2, CMSIS_NVIC_SetPriority.call_count);
 };
 
 /// @brief Test the reading of the counter value

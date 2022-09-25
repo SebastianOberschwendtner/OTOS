@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    cmsis_mock.cpp
  * @author  SO
- * @version v1.3.0
+ * @version v2.9.2
  * @date    04-Oktober-2021
  * @brief   Mocks of the CMSIS driver functions.
  ==============================================================================
@@ -33,6 +33,7 @@
 
 // === Mocks ===
 Mock::Callable<bool> CMSIS_NVIC_EnableIRQ;
+Mock::Callable<bool> CMSIS_NVIC_SetPriority;
 Mock::Callable<uint32_t> CMSIS_SysTick_Config;
 
 // === Functions ===
@@ -44,6 +45,16 @@ Mock::Callable<uint32_t> CMSIS_SysTick_Config;
 void NVIC_EnableIRQ(IRQn_Type IRQn)
 {
     CMSIS_NVIC_EnableIRQ.add_call(static_cast<int>(IRQn));
+};
+
+/**
+ * @brief Mock setting the interrupt priority.
+ * @param IRQn The IRQ number to set the priority for.
+ * @param priority The priority to set.
+ */
+void NVIC_SetPriority(IRQn_Type IRQn, uint32_t priority)
+{
+    CMSIS_NVIC_SetPriority.add_call(static_cast<int>(IRQn));
 };
 
 /**

@@ -139,6 +139,7 @@ typedef enum
 
 // === Mocked Functions ===
 void        NVIC_EnableIRQ(IRQn_Type IRQn);
+void        NVIC_SetPriority(IRQn_Type IRQn, uint32_t priority);
 uint32_t    SysTick_Config(uint32_t ticks);
 
 #endif
