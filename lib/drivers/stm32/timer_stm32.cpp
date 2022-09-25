@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    timer_stm32.cpp
  * @author  SO
- * @version v1.4.0
+ * @version v2.9.1
  * @date    31-October-2021
  * @brief   Timer driver for STM32 microcontrollers.
  ==============================================================================
@@ -58,6 +58,14 @@ void Timer::SysTick_Configure(void)
 
     // Configure the SysTick timer
     SysTick_Config(ticks_ms);
+
+    // Reconfigure Priorities so that SysTick has the highest priority
+#if defined(STM32L0)
+    NVIC_SetPriority(SVC_IRQn, 1);
+#elif defined(STM32F4)
+    NVIC_SetPriority(SVCall_IRQn, 1);
+#endif
+    NVIC_SetPriority(SysTick_IRQn, 0);
     return;
 };
 
