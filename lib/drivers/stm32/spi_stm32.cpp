@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    spi_stm32.cpp
  * @author  SO
- * @version v2.12.1
+ * @version v2.12.2
  * @date    22-Dezember-2021
  * @brief   SPI driver for STM32 microcontrollers.
  ==============================================================================
@@ -30,7 +30,7 @@
 // === Includes ===
 #include "spi_stm32.h"
 
-// Provide template instanciations with all allowed bus instances
+// Provide template instantiations with all allowed bus instances
 template class SPI::Controller<IO::SPI_1>;
 template class SPI::Controller<IO::SPI_2>;
 #ifdef STM32F4
@@ -93,7 +93,7 @@ namespace SPI
     };
 
     /**
-     * @brief Enable the coresponding clock in the RCC register.
+     * @brief Enable the corresponding clock in the RCC register.
      *
      * @tparam instance SPI peripheral instance.
      */
@@ -121,7 +121,7 @@ namespace SPI
     /**
      * @brief Get the prescaler for teh desired baudrate.
      * The prescaler value depends on the APB clock which
-     * is conencted to the SPI peripheral.
+     * is connected to the SPI peripheral.
      *
      * @tparam instance SPI peripheral instance.
      * @param baudrate The desired baudrate of the bus.
@@ -450,6 +450,19 @@ bool SPI::Controller<spi_instance>::send_array(const unsigned char *data,
         if (!this->send_data_byte(*(data + i)))
             return false;
     }
+
+    // Wait for transfer to finish
+    this->reset_timeout();
+    while (this->is_busy())
+    {
+        if (this->timed_out())
+        {
+            this->set_error(Error::Code::SPI_Timeout);
+            return false;
+        }
+    }
+
+    // Send was successful
     return true;
 };
 
@@ -507,7 +520,7 @@ bool SPI::Controller<spi_instance>::read_data(const unsigned char reg,
         }
     }
 
-    // Send was successful
+    // Read was successful
     return true;
 };
 
@@ -548,6 +561,19 @@ bool SPI::Controller<spi_instance>::read_array(
         // Store the data
         *(data + i) = rx.value();
     }
+
+    // Wait for transfer to finish
+    this->reset_timeout();
+    while (this->is_busy())
+    {
+        if (this->timed_out())
+        {
+            this->set_error(Error::Code::SPI_Timeout);
+            return false;
+        }
+    }
+
+    // Read was successful
     return true;
 };
 
