@@ -6,7 +6,7 @@
 ### Release Notes:
 - Fixes bug in `types.h` for STM32L0 devices.
 - Adds STM32 peripheral drivers for:
-    - SPI *(tx only)*
+    - SPI *(tx and rx)*
     - USART *(tx only)*
     - SDIO *(STM32F4 devices only)*
     - Basic interface for System Clock and PLL settings.

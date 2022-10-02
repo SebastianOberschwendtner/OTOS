@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_stm32_spi.cpp
  * @author  SO
- * @version v2.7.3
+ * @version v2.11.0
  * @date    22-December-2021
  * @brief   Unit tests for testing the spi driver for stm32 microcontrollers.
  ******************************************************************************
@@ -231,6 +231,21 @@ void test_last_transmit_finished(void)
     TEST_ASSERT_FALSE(UUT.last_transmit_finished());
 };
 
+/// @brief Test status of RX register
+void test_rx_data_valid(void)
+{
+    setUp();
+    SPI::Controller<IO::SPI_1> UUT(1'000'000);
+
+    // Test register empty
+    SPI1->SR = SPI_SR_RXNE;
+    TEST_ASSERT_TRUE(UUT.RX_data_valid());
+
+    // Test register not empty
+    SPI1->SR = 0;
+    TEST_ASSERT_FALSE(UUT.RX_data_valid());
+};
+
 /// @brief Test status bus busy
 void test_bus_busy(void)
 {
@@ -285,6 +300,26 @@ void test_send_data(void)
     TEST_ASSERT_EQUAL(payload.byte[0], SPI1->DR);
 };
 
+/// @brief Test read data
+void test_read_data(void)
+{
+    setUp();
+    SPI::Controller<IO::SPI_1> UUT(1'000'000);
+
+    // Test reading a byte, when RX buffer is not empty
+    SPI1->SR = SPI_SR_RXNE | SPI_SR_TXE;
+    SPI1->DR = 0x12;
+    TEST_ASSERT_TRUE(UUT.read_data(0x12, 1));
+    TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
+    TEST_ASSERT_EQUAL(0x00, UUT.get_rx_data().byte[0]);
+
+    // Test read a byte, when RX buffer is empty
+    SPI1->SR = SPI_SR_TXE;
+    SPI1->DR = 0x12;
+    TEST_ASSERT_TRUE(UUT.read_data(0x12, 1));
+    TEST_ASSERT_EQUAL(Error::Code::SPI_Timeout, UUT.get_error());
+};
+
 /// @brief Test sending an array
 void test_send_array(void)
 {
@@ -309,6 +344,30 @@ void test_send_array(void)
     TEST_ASSERT_FALSE(UUT.send_array(buffer.data(), 6));
     TEST_ASSERT_EQUAL(Error::Code::SPI_BUS_Busy_Error, UUT.get_error());
     TEST_ASSERT_EQUAL(0, SPI1->DR);
+};
+
+/// @brief Test reading an array
+void test_read_array(void)
+{
+    setUp();
+    std::array<unsigned char, 10> buffer{0};
+    SPI::Controller<IO::SPI_1> UUT(1'000'000);
+
+    // fill array with consecutive numbers
+    std::iota(buffer.begin(), buffer.end(), 1U);
+
+    // Test reading the array
+    SPI1->SR = SPI_SR_RXNE | SPI_SR_TXE;
+    TEST_ASSERT_TRUE(UUT.read_array(buffer.data(), 6));
+    TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
+    TEST_ASSERT_EQUAL(0x00, buffer[0]);
+    TEST_ASSERT_EQUAL(0x00, buffer[5]);
+    TEST_ASSERT_EQUAL(0x07, buffer[6]);
+
+    // Test reading an array, when the bus is busy
+    SPI1->SR = SPI_SR_BSY;
+    TEST_ASSERT_FALSE(UUT.read_array(buffer.data(), 6));
+    TEST_ASSERT_EQUAL(Error::Code::SPI_BUS_Busy_Error, UUT.get_error());
 };
 
 /// @brief Test creating a DMA Stream with the SPI as target/source
@@ -337,9 +396,12 @@ int main(int argc, char **argv)
     RUN_TEST(test_set_target_selection);
     RUN_TEST(test_enable);
     RUN_TEST(test_last_transmit_finished);
+    RUN_TEST(test_rx_data_valid);
     RUN_TEST(test_bus_busy);
     RUN_TEST(test_send_data);
+    RUN_TEST(test_read_data);
     RUN_TEST(test_send_array);
+    RUN_TEST(test_read_array);
     RUN_TEST(test_create_dma_stream);
     return UNITY_END();
 };

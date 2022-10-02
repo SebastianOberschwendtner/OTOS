@@ -42,7 +42,7 @@ namespace SPI
 
         // *** Methods ***
         bool send_data_byte(const unsigned char data);
-        // std::optional<unsigned char> read_data_byte(void);
+        std::optional<unsigned char> read_data_byte(void);
 
     public:
         // *** Constructor ***
@@ -60,14 +60,11 @@ namespace SPI
         bool send_data(const Bus::Data_t payload, const unsigned char n_bytes);
         bool send_array(const unsigned char *data, const unsigned char n_bytes);
         // bool send_array_leader(const unsigned char byte, const unsigned char *data, const unsigned char n_bytes);
-        // bool read_data(const unsigned char reg, unsigned char n_bytes);
+        bool read_data(const unsigned char reg, unsigned char n_bytes);
         // bool read_array(const unsigned char reg, unsigned char *dest, const unsigned char n_bytes);
-        // Bus::Data_t get_rx_data(void) const;
-        // bool            in_controller_mode  (void) const;
-        // bool            start_sent          (void) const;
-        // bool            address_sent        (void) const;
-        // bool            ack_received        (void) const;
-        // bool            RX_data_valid       (void) const;
+        bool read_array(unsigned char * const dest, const unsigned char n_bytes);
+        Bus::Data_t get_rx_data(void) const;
+        bool RX_data_valid       (void) const;
         // bool            transfer_finished   (void) const;
 
         // *** Templated Methods ***
