@@ -51,5 +51,6 @@
 #include "display/ssd1306.h"
 #include "display/ili9341.h"
 #include "display/uc1611.h"
+#include "display/gc9a01a.h"
 
 #endif

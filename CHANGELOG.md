@@ -14,6 +14,7 @@
 - Adds chip drivers for:
     - Display Controller *ILI9341*
     - Display Controller *UC1611S*
+    - Display Controller *GC9A01A* (&rArr; Used in the round 1.28" LCD display from Waveshare)
 - Adds timing and wait functions to tasks.
 - Adds basic driver for *SDHC*<sup>&trade;</sup> memory cards.
 - Adds driver for interfacing with *FAT32* volumes.
