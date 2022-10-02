@@ -19,6 +19,7 @@
 - Adds basic driver for *SDHC*<sup>&trade;</sup> memory cards.
 - Adds driver for interfacing with *FAT32* volumes.
 - Extends the *MAX17205* driver.
+- Adds blocking function to tasks for quick timing inside applications.
 
 ### Fixed Issues:
 

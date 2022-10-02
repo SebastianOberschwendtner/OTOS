@@ -74,6 +74,27 @@ namespace OTOS {
             while(this->time_elapsed_ms() < static_cast<std::uint32_t>(time_ms))
                 this->yield();
         };
+
+        /**
+         * @brief Wait for a specified amount of time. The
+         * task blocks execution as long as the wait time
+         * is not over.
+         * 
+         * This function can be used for timing when the
+         * OS itself is not used. The SysTick timer has
+         * to be updated, though.
+         * 
+         * @param time_ms The wait time in [ms].
+         * @details Blocking function
+         */
+        void block_ms(const unsigned long time_ms)
+        {
+            // Remember the time when the function was called
+            this->tic();
+
+            // Block the task until the wait time is over
+            while(this->time_elapsed_ms() < static_cast<std::uint32_t>(time_ms));
+        };
     };
 };
 

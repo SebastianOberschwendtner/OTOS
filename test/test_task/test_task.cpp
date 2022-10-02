@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_task.cpp
  * @author  SO
- * @version v2.8.2
+ * @version v2.12.0
  * @date    26-Dezember-2021
  * @brief   Unit tests to test the task functionality.
  ******************************************************************************
@@ -88,13 +88,25 @@ void test_time_elapsed(void)
     TEST_ASSERT_EQUAL(10, UUT.toc() );
 };
 
-/// @test Test the waiting functions
+/// @brief Test the waiting functions
 void test_waiting(void)
 {
     setUp();
     // Create task
     OTOS::Timed_Task UUT(&mock_handle_increment);
     UUT.wait_ms(10);
+
+    // Test side effects
+    TEST_ASSERT_EQUAL(11, call_timer.call_count);
+};
+
+/// @brief Test blocking the execution of the task
+void test_blocking(void)
+{
+    setUp();
+    // Create task
+    OTOS::Timed_Task UUT(&mock_handle_increment);
+    UUT.block_ms(10);
 
     // Test side effects
     TEST_ASSERT_EQUAL(11, call_timer.call_count);
@@ -107,6 +119,7 @@ int main(int argc, char **argv)
     RUN_TEST(test_constructor);
     RUN_TEST(test_time_elapsed);
     RUN_TEST(test_waiting);
+    RUN_TEST(test_blocking);
     UNITY_END();
     return EXIT_SUCCESS;
 };

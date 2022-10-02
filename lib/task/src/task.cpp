@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    task.c
  * @author  SO
- * @version v2.3.0
+ * @version v2.12.0
  * @date    09-March-2021
  * @brief   The basic functions for task interaction are defined here.
  ==============================================================================
