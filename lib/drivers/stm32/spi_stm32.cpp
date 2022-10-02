@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    spi_stm32.cpp
  * @author  SO
- * @version v2.11.0
+ * @version v2.12.1
  * @date    22-Dezember-2021
  * @brief   SPI driver for STM32 microcontrollers.
  ==============================================================================
@@ -333,6 +333,11 @@ bool SPI::Controller<spi_instance>::send_data_byte(const unsigned char data)
 template <IO spi_instance>
 std::optional<unsigned char> SPI::Controller<spi_instance>::read_data_byte(void)
 {
+    // Empty the RX buffer if its not empty
+    unsigned char rx = 0;
+    if ( this->RX_data_valid() )
+        rx = this->peripheral->DR;
+
     // Wait until TX buffer is empty
     this->reset_timeout();
     while (not this->last_transmit_finished())
@@ -342,7 +347,7 @@ std::optional<unsigned char> SPI::Controller<spi_instance>::read_data_byte(void)
         {
             // Peripheral timed out -> set error
             this->set_error(Error::Code::SPI_Timeout);
-            return false;
+            return {};
         }
     }
 
@@ -358,12 +363,13 @@ std::optional<unsigned char> SPI::Controller<spi_instance>::read_data_byte(void)
         {
             // Peripheral timed out -> set error
             this->set_error(Error::Code::SPI_Timeout);
-            return false;
+            return {};
         }
     }
 
     // read the byte
-    return this->peripheral->DR;
+    rx = this->peripheral->DR;
+    return rx;
 };
 
 /**
