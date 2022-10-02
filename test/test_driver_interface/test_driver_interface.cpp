@@ -19,11 +19,11 @@
  */
 /**
  ******************************************************************************
- * @file    test_i2c_stm32.cpp
+ * @file    test_driver_interface.cpp
  * @author  SO
- * @version v2.7.3
+ * @version v2.11.0
  * @date    30-August-2021
- * @brief   Unit tests for testing the i2c driver for stm32 microcontrollers.
+ * @brief   Unit tests for testing driver interfaces for OTOS.
  ******************************************************************************
  */
 
@@ -161,12 +161,36 @@ void test_bus_interface(void)
     TEST_ASSERT_TRUE(Bus::read_array(mybus, 0x56, &temp, 1));
     mybus.read_array.assert_called_once_with(0x56);
 
+    // test read array without sending register first
+    mybus.read_array.reset();
+    TEST_ASSERT_TRUE(Bus::read_array(mybus, &temp, 1));
+    mybus.read_array.assert_called_once();
+
     // test read word
     mybus.buffer.value = 0x43;
     auto response = Bus::read_word(mybus, 0x20);
     mybus.read_data.assert_called_once_with(0x20);
     TEST_ASSERT_TRUE(response);
     TEST_ASSERT_EQUAL(0x43, response.value());
+
+    // test read byte without sending address
+    mybus.buffer.value = 0x44;
+    mybus.read_data.reset();
+    response = Bus::read_byte(mybus);
+    mybus.read_data.assert_called_once();
+    TEST_ASSERT_TRUE(response);
+    TEST_ASSERT_EQUAL(0x44, response.value());
+
+    // Test sending an std::array
+    mybus.send_array.reset();
+    std::array<unsigned char, 6> std_array{0};
+    TEST_ASSERT_TRUE(Bus::send_array(mybus, std_array));
+    mybus.send_array.assert_called_once();
+
+    // Test reading an std::array
+    mybus.read_array.reset();
+    TEST_ASSERT_TRUE(Bus::read_array(mybus, std_array));
+    mybus.read_array.assert_called_once();
 };
 
 /// @brief Test and define the interface for timers

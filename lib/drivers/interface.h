@@ -25,6 +25,7 @@
 #include "error_codes.h"
 #include <optional>
 #include <cstdint>
+#include <array>
 
 // === Common identifier for specialized IOs ===
 enum class IO : unsigned char
@@ -149,7 +150,7 @@ namespace Bus
         unsigned int word[2];
         unsigned char byte[4];
 
-        // Overload the cast operator to int(), mainly for testing but maybe it can be usefull in general
+        // Overload the cast operator to int(), mainly for testing but maybe it can be useful in general
         operator int() { return static_cast<unsigned int>(this->value); };
     };
 
@@ -248,6 +249,19 @@ namespace Bus
     };
 
     /**
+     * @brief Send an std::array to a bus target without sending a register address.
+     * The highest byte in the output array is the first received byte!
+     * @param dest Array which contains the data.
+     * @return Returns True when the bytes were send successfully, False otherwise.
+     * @details blocking function
+     */
+    template <class bus_controller, size_t n_bytes>
+    bool send_array(bus_controller &bus, std::array<unsigned char, n_bytes> &data)
+    {
+        return bus.send_array(data.data(), n_bytes);
+    };
+
+    /**
      * @brief Send an array with n bytes to a bus target.
      * Includes a leading byte in front of the array data.
      * The first element in the array is transmitted first!
@@ -261,6 +275,19 @@ namespace Bus
     bool send_array_leader(bus_controller &bus, const unsigned char byte, const unsigned char *data, const unsigned char n_bytes)
     {
         return bus.send_array_leader(byte, data, n_bytes);
+    };
+
+    /**
+     * @brief Read a byte from a bus target without sending a register address.
+     * @return Returns True and Value when the byte was read successfully, False otherwise.
+     * @details blocking function
+     */
+    template <class bus_controller>
+    std::optional<unsigned char> read_byte(bus_controller &bus)
+    {
+        if (bus.read_data(1))
+            return bus.get_rx_data().byte[0];
+        return {};
     };
 
     /**
@@ -281,7 +308,7 @@ namespace Bus
      * @brief Read an array with n bytes from a bus target
      * The highest byte in the output array is the first received byte!
      * @param reg Register address of target to get the data from
-     * @param dest Address of the array where to save the responce
+     * @param dest Address of the array where to save the response
      * @param n_bytes How many bytes should be read
      * @return Returns True when the bytes were read successfully, False otherwise.
      * @details blocking function
@@ -290,6 +317,33 @@ namespace Bus
     bool read_array(bus_controller &bus, const unsigned char reg, unsigned char *dest, const unsigned char n_bytes)
     {
         return bus.read_array(reg, dest, n_bytes);
+    };
+
+    /**
+     * @brief Read an array with n bytes from a bus target without sending a register address.
+     * The highest byte in the output array is the first received byte!
+     * @param dest Address of the array where to save the response
+     * @param n_bytes How many bytes should be read
+     * @return Returns True when the bytes were read successfully, False otherwise.
+     * @details blocking function
+     */
+    template <class bus_controller>
+    bool read_array(bus_controller &bus, unsigned char *dest, const unsigned char n_bytes)
+    {
+        return bus.read_array(dest, n_bytes);
+    };
+
+    /**
+     * @brief Read an array with n bytes from a bus target without sending a register address.
+     * The highest byte in the output array is the first received byte!
+     * @param dest Array where the data will be stored.
+     * @return Returns True when the bytes were read successfully, False otherwise.
+     * @details blocking function
+     */
+    template <class bus_controller, size_t n_bytes>
+    bool read_array(bus_controller &bus, std::array<unsigned char, n_bytes> &dest)
+    {
+        return bus.read_array(dest.data(), n_bytes);
     };
 };
 
