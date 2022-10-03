@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_stm32_spi.cpp
  * @author  SO
- * @version v2.11.0
+ * @version v2.12.2
  * @date    22-December-2021
  * @brief   Unit tests for testing the spi driver for stm32 microcontrollers.
  ******************************************************************************
@@ -316,7 +316,7 @@ void test_read_data(void)
     // Test read a byte, when RX buffer is empty
     SPI1->SR = SPI_SR_TXE;
     SPI1->DR = 0x12;
-    TEST_ASSERT_TRUE(UUT.read_data(0x12, 1));
+    TEST_ASSERT_FALSE(UUT.read_data(0x12, 1));
     TEST_ASSERT_EQUAL(Error::Code::SPI_Timeout, UUT.get_error());
 };
 
