@@ -1,5 +1,5 @@
 # Changelog for OTOS
-## [v3.0.0](https://github.com/knuffel-v2/OTOS/releases/tag/v3.0.0) *(2022-xx-xx)*
+## [v3.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.0.0) *(2022-10-07)*
 
 >Released by `SO`
 
@@ -20,18 +20,24 @@
 - Adds driver for interfacing with *FAT32* volumes.
 - Extends the *MAX17205* driver.
 - Adds blocking function to tasks for quick timing inside applications.
+- Improves graphics library:
+    - Fixes bug when drawing vertical lines.
+    - Adds font scaling.
+    - Adds Bresenhams' algorithm to draw lines. :tada:
+    - Adds circles. :tada:
+    - **Breaking Change**: Font size is now called font type.
 
 ### Fixed Issues:
 
-## [v2.0.0](https://github.com/knuffel-v2/OTOS/releases/tag/v2.0.0) *(2021-12-21)*
+## [v2.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v2.0.0) *(2021-12-21)*
 
 >Released by `SO`
 
 ### Release Notes:
-- Adds font for fontsize 'Normal'. [&rdca; v1.2.0](https://github.com/knuffel-v2/OTOS/releases/tag/v1.2.0)
+- Adds font for fontsize 'Normal'. [&rdca; v1.2.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v1.2.0)
 - Adds a mock interface for the CMSIS drivers of ARM<sup>&reg;</sup>.
 - Adds the method `enable_interrupt` to the GPIO driver. This methods takes care of everything
-  which is necessary to enable an edge interrupt on a specific IO pin. [&rdca; v1.3.0](https://github.com/knuffel-v2/OTOS/releases/tag/v1.3.0)
+  which is necessary to enable an edge interrupt on a specific IO pin. [&rdca; v1.3.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v1.3.0)
 - Adds driver for IC which can be controlled via a bus system. The IC groups are:
     - Battery Management ICs
     - Display Controllers
@@ -42,7 +48,7 @@
 - #3: Add ms Timer for Threads
 
 
-## [v1.1.0](https://github.com/knuffel-v2/OTOS/releases/tag/v1.1.0) *(2021-09-21)*
+## [v1.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v1.1.0) *(2021-09-21)*
 
 >Released by `SO`
 
@@ -59,7 +65,7 @@
 
 - #5: Fix Unit Test on Linux Native
 
-## [v1.0.0](https://github.com/knuffel-v2/OTOS/releases/tag/v1.0.0) *(2021-05-29)*
+## [v1.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v1.0.0) *(2021-05-29)*
 
 >Released by `SO`
 

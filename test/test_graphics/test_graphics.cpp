@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_graphics.c
  * @author  SO
- * @version v2.7.3
+ * @version v3.0.0
  * @date    16-March-2021
  * @brief   Unit tests to test the graphics driver.
  ******************************************************************************
@@ -44,10 +44,11 @@
  * ▢ Canvas can set cursor:
  *      ▢ set its coordinates
  *      ▢ get its current coordinates
- *      ▢ increment by fontsize
+ *      ▢ increment by font size
  *      ▢ does roll over at limits
  * ▢ Canvas can write character to buffer
  * ▢ Canvas can write string to buffer
+ * ▢ Canvas can write number to buffer
  */
 
 // === Fixtures ===
@@ -88,7 +89,7 @@ void test_canvas_init(void)
     Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 };
 
-/// @brief test writting a pixel
+/// @brief test writing a pixel
 void test_canvas_write_pixel(void)
 {
     // Create buffer and object
@@ -205,6 +206,20 @@ void test_canvas_add_horizontal_line(void)
     TEST_ASSERT_EQUAL(0x00, buffer.data[7]);
     TEST_ASSERT_EQUAL(0x00, buffer.data[8]);
 
+    // draw a horizontal line in Black
+    buffer.data.fill(0);
+    Start.set(0,0);
+    UUT.add_line_h(Start, 5);
+    UUT.add_line_h(Start, 3, 0, Graphics::Color_BW::Black);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[0]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[1]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[2]);
+    TEST_ASSERT_EQUAL(0x01, buffer.data[3]);
+    TEST_ASSERT_EQUAL(0x01, buffer.data[4]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[5]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[6]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[7]);
+    TEST_ASSERT_EQUAL(0x00, buffer.data[8]);
 };
 
 /// @brief test adding vertical lines on the canvas
@@ -237,6 +252,88 @@ void test_canvas_add_vertical_line(void)
     UUT.add_line_v(Start, 13);
     TEST_ASSERT_EQUAL(0b11111000, buffer.data[4]);
     TEST_ASSERT_EQUAL(0b11111111, buffer.data[12]);
+
+    Start.set(0,0);
+    UUT.add_line_v(Start, 3, Graphics::Color_BW::Black);
+    TEST_ASSERT_EQUAL(0b00011000, buffer.data[0]);
+};
+
+/// @brief Test adding a line using Bresenham's algorithm
+void test_add_line(void)
+{
+    // Create buffer and object
+    Graphics::Buffer_BW<8, 8> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
+
+    // draw a vertical line
+    UUT.add_line({0,0}, {0,5});
+    TEST_ASSERT_EQUAL(0b00111111, buffer.data[0]);
+
+    // draw a vertical line in black
+    UUT.add_line({0,0}, {0,3}, Graphics::Color_BW::Black);
+    TEST_ASSERT_EQUAL(0b00110000, buffer.data[0]);
+};
+
+/// @brief Test adding circles to the canvas
+void test_add_circle(void)
+{
+    // Create buffer and object
+    Graphics::Buffer_BW<8, 8> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
+
+    // draw a circle
+    UUT.add_circle({4,4}, 4);
+    TEST_ASSERT_EQUAL(0b00111000, buffer.data[0]);
+    TEST_ASSERT_EQUAL(0b11000110, buffer.data[1]);
+    TEST_ASSERT_EQUAL(0b10000010, buffer.data[2]);
+    TEST_ASSERT_EQUAL(0b00000001, buffer.data[3]);
+    TEST_ASSERT_EQUAL(0b00000001, buffer.data[4]);
+    TEST_ASSERT_EQUAL(0b00000001, buffer.data[5]);
+    TEST_ASSERT_EQUAL(0b10000010, buffer.data[6]);
+    TEST_ASSERT_EQUAL(0b11000110, buffer.data[7]);
+
+    // draw a black circle
+    buffer.data.fill(0xFF);
+    UUT.add_circle({4,4}, 4, Graphics::Color_BW::Black);
+    TEST_ASSERT_EQUAL(0b11000111, buffer.data[0]);
+    TEST_ASSERT_EQUAL(0b00111001, buffer.data[1]);
+    TEST_ASSERT_EQUAL(0b01111101, buffer.data[2]);
+    TEST_ASSERT_EQUAL(0b11111110, buffer.data[3]);
+    TEST_ASSERT_EQUAL(0b11111110, buffer.data[4]);
+    TEST_ASSERT_EQUAL(0b11111110, buffer.data[5]);
+    TEST_ASSERT_EQUAL(0b01111101, buffer.data[6]);
+    TEST_ASSERT_EQUAL(0b00111001, buffer.data[7]);
+};
+
+/// @brief Test adding filled circles to the canvas
+void test_fill_circle(void)
+{
+    // Create buffer and object
+    Graphics::Buffer_BW<8, 8> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
+
+    // draw a full circle
+    UUT.fill_circle({4,4}, 4);
+    TEST_ASSERT_EQUAL(0b00111000, buffer.data[0]);
+    TEST_ASSERT_EQUAL(0b11111110, buffer.data[1]);
+    TEST_ASSERT_EQUAL(0b11111110, buffer.data[2]);
+    TEST_ASSERT_EQUAL(0b11111111, buffer.data[3]);
+    TEST_ASSERT_EQUAL(0b11111111, buffer.data[4]);
+    TEST_ASSERT_EQUAL(0b11111111, buffer.data[5]);
+    TEST_ASSERT_EQUAL(0b11111110, buffer.data[6]);
+    TEST_ASSERT_EQUAL(0b11111110, buffer.data[7]);
+
+    // draw a full circle in black
+    buffer.data.fill(0xFF);
+    UUT.fill_circle({4,4}, 4, Graphics::Color_BW::Black);
+    TEST_ASSERT_EQUAL(0b11000111, buffer.data[0]);
+    TEST_ASSERT_EQUAL(0b00000001, buffer.data[1]);
+    TEST_ASSERT_EQUAL(0b00000001, buffer.data[2]);
+    TEST_ASSERT_EQUAL(0b00000000, buffer.data[3]);
+    TEST_ASSERT_EQUAL(0b00000000, buffer.data[4]);
+    TEST_ASSERT_EQUAL(0b00000000, buffer.data[5]);
+    TEST_ASSERT_EQUAL(0b00000001, buffer.data[6]);
+    TEST_ASSERT_EQUAL(0b00000001, buffer.data[7]);
 };
 
 /// @brief test the cursor functionality of the canvas
@@ -272,7 +369,7 @@ void test_cursor(void)
     TEST_ASSERT_EQUAL(0, UUT.cursor.y_pos);
 };
 
-/// @brief test writting a character
+/// @brief test writing a character
 void test_add_character(void)
 {
     // Create buffer and object
@@ -330,7 +427,7 @@ void test_add_string(void)
     TEST_ASSERT_EQUAL(Font::Font_Small['D'][4], buffer.data[10]);
     TEST_ASSERT_EQUAL(Font::Font_Small['D'][5], buffer.data[11]);
 
-    // add character with linebreak
+    // add character with line break
     buffer.data.fill(0);
     UUT.set_cursor(0,0);
     UUT.add_string("G\nD");
@@ -356,9 +453,9 @@ void test_font_normal(void)
     Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // Change the fontsize
-    UUT.set_fontsize(Font::Size::Normal);
+    UUT.set_font(Font::Type::Normal);
 
-    // Test writting new characters
+    // Test writing new characters
     UUT.add_char('A');
     
     // Perform testing
@@ -388,6 +485,79 @@ void test_font_normal(void)
     TEST_ASSERT_EQUAL(Font::Font_Normal['A'][22], buffer.data[27]);
 };
 
+/// @brief Test the number font
+void test_font_number(void)
+{
+    // Create buffer and object
+    Graphics::Buffer_BW<16, 24> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
+
+    // Test writing new characters
+    UUT.add_number(2);
+    
+    // Perform testing
+    TEST_ASSERT_EQUAL(0, buffer.data[ 0]);
+    TEST_ASSERT_EQUAL(0, buffer.data[ 1]);
+    TEST_ASSERT_EQUAL(62, buffer.data[ 2]);
+    TEST_ASSERT_EQUAL(62, buffer.data[ 3]);
+    TEST_ASSERT_EQUAL(62, buffer.data[ 4]);
+    TEST_ASSERT_EQUAL(14, buffer.data[ 5]);
+    TEST_ASSERT_EQUAL(14, buffer.data[ 6]);
+    TEST_ASSERT_EQUAL(14, buffer.data[ 7]);
+    TEST_ASSERT_EQUAL(14, buffer.data[ 8]);
+    TEST_ASSERT_EQUAL(14, buffer.data[ 9]);
+    TEST_ASSERT_EQUAL(14, buffer.data[10]);
+    TEST_ASSERT_EQUAL(254, buffer.data[11]);
+    TEST_ASSERT_EQUAL(0, buffer.data[16]);
+    TEST_ASSERT_EQUAL(0, buffer.data[17]);
+    TEST_ASSERT_EQUAL(252, buffer.data[18]);
+    TEST_ASSERT_EQUAL(252, buffer.data[19]);
+    TEST_ASSERT_EQUAL(252, buffer.data[20]);
+    TEST_ASSERT_EQUAL(28, buffer.data[21]);
+    TEST_ASSERT_EQUAL(28, buffer.data[22]);
+    TEST_ASSERT_EQUAL(28, buffer.data[23]);
+    TEST_ASSERT_EQUAL(28, buffer.data[24]);
+    TEST_ASSERT_EQUAL(28, buffer.data[25]);
+};
+
+/// @brief Test scaling the fonts
+void test_font_scaling(void)
+{
+    // Create buffer and object
+    Graphics::Buffer_BW<16, 24> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
+
+    // Change the font size and scale
+    UUT.set_font(Font::Type::Small, 2);
+
+    // Test setting the cursor position
+    UUT.set_cursor(1,1);
+    TEST_ASSERT_EQUAL(Font::x_pixels(Font::Type::Small) * 2, UUT.cursor.x_pos);
+    TEST_ASSERT_EQUAL(Font::y_pixels(Font::Type::Small) * 2, UUT.cursor.y_pos);
+
+
+    // Test the newline when the font is scaled
+    UUT.set_cursor(0,0);
+    UUT.newline();
+    TEST_ASSERT_EQUAL(0, UUT.cursor.x_pos);
+    TEST_ASSERT_EQUAL(Font::y_pixels(Font::Type::Small) * 2, UUT.cursor.y_pos);
+
+    // Test writing new characters
+    UUT.set_cursor(0,0);
+    UUT.add_char('A');
+    
+    // Perform testing
+    TEST_ASSERT_EQUAL(0, buffer.data[ 0]);
+    TEST_ASSERT_EQUAL(0, buffer.data[ 1]);
+    TEST_ASSERT_EQUAL(252, buffer.data[ 2]);
+    TEST_ASSERT_EQUAL(252, buffer.data[ 3]);
+    TEST_ASSERT_EQUAL(3, buffer.data[ 4]);
+    TEST_ASSERT_EQUAL(3, buffer.data[ 5]);
+    TEST_ASSERT_EQUAL(3, buffer.data[20]);
+    TEST_ASSERT_EQUAL(3, buffer.data[21]);
+    TEST_ASSERT_EQUAL(3, buffer.data[22]);
+};
+
 /// === Run Tests ===
 int main(int argc, char** argv)
 {
@@ -398,9 +568,14 @@ int main(int argc, char** argv)
     RUN_TEST(test_canvas_fill);
     RUN_TEST(test_canvas_add_horizontal_line);
     RUN_TEST(test_canvas_add_vertical_line);
+    RUN_TEST(test_add_line);
+    RUN_TEST(test_add_circle);
+    RUN_TEST(test_fill_circle);
     RUN_TEST(test_cursor);
     RUN_TEST(test_add_character);
     RUN_TEST(test_add_string);
     RUN_TEST(test_font_normal);
+    RUN_TEST(test_font_number);
+    RUN_TEST(test_font_scaling);
     return UNITY_END();
 };

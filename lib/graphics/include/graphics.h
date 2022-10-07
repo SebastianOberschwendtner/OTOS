@@ -40,7 +40,7 @@ namespace Graphics {
     {
     public:
         // the height of the display should be divisible by 8
-        static_assert((Height_px%8) == 0, "Pixel height of the display");
+        static_assert((Height_px%8) == 0, "Pixel height of the display is not a multiple of 8!");
 
         // Properties buffer + sizes
         std::array<unsigned char, Width_px * Height_px / 8> data;
@@ -69,11 +69,16 @@ namespace Graphics {
     class Canvas_BW
     {
     private:
+        // *** properties
         unsigned char* const    buffer;
         const unsigned int      width;
         const unsigned int      height;
         const unsigned int      pixels;
-        Font::Size              current_size;
+        Font::Type              font_type;
+        unsigned char           scaling{1};
+
+        // *** Methods ***
+        void draw_pixel_with_scaling(const Coordinate base, Color_BW color);
 
     public:
         // *** properties
@@ -82,19 +87,23 @@ namespace Graphics {
         // *** Constructor ***
         Canvas_BW(unsigned char* const buffer, const unsigned int width, const unsigned int height):
             buffer(buffer), width(width), height(height), pixels(height * width),
-            current_size(Font::Size::Small), cursor(0,0){};
+            font_type(Font::Type::Small), cursor(0,0){};
 
         // *** Methods ***
 
         void        set_cursor  (const unsigned int x_pos, const unsigned int y_pos);
-        void        set_fontsize(const Font::Size size);
+        void        set_font(const Font::Type type, const unsigned char scale = 1);
         void        newline     (void);
         void        draw_pixel  (const unsigned int x_px, const unsigned int y_px, const Color_BW color);
         void        fill        (const Color_BW color);
-        void        add_line_h  (const Coordinate start, const unsigned int length, const unsigned char dotted = 0);
-        void        add_line_v  (const Coordinate start, const unsigned int length);
+        void        add_line_h  (const Coordinate start, const unsigned int length, const unsigned char dotted = 0, const Color_BW color = White);
+        void        add_line_v  (const Coordinate start, const unsigned int length, const Color_BW color = White);
+        void        add_line    (const Coordinate start, const Coordinate end, const Color_BW color = White);
+        void        add_circle  (const Coordinate center, const unsigned int radius, const Color_BW color = White);
+        void        fill_circle (const Coordinate center, const unsigned int radius, const Color_BW color = White);
         void        add_char    (const unsigned char character);
         void        add_string  (const char* string);
+        void        add_number  (const unsigned char number);
     };
 };
 #endif
