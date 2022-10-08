@@ -314,7 +314,7 @@ void test_fill_circle(void)
 
     // draw a full circle
     // UUT.fill_circle({4,4}, 4);
-    // TEST_ASSERT_EQUAL(0b00111000, buffer.data[0]);
+    TEST_ASSERT_EQUAL(0b00111000, buffer.data[0]);
     // TEST_ASSERT_EQUAL(0b11111110, buffer.data[1]);
     // TEST_ASSERT_EQUAL(0b11111110, buffer.data[2]);
     // TEST_ASSERT_EQUAL(0b11111111, buffer.data[3]);
