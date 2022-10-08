@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    graphics.c
  * @author  SO
- * @version v3.0.0
+ * @version v3.1.0
  * @date    13-September-2021
  * @brief   Graphics interface for the OTOS.
  ==============================================================================
@@ -423,12 +423,12 @@ void Graphics::Canvas_BW::add_char(const unsigned char character)
     if (this->scaling < 2)
     {
         // Write character depending in font since there is no scaling active
-        if (this->font_type == Font::Type::Small)
+        if (this->font_type == Font::Type::Default_8px)
         {
             // Write the pixels, the small font has 6 pixels in x direction
             for (unsigned char iX = 0; iX < width; iX++)
                 this->buffer[iX + this->cursor.x_pos + (this->width * this->cursor.y_pos / 8)] =
-                    Font::Font_Small[character][iX];
+                    Font::Default_8px.data[(character*Font::Default_8px.width_px) + iX];
         }
         else
         {
@@ -436,7 +436,7 @@ void Graphics::Canvas_BW::add_char(const unsigned char character)
             for (unsigned char iY = 0; iY < height_pages; iY++)
                 for (unsigned char iX = 0; iX < width; iX++)
                     this->buffer[iX + this->cursor.x_pos + (this->width * (iY + (this->cursor.y_pos / 8)))] =
-                        Font::Font_Normal[character][((height_pages) * iX) + 1 - iY];
+                        Font::Default_16px.data[(character*Font::Default_16px.width_px*Font::Default_16px.stride) + ((height_pages) * iX) + 1 - iY];
         }
         // append the cursor
         this->cursor.x_pos += width;
@@ -452,33 +452,33 @@ void Graphics::Canvas_BW::add_char(const unsigned char character)
             for (unsigned char iY = 0; iY < height; iY++)
             {
                 // Get the color of the pixel
-                if (this->font_type == Font::Type::Small)
-                    color = (Font::Font_Small[character][iX] & (1 << iY)) ? Color_BW::White : Color_BW::Black;
+                if (this->font_type == Font::Type::Default_8px)
+                    color = (Font::Default_8px.data[(character*Font::Default_8px.width_px) + iX] & (1 << iY)) ? Color_BW::White : Color_BW::Black;
                 else
-                    color = (Font::Font_Normal[character][2 * iX + 1 - (iY / 8)] & (1 << (iY % 8))) ? Color_BW::White : Color_BW::Black;
-
-                // Draw the scaled pixel
-                this->draw_pixel_with_scaling({iX, iY}, color);
-            }
-        }
-        // append the cursor
-        this->cursor.x_pos += width * this->scaling;
-    }
-};
-
-/**
- * @brief Add a string to the canvas
- * String has to be null terminated!
- * Newline characters are supported.
- * @param string The pointer to the string to display.
- */
-void Graphics::Canvas_BW::add_string(const char *string)
-{
-    char *character = const_cast<char *>(string);
-
-    while (*character != 0)
-    {
-        if (*character == '\n')
+                    color = (Font::Default_16px.data[(character*Font::Default_16px.width_px*Font::Default_16px.stride) + 2 * iX + 1 - (iY / 8)] & (1 << (iY % 8))) ? Color_BW::White : Color_BW::Black;
+                                                                                       
+                // Draw the scaled pixel                                               
+                this->draw_pixel_with_scaling({iX, iY}, color);                        
+            }                                                                          
+        }                                                                              
+        // append the cursor                                                           
+        this->cursor.x_pos += width * this->scaling;                                   
+    }                                                                                  
+};                                                                                     
+                                                                                       
+/**                                                                                    
+ * @brief Add a string to the canvas                                                   
+ * String has to be null terminated!                                                   
+ * Newline characters are supported.                                                   
+ * @param string The pointer to the string to display.                                 
+ */                                                                                    
+void Graphics::Canvas_BW::add_string(const char *string)                               
+{                                                                                      
+    char *character = const_cast<char *>(string);                                      
+                                                                                       
+    while (*character != 0)                                                            
+    {                                                                                  
+        if (*character == '\n')                                                        
             this->newline();
         else
             this->add_char(*character);

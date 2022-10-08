@@ -378,31 +378,31 @@ void test_add_character(void)
 
     // add the character
     UUT.add_char('B');
-    TEST_ASSERT_EQUAL(Font::Font_Small['B'][0], buffer.data[0]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['B'][1], buffer.data[1]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['B'][2], buffer.data[2]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['B'][3], buffer.data[3]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['B'][4], buffer.data[4]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['B'][5], buffer.data[5]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['B'*6 + 0], buffer.data[0]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['B'*6 + 1], buffer.data[1]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['B'*6 + 2], buffer.data[2]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['B'*6 + 3], buffer.data[3]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['B'*6 + 4], buffer.data[4]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['B'*6 + 5], buffer.data[5]);
 
     // add another character
     UUT.add_char('D');
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][0], buffer.data[6]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][1], buffer.data[7]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][2], buffer.data[8]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][3], buffer.data[9]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][4], buffer.data[10]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][5], buffer.data[11]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 0], buffer.data[6]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 1], buffer.data[7]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 2], buffer.data[8]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 3], buffer.data[9]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 4], buffer.data[10]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 5], buffer.data[11]);
 
     // add another character
     UUT.set_cursor(0,1);
     UUT.add_char('F');
-    TEST_ASSERT_EQUAL(Font::Font_Small['F'][0], buffer.data[16]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['F'][1], buffer.data[17]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['F'][2], buffer.data[18]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['F'][3], buffer.data[19]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['F'][4], buffer.data[20]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['F'][5], buffer.data[21]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['F'*6 + 0], buffer.data[16]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['F'*6 + 1], buffer.data[17]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['F'*6 + 2], buffer.data[18]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['F'*6 + 3], buffer.data[19]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['F'*6 + 4], buffer.data[20]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['F'*6 + 5], buffer.data[21]);
 };
 
 /// @brief test adding a string
@@ -414,35 +414,35 @@ void test_add_string(void)
 
     // add the character
     UUT.add_string("GD");
-    TEST_ASSERT_EQUAL(Font::Font_Small['G'][0], buffer.data[0]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['G'][1], buffer.data[1]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['G'][2], buffer.data[2]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['G'][3], buffer.data[3]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['G'][4], buffer.data[4]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['G'][5], buffer.data[5]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][0], buffer.data[6]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][1], buffer.data[7]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][2], buffer.data[8]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][3], buffer.data[9]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][4], buffer.data[10]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][5], buffer.data[11]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 0], buffer.data[0]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 1], buffer.data[1]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 2], buffer.data[2]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 3], buffer.data[3]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 4], buffer.data[4]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 5], buffer.data[5]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 0], buffer.data[6]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 1], buffer.data[7]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 2], buffer.data[8]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 3], buffer.data[9]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 4], buffer.data[10]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 5], buffer.data[11]);
 
     // add character with line break
     buffer.data.fill(0);
     UUT.set_cursor(0,0);
     UUT.add_string("G\nD");
-    TEST_ASSERT_EQUAL(Font::Font_Small['G'][0], buffer.data[0]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['G'][1], buffer.data[1]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['G'][2], buffer.data[2]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['G'][3], buffer.data[3]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['G'][4], buffer.data[4]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['G'][5], buffer.data[5]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][0], buffer.data[16]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][1], buffer.data[17]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][2], buffer.data[18]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][3], buffer.data[19]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][4], buffer.data[20]);
-    TEST_ASSERT_EQUAL(Font::Font_Small['D'][5], buffer.data[21]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 0], buffer.data[0]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 1], buffer.data[1]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 2], buffer.data[2]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 3], buffer.data[3]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 4], buffer.data[4]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 5], buffer.data[5]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 0], buffer.data[16]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 1], buffer.data[17]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 2], buffer.data[18]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 3], buffer.data[19]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 4], buffer.data[20]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 5], buffer.data[21]);
 };
 
 /// @brief Test the normal font size
@@ -453,36 +453,36 @@ void test_font_normal(void)
     Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // Change the fontsize
-    UUT.set_font(Font::Type::Normal);
+    UUT.set_font(Font::Type::Default_16px);
 
     // Test writing new characters
     UUT.add_char('A');
     
     // Perform testing
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 1], buffer.data[ 0]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 3], buffer.data[ 1]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 5], buffer.data[ 2]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 7], buffer.data[ 3]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 9], buffer.data[ 4]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][11], buffer.data[ 5]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][13], buffer.data[ 6]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][15], buffer.data[ 7]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][17], buffer.data[ 8]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][19], buffer.data[ 9]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][21], buffer.data[10]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][23], buffer.data[11]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 0], buffer.data[16]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 2], buffer.data[17]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 4], buffer.data[18]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 6], buffer.data[19]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][ 8], buffer.data[20]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][10], buffer.data[21]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][12], buffer.data[22]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][14], buffer.data[23]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][16], buffer.data[24]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][18], buffer.data[25]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][20], buffer.data[26]);
-    TEST_ASSERT_EQUAL(Font::Font_Normal['A'][22], buffer.data[27]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 +  1], buffer.data[ 0]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 +  3], buffer.data[ 1]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 +  5], buffer.data[ 2]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 +  7], buffer.data[ 3]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 +  9], buffer.data[ 4]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 + 11], buffer.data[ 5]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 + 13], buffer.data[ 6]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 + 15], buffer.data[ 7]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 + 17], buffer.data[ 8]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 + 19], buffer.data[ 9]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 + 21], buffer.data[10]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 + 23], buffer.data[11]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 +  0], buffer.data[16]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 +  2], buffer.data[17]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 +  4], buffer.data[18]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 +  6], buffer.data[19]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 +  8], buffer.data[20]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 + 10], buffer.data[21]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 + 12], buffer.data[22]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 + 14], buffer.data[23]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 + 16], buffer.data[24]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 + 18], buffer.data[25]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 + 20], buffer.data[26]);
+    TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 + 22], buffer.data[27]);
 };
 
 /// @brief Test the number font
@@ -528,19 +528,19 @@ void test_font_scaling(void)
     Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // Change the font size and scale
-    UUT.set_font(Font::Type::Small, 2);
+    UUT.set_font(Font::Type::Default_8px, 2);
 
     // Test setting the cursor position
     UUT.set_cursor(1,1);
-    TEST_ASSERT_EQUAL(Font::x_pixels(Font::Type::Small) * 2, UUT.cursor.x_pos);
-    TEST_ASSERT_EQUAL(Font::y_pixels(Font::Type::Small) * 2, UUT.cursor.y_pos);
+    TEST_ASSERT_EQUAL(Font::Default_8px.width_px * 2, UUT.cursor.x_pos);
+    TEST_ASSERT_EQUAL(Font::Default_8px.height_px * 2, UUT.cursor.y_pos);
 
 
     // Test the newline when the font is scaled
     UUT.set_cursor(0,0);
     UUT.newline();
     TEST_ASSERT_EQUAL(0, UUT.cursor.x_pos);
-    TEST_ASSERT_EQUAL(Font::y_pixels(Font::Type::Small) * 2, UUT.cursor.y_pos);
+    TEST_ASSERT_EQUAL(Font::Default_8px.height_px * 2, UUT.cursor.y_pos);
 
     // Test writing new characters
     UUT.set_cursor(0,0);
@@ -563,19 +563,19 @@ int main(int argc, char** argv)
 {
     UNITY_BEGIN();
     RUN_TEST(test_buffer);
-    // RUN_TEST(test_canvas_init);
-    // RUN_TEST(test_canvas_write_pixel);
-    // RUN_TEST(test_canvas_fill);
-    // RUN_TEST(test_canvas_add_horizontal_line);
-    // RUN_TEST(test_canvas_add_vertical_line);
-    // RUN_TEST(test_add_line);
-    // RUN_TEST(test_add_circle);
-    // RUN_TEST(test_fill_circle);
-    // RUN_TEST(test_cursor);
-    // RUN_TEST(test_add_character);
-    // RUN_TEST(test_add_string);
-    // RUN_TEST(test_font_normal);
-    // RUN_TEST(test_font_number);
-    // RUN_TEST(test_font_scaling);
+    RUN_TEST(test_canvas_init);
+    RUN_TEST(test_canvas_write_pixel);
+    RUN_TEST(test_canvas_fill);
+    RUN_TEST(test_canvas_add_horizontal_line);
+    RUN_TEST(test_canvas_add_vertical_line);
+    RUN_TEST(test_add_line);
+    RUN_TEST(test_add_circle);
+    RUN_TEST(test_fill_circle);
+    RUN_TEST(test_cursor);
+    RUN_TEST(test_add_character);
+    RUN_TEST(test_add_string);
+    RUN_TEST(test_font_normal);
+    RUN_TEST(test_font_number);
+    RUN_TEST(test_font_scaling);
     return UNITY_END();
 };

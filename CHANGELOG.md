@@ -1,5 +1,15 @@
 # Changelog for OTOS
-## [v3.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.0.0) *(2022-10-07)*
+## [v4.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.0.0) *(2022-xx-xx)*
+
+>Released by `SO`
+
+### Release Notes:
+- `Graphics` :
+    - Moves fonts to separate header files and makes adding fonts easier.
+
+### Fixed Issues:
+
+## [v3.0.1](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.0.1) *(2022-10-07)*
 
 >Released by `SO`
 
@@ -28,6 +38,9 @@
     - **Breaking Change**: Font size is now called font type.
 
 ### Fixed Issues:
+- #8: Add driver for SPI communication
+- #9: Add driver for SDIO communciation
+- #14: SysTick and SVCall Interrupt Priority
 
 ## [v2.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v2.0.0) *(2021-12-21)*
 

@@ -75,6 +75,7 @@ namespace Graphics {
         const unsigned int      height;
         const unsigned int      pixels;
         Font::Type              font_type;
+        const Font::Base_t*     font{&Font::Default_8px};
         unsigned char           scaling{1};
 
         // *** Methods ***
@@ -87,7 +88,7 @@ namespace Graphics {
         // *** Constructor ***
         Canvas_BW(unsigned char* const buffer, const unsigned int width, const unsigned int height):
             buffer(buffer), width(width), height(height), pixels(height * width),
-            font_type(Font::Type::Small), cursor(0,0){};
+            font_type(Font::Type::Default_8px), cursor(0,0){};
 
         // *** Methods ***
 
