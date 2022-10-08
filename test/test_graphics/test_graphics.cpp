@@ -310,7 +310,7 @@ void test_fill_circle(void)
 {
     // Create buffer and object
     Graphics::Buffer_BW<8, 8> buffer;
-    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
+    // Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // draw a full circle
     // UUT.fill_circle({4,4}, 4);
@@ -324,7 +324,7 @@ void test_fill_circle(void)
     TEST_ASSERT_EQUAL(0b11111110, buffer.data[7]);
 
     // draw a full circle in black
-    buffer.data.fill(0xFF);
+    // buffer.data.fill(0xFF);
     // UUT.fill_circle({4,4}, 4, Graphics::Color_BW::Black);
     TEST_ASSERT_EQUAL(0b11000111, buffer.data[0]);
     TEST_ASSERT_EQUAL(0b00000001, buffer.data[1]);
@@ -570,7 +570,7 @@ int main(int argc, char** argv)
     RUN_TEST(test_canvas_add_vertical_line);
     RUN_TEST(test_add_line);
     RUN_TEST(test_add_circle);
-    // RUN_TEST(test_fill_circle);
+    RUN_TEST(test_fill_circle);
     RUN_TEST(test_cursor);
     RUN_TEST(test_add_character);
     RUN_TEST(test_add_string);
