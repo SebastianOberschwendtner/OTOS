@@ -309,7 +309,7 @@ void test_add_circle(void)
 void test_fill_circle(void)
 {
     // Create buffer and object
-    // Graphics::Buffer_BW<8, 8> buffer;
+    Graphics::Buffer_BW<8, 8> buffer;
     // Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // draw a full circle
