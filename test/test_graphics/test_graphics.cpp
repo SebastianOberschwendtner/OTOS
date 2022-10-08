@@ -315,27 +315,25 @@ void test_fill_circle(void)
     // draw a full circle
     UUT.fill_circle({4,4}, 4);
     TEST_ASSERT_EQUAL(0b00111000, buffer.data[0]);
-    // TEST_ASSERT_EQUAL(0b11111110, buffer.data[1]);
-    // TEST_ASSERT_EQUAL(0b11111110, buffer.data[2]);
-    // TEST_ASSERT_EQUAL(0b11111111, buffer.data[3]);
-    // TEST_ASSERT_EQUAL(0b11111111, buffer.data[4]);
-    // TEST_ASSERT_EQUAL(0b11111111, buffer.data[5]);
-    // TEST_ASSERT_EQUAL(0b11111110, buffer.data[6]);
-    // TEST_ASSERT_EQUAL(0b11111110, buffer.data[7]);
+    TEST_ASSERT_EQUAL(0b11111110, buffer.data[1]);
+    TEST_ASSERT_EQUAL(0b11111110, buffer.data[2]);
+    TEST_ASSERT_EQUAL(0b11111111, buffer.data[3]);
+    TEST_ASSERT_EQUAL(0b11111111, buffer.data[4]);
+    TEST_ASSERT_EQUAL(0b11111111, buffer.data[5]);
+    TEST_ASSERT_EQUAL(0b11111110, buffer.data[6]);
+    TEST_ASSERT_EQUAL(0b11111110, buffer.data[7]);
 
     // draw a full circle in black
-    // buffer.data.fill(0xFF);
-    // UUT.fill_circle({4,4}, 4, Graphics::Color_BW::Black);
-    // TEST_ASSERT_EQUAL(0b11000111, buffer.data[0]);
-    // TEST_ASSERT_EQUAL(0b00000001, buffer.data[1]);
-    // TEST_ASSERT_EQUAL(0b00000001, buffer.data[2]);
-    // TEST_ASSERT_EQUAL(0b00000000, buffer.data[3]);
-    // TEST_ASSERT_EQUAL(0b00000000, buffer.data[4]);
-    // TEST_ASSERT_EQUAL(0b00000000, buffer.data[5]);
-    // TEST_ASSERT_EQUAL(0b00000001, buffer.data[6]);
-    // TEST_ASSERT_EQUAL(0b00000001, buffer.data[7]);
-
-    TEST_ASSERT_TRUE(true);
+    buffer.data.fill(0xFF);
+    UUT.fill_circle({4,4}, 4, Graphics::Color_BW::Black);
+    TEST_ASSERT_EQUAL(0b11000111, buffer.data[0]);
+    TEST_ASSERT_EQUAL(0b00000001, buffer.data[1]);
+    TEST_ASSERT_EQUAL(0b00000001, buffer.data[2]);
+    TEST_ASSERT_EQUAL(0b00000000, buffer.data[3]);
+    TEST_ASSERT_EQUAL(0b00000000, buffer.data[4]);
+    TEST_ASSERT_EQUAL(0b00000000, buffer.data[5]);
+    TEST_ASSERT_EQUAL(0b00000001, buffer.data[6]);
+    TEST_ASSERT_EQUAL(0b00000001, buffer.data[7]);
 };
 
 /// @brief test the cursor functionality of the canvas

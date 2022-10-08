@@ -407,7 +407,7 @@ void Graphics::Canvas_BW::fill_circle(
     }
     this->add_line_v(
         {static_cast<unsigned int>(x0), static_cast<unsigned int>(y0 - radius)},
-        static_cast<unsigned int>(2 * radius + 1),
+        static_cast<unsigned int>(2 * radius),
         color);
 };
 
