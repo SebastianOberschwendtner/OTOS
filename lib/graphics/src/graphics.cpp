@@ -44,8 +44,8 @@
 void Graphics::Canvas_BW::set_cursor(const unsigned int x_pos, const unsigned int y_pos)
 {
     // Get the new cursor positions
-    this->cursor.x_pos = x_pos * Font::x_pixels(this->font_type) * this->scaling;
-    this->cursor.y_pos = y_pos * Font::y_pixels(this->font_type) * this->scaling;
+    this->cursor.x_pos = x_pos * this->font->width_px * this->scaling;
+    this->cursor.y_pos = y_pos * this->font->height_px * this->scaling;
 
     // Limit the cursor to the display bounds
     if (this->cursor.x_pos >= this->width)
@@ -55,14 +55,17 @@ void Graphics::Canvas_BW::set_cursor(const unsigned int x_pos, const unsigned in
 };
 
 /**
- * @brief Set the font size to use for characters
- * @param size The new font size
+ * @brief Set the font type to use for characters
+ * @param type The new font type
  * @param scale The scale factor the font will be scaled with
  */
-void Graphics::Canvas_BW::set_font(const Font::Type size, const unsigned char scale)
+void Graphics::Canvas_BW::set_font(const Font::Base_t &type, const unsigned char scale)
 {
-    this->font_type = size;
+    // Set the scaling parameter
     this->scaling = scale;
+
+    // Add the font lookup
+    this->font = &type;
 };
 
 /**
@@ -74,7 +77,7 @@ void Graphics::Canvas_BW::newline(void)
     this->cursor.x_pos = 0;
 
     // increase y
-    this->cursor.y_pos += Font::y_pixels(this->font_type) * this->scaling;
+    this->cursor.y_pos += this->font->height_px * this->scaling;
 
     // Check bounds of y
     if (this->cursor.y_pos >= this->height)
@@ -414,32 +417,19 @@ void Graphics::Canvas_BW::fill_circle(
  */
 void Graphics::Canvas_BW::add_char(const unsigned char character)
 {
-    // get pixelsize of font
-    unsigned char width = Font::x_pixels(this->font_type);
-    unsigned char height = Font::y_pixels(this->font_type);
-    unsigned char height_pages = height / 8;
+    // get pixel size of font
+    unsigned char width = this->font->width_px;
+    unsigned char height = this->font->height_px;
+    unsigned char height_pages = this->font->stride;
 
     // Check whether scaling is active
     if (this->scaling < 2)
     {
-        // Write character depending in font since there is no scaling active
-        if (this->font_type == Font::Type::Default_8px)
-        {
-            // Write the pixels, the small font has 6 pixels in x direction
+        // Write the pixels
+        for (unsigned char iY = 0; iY < height_pages; iY++)
             for (unsigned char iX = 0; iX < width; iX++)
-                this->buffer[iX + this->cursor.x_pos + (this->width * this->cursor.y_pos / 8)] =
-                    Font::Default_8px.data[(character*Font::Default_8px.width_px) + iX];
-        }
-        else
-        {
-            // Write the pixels, the normal font has 12 pixels in x direction
-            for (unsigned char iY = 0; iY < height_pages; iY++)
-                for (unsigned char iX = 0; iX < width; iX++)
-                    this->buffer[iX + this->cursor.x_pos + (this->width * (iY + (this->cursor.y_pos / 8)))] =
-                        Font::Default_16px.data[(character*Font::Default_16px.width_px*Font::Default_16px.stride) + ((height_pages) * iX) + 1 - iY];
-        }
-        // append the cursor
-        this->cursor.x_pos += width;
+                this->buffer[iX + this->cursor.x_pos + (this->width * (iY + (this->cursor.y_pos / 8)))] =
+                    this->font->data[(character*width*height_pages) + ((height_pages) * iX) + (height_pages - 1) - iY];
     }
     else // Use font scaling
     {
@@ -452,18 +442,15 @@ void Graphics::Canvas_BW::add_char(const unsigned char character)
             for (unsigned char iY = 0; iY < height; iY++)
             {
                 // Get the color of the pixel
-                if (this->font_type == Font::Type::Default_8px)
-                    color = (Font::Default_8px.data[(character*Font::Default_8px.width_px) + iX] & (1 << iY)) ? Color_BW::White : Color_BW::Black;
-                else
-                    color = (Font::Default_16px.data[(character*Font::Default_16px.width_px*Font::Default_16px.stride) + 2 * iX + 1 - (iY / 8)] & (1 << (iY % 8))) ? Color_BW::White : Color_BW::Black;
+                color = (this->font->data[(character*width*height_pages) + (height_pages * iX)  + (height_pages - 1) - (iY / 8)] & (1 << (iY % 8))) ? Color_BW::White : Color_BW::Black;
                                                                                        
                 // Draw the scaled pixel                                               
                 this->draw_pixel_with_scaling({iX, iY}, color);                        
             }                                                                          
         }                                                                              
-        // append the cursor                                                           
-        this->cursor.x_pos += width * this->scaling;                                   
-    }                                                                                  
+    }
+    // append the cursor
+    this->cursor.x_pos += width * this->scaling;
 };                                                                                     
                                                                                        
 /**                                                                                    

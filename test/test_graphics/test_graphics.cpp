@@ -453,7 +453,7 @@ void test_font_normal(void)
     Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // Change the fontsize
-    UUT.set_font(Font::Type::Default_16px);
+    UUT.set_font(Font::Default_16px);
 
     // Test writing new characters
     UUT.add_char('A');
@@ -528,7 +528,7 @@ void test_font_scaling(void)
     Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // Change the font size and scale
-    UUT.set_font(Font::Type::Default_8px, 2);
+    UUT.set_font(Font::Default_8px, 2);
 
     // Test setting the cursor position
     UUT.set_cursor(1,1);

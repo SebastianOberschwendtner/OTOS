@@ -26,41 +26,6 @@
 namespace Font
 {
     /**
-     * @brief Define the possible sizes
-     */
-    enum class Type
-    {
-        Default_8px,
-        Default_16px
-    };
-
-    /**
-     * @brief Define the sizes in pixels of the fonts
-     */
-    constexpr unsigned char x_pixels(const Type font_type)
-    {
-        switch (font_type)
-        {
-        case Type::Default_8px:
-            return 6;
-        case Type::Default_16px:
-            return 12;
-        }
-        return 0;
-    };
-    constexpr unsigned char y_pixels(const Type font_type)
-    {
-        switch (font_type)
-        {
-        case Type::Default_8px:
-            return 8;
-        case Type::Default_16px:
-            return 16;
-        }
-        return 0;
-    };
-
-    /**
      * @brief Font with numbers only
      * @details width: 16px, height: 20px
      */
