@@ -310,10 +310,10 @@ void test_fill_circle(void)
 {
     // Create buffer and object
     Graphics::Buffer_BW<8, 8> buffer;
-    // Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // draw a full circle
-    // UUT.fill_circle({4,4}, 4);
+    UUT.fill_circle({4,4}, 4);
     TEST_ASSERT_EQUAL(0b00111000, buffer.data[0]);
     // TEST_ASSERT_EQUAL(0b11111110, buffer.data[1]);
     // TEST_ASSERT_EQUAL(0b11111110, buffer.data[2]);
