@@ -313,7 +313,7 @@ void test_fill_circle(void)
     Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // draw a full circle
-    UUT.fill_circle({4,4}, 4);
+    // UUT.fill_circle({4,4}, 4);
     TEST_ASSERT_EQUAL(0b00111000, buffer.data[0]);
     TEST_ASSERT_EQUAL(0b11111110, buffer.data[1]);
     TEST_ASSERT_EQUAL(0b11111110, buffer.data[2]);
@@ -325,7 +325,7 @@ void test_fill_circle(void)
 
     // draw a full circle in black
     buffer.data.fill(0xFF);
-    UUT.fill_circle({4,4}, 4, Graphics::Color_BW::Black);
+    // UUT.fill_circle({4,4}, 4, Graphics::Color_BW::Black);
     TEST_ASSERT_EQUAL(0b11000111, buffer.data[0]);
     TEST_ASSERT_EQUAL(0b00000001, buffer.data[1]);
     TEST_ASSERT_EQUAL(0b00000001, buffer.data[2]);
@@ -571,11 +571,11 @@ int main(int argc, char** argv)
     RUN_TEST(test_add_line);
     RUN_TEST(test_add_circle);
     RUN_TEST(test_fill_circle);
-    // RUN_TEST(test_cursor);
-    // RUN_TEST(test_add_character);
-    // RUN_TEST(test_add_string);
-    // RUN_TEST(test_font_normal);
-    // RUN_TEST(test_font_number);
-    // RUN_TEST(test_font_scaling);
+    RUN_TEST(test_cursor);
+    RUN_TEST(test_add_character);
+    RUN_TEST(test_add_string);
+    RUN_TEST(test_font_normal);
+    RUN_TEST(test_font_number);
+    RUN_TEST(test_font_scaling);
     return UNITY_END();
 };
