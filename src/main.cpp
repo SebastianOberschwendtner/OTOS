@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    main.c
  * @author  SO
- * @version v2.9.0
+ * @version v3.3.0
  * @date    09-March-2021
  * @brief   Main function for the OTOS. Mainly used to demonstrate how the OTOS
  *          functions work and should be used.
@@ -76,7 +76,7 @@ OTOS::Kernel OS;
 // *** Main ***
 int main(void)
 {
-    ST_Core::switch_system_clock<ST_Core::Clock::PLL_HSI, 120, 30, 60>();
+    ST_Core::switch_system_clock<ST_Core::Clock::PLL_HSI, F_CPU/1000000, F_APB1/1000000, F_APB2/1000000>();
     // Configure SysTick timer for interrupts every 1 ms
     Timer::SysTick_Configure();
 
