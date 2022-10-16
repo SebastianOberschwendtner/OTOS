@@ -4,10 +4,14 @@
 >Released by `SO`
 
 ### Release Notes:
+#### [&rarrb; v3.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.1.0)
 - `Graphics` :
-    - Moves fonts to separate header files and makes adding fonts easier. [&rarrb; v3.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.1.0)
-    - Adds custom monospaced fonts. [&rarrb; v3.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.1.0)
-    - Coordinate class has overloads for basic arithmetic operators. [&rarrb; v3.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.1.0)
+    - Moves fonts to separate header files and makes adding fonts easier.
+    - Adds custom monospaced fonts.
+    - Coordinate class has overloads for basic arithmetic operators.
+#### [&rarrb; v3.2.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.2.0)
+- `Drivers`:
+    - Improves DMA driver for sending data.
 
 ### Fixed Issues:
 

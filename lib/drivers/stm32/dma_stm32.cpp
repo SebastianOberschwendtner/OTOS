@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    dma_stm32.cpp
  * @author  SO
- * @version v2.9.0
+ * @version v3.2.0
  * @date    18-July-2022
  * @brief   DMA driver for STM32 microcontrollers.
  ==============================================================================
@@ -160,6 +160,43 @@ void DMA::Stream::set_direction(const Direction &direction)
         this->Instance->CCR |= DMA_CCR_MEM2MEM | DMA_CCR_DIR;
     else if (direction == Direction::memory_to_peripheral)
         this->Instance->CCR |= DMA_CCR_DIR;
+#endif
+};
+
+/**
+ * @brief Set the peripheral width of the DMA stream.
+ *
+ * @param width The peripheral width in bits.
+ */
+void DMA::Stream::set_peripheral_size(const Width &width)
+{
+#if defined(STM32F4)
+    // clear old width
+    this->Instance->CR &= ~DMA_SxCR_PSIZE_Msk;
+
+    // set new width
+    this->Instance->CR |= (static_cast<unsigned char>(width) << DMA_SxCR_PSIZE_Pos) & DMA_SxCR_PSIZE_Msk;
+#elif defined(STM32L0)
+    // clear old width
+    this->Instance->CCR &= ~DMA_CCR_PSIZE_Msk;
+
+    // set new width
+    this->Instance->CCR |= (static_cast<unsigned char>(width) << DMA_CCR_PSIZE_Pos) & DMA_CCR_PSIZE_Msk;
+#endif
+};
+
+/**
+ * @brief Set the number of items to be transferred by the DMA stream.
+ * 
+ * @param number_of_transfers The number of transfers.
+ */
+void DMA::Stream::set_number_of_transfers(const size_t &number_of_transfers)
+{
+    // Set number of memory transfers
+#if defined(STM32F4)
+    this->Instance->NDTR = static_cast<unsigned int>(number_of_transfers);
+#elif defined(STM32L0)
+    this->Instance->CNDTR = static_cast<unsigned int>(number_of_transfers);
 #endif
 };
 

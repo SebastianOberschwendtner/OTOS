@@ -439,5 +439,11 @@ namespace DMA
         memory_to_peripheral,
         memory_to_memory
     };
+    enum class Width: unsigned char
+    {
+        _8bit = 0,
+        _16bit = 1,
+        _32bit = 2
+    };
 };
 #endif
