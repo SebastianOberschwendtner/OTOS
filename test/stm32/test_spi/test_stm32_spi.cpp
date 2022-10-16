@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_stm32_spi.cpp
  * @author  SO
- * @version v3.2.0
+ * @version v3.3.0
  * @date    22-December-2021
  * @brief   Unit tests for testing the spi driver for stm32 microcontrollers.
  ******************************************************************************
@@ -390,18 +390,22 @@ void test_create_dma_stream(void)
     SPI::Controller<IO::SPI_1> UUT(1'000'000);
 
     // Create a DMA stream
-    auto stream = UUT.create_dma_stream(DMA_Stream{}, DMA::Direction::peripheral_to_memory);
+    auto stream = UUT.create_dma_stream(DMA_Stream{}, DMA::Direction::memory_to_peripheral);
 
     // Test side effects
     TEST_ASSERT_BIT_HIGH(SPI_CR2_TXDMAEN_Pos, SPI1->CR2);
     stream.assign_peripheral.assert_called_once();
-    stream.set_direction.assert_called_once_with(static_cast<int>(DMA::Direction::peripheral_to_memory));
+    stream.set_direction.assert_called_once_with(static_cast<int>(DMA::Direction::memory_to_peripheral));
     TEST_ASSERT_EQUAL(0, stream.set_peripheral_size.call_count);
 
     // Create DMA stream when SPI is in 16bit mode
     UUT.set_data_to_16bit();
-    stream = UUT.create_dma_stream(DMA_Stream{}, DMA::Direction::peripheral_to_memory);
+    stream = UUT.create_dma_stream(DMA_Stream{}, DMA::Direction::memory_to_peripheral);
     stream.set_peripheral_size.assert_called_once_with(static_cast<int>(DMA::Width::_16bit));
+
+    // Create a DMA stream with a different direction
+    stream = UUT.create_dma_stream(DMA_Stream{}, DMA::Direction::peripheral_to_memory);
+    TEST_ASSERT_BIT_HIGH(SPI_CR2_RXDMAEN_Pos, SPI1->CR2);
 };
 
 // === Main ===
