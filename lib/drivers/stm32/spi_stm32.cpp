@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    spi_stm32.cpp
  * @author  SO
- * @version v2.12.2
+ * @version v3.2.0
  * @date    22-Dezember-2021
  * @brief   SPI driver for STM32 microcontrollers.
  ==============================================================================
@@ -238,6 +238,40 @@ void SPI::Controller<spi_instance>::set_use_hardware_chip_select(const bool use_
         this->peripheral->CR1 |= (SPI_CR1_SSM | SPI_CR1_SSI);
         this->peripheral->CR2 &= ~SPI_CR2_SSOE;
     }
+};
+
+/**
+ * @brief Set the SPI data width to 16 bits.
+ * That means that the DR register is 16 bits wide.
+ *
+ * @attention This setting does not propagate to other drivers!
+ * They all assume a 8 bit wide DR register.
+ * @tparam spi_instance The SPI peripheral to be used.
+ */
+template <IO spi_instance>
+void SPI::Controller<spi_instance>::set_data_to_16bit(void)
+{
+    // Disable peripheral and wait until it is disabled
+    this->disable();
+
+    // Wait for disabling
+    this->reset_timeout();
+    while(this->peripheral->CR1 & SPI_CR1_SPE)
+    {
+        // Check for timeouts
+        if (this->timed_out())
+        {
+            // Peripheral timed out -> set error
+            this->set_error(Error::Code::SPI_Timeout);
+            return;
+        }
+    }
+
+   // Set the bit in the CR1 register
+    this->peripheral->CR1 |= SPI_CR1_DFF; 
+
+    // Enable peripheral again
+    this->enable();
 };
 
 /**

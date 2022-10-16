@@ -12,6 +12,7 @@
 #### [&rarrb; v3.2.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.2.0)
 - `Drivers`:
     - Improves DMA driver for sending data.
+    - Adds 16bit mode for SPI driver.
 
 ### Fixed Issues:
 
