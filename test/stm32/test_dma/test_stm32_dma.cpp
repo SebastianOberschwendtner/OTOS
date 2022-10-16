@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_stn32_dma.cpp
  * @author  SO
- * @version v2.9.0
+ * @version v3.2.0
  * @date    18-July-2022
  * @brief   Unit tests for testing the DMA driver for stm32 microcontrollers.
  ******************************************************************************
@@ -145,6 +145,25 @@ void test_assign_peripheral_address(void)
     TEST_ASSERT_BIT_LOW(DMA_SxCR_PINC_Pos, DMA1_Stream0->CR);
 };
 
+/// @brief Test setting the peripheral size
+void test_set_peripheral_size(void)
+{
+    // Create DMA Controller
+    DMA::Stream UUT{{1,0,1}};
+
+    // Set peripheral size to 8bit
+    UUT.set_peripheral_size(DMA::Width::_8bit);
+    TEST_ASSERT_BITS(DMA_SxCR_PSIZE_Msk, 0 << DMA_SxCR_PSIZE_Pos, DMA1_Stream0->CR);
+
+    // Set peripheral size to 16bit
+    UUT.set_peripheral_size(DMA::Width::_16bit);
+    TEST_ASSERT_BITS(DMA_SxCR_PSIZE_Msk, 1 << DMA_SxCR_PSIZE_Pos, DMA1_Stream0->CR);
+
+    // Set peripheral size to 32bit
+    UUT.set_peripheral_size(DMA::Width::_32bit);
+    TEST_ASSERT_BITS(DMA_SxCR_PSIZE_Msk, 2 << DMA_SxCR_PSIZE_Pos, DMA1_Stream0->CR);
+};
+
 /// @brief Assign a memory address to a DMA Stream
 void test_assign_memory_address(void)
 {
@@ -181,6 +200,25 @@ void test_assign_memory_address(void)
     std::uint32_t mem32 = 0;
     UUT.assign_memory(mem32);
     TEST_ASSERT_BITS(DMA_SxCR_MSIZE_Msk, 2 << DMA_SxCR_MSIZE_Pos, DMA1_Stream0->CR);
+};
+
+/// @brief Test setting the number of data items to transfer
+void test_set_number_of_transfers(void)
+{
+    // Create DMA Controller
+    DMA::Stream UUT{{1,0,1}};
+    
+    // Set number of data items to 1
+    UUT.set_number_of_transfers(1);
+    TEST_ASSERT_BITS(DMA_SxNDT_Msk, 1 << DMA_SxNDT_Pos, DMA1_Stream0->NDTR);
+
+    // Set number of data items to 2
+    UUT.set_number_of_transfers(2);
+    TEST_ASSERT_BITS(DMA_SxNDT_Msk, 2 << DMA_SxNDT_Pos, DMA1_Stream0->NDTR);
+
+    // Set number of data items to 3
+    UUT.set_number_of_transfers(3);
+    TEST_ASSERT_BITS(DMA_SxNDT_Msk, 3 << DMA_SxNDT_Pos, DMA1_Stream0->NDTR);
 };
 
 /// @brief Test assigning an array to a DMA Stream
@@ -348,7 +386,9 @@ int main(int argc, char **argv)
     RUN_TEST(test_init);
     RUN_TEST(test_channel_selection);
     RUN_TEST(test_assign_peripheral_address);
+    RUN_TEST(test_set_peripheral_size);
     RUN_TEST(test_assign_memory_address);
+    RUN_TEST(test_set_number_of_transfers);
     RUN_TEST(test_assign_array);
     RUN_TEST(test_reading_status);
     RUN_TEST(test_set_transfer_direction);

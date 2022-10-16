@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_stm32_spi.cpp
  * @author  SO
- * @version v2.12.2
+ * @version v3.2.0
  * @date    22-December-2021
  * @brief   Unit tests for testing the spi driver for stm32 microcontrollers.
  ******************************************************************************
@@ -46,6 +46,7 @@
 struct DMA_Stream
 {
     Mock::Callable<> assign_peripheral;
+    Mock::Callable<> set_peripheral_size;
     Mock::Callable<DMA::Direction> set_direction;
 };
 
@@ -370,6 +371,18 @@ void test_read_array(void)
     TEST_ASSERT_EQUAL(Error::Code::SPI_BUS_Busy_Error, UUT.get_error());
 };
 
+/// @brief Test changing the data width of the SPI
+void test_set_data_width(void)
+{
+    // Create SPI Controller
+    SPI::Controller<IO::SPI_1> UUT(1'000'000);
+
+    // Test setting the data width to 16 bits
+    UUT.set_data_to_16bit();
+    TEST_ASSERT_BIT_HIGH(SPI_CR1_DFF_Pos, SPI1->CR1);
+    TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
+};
+
 /// @brief Test creating a DMA Stream with the SPI as target/source
 void test_create_dma_stream(void)
 {
@@ -383,6 +396,12 @@ void test_create_dma_stream(void)
     TEST_ASSERT_BIT_HIGH(SPI_CR2_TXDMAEN_Pos, SPI1->CR2);
     stream.assign_peripheral.assert_called_once();
     stream.set_direction.assert_called_once_with(static_cast<int>(DMA::Direction::peripheral_to_memory));
+    TEST_ASSERT_EQUAL(0, stream.set_peripheral_size.call_count);
+
+    // Create DMA stream when SPI is in 16bit mode
+    UUT.set_data_to_16bit();
+    stream = UUT.create_dma_stream(DMA_Stream{}, DMA::Direction::peripheral_to_memory);
+    stream.set_peripheral_size.assert_called_once_with(static_cast<int>(DMA::Width::_16bit));
 };
 
 // === Main ===
@@ -403,5 +422,6 @@ int main(int argc, char **argv)
     RUN_TEST(test_send_array);
     RUN_TEST(test_read_array);
     RUN_TEST(test_create_dma_stream);
+    RUN_TEST(test_set_data_width);
     return UNITY_END();
 };

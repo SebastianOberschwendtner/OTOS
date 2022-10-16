@@ -53,6 +53,7 @@ namespace SPI
         void set_clock_timing(const Level idle, const Edge data_valid);
         void set_use_hardware_chip_select(const bool use_hardware);
         void set_target_address(const unsigned char address) { return; }; // To be compatible with the bus interface
+        void set_data_to_16bit(void);
         void enable(void);
         void disable(void);
         bool last_transmit_finished(void) const;
@@ -84,6 +85,10 @@ namespace SPI
             this->peripheral->CR2 |= SPI_CR2_TXDMAEN;
             stream.assign_peripheral(this->peripheral->DR);
             stream.set_direction(direction);
+
+            // When the SPI is in 16bit mode, the DMA has to transfer 2 bytes at once.
+            if (this->peripheral->CR1 & SPI_CR1_DFF)
+                stream.set_peripheral_size(DMA::Width::_16bit);
 
             return stream;
         };

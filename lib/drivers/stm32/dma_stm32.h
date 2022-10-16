@@ -42,7 +42,7 @@ namespace DMA
      * @brief This class/struct is used to define the used
      * DMA channel and the used stream.
      * 
-     * For F4 and L0 devices the naming scheme in the datasheet differ.
+     * For F4 and L0 devices the naming scheme in the data sheet differ.
      * The following table shows the equivalent names:
      * | F4 | L0 |
      * |---|---|
@@ -92,12 +92,12 @@ namespace DMA
         /**
          * @brief Assign a peripheral to the DMA stream.
          *
-         * @tparam peripheral_t The type of the peripheral.
+         * @tparam controller_t The peripheral controller class.
          * @param peripheral The peripheral to assign.
          * @param enable_increment Enable incrementing of the peripheral address.
          */
-        template <typename peripheral_t>
-        void assign_peripheral(peripheral_t &peripheral, const bool enable_increment = false)
+        template <typename controller_t>
+        void assign_peripheral(controller_t &peripheral, const bool enable_increment = false)
         {
             // Set the peripheral address
 #if defined(STM32F4)
@@ -180,15 +180,13 @@ namespace DMA
             this->assign_memory(array[0], enable_increment);
 
             // Set number of memory transfers
-#if defined(STM32F4)
-            this->Instance->NDTR = size;
-#elif defined(STM32L0)
-            this->Instance->CNDTR = size;
-#endif
+            this->set_number_of_transfers(size);
         };
 
         // *** Methods ***
         void set_direction(const Direction &direction);
+        void set_peripheral_size(const Width &width);
+        void set_number_of_transfers(const size_t &number_of_transfers);
         void clear_interrupt_flag(const Flag &flag);
         bool enable(void);
         bool is_enabled(void) const;
