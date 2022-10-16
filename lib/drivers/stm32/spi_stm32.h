@@ -82,7 +82,7 @@ namespace SPI
         template<class DMA_Stream>
         DMA_Stream create_dma_stream( DMA_Stream &&stream, const DMA::Direction direction ) const
         {
-            this->peripheral->CR2 |= SPI_CR2_TXDMAEN;
+            this->peripheral->CR2 |= (direction == DMA::Direction::memory_to_peripheral) ? SPI_CR2_TXDMAEN : SPI_CR2_RXDMAEN;
             stream.assign_peripheral(this->peripheral->DR);
             stream.set_direction(direction);
 

@@ -13,6 +13,9 @@
 - `Drivers`:
     - Improves DMA driver for sending data.
     - Adds 16bit mode for SPI driver.
+#### [&rarrb; v3.3.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.3.0)
+- `Drivers`:
+    - SPI can create RX and TX DMA Streams.
 
 ### Fixed Issues:
 
