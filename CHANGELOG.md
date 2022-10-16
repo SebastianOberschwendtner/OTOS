@@ -16,8 +16,10 @@
 #### [&rarrb; v3.3.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.3.0)
 - `Drivers`:
     - SPI can create RX and TX DMA Streams.
+    - Adjusts PLL defines for L0 devices.
 
 ### Fixed Issues:
+- #12: Update core_stm32 for STM32L0 Devices
 
 ## [v3.0.1](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.0.1) *(2022-10-07)*
 
