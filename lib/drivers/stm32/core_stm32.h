@@ -109,7 +109,6 @@ namespace ST_Core
 
     struct Flash
     {
-#ifdef STM32F4
         /**
          * @brief Set the access control of the flash
          * according to the VCC voltage range and
@@ -124,9 +123,14 @@ namespace ST_Core
             // Only normal voltage range is supported now
             static_assert(range == VCC::_2_7V_to_3_6V, "Voltage range for Flash control not supported yet!");
             // Check for valid CPU speed
+#ifdef STM32F4
             static_assert(SysClock <= 168, "F_CPU is to high!");
+#elif defined(STM32L0)
+            static_assert(SysClock <= 32, "F_CPU is to high!");
+#endif
 
             // Set the configuration for flash
+#ifdef STM32F4
             if constexpr (SysClock <= 30)
                 FLASH->ACR = FLASH_ACR_LATENCY_0WS;
             else if constexpr (SysClock <= 60)
@@ -141,8 +145,11 @@ namespace ST_Core
                 FLASH->ACR = FLASH_ACR_LATENCY_5WS;
             else
                 FLASH->ACR = 0;
-        };
+#elif defined(STM32L0)
+            if constexpr (SysClock > 16)
+                FLASH->ACR = FLASH_ACR_LATENCY;
 #endif
+        };
     };
 
     template<unsigned char f_cpu, unsigned char f_apb1>
@@ -246,9 +253,15 @@ namespace ST_Core
     void switch_system_clock()
     {
         // Check clock limits
+#if defined(STM32F4)
         static_assert(f_apb1 <= 42, "F_APB1 too high!");
         static_assert(f_apb2 <= 84, "F_APB2 too high!");
         static_assert(f_cpu <= 168, "F_CPU too high!");
+#elif defined(STM32L0)
+        static_assert(f_apb1 <= 32, "F_APB1 too high!");
+        static_assert(f_apb2 <= 32, "F_APB2 too high!");
+        static_assert(f_cpu <= 32, "F_CPU too high!");
+#endif
 
         // Get the APB1 prescaler
         constexpr unsigned long APB1_Prescaler = get_APB1_prescaler<f_cpu, f_apb1>();
@@ -263,14 +276,26 @@ namespace ST_Core
         Flash::configure<VCC::_2_7V_to_3_6V, f_cpu>();
 
         // Set PLL Parameters
-        static_assert(source != Clock::HSE, "Configuring the PLL source with HSE is not yet supported!");
+        static_assert(source != Clock::PLL_HSE, "Configuring the PLL source with HSE is not yet supported!");
         if constexpr (source == Clock::PLL_HSI)
         {
             constexpr unsigned int M = ST_Core::PLL::get_M_HSI();
             constexpr unsigned int N = ST_Core::PLL::get_N_HSI();
             constexpr unsigned int Q = ST_Core::PLL::get_Q_HSI();
-            constexpr unsigned int P = ST_Core::PLL::get_P_HSI<120>();
+            constexpr unsigned int P = ST_Core::PLL::get_P_HSI<f_cpu>();
             RCC->PLLCFGR = (Q << RCC_PLLCFGR_PLLQ_Pos) | (P << RCC_PLLCFGR_PLLP_Pos) | (N << RCC_PLLCFGR_PLLN_Pos) | M;
+        }
+#elif defined(STM32L0)
+        // Set the Flash wait states
+        Flash::configure<VCC::_2_7V_to_3_6V, f_cpu>();
+
+        // Set PLL Parameters
+        static_assert(source != Clock::PLL_HSE, "Configuring the PLL source with HSE is not yet supported!");
+        if constexpr (source == Clock::PLL_HSI)
+        {
+            constexpr unsigned int Mul = 0b0001; // Multiply by 4;
+            constexpr unsigned int Div = 0b0001;   // Divide by 2;
+            RCC->CFGR = (Mul << RCC_CFGR_PLLMUL_Pos) | (Div << RCC_CFGR_PLLDIV_Pos) | RCC_CFGR_PLLSRC_HSI;
         }
 #endif
 
