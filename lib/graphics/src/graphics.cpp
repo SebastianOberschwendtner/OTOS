@@ -450,7 +450,16 @@ void Graphics::Canvas_BW::add_char(const unsigned char character)
         }                                                                              
     }
     // append the cursor
-    this->cursor.x_pos += width * this->scaling;
+    auto next_x = this->cursor.x_pos + width * this->scaling;
+    if (next_x > this->width)
+    {
+        this->cursor.x_pos = 0;
+        this->cursor.y_pos += this->font->height_px * this->scaling;
+    }
+    else
+    {
+        this->cursor.x_pos = next_x;
+    }
 };                                                                                     
                                                                                        
 /**                                                                                    

@@ -6,6 +6,8 @@
 ### Release Notes:
 - `Graphics` :
     - Moves fonts to separate header files and makes adding fonts easier.
+    - Adds custom monospaced fonts.
+    - Corodinate class has overloads for basic arithmetic operators.
 
 ### Fixed Issues:
 

@@ -453,7 +453,7 @@ void test_font_normal(void)
     Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // Change the fontsize
-    UUT.set_font(Font::Default_16px);
+    UUT.set_font(Font::_16px::Default);
 
     // Test writing new characters
     UUT.add_char('A');
@@ -528,19 +528,19 @@ void test_font_scaling(void)
     Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // Change the font size and scale
-    UUT.set_font(Font::Default_8px, 2);
+    UUT.set_font(Font::_8px::Default, 2);
 
     // Test setting the cursor position
     UUT.set_cursor(1,1);
-    TEST_ASSERT_EQUAL(Font::Default_8px.width_px * 2, UUT.cursor.x_pos);
-    TEST_ASSERT_EQUAL(Font::Default_8px.height_px * 2, UUT.cursor.y_pos);
+    TEST_ASSERT_EQUAL(Font::_8px::Default.width_px * 2, UUT.cursor.x_pos);
+    TEST_ASSERT_EQUAL(Font::_8px::Default.height_px * 2, UUT.cursor.y_pos);
 
 
     // Test the newline when the font is scaled
     UUT.set_cursor(0,0);
     UUT.newline();
     TEST_ASSERT_EQUAL(0, UUT.cursor.x_pos);
-    TEST_ASSERT_EQUAL(Font::Default_8px.height_px * 2, UUT.cursor.y_pos);
+    TEST_ASSERT_EQUAL(Font::_8px::Default.height_px * 2, UUT.cursor.y_pos);
 
     // Test writing new characters
     UUT.set_cursor(0,0);
@@ -556,6 +556,34 @@ void test_font_scaling(void)
     TEST_ASSERT_EQUAL(3, buffer.data[20]);
     TEST_ASSERT_EQUAL(3, buffer.data[21]);
     TEST_ASSERT_EQUAL(3, buffer.data[22]);
+};
+
+/// @brief Test the coordinate overloading
+void test_coordinate_operators(void)
+{
+    // Arrange
+    Graphics::Coordinate coord1(1,2);
+    Graphics::Coordinate coord2(3,4);
+
+    // Test Adding two coordinates
+    Graphics::Coordinate coord3 = coord1 + coord2;
+    TEST_ASSERT_EQUAL(4, coord3.x_pos);
+    TEST_ASSERT_EQUAL(6, coord3.y_pos);
+
+    // Test Subtracting two coordinates
+    Graphics::Coordinate coord4 = coord2 - coord1;
+    TEST_ASSERT_EQUAL(2, coord4.x_pos);
+    TEST_ASSERT_EQUAL(2, coord4.y_pos);
+
+    // Test the += operator
+    coord1 += coord2;
+    TEST_ASSERT_EQUAL(4, coord1.x_pos);
+    TEST_ASSERT_EQUAL(6, coord1.y_pos);
+
+    // Test the -= operator
+    coord1 -= coord2;
+    TEST_ASSERT_EQUAL(1, coord1.x_pos);
+    TEST_ASSERT_EQUAL(2, coord1.y_pos);
 };
 
 /// === Run Tests ===
@@ -577,5 +605,6 @@ int main(int argc, char** argv)
     RUN_TEST(test_font_normal);
     RUN_TEST(test_font_number);
     RUN_TEST(test_font_scaling);
+    RUN_TEST(test_coordinate_operators);
     return UNITY_END();
 };

@@ -22,6 +22,15 @@
 #define FONT_H_
 // === Includes ===
 #include "fonts/default_font.h"
+#include "fonts/DelugiaPLMono.h"
+#include "fonts/Monospac821BT.h"
+#include "fonts/SWMono.h"
+#include "fonts/RobotoMono.h"
+#include "fonts/SpaceMono.h"
+#include "fonts/Inconsolata.h"
+#include "fonts/NotoSansMono.h"
+#include "fonts/ShareTechMono.h"
+#include "fonts/VT323.h"
 
 namespace Font
 {
