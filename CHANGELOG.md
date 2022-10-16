@@ -5,7 +5,9 @@
 
 ### Release Notes:
 - `Graphics` :
-    - Moves fonts to separate header files and makes adding fonts easier.
+    - Moves fonts to separate header files and makes adding fonts easier. [&rarrb; v3.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.1.0)
+    - Adds custom monospaced fonts. [&rarrb; v3.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.1.0)
+    - Coordinate class has overloads for basic arithmetic operators. [&rarrb; v3.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.1.0)
 
 ### Fixed Issues:
 

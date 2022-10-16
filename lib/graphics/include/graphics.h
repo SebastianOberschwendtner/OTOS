@@ -64,6 +64,10 @@ namespace Graphics {
 
         // *** Methods ***
         void set(const unsigned int new_x, const unsigned int new_y) { this->x_pos = new_x; this->y_pos = new_y; };
+        Coordinate operator+(const Coordinate& rhs) const { return Coordinate(this->x_pos + rhs.x_pos, this->y_pos + rhs.y_pos); };
+        Coordinate operator-(const Coordinate& rhs) const { return Coordinate(this->x_pos - rhs.x_pos, this->y_pos - rhs.y_pos); };
+        Coordinate operator+=(const Coordinate& rhs) { this->x_pos += rhs.x_pos; this->y_pos += rhs.y_pos; return *this; };
+        Coordinate operator-=(const Coordinate& rhs) { this->x_pos -= rhs.x_pos; this->y_pos -= rhs.y_pos; return *this; };
     };
 
     class Canvas_BW
@@ -74,7 +78,7 @@ namespace Graphics {
         const unsigned int      width;
         const unsigned int      height;
         const unsigned int      pixels;
-        const Font::Base_t*     font{&Font::Default_8px};
+        const Font::Base_t*     font{&Font::_8px::Default};
         unsigned char           scaling{1};
 
         // *** Methods ***

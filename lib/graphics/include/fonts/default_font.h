@@ -557,19 +557,24 @@ namespace Font
 
     // === Font Information for Default  Fonts ===
     // Default Font Small: 8px
-    constexpr Font::Base_t Default_8px = {
-        .data = Lookup_Default_8px,
-        .width_px = 6,
-        .height_px = 8,
-        .stride = 1
-    };
+    namespace _8px
+    {
+        constexpr Font::Base_t Default = {
+            .data = Lookup_Default_8px,
+            .width_px = 6,
+            .height_px = 8,
+            .stride = 1};
+    }; // namespace 8px
+    
 
     // Default Font Normal: 16px
-    constexpr Font::Base_t Default_16px = {
-        .data = Lookup_Default_16px,
-        .width_px = 12,
-        .height_px = 16,
-        .stride = 2
+    namespace _16px
+    {
+        constexpr Font::Base_t Default = {
+            .data = Lookup_Default_16px,
+            .width_px = 12,
+            .height_px = 16,
+            .stride = 2};
     };
 };
 #endif
