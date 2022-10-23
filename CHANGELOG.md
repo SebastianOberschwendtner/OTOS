@@ -21,6 +21,8 @@
     - Adds << operator to display canvas for strings.
 
 #### [&rarrb; v3.4.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.4.0)
+- `Filesystem`:
+    - Files can be opened using a specific mode.
 
 ### Fixed Issues:
 - #12: Update core_stm32 for STM32L0 Devices

@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    file.cpp
  * @author  SO
- * @version v2.8.0
+ * @version v3.4.0
  * @date    09-January-2022
  * @brief   Interface for files.
  ******************************************************************************
@@ -74,7 +74,6 @@ unsigned long FAT32::File<Volume_t>::tell(void) const
 template<class Volume_t>
 unsigned char FAT32::File<Volume_t>::read(void)
 {
-    unsigned char data = 0;
     // Check whether the end of file is already reached
     if (this->tell() == this->size())
         return 0;
