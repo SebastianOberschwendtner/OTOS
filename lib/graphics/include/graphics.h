@@ -107,6 +107,19 @@ namespace Graphics {
         void        add_char    (const unsigned char character);
         void        add_string  (const char* string);
         void        add_number  (const unsigned char number);
+
+        // *** << Operators ***
+        /**
+         * @brief Add a string to the canvas using the << operator.
+         * 
+         * @param string The null terminated (!) string to add.
+         * @return Canvas_BW& Returns a reference to the canvas.
+         */
+        Canvas_BW& operator<<(const char* string)
+        {
+            this->add_string(string);
+            return *this;
+        };
     };
 };
 #endif
