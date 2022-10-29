@@ -52,16 +52,27 @@ namespace Files
     // === Interface ===
     struct File_Interface
     {
+        // *** Properties ***
         State state{State::Closed};
+
+        // *** Virtual Interface Methods ***
         virtual unsigned long size(void) const = 0;
         // virtual bool seek(const unsigned long position) = 0;
-        virtual unsigned long tell() const = 0;
-        // virtual bool write() = 0;
+        virtual unsigned long tell(void) const = 0;
+        virtual bool write(const unsigned char byte) = 0;
         // virtual bool write_line() = 0;
-        virtual unsigned char read() = 0;
+        virtual unsigned char read(void) = 0;
         // virtual bool read_line() = 0;
         // virtual bool save() = 0;
-        // virtual bool close() = 0;
+        virtual bool close(void) = 0;
+
+        // *** Methods ***
+        File_Interface& operator<<(const char* string)
+        {
+            while (*string)
+                this->write(*string++);
+            return *this;
+        };
     };
 
 };
@@ -87,11 +98,11 @@ namespace FAT32
         unsigned long tell(void) const final;
         unsigned char read(void) final;
         // seek();
-        // write();
+        bool write(const unsigned char byte) final;
         // write_line();
         // read_line();
         // save();
-        // close();
+        bool close(void) final;
     };
 
     // === Functions to interact with files ===

@@ -57,6 +57,8 @@ struct Mock_Volume
     Mock::Callable<bool> call_read_next_sector_of_cluster;
     Mock::Callable<bool> call_write_FAT_entry;
     Mock::Callable<bool> call_make_directory_entry;
+    Mock::Callable<bool> call_write_filesize_to_directory;
+    Mock::Callable<bool> call_write_file_to_memory;
 
         // === Provide the expected interface ===
         std::optional<unsigned long>
@@ -108,6 +110,16 @@ struct Mock_Volume
     bool write_FAT_entry(const unsigned long cluster, const unsigned long next_cluster)
     {
         return call_write_FAT_entry(next_cluster);
+    };
+
+    bool write_filesize_to_directory(FAT32::Filehandler &file)
+    {
+        return call_write_filesize_to_directory(file.id);
+    };
+
+    bool write_file_to_memory(FAT32::Filehandler &file)
+    {
+        return call_write_file_to_memory(file.id);
     };
 
     bool make_directory_entry(
@@ -256,7 +268,56 @@ void test_create_file(void)
     volume.call_get_next_empty_cluster.assert_called_once();
     volume.call_write_FAT_entry.assert_called_once_with(0x0FFFFFFF);
     volume.call_make_directory_entry.assert_called_once_with(FAT32::Attribute::Archive);
-}
+};
+
+/// @brief Test writing data to a file
+void test_write_file(void)
+{
+    // Setup Test
+    setUp();
+    volume.id_return = {};
+    volume.file_return.id = 3;
+    volume.file_return.size = 0;
+    volume.file_return.start_cluster = 4;
+
+    // create a file and write one byte to it
+    auto file = FAT32::open(volume, "0:/Test.txt", Files::app);
+    TEST_ASSERT_TRUE(file.write(5));
+    TEST_ASSERT_EQUAL(Files::State::Changed, file.state);
+    TEST_ASSERT_EQUAL(1, file.size());
+    TEST_ASSERT_EQUAL(1, file.tell());
+    TEST_ASSERT_EQUAL(0, volume.call_write_file_to_memory.call_count);
+    TEST_ASSERT_EQUAL(0, volume.call_write_filesize_to_directory.call_count);
+
+    // write 511 more bytes
+    for (unsigned int count = 0; count < 511; count++)
+        file.write(5);
+    TEST_ASSERT_EQUAL(512, file.size());
+    TEST_ASSERT_EQUAL(512, file.tell());
+    TEST_ASSERT_EQUAL(1, volume.call_write_file_to_memory.call_count);
+    TEST_ASSERT_EQUAL(1, volume.call_write_filesize_to_directory.call_count);
+};
+
+/// @brief Test closing a file
+void test_close_file(void)
+{
+    // Setup Test
+    setUp();
+    volume.id_return = {};
+    volume.file_return.id = 3;
+    volume.file_return.size = 0;
+    volume.file_return.start_cluster = 4;
+
+    // create a file and write one byte to it
+    auto file = FAT32::open(volume, "0:/Test.txt", Files::app);
+    file.write(5);
+
+    // close the file
+    TEST_ASSERT_TRUE(file.close());
+    TEST_ASSERT_EQUAL(Files::State::Closed, file.state);
+    TEST_ASSERT_EQUAL(1, volume.call_write_file_to_memory.call_count);
+    TEST_ASSERT_EQUAL(1, volume.call_write_filesize_to_directory.call_count);
+};
 
 // === Main ===
 int main(int argc, char **argv)
@@ -267,5 +328,7 @@ int main(int argc, char **argv)
     RUN_TEST(test_read_file);
     RUN_TEST(test_read_file_and_sector);
     RUN_TEST(test_create_file);
+    RUN_TEST(test_write_file);
+    RUN_TEST(test_close_file);
     return UNITY_END();
 };

@@ -89,3 +89,55 @@ unsigned char FAT32::File<Volume_t>::read(void)
     this->access_position++;
     return this->handle.block_buffer[this->handle.current.byte++];
 };
+
+/**
+ * @brief Write data to the file. After
+ * each access the byte counter is increased.
+ * 
+ * @tparam Volume_t The volume class which is used for memory access.
+ * @param data The data byte to write to the file.
+ * @return Return True when the byte was successfully written.
+ */
+template<class Volume_t>
+bool FAT32::File<Volume_t>::write(const unsigned char byte)
+{
+    // Set file state to changed
+    this->state = Files::State::Changed;
+     
+    // Write the byte to the current buffer position
+    this->handle.block_buffer[this->handle.current.byte] = byte;
+
+    // Update position counter
+    this->handle.current.byte++;
+    this->handle.size++;
+    this->access_position++;
+
+    // When block buffer is full flush it to the card
+    if (this->handle.current.byte == 512)
+    {
+        this->volume->write_file_to_memory(this->handle);
+        this->volume->write_filesize_to_directory(this->handle);
+        this->handle.current.byte = 0;
+    }
+
+    return true;
+};
+
+/**
+ * @brief Close the file and write data.
+ * 
+ * @tparam Volume_t The volume class which is used for memory access.
+ * @return Return True when the file was successfully written.
+ */
+template<class Volume_t>
+bool FAT32::File<Volume_t>::close(void)
+{
+    // Flush the block buffer to the card
+    this->volume->write_file_to_memory(this->handle);
+    this->volume->write_filesize_to_directory(this->handle);
+
+    // Set file state to closed
+    this->state = Files::State::Closed;
+
+    return true;
+};
