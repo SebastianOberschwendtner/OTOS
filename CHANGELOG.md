@@ -23,6 +23,8 @@
 #### [&rarrb; v3.4.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.4.0)
 - `Filesystem`:
     - Files can be opened using a specific mode.
+    - Files can be written to.
+- New Examples which demonstrate how to use the OTOS.
 
 ### Fixed Issues:
 - #12: Update core_stm32 for STM32L0 Devices
