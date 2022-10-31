@@ -42,12 +42,15 @@ namespace Files
 
     // Open Modes as defined in the C++ standard
     typedef unsigned char openmode;
-    static constexpr openmode app = 0b00000001;
-    // static constexpr openmode binary = 0b00000010;
-    static constexpr openmode in = 0b00000100;
-    static constexpr openmode out = 0b00001000;
-    // static constexpr openmode trunc = 0b00010000;
-    // static constexpr openmode ate = 0b00100000;
+    namespace Mode
+    {
+        static constexpr openmode app = 0b00000001;
+        // static constexpr openmode binary = 0b00000010;
+        static constexpr openmode in = 0b00000100;
+        static constexpr openmode out = 0b00001000;
+        // static constexpr openmode trunc = 0b00010000;
+        // static constexpr openmode ate = 0b00100000;
+    }
 
     // === Interface ===
     struct File_Interface
@@ -124,7 +127,7 @@ namespace FAT32
      * @return File<Volume_t> Returns a file object indicating whether the file was found or not.
      */
     template <class Volume_t>
-    File<Volume_t> open(Volume_t &volume_used, const char *path_to_file, const Files::openmode mode = Files::in)
+    File<Volume_t> open(Volume_t &volume_used, const char *path_to_file, const Files::openmode mode = Files::Mode::in)
     {
         // Create a filehandle to use for data access
         FAT32::Filehandler ref{};
@@ -170,7 +173,7 @@ namespace FAT32
             auto id = volume_used.get_fileid(ref, ref.name);
 
             // When the file was not found but should be created
-            if (not id and (mode & (Files::out | Files::app)))
+            if (not id and (mode & (Files::Mode::out | Files::Mode::app)))
             {
                 // File not found -> create a new one
                 volume_used.read_cluster(ref, ref.start_cluster);

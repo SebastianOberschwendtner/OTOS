@@ -257,7 +257,7 @@ void test_create_file(void)
     volume.file_return.start_cluster = 4;
 
     // Test creating a file
-    auto file = FAT32::open(volume, "0:/Test.txt", Files::app);
+    auto file = FAT32::open(volume, "0:/Test.txt", Files::Mode::app);
     TEST_ASSERT_EQUAL_STRING("TEST    TXT", volume.file_arg.name.begin());
     TEST_ASSERT_EQUAL(Files::State::Open, file.state);
     TEST_ASSERT_EQUAL(1, volume.call_get_file.call_count);
@@ -281,7 +281,7 @@ void test_write_file(void)
     volume.file_return.start_cluster = 4;
 
     // create a file and write one byte to it
-    auto file = FAT32::open(volume, "0:/Test.txt", Files::app);
+    auto file = FAT32::open(volume, "0:/Test.txt", Files::Mode::app);
     TEST_ASSERT_TRUE(file.write(5));
     TEST_ASSERT_EQUAL(Files::State::Changed, file.state);
     TEST_ASSERT_EQUAL(1, file.size());
@@ -309,7 +309,7 @@ void test_close_file(void)
     volume.file_return.start_cluster = 4;
 
     // create a file and write one byte to it
-    auto file = FAT32::open(volume, "0:/Test.txt", Files::app);
+    auto file = FAT32::open(volume, "0:/Test.txt", Files::Mode::app);
     file.write(5);
 
     // close the file

@@ -79,7 +79,7 @@ void Run_SD_Example(void)
     // create test_file if it does not exist
     auto test_file = FAT32::open(volume, "0:/TEST.DAT");
     if (test_file.state == Files::State::Not_Found)
-        test_file = FAT32::open(volume, "0:/TEST.DAT", Files::out);
+        test_file = FAT32::open(volume, "0:/TEST.DAT", Files::Mode::out);
 
     // Write to the file
     test_file << "Hello World!" << "\n";
