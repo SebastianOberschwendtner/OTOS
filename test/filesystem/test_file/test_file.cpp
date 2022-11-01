@@ -182,11 +182,15 @@ void test_open_file(void)
     // Test opening a file which exists
     TEST_ASSERT_EQUAL_STRING("TEST    TXT", volume.file_arg.name.begin());
     TEST_ASSERT_EQUAL(12, file.size());
-    TEST_ASSERT_EQUAL(Files::State::Open, file.state);
+    TEST_ASSERT_EQUAL(Files::State::Read_only, file.state);
     volume.call_get_file.assert_called_once_with(3);
     volume.call_get_fileid.assert_called_once();
     volume.call_read_cluster.assert_called_once_with(4);
     volume.call_read_root.assert_called_once();
+
+    // Test opening a file in write mode
+    file = FAT32::open(volume, "0:/Test.txt", Files::Mode::out);
+    TEST_ASSERT_EQUAL(Files::State::Open, file.state);
 
     // Test opening a file which does not exist
     setUp();
@@ -296,6 +300,20 @@ void test_write_file(void)
     TEST_ASSERT_EQUAL(512, file.tell());
     TEST_ASSERT_EQUAL(1, volume.call_write_file_to_memory.call_count);
     TEST_ASSERT_EQUAL(1, volume.call_write_filesize_to_directory.call_count);
+
+    // Test writing to a read-only file
+    volume.id_return = 4;
+    volume.file_return.size = 5;
+    file = FAT32::open(volume, "0:/Test.txt", Files::Mode::in);
+    TEST_ASSERT_FALSE(file.write(5));
+    TEST_ASSERT_EQUAL(5, file.size());
+    TEST_ASSERT_EQUAL(0, file.tell());
+
+    // Test writing to a closed file
+    file.state = Files::State::Closed;
+    TEST_ASSERT_FALSE(file.write(5));
+    TEST_ASSERT_EQUAL(5, file.size());
+    TEST_ASSERT_EQUAL(0, file.tell());
 };
 
 /// @brief Test closing a file

@@ -83,6 +83,8 @@ void Run_SD_Example(void)
 
     // Write to the file
     test_file << "Hello World!" << "\n";
+    std::string_view test_string{"TestString"};
+    test_file << test_string;
 
     // close file again
     test_file.close();

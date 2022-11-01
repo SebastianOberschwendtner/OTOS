@@ -101,6 +101,12 @@ unsigned char FAT32::File<Volume_t>::read(void)
 template<class Volume_t>
 bool FAT32::File<Volume_t>::write(const unsigned char byte)
 {
+    // Only when file is not read-only
+    if (
+        (this->state == Files::State::Read_only) or 
+        (this->state == Files::State::Closed) )
+        return false;
+
     // Set file state to changed
     this->state = Files::State::Changed;
      
@@ -118,6 +124,52 @@ bool FAT32::File<Volume_t>::write(const unsigned char byte)
         this->volume->write_file_to_memory(this->handle);
         this->volume->write_filesize_to_directory(this->handle);
         this->handle.current.byte = 0;
+    }
+
+    return true;
+};
+
+/**
+ * @brief Write data to the file using an iterator. After
+ * each access the byte counter is increased.
+ * 
+ * @tparam Volume_t The volume class which is used for memory access.
+ * @param data The data byte to write to the file.
+ * @return Return True when the byte was successfully written.
+ */
+template<class Volume_t>
+bool FAT32::File<Volume_t>::write(
+    const char* begin,
+    const char* end)
+{
+    // Only when file is not read-only
+    if (
+        (this->state == Files::State::Read_only) or 
+        (this->state == Files::State::Closed) )
+        return false;
+
+    // Set file state to changed
+    this->state = Files::State::Changed;
+     
+    // iterate through the data
+    auto ptr = begin;
+    while ( ptr != end)
+    {
+        // Write the byte to the current buffer position
+        this->handle.block_buffer[this->handle.current.byte] = *ptr++;
+
+        // Update position counter
+        this->handle.current.byte++;
+        this->handle.size++;
+        this->access_position++;
+
+        // When block buffer is full flush it to the card
+        if (this->handle.current.byte == 512)
+        {
+            this->volume->write_file_to_memory(this->handle);
+            this->volume->write_filesize_to_directory(this->handle);
+            this->handle.current.byte = 0;
+        }
     }
 
     return true;

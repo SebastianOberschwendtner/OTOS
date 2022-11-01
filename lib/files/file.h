@@ -25,6 +25,7 @@
 #include <optional>
 #include <ctime>
 #include <cstring>
+#include <string_view>
 #include "volumes.h"
 
 namespace Files
@@ -35,6 +36,7 @@ namespace Files
     {
         Closed,
         Open,
+        Read_only,
         Changed,
         Not_Found,
         Duplicate_File
@@ -63,6 +65,7 @@ namespace Files
         // virtual bool seek(const unsigned long position) = 0;
         virtual unsigned long tell(void) const = 0;
         virtual bool write(const unsigned char byte) = 0;
+        virtual bool write(const char* begin, const char* end) = 0;
         // virtual bool write_line() = 0;
         virtual unsigned char read(void) = 0;
         // virtual bool read_line() = 0;
@@ -74,6 +77,11 @@ namespace Files
         {
             while (*string)
                 this->write(*string++);
+            return *this;
+        };
+        File_Interface& operator<<(const std::string_view& string)
+        {
+            this->write(string.cbegin(), string.cend());
             return *this;
         };
     };
@@ -102,6 +110,7 @@ namespace FAT32
         unsigned char read(void) final;
         // seek();
         bool write(const unsigned char byte) final;
+        bool write(const char* begin, const char* end) final;
         // write_line();
         // read_line();
         // save();
@@ -193,9 +202,12 @@ namespace FAT32
             // When file was found
             if (id)
             {
+                // Load the file information and content
                 volume_used.get_file(ref, id.value());
                 volume_used.read_cluster(ref, ref.start_cluster);
-                file_state = Files::State::Open;
+                
+                // Set file state to open or read-only depending on open mode
+                file_state = (mode & Files::Mode::in) ? Files::State::Read_only : Files::State::Open;
             }
         }
         // Create the file and return it
