@@ -134,8 +134,9 @@ bool FAT32::File<Volume_t>::write(const unsigned char byte)
  * each access the byte counter is increased.
  * 
  * @tparam Volume_t The volume class which is used for memory access.
- * @param data The data byte to write to the file.
- * @return Return True when the byte was successfully written.
+ * @param begin The begin iterator of the data to write.
+ * @param end The end iterator of the data to write.
+ * @return Return True when the data was successfully written.
  */
 template<class Volume_t>
 bool FAT32::File<Volume_t>::write(
