@@ -9,8 +9,9 @@ legend Hardware or Processor specific levels are marked in **<color #SkyBlue> bl
 *** kernel.h
 ****_ processors.h
 ' *** schedule.h
-*** types.h
 *** thread.h
+*** types.h
+*** iostream.h
 
 ' === Task ===
 **[#GreenYellow] task
@@ -58,6 +59,7 @@ legend Hardware or Processor specific levels are marked in **<color #SkyBlue> bl
 ' === Graphics ===
 **[#GreenYellow] graphics
 *** graphics.h
+****_ iostream.h
 *** font.h
 ***_ fonts
 **** font_base.h 
@@ -66,6 +68,7 @@ legend Hardware or Processor specific levels are marked in **<color #SkyBlue> bl
 ' === Files ===
 **[#GreenYellow] files
 *** file.h 
+****_ iostream.h
 *** drive.h 
 ***_ memory 
 **** sdhc.h

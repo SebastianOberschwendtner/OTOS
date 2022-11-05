@@ -25,6 +25,7 @@
     - Files can be opened using a specific mode.
     - Files can be written to.
 - New Examples which demonstrate how to use the OTOS.
+- Adds *iostreams* to `Kernel`.
 
 ### Fixed Issues:
 - #12: Update core_stm32 for STM32L0 Devices
