@@ -27,6 +27,7 @@
 #include <cstring>
 #include <string_view>
 #include "volumes.h"
+#include "iostream.h"
 
 namespace Files
 {
@@ -54,44 +55,44 @@ namespace Files
         // static constexpr openmode ate = 0b00100000;
     }
 
-    // === Interface ===
-    struct File_Interface
-    {
-        // *** Properties ***
-        State state{State::Closed};
+    // // === Interface ===
+    // struct File_Interface
+    // {
+    //     // *** Properties ***
+    //     State state{State::Closed};
 
-        // *** Virtual Interface Methods ***
-        virtual unsigned long size(void) const = 0;
-        // virtual bool seek(const unsigned long position) = 0;
-        virtual unsigned long tell(void) const = 0;
-        virtual bool write(const unsigned char byte) = 0;
-        virtual bool write(const char* begin, const char* end) = 0;
-        // virtual bool write_line() = 0;
-        virtual unsigned char read(void) = 0;
-        // virtual bool read_line() = 0;
-        // virtual bool save() = 0;
-        virtual bool close(void) = 0;
+    //     // *** Virtual Interface Methods ***
+    //     virtual unsigned long size(void) const = 0;
+    //     // virtual bool seek(const unsigned long position) = 0;
+    //     virtual unsigned long tell(void) const = 0;
+    //     virtual bool write(const unsigned char byte) = 0;
+    //     virtual bool write(const char* begin, const char* end) = 0;
+    //     // virtual bool write_line() = 0;
+    //     virtual unsigned char read(void) = 0;
+    //     // virtual bool read_line() = 0;
+    //     // virtual bool save() = 0;
+    //     virtual bool close(void) = 0;
 
-        // *** Methods ***
-        File_Interface& operator<<(const char* string)
-        {
-            while (*string)
-                this->write(*string++);
-            return *this;
-        };
-        File_Interface& operator<<(const std::string_view& string)
-        {
-            this->write(string.cbegin(), string.cend());
-            return *this;
-        };
-    };
+    //     // *** Methods ***
+    //     File_Interface& operator<<(const char* string)
+    //     {
+    //         while (*string)
+    //             this->write(*string++);
+    //         return *this;
+    //     };
+    //     File_Interface& operator<<(const std::string_view& string)
+    //     {
+    //         this->write(string.cbegin(), string.cend());
+    //         return *this;
+    //     };
+    // };
 
 };
 
 namespace FAT32
 {
     template <class Volume_t>
-    class File : public Files::File_Interface
+    class File : public OTOS::iostream<File<Volume_t>>
     {
     private:
         FAT32::Filehandler handle;
@@ -99,22 +100,40 @@ namespace FAT32
         unsigned long access_position{0};
 
     public:
+        // *** Properties ***
+        using State = Files::State;
+        State state{State::Closed};
+
         // *** Constructors ***
-        File(Filehandler &file, Volume_t &volume_used) : handle{file}, volume{&volume_used} {};
+        File() = delete;
+        File(Filehandler &file, Volume_t &volume_used) : OTOS::iostream<File<Volume_t>>(*this), handle{file}, volume{&volume_used} {};
         File(Filehandler &file, Volume_t &volume_used, Files::State file_state)
             : File{file, volume_used} { this->state = file_state; };
+        File(File&&) = delete;
+        File &operator=(File&) = delete;
+        File &operator=(File&& other)
+        {
+            /* Copy everything except the pimpl pointer of the stream, because
+             * the pointer is already set by the constructor of the stream. */
+            this->handle = other.handle;
+            this->volume = other.volume;
+            this->access_position = other.access_position;
+            this->state = other.state;
+            return *this;
+        };
+        ~File() {};
 
         // *** Methods ***
-        unsigned long size(void) const final;
-        unsigned long tell(void) const final;
-        unsigned char read(void) final;
+        unsigned long size(void) const;
+        unsigned long tell(void) const;
+        unsigned char read(void);
         // seek();
-        bool write(const unsigned char byte) final;
-        bool write(const char* begin, const char* end) final;
+        bool put(const char byte);
+        bool write(const char* begin, const char* end);
         // write_line();
         // read_line();
         // save();
-        bool close(void) final;
+        bool close(void);
     };
 
     // === Functions to interact with files ===

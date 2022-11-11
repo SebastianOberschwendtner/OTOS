@@ -7,7 +7,7 @@
 #### [&rarrb; v3.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.1.0)
 - `Graphics` :
     - Moves fonts to separate header files and makes adding fonts easier.
-    - Adds custom monospaced fonts.
+    - Adds custom mono spaced fonts.
     - Coordinate class has overloads for basic arithmetic operators.
 #### [&rarrb; v3.2.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.2.0)
 - `Drivers`:
@@ -24,6 +24,7 @@
 - `Filesystem`:
     - Files can be opened using a specific mode.
     - Files can be written to.
+    - Files inherit from `OTOS::iostream`.
 - New Examples which demonstrate how to use the OTOS.
 - Adds *iostreams* to `Kernel`.
 
@@ -60,7 +61,7 @@
 
 ### Fixed Issues:
 - #8: Add driver for SPI communication
-- #9: Add driver for SDIO communciation
+- #9: Add driver for SDIO communication
 - #14: SysTick and SVCall Interrupt Priority
 
 ## [v2.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v2.0.0) *(2021-12-21)*

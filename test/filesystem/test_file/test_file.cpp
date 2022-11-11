@@ -286,7 +286,7 @@ void test_write_file(void)
 
     // create a file and write one byte to it
     auto file = FAT32::open(volume, "0:/Test.txt", Files::Mode::app);
-    TEST_ASSERT_TRUE(file.write(5));
+    TEST_ASSERT_TRUE(file.put(5));
     TEST_ASSERT_EQUAL(Files::State::Changed, file.state);
     TEST_ASSERT_EQUAL(1, file.size());
     TEST_ASSERT_EQUAL(1, file.tell());
@@ -295,7 +295,7 @@ void test_write_file(void)
 
     // write 511 more bytes
     for (unsigned int count = 0; count < 511; count++)
-        file.write(5);
+        file.put(5);
     TEST_ASSERT_EQUAL(512, file.size());
     TEST_ASSERT_EQUAL(512, file.tell());
     TEST_ASSERT_EQUAL(1, volume.call_write_file_to_memory.call_count);
@@ -305,13 +305,13 @@ void test_write_file(void)
     volume.id_return = 4;
     volume.file_return.size = 5;
     file = FAT32::open(volume, "0:/Test.txt", Files::Mode::in);
-    TEST_ASSERT_FALSE(file.write(5));
+    TEST_ASSERT_FALSE(file.put(5));
     TEST_ASSERT_EQUAL(5, file.size());
     TEST_ASSERT_EQUAL(0, file.tell());
 
     // Test writing to a closed file
     file.state = Files::State::Closed;
-    TEST_ASSERT_FALSE(file.write(5));
+    TEST_ASSERT_FALSE(file.put(5));
     TEST_ASSERT_EQUAL(5, file.size());
     TEST_ASSERT_EQUAL(0, file.tell());
 };
@@ -328,7 +328,7 @@ void test_close_file(void)
 
     // create a file and write one byte to it
     auto file = FAT32::open(volume, "0:/Test.txt", Files::Mode::app);
-    file.write(5);
+    file.put(5);
 
     // close the file
     TEST_ASSERT_TRUE(file.close());

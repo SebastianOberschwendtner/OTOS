@@ -91,7 +91,7 @@ unsigned char FAT32::File<Volume_t>::read(void)
 };
 
 /**
- * @brief Write data to the file. After
+ * @brief Put a byte to the file. After
  * each access the byte counter is increased.
  * 
  * @tparam Volume_t The volume class which is used for memory access.
@@ -99,7 +99,7 @@ unsigned char FAT32::File<Volume_t>::read(void)
  * @return Return True when the byte was successfully written.
  */
 template<class Volume_t>
-bool FAT32::File<Volume_t>::write(const unsigned char byte)
+bool FAT32::File<Volume_t>::put(const char byte)
 {
     // Only when file is not read-only
     if (
