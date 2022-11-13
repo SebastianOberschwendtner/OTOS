@@ -30,6 +30,11 @@
 // === Includes ===
 #include <unity.h>
 #include <mock.h>
+#include <algorithm>
+#include <array>
+#include <string_view>
+
+// === UUT ===
 #include "iostream.h"
 
 /** === Test List ===
@@ -39,12 +44,15 @@
 // === Fixtures ===
 struct Dummy_IO
 {
+    std::array<char, 80> char_buffer{0};
+    std::size_t index{0};
     Mock::Callable<bool> call_put;
     Mock::Callable<bool> call_flush;
     Mock::Callable<bool> call_write;
-    void put(char c) { call_put(c); };
+    void put(char c) { call_put(c); char_buffer[index++] = c;};
     void flush(void) { call_flush(); };
-    void write(const char* str, std::size_t len) { call_write(len); };
+    void write(const char* str, std::size_t len) { call_write(len);
+        std::copy_n( str, len, char_buffer.begin()); };
 };
 
 void setUp(void)
@@ -82,16 +90,33 @@ void test_ostream_basic(void)
 
     // Write a character
     os.put('a');
+    io.call_put.assert_called_once_with('a');
+
     // Write a string
     char c[]="This is sample text.";
     os.write(c, 5);
+    io.call_write.assert_called_once_with(5);
+
     // flush buffer
     os.flush();
-
-    // Check if the character was written
-    io.call_put.assert_called_once_with('a');
-    io.call_write.assert_called_once_with(5);
     io.call_flush.assert_called_once();
+};
+
+/// @brief Test the ostream output operator overloads
+void test_ostream_output_overloads(void)
+{
+    // Create a dummy IO
+    Dummy_IO io;
+    
+    // Create a new ostream object
+    OTOS::ostream os{io};
+
+    // Test writing null terminated strings
+    char msg[] = "Null String.";
+    os << msg;
+    std::string_view result{io.char_buffer.data()};
+    TEST_ASSERT_EQUAL(sizeof(msg)-1, io.call_put.call_count);
+    TEST_ASSERT_EQUAL(0, result.compare(msg));
 };
 
 // === Main ===
@@ -100,5 +125,6 @@ int main(int argc, char **argv)
     UNITY_BEGIN();
     RUN_TEST(test_ostream_constructor);
     RUN_TEST(test_ostream_basic);
+    RUN_TEST(test_ostream_output_overloads);
     return UNITY_END();
 };

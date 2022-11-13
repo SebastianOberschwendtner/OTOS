@@ -55,6 +55,21 @@ namespace OTOS
         ostream& put(char c) { pimpl->put(c); return *this;}; 
         ostream& write(const char* str, std::size_t n) { pimpl->write(str, n); return *this;};
         ostream& flush(void) { pimpl->flush(); return *this;};
+
+        // *** Overloaded stream operators ***
+        /**
+         * @brief Add a string to the stream.
+         * 
+         * @param str The pointer to the  null terminated (!) string to add.
+         * @return ostream& Returns a reference to the stream.
+         */
+        ostream& operator<<(char * str)
+        {
+            // Loop as long as the string is not terminated
+            while(*str)
+                this->put(*str++);
+            return *this;
+        }; 
     };
 
     /**
