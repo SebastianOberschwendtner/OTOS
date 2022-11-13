@@ -49,10 +49,14 @@ struct Dummy_IO
     Mock::Callable<bool> call_put;
     Mock::Callable<bool> call_flush;
     Mock::Callable<bool> call_write;
-    void put(char c) { call_put(c); char_buffer[index++] = c;};
-    void flush(void) { call_flush(); char_buffer.fill(0); index=0;};
-    void write(const char* str, std::size_t len) { call_write(len);
-        std::copy_n( str, len, char_buffer.begin()); };
+    void put(char c) 
+        { call_put(c); char_buffer[index++] = c;};
+    void flush(void)
+        { call_flush(); char_buffer.fill(0); index=0;};
+    void write(const char* str, std::size_t len) 
+        { call_write(len);
+        std::copy_n( str, len, char_buffer.begin() + index);
+        index += len; };
 };
 
 void setUp(void)
@@ -125,6 +129,15 @@ void test_ostream_output_overloads(void)
     result = {io.char_buffer.data()}; 
     TEST_ASSERT_EQUAL(sizeof(msg)-1, io.call_put.call_count);
     TEST_ASSERT_EQUAL(0, result.compare(str_view));
+
+    // Test adding integer numbers
+    io.flush();
+    os << 123U;
+    result = {io.char_buffer.data()};
+    TEST_ASSERT_EQUAL(0, result.compare("123"));
+    os << 45;
+    result = {io.char_buffer.data()};
+    TEST_ASSERT_EQUAL(0, result.compare("12345"));
 };
 
 // === Main ===

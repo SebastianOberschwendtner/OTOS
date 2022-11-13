@@ -28,8 +28,9 @@
 - New Examples which demonstrate how to use the OTOS.
 - Adds *iostreams* to `Kernel`.
 - *iostream* has overloads for adding:
-    - Null terminated string.
-    - `std::string_view`.
+    - Null terminated strings
+    - `std::string_view`
+    - Integer numbers
 
 ### Fixed Issues:
 - #12: Update core_stm32 for STM32L0 Devices

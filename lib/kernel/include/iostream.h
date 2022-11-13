@@ -22,7 +22,15 @@
 #define IOSTREAM_H_
 
 // === Includes ===
+#include <array>
 #include <string_view>
+#include <charconv>
+
+// === Details ===
+namespace detail
+{
+    constexpr std::size_t max_int_decimals = 10;
+}; // !namespace detail
 
 // === IO Streams ===
 namespace OTOS
@@ -53,8 +61,8 @@ namespace OTOS
         ostream& operator=(ostream&&) = delete;
 
         // *** Methods ***
-        ostream& put(char c) { pimpl->put(c); return *this;}; 
-        ostream& write(const char* str, std::size_t n) { pimpl->write(str, n); return *this;};
+        ostream& put(const char c) { pimpl->put(c); return *this;}; 
+        ostream& write(const char* str, const std::size_t n) { pimpl->write(str, n); return *this;};
         ostream& flush(void) { pimpl->flush(); return *this;};
 
         // *** Overloaded stream operators ***
@@ -81,12 +89,43 @@ namespace OTOS
          * @param str_view The reference to the string view to add.
          * @return ostream& Returns a reference to the stream.
          */
-        ostream& operator<<(std::string_view & str_view)
+        ostream& operator<<(const std::string_view & str_view)
         {
             // Write all characters of the string view
             this->write(str_view.data(), str_view.size());
             return *this;
         }; 
+
+        /**
+         * @brief Add an integer number to the stream.
+         *
+         * The maximum number of decimals which can be 
+         * converted is defined by `detail::max_int_decimals`.
+         * 
+         * @tparam int_type The integral type of the number to add.
+         * @param num The number to add.
+         * @return ostream& Returns a reference to the stream.
+         */
+        template <typename int_type>
+        ostream& operator<<(const int_type num)
+        {
+            // Temporary container for result
+            std::array<char, detail::max_int_decimals> result;
+
+            // convert the number to a string
+            auto [ptr, ec] = std::to_chars(
+                    result.data(),
+                    result.data() + result.size(),
+                    num);
+            // @TODO Check for errors in the string conversion
+            
+            // Calculate the length of the result
+            auto len = std::distance(result.begin(), ptr);
+
+            // Write the string to the stream
+            this->write(result.begin(), len);
+            return *this;
+        };
     };
 
     /**
