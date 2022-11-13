@@ -54,39 +54,6 @@ namespace Files
         // static constexpr openmode trunc = 0b00010000;
         // static constexpr openmode ate = 0b00100000;
     }
-
-    // // === Interface ===
-    // struct File_Interface
-    // {
-    //     // *** Properties ***
-    //     State state{State::Closed};
-
-    //     // *** Virtual Interface Methods ***
-    //     virtual unsigned long size(void) const = 0;
-    //     // virtual bool seek(const unsigned long position) = 0;
-    //     virtual unsigned long tell(void) const = 0;
-    //     virtual bool write(const unsigned char byte) = 0;
-    //     virtual bool write(const char* begin, const char* end) = 0;
-    //     // virtual bool write_line() = 0;
-    //     virtual unsigned char read(void) = 0;
-    //     // virtual bool read_line() = 0;
-    //     // virtual bool save() = 0;
-    //     virtual bool close(void) = 0;
-
-    //     // *** Methods ***
-    //     File_Interface& operator<<(const char* string)
-    //     {
-    //         while (*string)
-    //             this->write(*string++);
-    //         return *this;
-    //     };
-    //     File_Interface& operator<<(const std::string_view& string)
-    //     {
-    //         this->write(string.cbegin(), string.cend());
-    //         return *this;
-    //     };
-    // };
-
 };
 
 namespace FAT32
@@ -106,15 +73,19 @@ namespace FAT32
 
         // *** Constructors ***
         File() = delete;
-        File(Filehandler &file, Volume_t &volume_used) : OTOS::iostream<File<Volume_t>>(*this), handle{file}, volume{&volume_used} {};
+        File(Filehandler &file, Volume_t &volume_used)
+            : OTOS::iostream<File<Volume_t>>(*this)
+            , handle{file}
+            , volume{&volume_used} {};
         File(Filehandler &file, Volume_t &volume_used, Files::State file_state)
             : File{file, volume_used} { this->state = file_state; };
         File(File&&) = delete;
         File &operator=(File&) = delete;
         File &operator=(File&& other)
         {
-            /* Copy everything except the pimpl pointer of the stream, because
-             * the pointer is already set by the constructor of the stream. */
+            /* Copy everything except the pimpl pointer of the stream,
+             * because the pointer is already set by the constructor 
+             * of the stream. */
             this->handle = other.handle;
             this->volume = other.volume;
             this->access_position = other.access_position;
@@ -130,7 +101,7 @@ namespace FAT32
         // seek();
         bool put(const char byte);
         bool write(const char* begin, const std::size_t len);
-        /* void flush(void); */
+        void flush(void);
         // write_line();
         // read_line();
         // save();

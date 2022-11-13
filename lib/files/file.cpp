@@ -168,13 +168,24 @@ bool FAT32::File<Volume_t>::write(
         // When block buffer is full flush it to the card
         if (this->handle.current.byte == 512)
         {
-            this->volume->write_file_to_memory(this->handle);
-            this->volume->write_filesize_to_directory(this->handle);
+            this->flush();
             this->handle.current.byte = 0;
         }
     }
 
     return true;
+};
+
+/**
+ * @brief Flush the file and write data.
+ * 
+ * @tparam Volume_t The volume class which is used for memory access.
+ */
+template<class Volume_t>
+void FAT32::File<Volume_t>::flush(void)
+{
+    this->volume->write_file_to_memory(this->handle);
+    this->volume->write_filesize_to_directory(this->handle);
 };
 
 /**
@@ -187,8 +198,7 @@ template<class Volume_t>
 bool FAT32::File<Volume_t>::close(void)
 {
     // Flush the block buffer to the card
-    this->volume->write_file_to_memory(this->handle);
-    this->volume->write_filesize_to_directory(this->handle);
+    this->flush();
 
     // Set file state to closed
     this->state = Files::State::Closed;
