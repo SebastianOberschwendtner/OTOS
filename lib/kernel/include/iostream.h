@@ -22,6 +22,7 @@
 #define IOSTREAM_H_
 
 // === Includes ===
+#include <string_view>
 
 // === IO Streams ===
 namespace OTOS
@@ -59,6 +60,9 @@ namespace OTOS
         // *** Overloaded stream operators ***
         /**
          * @brief Add a string to the stream.
+         *
+         * => Prefer using `std::string_views` instead of null terminated strings.
+         * String views can be implemented more efficient.
          * 
          * @param str The pointer to the  null terminated (!) string to add.
          * @return ostream& Returns a reference to the stream.
@@ -68,6 +72,19 @@ namespace OTOS
             // Loop as long as the string is not terminated
             while(*str)
                 this->put(*str++);
+            return *this;
+        }; 
+
+        /**
+         * @brief Add a string view to the stream.
+         * 
+         * @param str_view The reference to the string view to add.
+         * @return ostream& Returns a reference to the stream.
+         */
+        ostream& operator<<(std::string_view & str_view)
+        {
+            // Write all characters of the string view
+            this->write(str_view.data(), str_view.size());
             return *this;
         }; 
     };

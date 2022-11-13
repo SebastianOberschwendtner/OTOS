@@ -29,6 +29,7 @@
 - Adds *iostreams* to `Kernel`.
 - *iostream* has overloads for adding:
     - Null terminated string.
+    - `std::string_view`.
 
 ### Fixed Issues:
 - #12: Update core_stm32 for STM32L0 Devices
