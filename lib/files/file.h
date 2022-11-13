@@ -129,7 +129,8 @@ namespace FAT32
         unsigned char read(void);
         // seek();
         bool put(const char byte);
-        bool write(const char* begin, const char* end);
+        bool write(const char* begin, const std::size_t len);
+        /* void flush(void); */
         // write_line();
         // read_line();
         // save();

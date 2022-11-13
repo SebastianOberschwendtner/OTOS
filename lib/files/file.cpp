@@ -135,13 +135,14 @@ bool FAT32::File<Volume_t>::put(const char byte)
  * 
  * @tparam Volume_t The volume class which is used for memory access.
  * @param begin The begin iterator of the data to write.
- * @param end The end iterator of the data to write.
+ * @param len The number of bytes to write.
  * @return Return True when the data was successfully written.
  */
 template<class Volume_t>
 bool FAT32::File<Volume_t>::write(
     const char* begin,
-    const char* end)
+    const std::size_t len
+    )
 {
     // Only when file is not read-only
     if (
@@ -154,7 +155,7 @@ bool FAT32::File<Volume_t>::write(
      
     // iterate through the data
     auto ptr = begin;
-    while ( ptr != end)
+    for (std::size_t iByte = 0; iByte < len; iByte++)
     {
         // Write the byte to the current buffer position
         this->handle.block_buffer[this->handle.current.byte] = *ptr++;
