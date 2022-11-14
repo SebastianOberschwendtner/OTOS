@@ -1,10 +1,10 @@
 ![OTOS Logo Header](doc/img/OTOS_Header.png)
 
 # OTOS
-![tag](https://img.shields.io/github/v/tag/knuffel-v2/otos?color=green)
-![release](https://img.shields.io/github/v/release/knuffel-v2/otos?color=green)
-![issues](https://img.shields.io/github/issues-raw/knuffel-v2/otos)
-![bugs](https://img.shields.io/github/issues/knuffel-v2/otos/bug?color=red)
+![tag](https://img.shields.io/github/v/tag/SebastianOberschwendtner/otos?color=green)
+![release](https://img.shields.io/github/v/release/SebastianOberschwendtner/otos?color=green)
+![issues](https://img.shields.io/github/issues-raw/SebastianOberschwendtner/otos)
+![bugs](https://img.shields.io/github/issues/SebastianOberschwendtner/otos/bug?color=red)
 ![Status](https://img.shields.io/badge/Status-Developing-yellowgreen)
 
 Bear bones realtime operating system for embedded systems. Focus lies on KISS (**K**eep-**I**t-**S**uper-**S**imple).
@@ -12,12 +12,12 @@ Bear bones realtime operating system for embedded systems. Focus lies on KISS (*
 > Read the [&rarrb; Getting Started](#getting-started) when you want to use the OS in your project.
 
 ## Software Framework
-![GitHub Build Status](https://img.shields.io/github/workflow/status/knuffel-v2/otos/Build%20Firmware)
-![GitHub Test Status](https://img.shields.io/github/workflow/status/knuffel-v2/otos/Unit%20Test?label=test)
+![GitHub Build Status](https://img.shields.io/github/workflow/status/SebastianOberschwendtner/otos/Build%20Firmware)
+![GitHub Test Status](https://img.shields.io/github/workflow/status/SebastianOberschwendtner/otos/Unit%20Test?label=test)
 ![IDE2](https://img.shields.io/static/v1?label=IDE&message=VSCode&color=yellowgreen)
-![GitHub top language](https://img.shields.io/github/languages/top/knuffel-v2/otos?color=brightgreen)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/knuffel-v2/otos)
-![GitHub](https://img.shields.io/github/license/knuffel-v2/otos)
+![GitHub top language](https://img.shields.io/github/languages/top/SebastianOberschwendtner/otos?color=brightgreen)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/SebastianOberschwendtner/otos)
+![GitHub](https://img.shields.io/github/license/SebastianOberschwendtner/otos)
 
 > Supported Microcontrollers:
 - STM<sup>&reg;</sub>
