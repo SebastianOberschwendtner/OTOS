@@ -32,6 +32,9 @@
     - `std::string_view`
     - Integer numbers
     - `const` null terminated strings
+#### [&rarrb; v4.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.0.0)
+- `Graphics`:
+    - Canvas inherits from `OTOS::ostream` and satisfies its interface requirements.
 
 ### Fixed Issues:
 - #12: Update core_stm32 for STM32L0 Devices

@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_graphics.c
  * @author  SO
- * @version v3.1.0
+ * @version v4.0.0
  * @date    16-March-2021
  * @brief   Unit tests to test the graphics driver.
  ******************************************************************************
@@ -377,7 +377,7 @@ void test_add_character(void)
     Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // add the character
-    UUT.add_char('B');
+    UUT.put('B');
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['B'*6 + 0], buffer.data[0]);
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['B'*6 + 1], buffer.data[1]);
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['B'*6 + 2], buffer.data[2]);
@@ -386,7 +386,7 @@ void test_add_character(void)
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['B'*6 + 5], buffer.data[5]);
 
     // add another character
-    UUT.add_char('D');
+    UUT.put('D');
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 0], buffer.data[6]);
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 1], buffer.data[7]);
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['D'*6 + 2], buffer.data[8]);
@@ -396,7 +396,7 @@ void test_add_character(void)
 
     // add another character
     UUT.set_cursor(0,1);
-    UUT.add_char('F');
+    UUT.put('F');
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['F'*6 + 0], buffer.data[16]);
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['F'*6 + 1], buffer.data[17]);
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['F'*6 + 2], buffer.data[18]);
@@ -413,7 +413,7 @@ void test_add_string(void)
     Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
 
     // add the character
-    UUT.add_string("GD");
+    UUT.write("GD", 2);
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 0], buffer.data[0]);
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 1], buffer.data[1]);
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 2], buffer.data[2]);
@@ -430,7 +430,7 @@ void test_add_string(void)
     // add character with line break
     buffer.data.fill(0);
     UUT.set_cursor(0,0);
-    UUT.add_string("G\nD");
+    UUT.write("G\nD", 3);
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 0], buffer.data[0]);
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 1], buffer.data[1]);
     TEST_ASSERT_EQUAL(Font::Lookup_Default_8px['G'*6 + 2], buffer.data[2]);
@@ -456,7 +456,7 @@ void test_font_normal(void)
     UUT.set_font(Font::_16px::Default);
 
     // Test writing new characters
-    UUT.add_char('A');
+    UUT.put('A');
     
     // Perform testing
     TEST_ASSERT_EQUAL(Font::Lookup_Default_16px['A'*12*2 +  1], buffer.data[ 0]);
@@ -544,7 +544,7 @@ void test_font_scaling(void)
 
     // Test writing new characters
     UUT.set_cursor(0,0);
-    UUT.add_char('A');
+    UUT.put('A');
     
     // Perform testing
     TEST_ASSERT_EQUAL(0, buffer.data[ 0]);

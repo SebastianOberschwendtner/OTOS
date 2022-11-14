@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    graphics.c
  * @author  SO
- * @version v3.1.0
+ * @version v4.0.0
  * @date    13-September-2021
  * @brief   Graphics interface for the OTOS.
  ==============================================================================
@@ -415,7 +415,7 @@ void Graphics::Canvas_BW::fill_circle(
  * @brief Add a character to the canvas
  * @param character The character to display.
  */
-void Graphics::Canvas_BW::add_char(const unsigned char character)
+void Graphics::Canvas_BW::put(const char character)
 {
     // get pixel size of font
     unsigned char width = this->font->width_px;
@@ -464,20 +464,21 @@ void Graphics::Canvas_BW::add_char(const unsigned char character)
                                                                                        
 /**                                                                                    
  * @brief Add a string to the canvas                                                   
- * String has to be null terminated!                                                   
+ * 
  * Newline characters are supported.                                                   
  * @param string The pointer to the string to display.                                 
+ * @param len The number of bytes to write.
  */                                                                                    
-void Graphics::Canvas_BW::add_string(const char *string)                               
+void Graphics::Canvas_BW::write(const char *str, const std::size_t len)                               
 {                                                                                      
-    char *character = const_cast<char *>(string);                                      
+    char *character = const_cast<char *>(str);                                      
                                                                                        
-    while (*character != 0)                                                            
+    for (std::size_t iByte = 0; iByte < len; iByte++)                                                            
     {                                                                                  
         if (*character == '\n')                                                        
             this->newline();
         else
-            this->add_char(*character);
+            this->put(*character);
         character++;
     }
 };

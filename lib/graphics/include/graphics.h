@@ -24,6 +24,7 @@
 // === Includes ===
 #include <array>
 #include "font.h"
+#include "iostream.h"
 
 // === Declarations ===
 namespace Graphics {
@@ -70,7 +71,7 @@ namespace Graphics {
         Coordinate operator-=(const Coordinate& rhs) { this->x_pos -= rhs.x_pos; this->y_pos -= rhs.y_pos; return *this; };
     };
 
-    class Canvas_BW
+    class Canvas_BW: public OTOS::ostream<Canvas_BW>
     {
     private:
         // *** properties
@@ -89,8 +90,14 @@ namespace Graphics {
         Coordinate cursor;
 
         // *** Constructor ***
-        Canvas_BW(unsigned char* const buffer, const unsigned int width, const unsigned int height):
-            buffer(buffer), width(width), height(height), pixels(height * width), cursor(0,0){};
+        Canvas_BW() = delete;
+        Canvas_BW(unsigned char* const buffer, const unsigned int width, const unsigned int height)
+            : OTOS::ostream<Canvas_BW>{*this}
+            , buffer(buffer)
+            , width(width)
+            , height(height)
+            , pixels(height * width)
+            , cursor(0,0){};
 
         // *** Methods ***
 
@@ -104,22 +111,9 @@ namespace Graphics {
         void        add_line    (const Coordinate start, const Coordinate end, const Color_BW color = White);
         void        add_circle  (const Coordinate center, const unsigned int radius, const Color_BW color = White);
         void        fill_circle (const Coordinate center, const unsigned int radius, const Color_BW color = White);
-        void        add_char    (const unsigned char character);
-        void        add_string  (const char* string);
+        void        put         (const char character);
+        void        write       (const char* str, const std::size_t len);
         void        add_number  (const unsigned char number);
-
-        // *** << Operators ***
-        /**
-         * @brief Add a string to the canvas using the << operator.
-         * 
-         * @param string The null terminated (!) string to add.
-         * @return Canvas_BW& Returns a reference to the canvas.
-         */
-        Canvas_BW& operator<<(const char* string)
-        {
-            this->add_string(string);
-            return *this;
-        };
     };
 };
 #endif
