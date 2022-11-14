@@ -31,6 +31,7 @@
     - Null terminated strings
     - `std::string_view`
     - Integer numbers
+    - `const` null terminated strings
 
 ### Fixed Issues:
 - #12: Update core_stm32 for STM32L0 Devices

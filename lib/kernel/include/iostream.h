@@ -84,6 +84,26 @@ namespace OTOS
         }; 
 
         /**
+         * @brief Add a const string to the stream.
+         *
+         * => Prefer using `std::string_views` instead of null terminated strings.
+         * String views can be implemented more efficient.
+         * 
+         * @param str The pointer to the  null terminated (!) string to add.
+         * @return ostream& Returns a reference to the stream.
+         */
+        ostream& operator<<(const char * str)
+        {
+            // Get the temporary non-const pointer to the data
+            auto ptr = const_cast<char *>(str);
+
+            // Loop as long as the string is not terminated
+            while(*ptr)
+                this->put(*ptr++);
+            return *this;
+        }; 
+
+        /**
          * @brief Add a string view to the stream.
          * 
          * @param str_view The reference to the string view to add.

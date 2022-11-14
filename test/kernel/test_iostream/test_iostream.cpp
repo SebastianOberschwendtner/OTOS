@@ -130,6 +130,12 @@ void test_ostream_output_overloads(void)
     TEST_ASSERT_EQUAL(sizeof(msg)-1, io.call_put.call_count);
     TEST_ASSERT_EQUAL(0, result.compare(str_view));
 
+    // Test writing const strings
+    io.flush();
+    os << "Const string";
+    result = {io.char_buffer.data()}; 
+    TEST_ASSERT_EQUAL(0, result.compare("Const string"));
+
     // Test adding integer numbers
     io.flush();
     os << 123U;
