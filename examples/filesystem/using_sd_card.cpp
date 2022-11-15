@@ -21,12 +21,13 @@
  ==============================================================================
  * @file    using_sd_card.cpp
  * @author  SO
- * @version v3.4.0
+ * @version v4.0.0
  * @date    30-October-2022
  * @brief   This example shows how to setup a SD card, open a file and then
             write to it.
  ==============================================================================
  */
+#include "main.h" // => include not strictly necessary, but for intellisense to work
 
 /**
  * @brief Example task for using the filesystem with a SD Card.

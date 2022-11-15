@@ -21,11 +21,13 @@
  ==============================================================================
  * @file    using_ili9341.cpp
  * @author  SO
- * @version v3.4.0
+ * @version v4.0.0
  * @date    31-October-2022
  * @brief   This example shows how to use the ILI9341 display driver.
  ==============================================================================
  */
+#include "main.h" // => include not strictly necessary, but for intellisense to work
+
 // *** Variables ***
 Graphics::Buffer_BW<240, 320> display_buffer;
 
@@ -67,7 +69,23 @@ void Run_ILI9341_Example(void)
     // Canvas
     Graphics::Canvas_BW canvas(display_buffer.data.data(), display_buffer.width_px, display_buffer.height_px);
     canvas.set_font(Font::_24px::DelugiaPLMono);
-    canvas << "hello world!";
+
+    // Add strings
+    /** @attention The constant string stream does not yet support the
+     * newline character. You you have to terminate each line with a
+     * `OTOS::endl` instead. 
+     * => std::string_view supports the newline character!*/
+    canvas << "hello world!" << OTOS::endl;
+
+    // Add string_view
+    std::string_view sv = "string_view\n";
+    canvas << sv;
+
+    // Add integer numbers
+    canvas << 42;
+
+    // Add floating point numbers
+    /* *** -> Coming soon *** */
 
     // Initialize display
     display.wake_up();
@@ -78,13 +96,18 @@ void Run_ILI9341_Example(void)
     // Start drawing the display buffer
     while (true)
     {
+        // Flash LED to indicate each display update
         Led_Green.set_high();
+
+        // Draw the BW canvas with specified foreground and background color
         display.draw(
             display_buffer.data.cbegin(),
             display_buffer.data.cend(),
             ILI9341::RGB_16bit<255, 255, 255>(),
             0);
         Led_Green.set_low();
+
+        // Wait for next update
         OTOS::Task::yield();
     }
 };
