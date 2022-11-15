@@ -586,6 +586,17 @@ void test_coordinate_operators(void)
     TEST_ASSERT_EQUAL(2, coord1.y_pos);
 };
 
+/// @brief Test the flush method as required by OTOS::ostream
+void test_flush(void)
+{
+    // Create buffer and object
+    Graphics::Buffer_BW<16, 24> buffer;
+    Graphics::Canvas_BW UUT(buffer.data.data(), buffer.width_px, buffer.height_px);
+
+    // Test the flush method
+    UUT.flush();
+};
+
 /// === Run Tests ===
 int main(int argc, char** argv)
 {
@@ -606,5 +617,6 @@ int main(int argc, char** argv)
     RUN_TEST(test_font_number);
     RUN_TEST(test_font_scaling);
     RUN_TEST(test_coordinate_operators);
+    RUN_TEST(test_flush);
     return UNITY_END();
 };

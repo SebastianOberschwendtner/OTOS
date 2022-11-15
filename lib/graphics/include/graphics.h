@@ -113,6 +113,7 @@ namespace Graphics {
         void        fill_circle (const Coordinate center, const unsigned int radius, const Color_BW color = White);
         void        put         (const char character);
         void        write       (const char* str, const std::size_t len);
+        void        flush       (void);
         void        add_number  (const unsigned char number);
     };
 };

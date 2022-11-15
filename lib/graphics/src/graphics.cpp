@@ -484,6 +484,15 @@ void Graphics::Canvas_BW::write(const char *str, const std::size_t len)
 };
 
 /**
+ * @brief Provide the flush method as required by the ostream interface.
+ * The function does nothing as of now. This may change in the future.
+ */
+void Graphics::Canvas_BW::flush(void)
+{
+    return;
+};
+
+/**
  * @brief Add a number to the canvas using
  * the number font.
  * @param number The number to display.
