@@ -114,7 +114,22 @@ namespace OTOS
             // Write all characters of the string view
             this->write(str_view.data(), str_view.size());
             return *this;
-        }; 
+        };
+
+        /**
+         * @brief  Interface for manipulators.
+         *
+         * Manipulators such as OTOS::endl use these
+         * functions in constructs like "out << OTOS::endl".  For more
+         * more information refer to the C++ standard as this construct
+         * is taken from there.
+         * @param __pf The function pointer to the manipulator.
+         * @return Returns a reference to the stream.
+         */
+        ostream & operator<<(ostream &(*__pf)(ostream &))
+        {
+            return __pf(*this);
+        };
 
         /**
          * @brief Add an integer number to the stream.
@@ -129,6 +144,9 @@ namespace OTOS
         template <typename int_type>
         ostream& operator<<(const int_type num)
         {
+            // Check if the template type is an integral type
+            static_assert(std::is_integral_v<int_type>, "Only integral types are allowed.");
+
             // Temporary container for result
             std::array<char, detail::max_int_decimals> result;
 
@@ -183,6 +201,25 @@ namespace OTOS
         // *** Methods ***
         // iostream& get(char& c) { this->pimpl->get(c); return *this;};
         // iostream& read(char* str, std::size_t n) { this->pimpl->read(str, n); return *this;};
+    };
+
+    // === Manipulators ===
+
+    /**
+     * @brief Function template to end the current line.
+     * In the C++ standard this manipulator also flushes the stream.
+     * This behavior might be added in the future.
+     * 
+     * @tparam o_device The output device which holds the output buffer/interface.
+     * @param stream The reference to the output stream.
+     * @return Returns a reference to the output stream.
+     */
+    template <class o_device>
+    inline ostream<o_device>& endl(ostream<o_device>& stream)
+    {
+        // write one character, since put() does not always check for newlines
+        stream.write("\n", 1);
+        return stream;
     };
 
 }; // !namespace OTOS

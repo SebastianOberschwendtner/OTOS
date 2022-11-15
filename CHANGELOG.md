@@ -1,5 +1,5 @@
 # Changelog for OTOS
-## [v4.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.0.0) *(2022-xx-xx)*
+## [v4.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.0.0) *(2022-11-15)*
 
 >Released by `SO`
 
@@ -35,6 +35,8 @@
 #### [&rarrb; v4.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.0.0)
 - `Graphics`:
     - Canvas inherits from `OTOS::ostream` and satisfies its interface requirements.
+- `Kernel`:
+    - Adds *endl* manipulator for ostreams.
 
 ### Fixed Issues:
 - #12: Update core_stm32 for STM32L0 Devices

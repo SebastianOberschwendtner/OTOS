@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_file.cpp
  * @author  SO
- * @version v3.4.0
+ * @version v4.0.0
  * @date    08-January-2022
  * @brief   Unit tests for testing the File interface.
  ******************************************************************************
@@ -144,6 +144,12 @@ void test_ostream_output_overloads(void)
     os << 45;
     result = {io.char_buffer.data()};
     TEST_ASSERT_EQUAL(0, result.compare("12345"));
+
+    // Test adding a new line
+    io.flush();
+    os << OTOS::endl;
+    result = {io.char_buffer.data()};
+    TEST_ASSERT_EQUAL(0, result.compare("\n"));
 };
 
 // === Main ===
