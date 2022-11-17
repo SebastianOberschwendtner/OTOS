@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_tps65987.cpp
  * @author  SO
- * @version v2.7.4
+ * @version v4.1.0
  * @date    14-November-2021
  * @brief   Unit tests to test the driver for USB-3 PD controller.
  ******************************************************************************
@@ -90,7 +90,24 @@ template class TPS65987::Controller<I2C_Mock>;
  * ✓ controller initializes the PD IC based on its mode
  * ▢ controller can check whether command was finished
  * ▢ controller can read the return code of a finished command
- * ▢ controller can read the PD status
+ * ▢ controller can handle the following registers:
+ *     ▢ 0x1A - Status Register
+ *     ▢ 0x26 - Power Path Status ?
+ *     ▢ 0x27 - Global System Configuration ?
+ *     ▢ 0x28 - Port Configuration ?
+ *     ▢ 0x29 - Port Control ?
+ *     ▢ 0x30 - RX Source Capabilities
+ *     ▢ 0x31 - RX Sink Capabilities
+ *     ▢ 0x32 - TX Source Capabilities
+ *     ▢ 0x33 - TX Sink Capabilities
+ *     ▢ 0x34 - Active Contract PDO
+ *     ▢ 0x35 - Active Contract RDO
+ *     ▢ 0x36 - Sink Request RDO
+ *     ▢ 0x37 - Auto Negotiate Sink
+ *     ▢ 0x3F - Power Status
+ *     ✓ 0x40 - PD Status
+ *     ▢ 0x41 - PD3.0 Status ?
+ *     ▢ 0x70 - Sleep Configuration
  */
 
 void setUp(void) {
