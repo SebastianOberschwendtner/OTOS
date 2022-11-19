@@ -1,4 +1,14 @@
 # Changelog for OTOS
+## [v5.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v5.0.0) *(2022-xx-xx)*
+
+>Released by `SO`
+
+### Release Notes:
+#### [&rarrb; v4.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.1.0)
+
+### Fixed Issues:
+- n/a
+
 ## [v4.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.0.0) *(2022-11-15)*
 
 >Released by `SO`

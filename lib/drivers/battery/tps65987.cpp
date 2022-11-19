@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    tps65987.cpp
  * @author  SO
- * @version v2.7.4
+ * @version v4.1.0
  * @date    14-November-2021
  * @brief   Driver for the TPS65987DDH(K) USB-3 PD controller.
  ******************************************************************************
@@ -30,10 +30,83 @@
 // === Includes ===
 #include "tps65987.h"
 
-// Provide template instanciations with allowed bus controllers
+// Provide template instantiations with allowed bus controllers
 template class TPS65987::Controller<I2C::Controller>;
 
 // === Functions ===
+
+/**
+ * @brief Get the raw value of the PDO.
+ * 
+ * @return The raw PDO in bits 0-31.
+ */ 
+unsigned long TPS65987::PDO::get_data(void) const
+{
+    return this->data;
+};
+/**
+ * @brief Returns the maximum current indicated by the PDO.
+ * 
+ * @return The maximum current in [mA].
+ */
+unsigned int TPS65987::PDO::get_current(void) const
+{
+    return (this->data & 0x3FF) * 10;
+};
+
+/**
+ * @brief Returns the fixed voltage indicated by the PDO.
+ * 
+ * @return The voltage in [mV].
+ */
+unsigned int TPS65987::PDO::get_voltage(void) const
+{
+    return ((this->data >> 10) & 0x3FF) * 50;
+};
+
+/**
+ * @brief Check whether the PDO indicates a fixed voltage.
+ * 
+ * @return Returns true if the PDO indicates a fixed voltage.
+ */ 
+bool TPS65987::PDO::is_fixed_supply(void) const
+{
+    return (this->data & (0b11UL << 30)) == 0;
+};
+
+/**
+ * @brief Set the voltage of the PDO.
+ * 
+ * @param voltage The voltage in [mV].
+ */
+void TPS65987::PDO::set_voltage(const unsigned int voltage)
+{
+    // Calculate the voltage in 50mV steps
+    unsigned int volt = voltage / 50;
+
+    // Clear the voltage bits
+    this->data &= ~(0x3FF << 10);
+    
+    // Set the voltage bits
+    this->data |= (volt & 0x3FF) << 10;
+};
+
+/**
+ * @brief Set the current of the PDO.
+ * 
+ * @param current The current in [mA].
+ */
+void TPS65987::PDO::set_current(const unsigned int current)
+{
+    // Calculate the current in 10mA steps
+    unsigned int I = current / 10;
+
+    // Clear the current bits
+    this->data &= ~0x3FF;
+    
+    // Set the voltage bits
+    this->data |= (I & 0x3FF);
+};
 
 /**
  * @brief Initialize the PD IC based on its current mode.

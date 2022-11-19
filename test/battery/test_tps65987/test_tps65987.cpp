@@ -326,6 +326,46 @@ void test_read_PD_status(void)
     TEST_ASSERT_EQUAL(0, UUT.get_active_contract().current);
 };
 
+/// @brief Test the PDO class for USB PD contracts
+void test_PDO_class(void)
+{
+    // Create a PDO object
+    TPS65987::PDO pdo;
+
+    // Test the default constructor
+    TEST_ASSERT_EQUAL(0, pdo.get_voltage());
+    TEST_ASSERT_EQUAL(0, pdo.get_current());
+    TEST_ASSERT_EQUAL(0, pdo.get_data());
+    TEST_ASSERT_TRUE(pdo.is_fixed_supply());
+
+    // Test setting the voltage
+    pdo.set_voltage(5000);
+    TEST_ASSERT_EQUAL(0x19000, pdo.get_data());
+    TEST_ASSERT_EQUAL(5000, pdo.get_voltage());
+
+    // Test setting the current
+    pdo.set_current(3000);
+    TEST_ASSERT_EQUAL(0x1912C, pdo.get_data());
+    TEST_ASSERT_EQUAL(3000, pdo.get_current());
+
+    // Test constructor with data
+    TPS65987::PDO pdo2{(0b11 << 30) | 0x1912CUL};
+    TEST_ASSERT_EQUAL(5000, pdo2.get_voltage());
+    TEST_ASSERT_EQUAL(3000, pdo2.get_current());
+    TEST_ASSERT_FALSE(pdo2.is_fixed_supply());
+
+    // Test copy constructor
+    TPS65987::PDO pdo3{pdo2};
+    TEST_ASSERT_EQUAL(5000, pdo3.get_voltage());
+    TEST_ASSERT_EQUAL(3000, pdo3.get_current());
+
+    // Test assignment operator
+    TPS65987::PDO pdo4;
+    pdo4 = 0x1912C;
+    TEST_ASSERT_EQUAL(5000, pdo4.get_voltage());
+    TEST_ASSERT_EQUAL(3000, pdo4.get_current());
+};
+
 /// === Run Tests ===
 int main(int argc, char** argv)
 {
@@ -339,5 +379,6 @@ int main(int argc, char** argv)
     RUN_TEST(test_initialization);
     RUN_TEST(test_read_mode);
     RUN_TEST(test_read_PD_status);
+    RUN_TEST(test_PDO_class);
     return UNITY_END();
 };

@@ -72,6 +72,32 @@ namespace TPS65987 {
         unsigned int  voltage;
         unsigned int  current; 
     };
+
+    /**
+     * @brief PDO (Power Data Object) for USB-PD.
+     * The conversion are taken from the USB-PD specification.
+     */
+    class PDO
+    {
+    private:
+        unsigned long data{0}; // The raw data of the PDO
+    public:
+        // *** Constructors ***
+        PDO(void) = default;
+        PDO(PDO& other) = default;
+        PDO(PDO&& other) = default;
+        PDO& operator=(PDO& other) = default;
+        PDO& operator=(PDO&& other) = default;
+        PDO(unsigned long data) : data(data) {};
+
+        // *** Methods ***
+        unsigned long get_data(void) const;
+        unsigned int get_voltage(void) const;
+        unsigned int get_current(void) const;
+        bool is_fixed_supply(void) const;
+        void set_voltage(const unsigned int voltage);
+        void set_current(const unsigned int current);
+    };
      
     using Bus::Data_t;
     template<class bus_controller>
