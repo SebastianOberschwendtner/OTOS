@@ -326,6 +326,30 @@ void test_read_PD_status(void)
     TEST_ASSERT_EQUAL(0, UUT.get_active_contract().current);
 };
 
+/// @brief Test the reading of the status
+void test_read_status(void)
+{
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+
+    // create the controller object
+    TPS65987::Controller UUT(i2c);
+
+    // Response with all zeros
+    rx_buffer[0] = 0x88;
+    rx_buffer[1] = 0x77;
+    rx_buffer[2] = 0x66;
+    rx_buffer[3] = 0x55;
+    rx_buffer[4] = 0x44;
+    rx_buffer[5] = 0x33;
+    rx_buffer[6] = 0x22;
+    rx_buffer[7] = 0x11;
+    auto response = UUT.read_status();
+    TEST_ASSERT_TRUE(response);
+    TEST_ASSERT_EQUAL(0x44332211, response.value());
+    ::read_array.assert_called_once_with(8+1);
+};
+
 /// @brief Test the PDO class for USB PD contracts
 void test_PDO_class(void)
 {
@@ -379,6 +403,7 @@ int main(int argc, char** argv)
     RUN_TEST(test_initialization);
     RUN_TEST(test_read_mode);
     RUN_TEST(test_read_PD_status);
+    RUN_TEST(test_read_status);
     RUN_TEST(test_PDO_class);
     return UNITY_END();
 };

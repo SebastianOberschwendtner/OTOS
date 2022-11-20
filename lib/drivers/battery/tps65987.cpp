@@ -37,16 +37,16 @@ template class TPS65987::Controller<I2C::Controller>;
 
 /**
  * @brief Get the raw value of the PDO.
- * 
+ *
  * @return The raw PDO in bits 0-31.
- */ 
+ */
 unsigned long TPS65987::PDO::get_data(void) const
 {
     return this->data;
 };
 /**
  * @brief Returns the maximum current indicated by the PDO.
- * 
+ *
  * @return The maximum current in [mA].
  */
 unsigned int TPS65987::PDO::get_current(void) const
@@ -56,7 +56,7 @@ unsigned int TPS65987::PDO::get_current(void) const
 
 /**
  * @brief Returns the fixed voltage indicated by the PDO.
- * 
+ *
  * @return The voltage in [mV].
  */
 unsigned int TPS65987::PDO::get_voltage(void) const
@@ -66,9 +66,9 @@ unsigned int TPS65987::PDO::get_voltage(void) const
 
 /**
  * @brief Check whether the PDO indicates a fixed voltage.
- * 
+ *
  * @return Returns true if the PDO indicates a fixed voltage.
- */ 
+ */
 bool TPS65987::PDO::is_fixed_supply(void) const
 {
     return (this->data & (0b11UL << 30)) == 0;
@@ -76,7 +76,7 @@ bool TPS65987::PDO::is_fixed_supply(void) const
 
 /**
  * @brief Set the voltage of the PDO.
- * 
+ *
  * @param voltage The voltage in [mV].
  */
 void TPS65987::PDO::set_voltage(const unsigned int voltage)
@@ -86,14 +86,14 @@ void TPS65987::PDO::set_voltage(const unsigned int voltage)
 
     // Clear the voltage bits
     this->data &= ~(0x3FF << 10);
-    
+
     // Set the voltage bits
     this->data |= (volt & 0x3FF) << 10;
 };
 
 /**
  * @brief Set the current of the PDO.
- * 
+ *
  * @param current The current in [mA].
  */
 void TPS65987::PDO::set_current(const unsigned int current)
@@ -103,7 +103,7 @@ void TPS65987::PDO::set_current(const unsigned int current)
 
     // Clear the current bits
     this->data &= ~0x3FF;
-    
+
     // Set the voltage bits
     this->data |= (I & 0x3FF);
 };
@@ -190,7 +190,7 @@ bool TPS65987::Controller<bus_controller>::read_active_command(void)
 
 /**
  * @brief Write a command to the command register
- * The Data1 register has to be written first, when the 
+ * The Data1 register has to be written first, when the
  * command expects data!
  * @param cmd The command string => has to have 4 characters.
  * @return Returns True when the command was send successfully.
@@ -209,9 +209,9 @@ bool TPS65987::Controller<bus_controller>::write_command(const char *cmd)
     return Bus::send_array(this->mybus, dest, Register::Cmd1.length + 2);
 };
 /**
-  * @brief Read the active mode of the controller.
-  * @return Returns True when the mode was read successfully.
-  */
+ * @brief Read the active mode of the controller.
+ * @return Returns True when the mode was read successfully.
+ */
 template <class bus_controller>
 bool TPS65987::Controller<bus_controller>::read_mode(void)
 {
@@ -239,9 +239,9 @@ bool TPS65987::Controller<bus_controller>::read_mode(void)
 }
 
 /**
-  * @brief Read the current PD status from the PD Controller.
-  * @return Returns True when the status was read successfully.
-  */
+ * @brief Read the current PD status from the PD Controller.
+ * @return Returns True when the status was read successfully.
+ */
 template <class bus_controller>
 bool TPS65987::Controller<bus_controller>::read_PD_status(void)
 {
@@ -297,4 +297,25 @@ bool TPS65987::Controller<bus_controller>::read_PD_status(void)
         break;
     };
     return true;
+};
+
+/**
+ * @brief Read the status register [0x1A] from the PD Controller.
+ * @return Returns True and the value of the lower 4 bytes of the status when read successfully.
+ */
+template <class bus_controller>
+std::optional<unsigned long> TPS65987::Controller<bus_controller>::read_status(void)
+{
+    // Read the status register
+    if (!this->read_register(Register::Status))
+        return {};
+
+    // Convert the received data
+    unsigned long status = this->buffer_data[8];
+    status |= (this->buffer_data[7] << 8);
+    status |= (this->buffer_data[6] << 16);
+    status |= (this->buffer_data[5] << 24);
+
+    // Return the status
+    return status;
 };

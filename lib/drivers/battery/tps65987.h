@@ -26,19 +26,20 @@
 #include <array>
 
 // === Command codes ===
-namespace TPS65987 {
+namespace TPS65987
+{
 
     // === Constants ===
-    constexpr unsigned char i2c_address         = 0x40;
+    constexpr unsigned char i2c_address = 0x40;
 
     // === Bits ===
-    constexpr unsigned char PlugDetails_0       = (1<<0);
-    constexpr unsigned char PlugDetails_1       = (1<<1);
-    constexpr unsigned char CCPullUp_0          = (1<<2);
-    constexpr unsigned char CCPullUp_1          = (1<<3);
-    constexpr unsigned char PortType_0          = (1<<4);
-    constexpr unsigned char PortType_1          = (1<<5);
-    constexpr unsigned char PresentRole         = (1<<6);
+    constexpr unsigned char PlugDetails_0 = (1 << 0);
+    constexpr unsigned char PlugDetails_1 = (1 << 1);
+    constexpr unsigned char CCPullUp_0 = (1 << 2);
+    constexpr unsigned char CCPullUp_1 = (1 << 3);
+    constexpr unsigned char PortType_0 = (1 << 4);
+    constexpr unsigned char PortType_1 = (1 << 5);
+    constexpr unsigned char PresentRole = (1 << 6);
 
     // === Registers ===
     struct reg_t
@@ -49,19 +50,23 @@ namespace TPS65987 {
 
     namespace Register
     {
-        constexpr reg_t Mode        = {0x03, 4};
-        constexpr reg_t Cmd1        = {0x08, 4};
-        constexpr reg_t Data1       = {0x09, 64};   
+        constexpr reg_t Mode = {0x03, 4};
+        constexpr reg_t Cmd1 = {0x08, 4};
+        constexpr reg_t Data1 = {0x09, 64};
+        constexpr reg_t Status = {0x1A, 8};
         constexpr reg_t TX_Sink_Cap = {0x33, 57};
-        constexpr reg_t Active_PDO  = {0x34, 6};
-        constexpr reg_t Active_RDO  = {0x35, 4};
-        constexpr reg_t PD_Status   = {0x40, 4};
+        constexpr reg_t Active_PDO = {0x34, 6};
+        constexpr reg_t Active_RDO = {0x35, 4};
+        constexpr reg_t PD_Status = {0x40, 4};
     }; // namespace Register
 
     // === Modes ===
-    enum class Mode: unsigned char
+    enum class Mode : unsigned char
     {
-        BOOT = 0, PTCH, APP, OTHER
+        BOOT = 0,
+        PTCH,
+        APP,
+        OTHER
     };
 
     // === Power contracts ===
@@ -69,8 +74,8 @@ namespace TPS65987 {
     {
         unsigned char role;
         unsigned char USB_type;
-        unsigned int  voltage;
-        unsigned int  current; 
+        unsigned int voltage;
+        unsigned int current;
     };
 
     /**
@@ -84,11 +89,11 @@ namespace TPS65987 {
     public:
         // *** Constructors ***
         PDO(void) = default;
-        PDO(PDO& other) = default;
-        PDO(PDO&& other) = default;
-        PDO& operator=(PDO& other) = default;
-        PDO& operator=(PDO&& other) = default;
-        PDO(unsigned long data) : data(data) {};
+        PDO(PDO &other) = default;
+        PDO(PDO &&other) = default;
+        PDO &operator=(PDO &other) = default;
+        PDO &operator=(PDO &&other) = default;
+        PDO(unsigned long data) : data(data){};
 
         // *** Methods ***
         unsigned long get_data(void) const;
@@ -98,20 +103,20 @@ namespace TPS65987 {
         void set_voltage(const unsigned int voltage);
         void set_current(const unsigned int current);
     };
-     
+
     using Bus::Data_t;
-    template<class bus_controller>
+    template <class bus_controller>
     class Controller
     {
     private:
         // *** properties ***
-        bus_controller                mybus;
-        Data_t                        i2c_data          = {0};
-        std::array<char, 6>           buffer_cmd        = {0x08, 0x04, 0, 0, 0, 0};
-        std::array<unsigned char, 66> buffer_data       = {0};
-        Mode                          mode_active       = Mode::BOOT;
-        mutable char                  cmd_active[4]     = {0};
-        Contract                      contract_active   = {0, 0, 0, 0};
+        bus_controller mybus;
+        Data_t i2c_data = {0};
+        std::array<char, 6> buffer_cmd = {0x08, 0x04, 0, 0, 0, 0};
+        std::array<unsigned char, 66> buffer_data = {0};
+        Mode mode_active = Mode::BOOT;
+        mutable char cmd_active[4] = {0};
+        Contract contract_active = {0, 0, 0, 0};
 
     public:
         // *** Constructor ***
@@ -120,23 +125,22 @@ namespace TPS65987 {
          * @param bus_used The reference to the used bus peripheral.
          */
         Controller(bus_controller bus_used)
-        : mybus{bus_used}
-        {  
-        };
+            : mybus{bus_used} {};
 
         // Properties
 
         // *** Methods ***
-        bool            initialize          (void);
-        Mode            get_mode            (void) const { return this->mode_active; };
-        char*           get_active_command  (void) const { return &this->cmd_active[0]; };
-        Contract        get_active_contract (void) const { return this->contract_active; };
-        bool            read_register       (const reg_t reg);
-        bool            write_register      (const reg_t reg);
-        bool            read_active_command (void);
-        bool            write_command       (const char* cmd);
-        bool            read_mode           (void);
-        bool            read_PD_status      (void);
+        bool initialize(void);
+        Mode get_mode(void) const { return this->mode_active; };
+        char *get_active_command(void) const { return &this->cmd_active[0]; };
+        Contract get_active_contract(void) const { return this->contract_active; };
+        bool read_register(const reg_t reg);
+        bool write_register(const reg_t reg);
+        bool read_active_command(void);
+        bool write_command(const char *cmd);
+        bool read_mode(void);
+        bool read_PD_status(void);
+        std::optional<unsigned long> read_status(void);
     };
 };
 #endif
