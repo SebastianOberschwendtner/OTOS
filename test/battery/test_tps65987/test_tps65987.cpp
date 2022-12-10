@@ -31,11 +31,12 @@
 #include <unity.h>
 #include <mock.h>
 #include <array>
+#include "interface.h"
 
 // === Fixtures ===
 
 // Mock the i2c driver
-struct I2C_Mock { };
+struct I2C_Mock: public Driver::Base { };
 Mock::Callable<bool> set_target_address;
 Mock::Callable<bool> send_word;
 Mock::Callable<bool> send_array;
@@ -390,6 +391,28 @@ void test_PDO_class(void)
     TEST_ASSERT_EQUAL(3000, pdo4.get_current());
 };
 
+/// @brief Test the reading of the active contract PDO
+void test_read_active_pdo(void)
+{
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+
+    // create the controller object
+    TPS65987::Controller UUT(i2c);
+
+    // Response with all zeros
+    rx_buffer[0] = 0x66;
+    rx_buffer[1] = 0x55;
+    rx_buffer[2] = 0x44;
+    rx_buffer[3] = 0x33;
+    rx_buffer[4] = 0x22;
+    rx_buffer[5] = 0x11;
+    auto response = UUT.read_active_pdo();
+    TEST_ASSERT_TRUE(response);
+    TEST_ASSERT_EQUAL_HEX(0x44332211, response.value().get_data());
+    ::read_array.assert_called_once_with(6+1);
+};
+
 /// === Run Tests ===
 int main(int argc, char** argv)
 {
@@ -405,5 +428,6 @@ int main(int argc, char** argv)
     RUN_TEST(test_read_PD_status);
     RUN_TEST(test_read_status);
     RUN_TEST(test_PDO_class);
+    RUN_TEST(test_read_active_pdo);
     return UNITY_END();
 };

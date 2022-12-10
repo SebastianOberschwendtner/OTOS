@@ -5,6 +5,8 @@
 
 ### Release Notes:
 #### [&rarrb; v4.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.1.0)
+- `Battery` :
+    - Adds function to handle USB PD contracts to *TPS65987* driver.
 
 ### Fixed Issues:
 - n/a
@@ -20,18 +22,18 @@
     - Adds custom mono spaced fonts.
     - Coordinate class has overloads for basic arithmetic operators.
 #### [&rarrb; v3.2.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.2.0)
-- `Drivers`:
+- `Drivers` :
     - Improves DMA driver for sending data.
     - Adds 16bit mode for SPI driver.
 #### [&rarrb; v3.3.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.3.0)
-- `Drivers`:
+- `Drivers` :
     - SPI can create RX and TX DMA Streams.
     - Adjusts PLL defines for L0 devices.
-- `Graphics`:
+- `Graphics` :
     - Adds << operator to display canvas for strings.
 
 #### [&rarrb; v3.4.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.4.0)
-- `Filesystem`:
+- `Filesystem` :
     - Files can be opened using a specific mode.
     - Files can be written to.
     - Files inherit from `OTOS::iostream`.
@@ -43,9 +45,9 @@
     - Integer numbers
     - `const` null terminated strings
 #### [&rarrb; v4.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.0.0)
-- `Graphics`:
+- `Graphics` :
     - Canvas inherits from `OTOS::ostream` and satisfies its interface requirements.
-- `Kernel`:
+- `Kernel` :
     - Adds *endl* manipulator for ostreams.
 
 ### Fixed Issues:

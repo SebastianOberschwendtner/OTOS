@@ -141,6 +141,7 @@ namespace TPS65987
         bool read_mode(void);
         bool read_PD_status(void);
         std::optional<unsigned long> read_status(void);
+        std::optional<PDO> read_active_pdo(void);
     };
 };
 #endif

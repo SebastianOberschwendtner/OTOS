@@ -117,6 +117,7 @@ bool TPS65987::Controller<bus_controller>::initialize(void)
 {
     // set the i2c address
     Bus::change_address(this->mybus, TPS65987::i2c_address);
+    this->mybus.set_timeout(65000);
 
     // First read the current mode of the IC
     if (!this->read_mode())
@@ -318,4 +319,22 @@ std::optional<unsigned long> TPS65987::Controller<bus_controller>::read_status(v
 
     // Return the status
     return status;
+};
+
+
+template <class bus_controller>
+std::optional<TPS65987::PDO> TPS65987::Controller<bus_controller>::read_active_pdo(void)
+{
+    // Read the active PDO register
+    if (!this->read_register(Register::Active_PDO))
+        return {};
+
+    // Convert the received data
+    unsigned long pdo = this->buffer_data[6];
+    pdo |= (this->buffer_data[5] << 8);
+    pdo |= (this->buffer_data[4] << 16);
+    pdo |= (this->buffer_data[3] << 24);
+
+    // Return the PDO
+    return PDO(pdo);
 };
