@@ -361,10 +361,7 @@ void test_PDO_class(void)
     TEST_ASSERT_EQUAL(0, pdo.voltage());
     TEST_ASSERT_EQUAL(0, pdo.current());
     TEST_ASSERT_EQUAL(0, pdo.get_data());
-    TEST_ASSERT_EQUAL(
-            TPS65987::PDO::Fixed_Supply,
-            pdo.type()
-            );
+    TEST_ASSERT_EQUAL( TPS65987::PDO::Fixed_Supply, pdo.type() );
 
     // Test setting the voltage
     pdo.set_voltage(5000);
@@ -378,15 +375,10 @@ void test_PDO_class(void)
 
     // Test constructor with data
     TPS65987::PDO pdo2{(0b11 << 30) | 0x1912CUL};
-    TEST_ASSERT_EQUAL(5000, pdo2.voltage());
-    TEST_ASSERT_EQUAL(3000, pdo2.current());
-    TEST_ASSERT_EQUAL(
-            TPS65987::PDO::APDO,
-            pdo2.type()
-            );
+    TEST_ASSERT_EQUAL( TPS65987::PDO::APDO, pdo2.type() );
 
     // Test copy constructor
-    TPS65987::PDO pdo3{pdo2};
+    TPS65987::PDO pdo3{pdo};
     TEST_ASSERT_EQUAL(5000, pdo3.voltage());
     TEST_ASSERT_EQUAL(3000, pdo3.current());
 
@@ -395,6 +387,11 @@ void test_PDO_class(void)
     pdo4 = 0x1912C;
     TEST_ASSERT_EQUAL(5000, pdo4.voltage());
     TEST_ASSERT_EQUAL(3000, pdo4.current());
+
+    // Test getting the voltage of a variable supply
+    pdo2 = (0b10UL << 30) | (0x190UL << 20);
+    TEST_ASSERT_EQUAL( TPS65987::PDO::Variable_Supply, pdo2.type() );
+    TEST_ASSERT_EQUAL( 20000, pdo2.voltage() );
 };
 
 /// @brief Test the reading of the active contract PDO

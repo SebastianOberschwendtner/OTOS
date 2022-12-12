@@ -61,7 +61,11 @@ unsigned int TPS65987::PDO::current(void) const
  */
 unsigned int TPS65987::PDO::voltage(void) const
 {
-    return ((this->data >> 10) & 0x3FF) * 50;
+    // Get the bit position of the voltage depending on the PDO type
+    unsigned char bit_pos = this->type() == Fixed_Supply ? 10 : 20;
+
+    // Return the converted voltage in [mV]
+    return ((this->data >> bit_pos) & 0x3FF) * 50;
 };
 
 /**
