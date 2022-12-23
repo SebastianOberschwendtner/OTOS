@@ -321,7 +321,12 @@ std::optional<unsigned long> TPS65987::Controller<bus_controller>::read_status(v
     return status;
 };
 
-
+/**
+ * @brief Read the active PDO from the PD Controller.
+ *
+ * @tparam bus_controller The used bus for the communication.
+ * @return True and the active PDO when read successfully.
+ */
 template <class bus_controller>
 std::optional<TPS65987::PDO> TPS65987::Controller<bus_controller>::read_active_pdo(void)
 {
@@ -336,5 +341,35 @@ std::optional<TPS65987::PDO> TPS65987::Controller<bus_controller>::read_active_p
     pdo |= (this->buffer_data[3] << 24);
 
     // Return the PDO
+    return PDO(pdo);
+};
+
+/**
+ * @brief Read a TX source PDO from the PD Controller.
+ * 
+ * @tparam bus_controller The used bus for the communication.
+ * @param pdo_number The PDO number to read.
+ * @return Returns True and the PDO when read successfully and when the PDO number is valid.
+ */
+template <class bus_controller>
+std::optional<TPS65987::PDO> TPS65987::Controller<bus_controller>::read_TX_sink_pdo(
+    const unsigned char pdo_number
+)
+{
+    // Read the TX sink PDO capabilities register
+    if (!this->read_register(Register::TX_Sink_Cap))
+        return {};
+
+    // Check whether the PDO number is valid
+    auto valid_pdos = this->buffer_data[57] & 0b111;
+    if (pdo_number > valid_pdos)
+        return {};
+
+    // Convert the received data
+    unsigned long pdo = this->buffer_data[56 - pdo_number * 4];
+    pdo |= (this->buffer_data[55 - pdo_number * 4] << 8);
+    pdo |= (this->buffer_data[54 - pdo_number * 4] << 16);
+    pdo |= (this->buffer_data[53 - pdo_number * 4] << 24);
+
     return PDO(pdo);
 };

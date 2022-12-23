@@ -413,6 +413,27 @@ void test_read_active_pdo(void)
     ::read_array.assert_called_once_with(6+1);
 };
 
+/// @brief Test the reading of the TX sink capabilites PDOs
+void test_read_TX_sink_capability(void)
+{
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+
+    // create the controller object
+    TPS65987::Controller UUT(i2c);
+
+    // Set up response
+    rx_buffer[52] = 0x55;
+    rx_buffer[53] = 0x44;
+    rx_buffer[54] = 0x33;
+    rx_buffer[55] = 0x22;
+    rx_buffer[56] = 0x11;
+    auto response = UUT.read_TX_sink_pdo(0);
+    TEST_ASSERT_TRUE(response);
+    TEST_ASSERT_EQUAL_HEX(0x55443322, response.value().get_data());
+    ::read_array.assert_called_once_with(57+1);
+};
+
 /// === Run Tests ===
 int main(int argc, char** argv)
 {
@@ -429,5 +450,6 @@ int main(int argc, char** argv)
     RUN_TEST(test_read_status);
     RUN_TEST(test_PDO_class);
     RUN_TEST(test_read_active_pdo);
+    RUN_TEST(test_read_TX_sink_capability);
     return UNITY_END();
 };

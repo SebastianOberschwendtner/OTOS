@@ -54,6 +54,11 @@ namespace TPS65987
         constexpr reg_t Cmd1 = {0x08, 4};
         constexpr reg_t Data1 = {0x09, 64};
         constexpr reg_t Status = {0x1A, 8};
+        constexpr reg_t Power_Path_Status = {0x26, 8};
+        constexpr reg_t Global_SysConfig = {0x27, 14};
+        constexpr reg_t Port_Config = {0x28, 8};
+        constexpr reg_t Port_Ctrl = {0x29, 4};
+        constexpr reg_t TX_Source_Cap = {0x32, 64};
         constexpr reg_t TX_Sink_Cap = {0x33, 57};
         constexpr reg_t Active_PDO = {0x34, 6};
         constexpr reg_t Active_RDO = {0x35, 4};
@@ -113,12 +118,12 @@ namespace TPS65987
         bus_controller mybus;
         Data_t i2c_data = {0};
         std::array<char, 6> buffer_cmd = {0x08, 0x04, 0, 0, 0, 0};
-        std::array<unsigned char, 66> buffer_data = {0};
         Mode mode_active = Mode::BOOT;
         mutable char cmd_active[4] = {0};
         Contract contract_active = {0, 0, 0, 0};
 
     public:
+        std::array<unsigned char, 66> buffer_data = {0};
         // *** Constructor ***
         /**
          * @brief Constructor for PD controller.
@@ -142,6 +147,7 @@ namespace TPS65987
         bool read_PD_status(void);
         std::optional<unsigned long> read_status(void);
         std::optional<PDO> read_active_pdo(void);
+        std::optional<PDO> read_TX_sink_pdo(const unsigned char pdo_number);
     };
 };
 #endif
