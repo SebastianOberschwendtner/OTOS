@@ -92,6 +92,15 @@ namespace TPS65987
     private:
         unsigned long data{0}; // The raw data of the PDO
     public:
+        // ** Enum with PDO types ***
+        enum Type
+        {
+            Fixed_Supply = 0,
+            Battery = 1,
+            Variable_Supply = 2,
+            APDO = 3 // Augmented Power Data Object
+        };
+
         // *** Constructors ***
         PDO(void) = default;
         PDO(PDO &other) = default;
@@ -102,9 +111,9 @@ namespace TPS65987
 
         // *** Methods ***
         unsigned long get_data(void) const;
-        unsigned int get_voltage(void) const;
-        unsigned int get_current(void) const;
-        bool is_fixed_supply(void) const;
+        unsigned int voltage(void) const;
+        unsigned int current(void) const;
+        Type  type(void) const;
         void set_voltage(const unsigned int voltage);
         void set_current(const unsigned int current);
     };

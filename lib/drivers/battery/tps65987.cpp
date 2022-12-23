@@ -49,7 +49,7 @@ unsigned long TPS65987::PDO::get_data(void) const
  *
  * @return The maximum current in [mA].
  */
-unsigned int TPS65987::PDO::get_current(void) const
+unsigned int TPS65987::PDO::current(void) const
 {
     return (this->data & 0x3FF) * 10;
 };
@@ -59,19 +59,23 @@ unsigned int TPS65987::PDO::get_current(void) const
  *
  * @return The voltage in [mV].
  */
-unsigned int TPS65987::PDO::get_voltage(void) const
+unsigned int TPS65987::PDO::voltage(void) const
 {
-    return ((this->data >> 10) & 0x3FF) * 50;
+    // Get the bit position of the voltage depending on the PDO type
+    unsigned char bit_pos = this->type() == Fixed_Supply ? 10 : 20;
+
+    // Return the converted voltage in [mV]
+    return ((this->data >> bit_pos) & 0x3FF) * 50;
 };
 
 /**
- * @brief Check whether the PDO indicates a fixed voltage.
+ * @brief Check the type of PDO object.
  *
- * @return Returns true if the PDO indicates a fixed voltage.
+ * @return Returns the type of the object.
  */
-bool TPS65987::PDO::is_fixed_supply(void) const
+TPS65987::PDO::Type TPS65987::PDO::type(void) const
 {
-    return (this->data & (0b11UL << 30)) == 0;
+    return static_cast<Type>((this->data >> 30) & 0b11);
 };
 
 /**
