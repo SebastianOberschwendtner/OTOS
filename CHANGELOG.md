@@ -7,6 +7,7 @@
 #### [&rarrb; v4.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.1.0)
 - `Battery` :
     - Adds function to handle USB PD contracts to *TPS65987* driver.
+    - Adds handling of system configuration registers to *TPS65987* driver.
 - `misc` :
     - Adds library `bits` for manipulating bits.
 
