@@ -23,6 +23,7 @@
 
 // *** Includes ***
 #include "mock.h"
+#include <cstdint>
 
 // *** Function Declarations ***
 std::uintptr_t*  __otos_switch       (std::uintptr_t* ThreadStack);
