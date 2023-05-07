@@ -29,6 +29,7 @@
 
 // === Includes ===
 #include "unity.h"
+#include "mock.h"
 #include "ipc.h"
 
 /** === Test List ===
@@ -45,6 +46,7 @@
 // === Mocks ===
 constexpr unsigned char PID_1 = 1;
 constexpr unsigned char PID_2 = 2;
+extern Mock::Callable<bool> otos_yield;
 
 // === Tests ===
 void setUp(void) {
@@ -113,6 +115,25 @@ void test_get_data(void)
     TEST_ASSERT_EQUAL(0, UUT.get_data(PID_2).value_or<void*>(0));
 };
 
+/// @brief Test yield waiting for data
+void test_yield_wait_for_data(void)
+{
+    // Set data to be shared and register it
+    unsigned int data = 5;
+    IPC::Manager UUT(IPC::Check::PID<PID_1>());
+    UUT.deregister_data();
+    UUT.register_data(&data);
+
+    // Get the IPC data
+    auto* p_data = IPC::wait_for_data<unsigned int>(PID_1);
+
+    // Addresses should match
+    TEST_ASSERT_EQUAL(&data, p_data);
+
+    // The calls to the yield function
+    TEST_ASSERT_EQUAL(0, otos_yield.call_count);
+};
+
 // === Main ===
 int main(int argc, char** argv)
 {
@@ -120,5 +141,6 @@ int main(int argc, char** argv)
     // test_init();
     RUN_TEST(test_register_data);
     RUN_TEST(test_get_data);
+    RUN_TEST(test_yield_wait_for_data);
     return UNITY_END();
 };

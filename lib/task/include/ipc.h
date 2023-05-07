@@ -24,6 +24,7 @@
 // === Includes ===
 #include <array>
 #include <optional>
+#include "task.h"
 #include "types.h"
 #include "error_codes.h"
 
@@ -50,7 +51,7 @@ namespace IPC {
     private:
         // *** Properties ***
         unsigned char Owner_PID;
-        static std::array<void*, IPC_MAX_PID> ipc_data_addresses;
+        static std::array<void*, IPC_MAX_PID> ipc_data_addresses; // NOLINT
 
     public:
 
@@ -60,13 +61,27 @@ namespace IPC {
          * You do not need a manager when you only want to get data.
          * @param PID The PID of the owner task, this has to be unique.
          */
-        Manager(const unsigned char PID): Owner_PID(PID) {};
+        explicit Manager(const unsigned char PID): Owner_PID(PID) {};
 
         // *** Methods ***
-
-        Error::Code                 register_data           (void* const data_address);
-        void                        deregister_data         (void);
-        static std::optional<void*> get_data                (const unsigned char PID);
+        Error::Code                 register_data           (void* data_address);
+        void                        deregister_data         ();
+        static std::optional<void*> get_data                (unsigned char PID);
     };
-};
+
+    /**
+     * @brief Template function to wait until the data of the PID is available
+     * Calls `OTOS::TASK::yield()` until the data is available.
+     * 
+     * @tparam T The IPC interface type/class.
+     * @param PID The PID of the task that owns the data.
+     * @return T* Returns the pointer to the data as soon as it is available.
+     */
+    template<typename T>
+    auto wait_for_data(const uint8_t PID) -> T*
+    {
+        YIELD_WHILE(!IPC::Manager::get_data(PID));
+        return static_cast<T*>(IPC::Manager::get_data(PID).value());
+    }
+}; // namespace IPC
 #endif
