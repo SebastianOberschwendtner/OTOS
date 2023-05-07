@@ -377,3 +377,37 @@ std::optional<TPS65987::PDO> TPS65987::Controller<bus_controller>::read_TX_sink_
 
     return PDO(pdo);
 }
+
+/**
+ * @brief Update the tx buffer with the given capability.
+ * 
+ * A capability is a PDO with the corresponding power path configuration.
+ * Make sure to delete the tx buffer before calling this function!
+ *
+ * @tparam bus_controller The used bus for the communication.
+ * @param cap The capability to update the tx buffer with.
+ */
+template <class bus_controller>
+void TPS65987::Controller<bus_controller>::register_TX_source_capability(const Capability &cap)
+{
+    // Get the current number of valid PDOs in the buffer
+    uint8_t valid_pdos = this->buffer_data[2] & 0b111;
+
+    // Reset the number of valid PDOs if there are already 7 valid PDOs
+    if (valid_pdos >= 7)
+        valid_pdos = 0;
+
+    // Update the power path configuration
+    const uint8_t bitshift = 2 * valid_pdos;
+    this->buffer_data[6] = bits::set(this->buffer_data[6], {0b11, bitshift, cap.second});
+
+    // Update the number of valid PDOs
+    /// @todo Add setting the advertise bit when registering more than one PDO
+    this->buffer_data[2] = (this->buffer_data[2] & 0b11111000) | ++valid_pdos;
+
+    // Update the PDO in the register
+    this->buffer_data.at(valid_pdos * 4 + 6) = bits::get(cap.first.get_data(), {0xFF, 0});
+    this->buffer_data.at(valid_pdos * 4 + 7) = bits::get(cap.first.get_data(), {0xFF, 8});
+    this->buffer_data.at(valid_pdos * 4 + 8) = bits::get(cap.first.get_data(), {0xFF, 16});
+    this->buffer_data.at(valid_pdos * 4 + 9) = bits::get(cap.first.get_data(), {0xFF, 24});
+}

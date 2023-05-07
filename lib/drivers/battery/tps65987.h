@@ -24,6 +24,7 @@
 // === includes ===
 // #include <stdint.h>
 #include <array>
+#include <utility>
 #include "drivers.h"
 #include "misc/bits.h"
 
@@ -60,10 +61,13 @@ namespace TPS65987
         constexpr reg_t Global_SysConfig = {0x27, 14};
         constexpr reg_t Port_Config = {0x28, 8};
         constexpr reg_t Port_Ctrl = {0x29, 4};
+        constexpr reg_t RX_Source_Cap = {0x30, 29};
+        constexpr reg_t RX_Sink_Cap = {0x31, 29};
         constexpr reg_t TX_Source_Cap = {0x32, 64};
         constexpr reg_t TX_Sink_Cap = {0x33, 57};
         constexpr reg_t Active_PDO = {0x34, 6};
         constexpr reg_t Active_RDO = {0x35, 4};
+        constexpr reg_t Power_Status {0x3F, 2};
         constexpr reg_t PD_Status = {0x40, 4};
     }; // namespace Register
 
@@ -127,6 +131,11 @@ namespace TPS65987
         void set_current(uint16_t current);
     };
 
+    /* Type to pair the PDO with the power path selection 
+     * for setting the source and sink capabilities
+     */
+    using Capability = std::pair<TPS65987::PDO, uint8_t>;
+
     /**
      * @brief Status bit field for non-interrupt events.
      * @details Read-only register.
@@ -144,6 +153,27 @@ namespace TPS65987
         [[nodiscard]] inline bool PlugPresent() const { return (this->data.at(0) & (1 << 0)) != 0; }
         [[nodiscard]] inline uint8_t ConnState() const { return bits::get(this->data.at(0), {0b111, 1}); }
         [[nodiscard]] inline bool PortRole() const { return (this->data.at(0) & (1 << 5)) != 0; }
+        [[nodiscard]] inline uint8_t VbusStatus() const { return bits::get(this->data.at(2), {0b11, 4}); }
+    };
+
+    /**
+     * @brief Status bit field for power path.
+     * @details Read-only register.
+     */
+    class PowerPathStatus : public reg_t
+    {
+    private:
+        std::array<uint8_t, Register::Power_Path_Status.length> data{0};
+    public:
+
+        PowerPathStatus() : reg_t{Register::Power_Path_Status} {}
+
+        // *** Get all the options ***
+        [[nodiscard]] auto& get_data() { return this->data; }
+        [[nodiscard]] inline uint8_t PP1_CABLEswitch() const { return bits::get(this->data.at(0), {0b11, 0}); }
+        [[nodiscard]] inline uint8_t PP2_CABLEswitch() const { return bits::get(this->data.at(0), {0b11, 2}); }
+        [[nodiscard]] inline uint8_t PP1switch() const { return bits::get(this->data.at(0), {0b11, 6}); }
+        [[nodiscard]] inline uint8_t PP2switch() const { return bits::get(this->data.at(1), {0b111, 1}); }
     };
 
     /**
@@ -224,9 +254,13 @@ namespace TPS65987
         // *** Get all the options ***
         [[nodiscard]] auto& get_data() { return this->data; }
         [[nodiscard]] inline uint8_t TypeCCurrent() const { return bits::get(this->data.at(0), {0b11, 0}); }
+        [[nodiscard]] inline uint8_t ChargerAdvertiseEnable() const { return bits::get(this->data.at(3), {0b111, 2}); }
+        [[nodiscard]] inline uint8_t ChargerDetectEnable() const { return bits::get(this->data.at(3), {0b11, 6}); }
 
         // *** Set all the options ***
         inline void set_TypeCCurrent(const uint8_t value) { this->data[0] = bits::set(this->data.at(0), {0b11, 0, value}); }
+        inline void set_ChargerAdvertiseEnable(const uint8_t value) { this->data[3] = bits::set(this->data.at(3), {0b111, 2, value}); }
+        inline void set_ChargerDetectEnable(const uint8_t value) { this->data[3] = bits::set(this->data.at(3), {0b11, 6, value}); }
     };
 
     using Bus::Data_t;
@@ -267,6 +301,7 @@ namespace TPS65987
         auto read_status() -> std::optional<uint32_t>;
         auto read_active_pdo() -> std::optional<PDO>;
         auto read_TX_sink_pdo(uint8_t pdo_number) -> std::optional<PDO>;
+        void register_TX_source_capability(const Capability &cap);
 
         /**
          * @brief Read a register from the TPS65987 and directly

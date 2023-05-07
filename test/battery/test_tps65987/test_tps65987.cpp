@@ -483,6 +483,44 @@ void test_class_status()
     TEST_ASSERT_FALSE(status.PortRole());
     data[0] |= 0x01 << 5;
     TEST_ASSERT_TRUE(status.PortRole());
+
+    // Test reading the Vbus status
+    TEST_ASSERT_EQUAL(0, status.VbusStatus());
+    data[2] |= 0b10 << 4;
+    TEST_ASSERT_EQUAL(0b10, status.VbusStatus());
+}
+
+/// @brief Test the power path status register class
+void test_class_power_path_status()
+{
+    // Create empty register
+    TPS65987::PowerPathStatus power_path_status;
+
+    // Test getting the underlying data array
+    auto &data = power_path_status.get_data();
+
+    // Test reading the register options
+    TEST_ASSERT_EQUAL(TPS65987::Register::Power_Path_Status.length, data.size());
+
+    // Test reading the PP1_CABLEswitch status
+    TEST_ASSERT_EQUAL(0, power_path_status.PP1_CABLEswitch());
+    data[0] = 0b10;
+    TEST_ASSERT_EQUAL(2, power_path_status.PP1_CABLEswitch());
+
+    // Test reading the PP2_CABLEswitch status
+    TEST_ASSERT_EQUAL(0, power_path_status.PP2_CABLEswitch());
+    data[0] |= 0b0100;
+    TEST_ASSERT_EQUAL(1, power_path_status.PP2_CABLEswitch());
+
+    // Test reading the PP1switch status
+    TEST_ASSERT_EQUAL(0, power_path_status.PP1switch());
+    data[0] |= (1 << 6);
+    TEST_ASSERT_EQUAL(1, power_path_status.PP1switch());
+
+    // Test reading the PP2switch status
+    TEST_ASSERT_EQUAL(0, power_path_status.PP2switch());
+    data[1] |= (1 << 1);
+    TEST_ASSERT_EQUAL(1, power_path_status.PP2switch());
 }
 
 /// @brief Test the specialized register classes
@@ -535,7 +573,7 @@ void test_reading_global_system_configuration()
     rx_buffer[11] = 0x01; // Byte 2
     rx_buffer[12] = 0x00; // Byte 1
     rx_buffer[13] = 0x00; // Byte 0
-    rx_buffer[14] = 14; // Length
+    rx_buffer[14] = 14;   // Length
 
     // Read the register
     TPS65987::GlobalConfiguration global_config;
@@ -567,7 +605,7 @@ void test_writing_global_system_configuration()
     TEST_ASSERT_EQUAL(14, rx_buffer.at(1));
     TEST_ASSERT_EQUAL(0, rx_buffer.at(2));
     TEST_ASSERT_EQUAL(0, rx_buffer.at(3));
-    TEST_ASSERT_EQUAL((3<<3), rx_buffer.at(4));
+    TEST_ASSERT_EQUAL((3 << 3), rx_buffer.at(4));
 }
 
 /// @brief Test the port configuration register class
@@ -606,6 +644,8 @@ void test_class_port_control()
     auto data = port_control.get_data();
     TEST_ASSERT_EQUAL(TPS65987::Register::Port_Ctrl.length, data.size());
     TEST_ASSERT_EQUAL(0, port_control.TypeCCurrent());
+    TEST_ASSERT_EQUAL(0, port_control.ChargerAdvertiseEnable());
+    TEST_ASSERT_EQUAL(0, port_control.ChargerDetectEnable());
 
     // Test reading the register options
     TEST_ASSERT_EQUAL(TPS65987::Register::Port_Ctrl.address, port_control.address);
@@ -614,6 +654,60 @@ void test_class_port_control()
     // Test setting the register options
     port_control.set_TypeCCurrent(1);
     TEST_ASSERT_EQUAL(1, port_control.TypeCCurrent());
+    port_control.set_ChargerAdvertiseEnable(0b010);
+    TEST_ASSERT_EQUAL(0b010, port_control.ChargerAdvertiseEnable());
+    TEST_ASSERT_BITS(0b11100, (0b010 << 2), port_control.get_data().at(3));
+    port_control.set_ChargerDetectEnable(1);
+    TEST_ASSERT_EQUAL(1, port_control.ChargerDetectEnable());
+    TEST_ASSERT_BITS(0b11000000, 0b01000000, port_control.get_data().at(3));
+}
+
+/// @brief Test setting the source capabilities PDOs
+void test_write_TX_source_PDOs()
+{
+    // Create an array with the PDOs
+    TPS65987::Capability capability{{}, 1};
+    capability.first.set_voltage(5000);
+    capability.second = 2;
+
+    // Setup the mocked i2c driver
+    const I2C_Mock i2c;
+
+    // create the controller object
+    TPS65987::Controller UUT(i2c);
+
+    // Register the first PDO
+    UUT.register_TX_source_capability(capability);
+
+    // Test the correct data in the outgoing buffer
+    UUT.write_register(TPS65987::Register::TX_Source_Cap);
+    TEST_ASSERT_EQUAL(1, rx_buffer[2]);
+    TEST_ASSERT_EQUAL(2, rx_buffer[6]);
+
+    // Get the PDO back from the buffer
+    const TPS65987::PDO pdo{static_cast<uint32_t>(
+        (rx_buffer[13] << 24) |
+        (rx_buffer[12] << 16) |
+        (rx_buffer[11] << 8) |
+        rx_buffer[10])};
+    TEST_ASSERT_EQUAL(5000, pdo.voltage());
+
+    // Register the same PDO again with different voltage
+    capability.first.set_voltage(10000);
+    UUT.register_TX_source_capability(capability);
+
+    // Test the correct data in the outgoing buffer
+    UUT.write_register(TPS65987::Register::TX_Source_Cap);
+    TEST_ASSERT_EQUAL(2, rx_buffer[2]);
+    TEST_ASSERT_EQUAL(0b1010, rx_buffer[6]);
+
+    // Get the PDO back from the buffer
+    const TPS65987::PDO pdo2{static_cast<uint32_t>(
+        (rx_buffer[17] << 24) |
+        (rx_buffer[16] << 16) |
+        (rx_buffer[15] << 8) |
+        rx_buffer[14])};
+    TEST_ASSERT_EQUAL(10000, pdo2.voltage());
 }
 
 /// === Run Tests ===
@@ -634,10 +728,12 @@ int main()
     RUN_TEST(test_read_active_pdo);
     RUN_TEST(test_read_TX_sink_capability);
     RUN_TEST(test_class_status);
+    RUN_TEST(test_class_power_path_status);
     RUN_TEST(test_class_global_system_configuration);
     RUN_TEST(test_reading_global_system_configuration);
     RUN_TEST(test_writing_global_system_configuration);
     RUN_TEST(test_class_port_configuration);
     RUN_TEST(test_class_port_control);
+    RUN_TEST(test_write_TX_source_PDOs);
     return UNITY_END();
 }

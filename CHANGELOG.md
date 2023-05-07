@@ -8,8 +8,11 @@
 - `Battery` :
     - Adds function to handle USB PD contracts to *TPS65987* driver.
     - Adds handling of system configuration registers to *TPS65987* driver.
+- `Kernel` :
+    - Adds convenience function to `ipc` to yield wait until data becomes available.
 - `misc` :
     - Adds library `bits` for manipulating bits.
+#### [&rarrb; v4.2.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.2.0)
 
 ### Fixed Issues:
 - n/a
