@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    max17205.cpp
  * @author  SO
- * @version v2.8.1
+ * @version v4.2.0
  * @date    14-November-2021
  * @brief   Driver for the MAX17205+ battery balancer and coulomb counter.
  ******************************************************************************
@@ -37,135 +37,34 @@ template class MAX17205::Controller<I2C::Controller>;
 
 /**
  * @brief Initialize the balancer for the application.
+ * The chip does not require any initialization.
  * @return Returns True when the balancer was initialized correctly.
  */
 template<class bus_controller>
-bool MAX17205::Controller<bus_controller>::initialize(void)
+bool MAX17205::Controller<bus_controller>::initialize()
 {
-    // Get the current configuration
-    if(!this->read_register(Register::PackCfg)) return false;
-
-    // Check the configuration
-    /// @todo Should the configuration just be written every time and not checked?
-    unsigned int config = this->i2c_data.word[0];
-    if(! (config & ChEn))
-        return this->write_register(Register::PackCfg, (TdEn | ChEn | BALCFG_1 | BALCFG_0 | 2U));
-
     return true;
-};
-
-/**
- * @brief Convert a raw voltage value to a mV value.
- * @param raw The raw register value.
- * @return Returns the converted value.
- */
-template<class bus_controller>
-inline unsigned int MAX17205::Controller<bus_controller>::to_voltage( const unsigned int raw )
-{
-    // voltage = (10 * raw / 128) mV
-    return (10 * raw) >> 7;
-};
-
-/**
- * @brief Convert a raw current to a mA value.
- * @param raw The raw register value.
- * @return Returns the converted value.
- */
-template<class bus_controller>
-inline signed int MAX17205::Controller<bus_controller>::to_current( const unsigned int raw )
-{
-    // current = ( raw / (640*R_sense) ) mA
-
-    // convert to signed number
-    signed long temp = 0;
-    if (raw & (1<<15))
-        temp = raw - 65536;
-    else
-        temp = raw;
-
-    // Convert the raw data
-    return (1000 * temp) / (640 * R_sense_mOhm);
-};
-
-/**
- * @brief Convert a raw capacity value to a mAh value.
- * @param raw The raw register value.
- * @return Returns the converted value.
- */
-template<class bus_controller>
-inline unsigned int MAX17205::Controller<bus_controller>::to_capacity( const unsigned int raw )
-{
-    // Capacity = ( raw * 0.005 / R_sense) mAh
-    return raw * (5 / R_sense_mOhm);
-};
-
-/**
- * @brief Convert a raw percentage value to a % value.
- * @param raw The raw register value.
- * @return Returns the converted value.
- */
-template<class bus_controller>
-inline unsigned int MAX17205::Controller<bus_controller>::to_percentage( const unsigned int raw )
-{
-    // percentage = raw / 256
-    return raw >> 8;
-};
-
-/**
- * @brief Convert a raw temperature value.
- * @param raw The raw register value.
- * @return Returns the converted value.
- */
-template<class bus_controller>
-inline signed int MAX17205::Controller<bus_controller>::to_temperature( const unsigned int raw )
-{
-    // temperature = raw / 256
-    return raw / 256;
-};
-
-/**
- * @brief Convert a raw resistance value.
- * @param raw The raw register value.
- * @return Returns the converted value.
- */
-template<class bus_controller>
-inline unsigned int MAX17205::Controller<bus_controller>::to_resistance( const unsigned int raw )
-{
-    // resistance = raw / 4096
-    return raw >> 12;
-};
-
-/**
- * @brief Convert a raw time value.
- * @param raw The raw register value.
- * @return Returns the converted value.
- */
-template<class bus_controller>
-inline unsigned int MAX17205::Controller<bus_controller>::to_time( const unsigned int raw )
-{
-    // time = raw * 5.625s = 5*raw + 5*raw/8
-    return (5*raw) + (5*raw >> 3);
-};
+}
 
 /**
  * @brief Get the voltage of the battery pack.
  * @return Returns the voltage in [mV].
  */
 template<class bus_controller>
-unsigned int MAX17205::Controller<bus_controller>::get_battery_voltage(void) const
+auto MAX17205::Controller<bus_controller>::get_battery_voltage() const -> mV
 {
     return this->voltage_battery;    
-};
+}
 
 /**
  * @brief Get the current of the battery pack.
  * @return Returns the current in [mA].
  */
 template<class bus_controller>
-signed int MAX17205::Controller<bus_controller>::get_battery_current(void) const
+auto MAX17205::Controller<bus_controller>::get_battery_current() const -> mA
 {
     return this->current_battery;    
-};
+}
 
 /**
  * @brief Get the voltage of a specific cell.
@@ -173,129 +72,127 @@ signed int MAX17205::Controller<bus_controller>::get_battery_current(void) const
  * @return Returns the voltage in [mV].
  */
 template<class bus_controller>
-unsigned int MAX17205::Controller<bus_controller>::get_cell_voltage(const unsigned char cell) const
+auto MAX17205::Controller<bus_controller>::get_cell_voltage(const uint8_t cell) const -> mV
 {
-    return this->voltage_cell[cell - 1];    
-};
+    return this->voltage_cell.at(cell - 1);    
+}
 
 /**
  * @brief Get the total capacity of the battery pack.
  * @return Returns the capacity in [mAh].
  */
 template<class bus_controller>
-unsigned int MAX17205::Controller<bus_controller>::get_total_capacity(void) const
+auto MAX17205::Controller<bus_controller>::get_total_capacity() const -> mAh
 {
     return this->capacity[0];    
-};
+}
 
 /**
  * @brief Get the remaining capacity of the battery pack.
  * @return Returns the capacity in [mAh].
  */
 template<class bus_controller>
-unsigned int MAX17205::Controller<bus_controller>::get_remaining_capacity(void) const
+auto MAX17205::Controller<bus_controller>::get_remaining_capacity() const -> mAh
 {
     return this->capacity[1];    
-};
+}
 
 /**
  * @brief Get the number of cycles of the battery pack.
  * @return Returns the number of cycles.
  */
 template<class bus_controller>
-unsigned int MAX17205::Controller<bus_controller>::get_number_cycles(void) const
+auto MAX17205::Controller<bus_controller>::get_number_cycles() const -> uint16_t
 {
     return this->cycles;    
-};
+}
 
 /**
  * @brief Get the age of the battery pack.
  * @return Returns the age as a percentage of the original capacity.
  */
 template<class bus_controller>
-unsigned int MAX17205::Controller<bus_controller>::get_age(void) const
+auto MAX17205::Controller<bus_controller>::get_age() const -> percent
 {
     return this->age;    
-};
+}
 
 /**
  * @brief Get the internal series resistance of the battery pack.
  * @return Returns the resistance in [mΩ].
  */
 template<class bus_controller>
-unsigned int MAX17205::Controller<bus_controller>::get_ESR(void) const
+auto MAX17205::Controller<bus_controller>::get_ESR() const -> Ohm
 {
     return this->esr;    
-};
+}
 
 /**
  * @brief Get the temperature of the battery pack.
  * @return Returns the voltage in [mV].
  */
 template<class bus_controller>
-signed int MAX17205::Controller<bus_controller>::get_temperature(void) const
+auto MAX17205::Controller<bus_controller>::get_temperature() const -> degC
 {
     return this->temperature;    
-};
+}
 
 /**
  * @brief Get the SOC of the battery pack.
  * @return Returns the SOC in [%].
  */
 template<class bus_controller>
-unsigned int MAX17205::Controller<bus_controller>::get_SOC(void) const
+auto MAX17205::Controller<bus_controller>::get_SOC() const -> percent
 {
     return this->soc;    
-};
+}
 
 /**
  * @brief Get the time until the battery pack is empty.
  * @return Returns the time in [s].
  */
 template<class bus_controller>
-unsigned int MAX17205::Controller<bus_controller>::get_TTE(void) const
+auto MAX17205::Controller<bus_controller>::get_TTE() const -> seconds
 {
     return this->time2empty;
-};
+}
 
 /**
  * @brief Get the time until the battery pack is fully charged.
  * @return Returns the time in [s].
  */
 template<class bus_controller>
-unsigned int MAX17205::Controller<bus_controller>::get_TTF(void) const
+auto MAX17205::Controller<bus_controller>::get_TTF() const -> seconds
 {
     return this->time2full;
-};
+}
 
 /**
  * @brief Read a register of the balancer.
  * The balancer sends LSB first. The data is stored already
  * sorted to LSB last in the i2c_data struct.
  * @param reg The register to read from.
- * @return Returns True when the register was read successfully.
+ * @return Returns true and the value when the register was read successfully.
  */
 template<class bus_controller>
-bool MAX17205::Controller<bus_controller>::read_register(const Register reg)
+auto MAX17205::Controller<bus_controller>::read_register(const uint16_t reg) -> std::optional<uint16_t>
 {
-    unsigned int reg_int = static_cast<unsigned int>(reg);
-
     // Set the i2c address
-    if (reg_int > 0xFF)
+    if (reg > 0xFF)
         Bus::change_address(this->mybus, i2c_address_high);
     else
         Bus::change_address(this->mybus, i2c_address_low);
 
     // perform the read
-    unsigned char reg_byte = static_cast<unsigned char>(reg_int & 0xFF);
-    std::optional<unsigned int> response = Bus::read_word(this->mybus, reg_byte);
-    if (!response) return false;
+    const uint16_t reg_byte = (reg & 0xFF);
+    std::optional<uint16_t> response = Bus::read_word(this->mybus, reg_byte);
+    if (!response) return {};
 
     // Read successful, sort the data
     this->i2c_data.byte[0] = (response.value() >> 8) & 0xFF;
     this->i2c_data.byte[1] = response.value() & 0xFF;
-    return true;
-};
+    return this->i2c_data.word[0];
+}
 
 /**
  * @brief Write a register of the balancer.
@@ -305,196 +202,194 @@ bool MAX17205::Controller<bus_controller>::read_register(const Register reg)
  * @return Returns True when the data was sent successfully.
  */
 template<class bus_controller>
-bool MAX17205::Controller<bus_controller>::write_register(const Register reg,
-    const unsigned int data)
+bool MAX17205::Controller<bus_controller>::write_register(const uint16_t reg,
+    const uint16_t data)
 {
-    unsigned int reg_int = static_cast<unsigned int>(reg);
-
     // Set the i2c address
-    if (reg_int > 0xFF)
+    if (reg > 0xFF)
         Bus::change_address(this->mybus, i2c_address_high);
     else
         Bus::change_address(this->mybus, i2c_address_low);
 
     // send the data
-    return Bus::send_bytes(this->mybus, (reg_int & 0xFF), (data & 0xFF), (data >> 8));
-};
+    return Bus::send_bytes(this->mybus, (reg & 0xFF), (data & 0xFF), (data >> 8));
+}
 
 /**
  * @brief Read the pack voltage from the balancer and convert to mV.
  * @return Returns True when the pack voltage was read successfully.
  */
 template<class bus_controller>
-bool MAX17205::Controller<bus_controller>::read_battery_voltage(void)
+bool MAX17205::Controller<bus_controller>::read_battery_voltage()
 {
     // Read the Batt Register
     if(!this->read_register(Register::Batt_Register)) return false;
 
-    // convert the data
-    unsigned long temp = 0;
+    // convert the data -> This register uses a custom resolution of 1.25mV/LSB
+    uint32_t temp = 0;
     temp += this->i2c_data.byte[0];
     temp += (this->i2c_data.byte[1] << 8);
     temp *= 10;
-    this->voltage_battery = (temp >> 3);
+    this->voltage_battery.set_value(temp >> 3);
     return true;
-};
+}
 
 /**
  * @brief Read the pack current from the balancer and convert to mA.
  * @return Returns True when the pack current was read successfully.
  */
 template<class bus_controller>
-bool MAX17205::Controller<bus_controller>::read_battery_current(void)
+bool MAX17205::Controller<bus_controller>::read_battery_current()
 {
     // Read the Current Register
     if(!this->read_register(Register::Current)) return false;
 
     // convert the data
-    unsigned int temp = 0;
+    uint16_t temp = 0;
     temp += this->i2c_data.byte[0];
     temp += (this->i2c_data.byte[1] << 8);
-    this->current_battery = this->to_current(temp);
+    this->current_battery = temp;
     return true;
-};
+}
 
 /**
  * @brief Read the average pack current from the balancer and convert to mA.
  * @return Returns True when the pack current was read successfully.
  */
 template<class bus_controller>
-bool MAX17205::Controller<bus_controller>::read_battery_current_avg(void)
+bool MAX17205::Controller<bus_controller>::read_battery_current_avg()
 {
     // Read the Current Register
     if(!this->read_register(Register::Avg_Current)) return false;
 
     // convert the data
-    unsigned int temp = 0;
+    uint16_t temp = 0;
     temp += this->i2c_data.byte[0];
     temp += (this->i2c_data.byte[1] << 8);
-    this->current_battery = this->to_current(temp);
+    this->current_battery = temp;
     return true;
-};
+}
 
 /**
  * @brief Read the cell voltages of the balancer
  * @return Returns true when the cell voltages are updated successfully.
  */
 template<class bus_controller>
-bool MAX17205::Controller<bus_controller>::read_cell_voltage(void)
+bool MAX17205::Controller<bus_controller>::read_cell_voltage()
 {
     // Read the raw values
-    unsigned char reg = static_cast<unsigned char>(Register::Cell_2);
+    const auto reg = static_cast<uint8_t>(Register::Cell_2);
     if(!Bus::read_array(this->mybus, reg, &this->i2c_data.byte[0], 4)) return false;
 
     // Convert the data
-    // Cell 2
-    unsigned int temp = this->i2c_data.byte[3];
+    // Cell 1
+    uint16_t temp = this->i2c_data.byte[3];
     temp += this->i2c_data.byte[2] << 8;
-    this->voltage_cell[0] = this->to_voltage(temp);
+    this->voltage_cell[0] = temp;
     // Cell 2
     temp = this->i2c_data.byte[1];
     temp += this->i2c_data.byte[0] << 8;
-    this->voltage_cell[1] = this->to_voltage(temp);
+    this->voltage_cell[1] = temp;
 
     return true;
-};
+}
 
 /**
  * @brief Read the avg cell voltages of the balancer
  * @return Returns true when the cell voltages are updated successfully.
  */
 template<class bus_controller>
-bool MAX17205::Controller<bus_controller>::read_cell_voltage_avg(void)
+bool MAX17205::Controller<bus_controller>::read_cell_voltage_avg()
 {
     // Read the raw values
-    unsigned char reg = static_cast<unsigned char>(Register::Avg_Cell_2);
+    const auto reg = static_cast<uint8_t>(Register::Avg_Cell_2);
     if(!Bus::read_array(this->mybus, reg, &this->i2c_data.byte[0], 4)) return false;
 
     // Convert the data
     // Cell 2
-    unsigned int temp = this->i2c_data.byte[3];
+    uint16_t temp = this->i2c_data.byte[3];
     temp += this->i2c_data.byte[2] << 8;
-    this->voltage_cell[0] = this->to_voltage(temp);
+    this->voltage_cell[0] = temp;
     // Cell 2
     temp = this->i2c_data.byte[1];
     temp += this->i2c_data.byte[0] << 8;
-    this->voltage_cell[1] = this->to_voltage(temp);
+    this->voltage_cell[1] = temp;
 
     return true;
-};
+}
 
 /**
  * @brief Read the remaining capacity from the balancer and convert to mAh.
  * @return Returns true when the capacity is updated successfully.
  */
 template<class bus_controller>
-bool MAX17205::Controller<bus_controller>::read_remaining_capacity(void)
+bool MAX17205::Controller<bus_controller>::read_remaining_capacity()
 {
     // Read the raw values
     if(!this->read_register(Register::Cap_Remaining)) return false;
 
     // Convert the data
-    unsigned int temp = 0;
+    uint16_t temp = 0;
     temp += this->i2c_data.byte[0];
     temp += (this->i2c_data.byte[1] << 8);
-    this->capacity[1] = this->to_capacity(temp);
+    this->capacity[1] = temp;
 
     return true;
-};
+}
 
 /**
  * @brief Read the SOC from the balancer and convert to %.
  * @return Returns true when the soc is updated successfully.
  */
 template<class bus_controller>
-bool MAX17205::Controller<bus_controller>::read_soc(void)
+bool MAX17205::Controller<bus_controller>::read_soc()
 {
     // Read the raw values
     if(!this->read_register(Register::SOC)) return false;
 
     // Convert the data
-    unsigned int temp = 0;
+    uint16_t temp = 0;
     temp += this->i2c_data.byte[0];
     temp += (this->i2c_data.byte[1] << 8);
-    this->soc = this->to_percentage(temp);
+    this->soc = temp;
 
     return true;
-};
+}
 
 /**
  * @brief Read the time until the battery is empty and convert to [s].
  * @return Returns true when the TTE is updated successfully.
  */
 template<class bus_controller>
-bool MAX17205::Controller<bus_controller>::read_TTE(void)
+bool MAX17205::Controller<bus_controller>::read_TTE()
 {
     // Read the raw values
     if(!this->read_register(Register::TTE)) return false;
 
     // Convert the data
-    unsigned int temp = 0;
+    uint16_t temp = 0;
     temp += this->i2c_data.byte[0];
     temp += (this->i2c_data.byte[1] << 8);
-    this->time2empty = this->to_time(temp);
+    this->time2empty = temp;
 
     return true;
-};
+}
 
 /**
  * @brief Read the time until the battery is full and convert to [s].
  * @return Returns true when the TTF is updated successfully.
  */
 template<class bus_controller>
-bool MAX17205::Controller<bus_controller>::read_TTF(void)
+bool MAX17205::Controller<bus_controller>::read_TTF()
 {
     // Read the raw values
     if(!this->read_register(Register::TTF)) return false;
 
     // Convert the data
-    unsigned int temp = 0;
+    uint16_t temp = 0;
     temp += this->i2c_data.byte[0];
     temp += (this->i2c_data.byte[1] << 8);
-    this->time2full = this->to_time(temp);
+    this->time2full = temp;
 
     return true;
-};
+}

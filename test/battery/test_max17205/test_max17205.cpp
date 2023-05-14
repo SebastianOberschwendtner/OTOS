@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_max17205.cpp
  * @author  SO
- * @version v2.8.1
+ * @version v4.2.0
  * @date    14-November-2021
  * @brief   Unit tests to test the driver for battery balancer and coulomb counter.
  ******************************************************************************
@@ -147,6 +147,85 @@ void tearDown(void) {
 };
 
 // === Define Tests ===
+/// @brief Test the unit types
+void test_unit_capacity()
+{
+    // Create a capacity value
+    MAX17205::mAh capacity{};
+
+    // Default construction should be zero
+    TEST_ASSERT_EQUAL(0, capacity);
+    
+    // When assigning a integral value, it should be converted to mAh
+    capacity = 1000;
+    TEST_ASSERT_EQUAL(1000, capacity);
+
+    // Construct with integral value should get converted
+    MAX17205::mAh capacity2{2000};
+    TEST_ASSERT_EQUAL(2000, capacity2);
+
+    // Test copy assignment
+    capacity = capacity2;
+    TEST_ASSERT_EQUAL(2000, capacity);
+}
+void test_unit_percentage()
+{
+    // Create a percentage value
+    MAX17205::percent percentage{};
+
+    // Default construction should be zero
+    TEST_ASSERT_EQUAL(0, percentage);
+
+    // When assigning a integral value, it should be converted to %
+    percentage = 256;
+    TEST_ASSERT_EQUAL(1, percentage);
+}
+void test_unit_current()
+{
+    // Create a current value
+    MAX17205::mA current{};
+
+    // Default construction should be zero
+    TEST_ASSERT_EQUAL(0, current);
+
+    // When assigning a integral value, it should be converted to mA
+    current = 5*640;
+    TEST_ASSERT_EQUAL(1000, current);
+    current = -5*640;
+    TEST_ASSERT_EQUAL(-1000, current);
+    std::uint16_t temp_unsigned = 65532U;
+    current = temp_unsigned;    
+    TEST_ASSERT_EQUAL(-1, current);
+}
+void test_unit_voltage()
+{
+    // Create a voltage value
+    MAX17205::mV voltage{};
+
+    // Default construction should be zero
+    TEST_ASSERT_EQUAL(0, voltage);
+
+    // When assigning a integral value, it should be converted to mV
+    voltage = 12800;
+    TEST_ASSERT_EQUAL(1000, voltage);
+}
+void test_unit_seconds()
+{
+    // Create a seconds value
+    MAX17205::seconds seconds{};
+
+    // Default construction should be zero
+    TEST_ASSERT_EQUAL(0, seconds);
+
+    // When assigning a integral value, it should be converted to seconds
+    seconds = 1;
+    TEST_ASSERT_EQUAL(5, seconds);
+
+    // maximum value should be 65535
+    seconds = 65536;
+    TEST_ASSERT_EQUAL(368640, seconds);
+}
+
 /// @brief Test the constructor
 void test_init(void)
 {
@@ -173,7 +252,6 @@ void test_init(void)
     
     // initialization
     TEST_ASSERT_TRUE(UUT.initialize());
-    ::read_word.assert_called_once_with(0xBD);
 };
 
 /// @brief Test writting of registers
@@ -414,12 +492,109 @@ void test_read_TTF(void)
     TEST_ASSERT_TRUE(UUT.read_TTF());
     TEST_ASSERT_EQUAL( 16, UUT.get_TTF());
     ::read_word.assert_called_once_with(0x20);
-};
+}
+
+/// @brief Test the generic register read
+void test_generic_read_register()
+{
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+
+    // create the controller object
+    MAX17205::Controller UUT(i2c);
+
+    // Read a register
+    rx_buffer[3] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[1] = 0x0A;
+    rx_buffer[0] = 0x00;
+    MAX17205::percent value = UUT.read_register(0x0FF).value();
+
+    // perform test
+    TEST_ASSERT_EQUAL( 10, value);
+    ::read_word.assert_called_once_with(0x0FF);
+}
+
+/// @brief Test the register classes
+void test_register_classes()
+{
+    // *** PackCfg Class ***
+    MAX17205::PackCfg pack_cfg;
+    TEST_ASSERT_EQUAL_HEX16(MAX17205::Register::PackCfg, pack_cfg.address);
+    TEST_ASSERT_EQUAL(0, pack_cfg.value);
+
+    // Test setting and getting the NCELLS field
+    TEST_ASSERT_EQUAL(0, pack_cfg.NCELLS());
+    pack_cfg.set_NCELLS(2);
+    TEST_ASSERT_EQUAL(2, pack_cfg.NCELLS());
+    TEST_ASSERT_BITS(0b1111, 2, pack_cfg.value);
+
+    // Test setting and getting the BALCFG field
+    TEST_ASSERT_EQUAL(0, pack_cfg.BALCFG());
+    pack_cfg.set_BALCFG(0b101);
+    TEST_ASSERT_EQUAL(0b101, pack_cfg.BALCFG());
+    TEST_ASSERT_BITS(0b11100000, 0b101 << 5, pack_cfg.value);
+
+    // Other bits
+    pack_cfg.value |= ( 1<< 8); // Set the CXEN bit
+    TEST_ASSERT_TRUE(pack_cfg.CxEn());
+    TEST_ASSERT_FALSE(pack_cfg.BtEn());
+    TEST_ASSERT_FALSE(pack_cfg.ChEn());
+    TEST_ASSERT_FALSE(pack_cfg.TdEn());
+    TEST_ASSERT_FALSE(pack_cfg.A1En());
+    TEST_ASSERT_FALSE(pack_cfg.A2En());
+    TEST_ASSERT_FALSE(pack_cfg.FGT());
+}
+
+/// @brief Test reading register classes
+void test_reading_register_classes()
+{
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+
+    // create the controller object and register
+    MAX17205::Controller UUT(i2c);
+    MAX17205::PackCfg pack_cfg;
+
+
+    // Read a register
+    rx_buffer[3] = 0x00;
+    rx_buffer[2] = 0x00;
+    rx_buffer[1] = 0x03;
+    rx_buffer[0] = 0x00;
+    TEST_ASSERT_TRUE(UUT.read(pack_cfg));
+    TEST_ASSERT_EQUAL(3, pack_cfg.NCELLS());
+    ::read_word.assert_called_once_with(pack_cfg.address);
+}
+
+/// @brief Test writing register classes
+void test_writing_register_classes()
+{
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+
+    // create the controller object and register
+    MAX17205::Controller UUT(i2c);
+    MAX17205::PackCfg pack_cfg;
+
+    // Write a register
+    pack_cfg.set_NCELLS(2);
+    ::set_target_address.reset();
+    ::send_data.reset();
+    TEST_ASSERT_TRUE(UUT.write(pack_cfg));
+    ::set_target_address.assert_called_once_with(MAX17205::i2c_address_low);
+    ::send_data.assert_called_once_with(0xBD0200);
+}
 
 /// === Run Tests ===
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();
+    RUN_TEST(test_unit_capacity);
+    RUN_TEST(test_unit_percentage);
+    RUN_TEST(test_unit_current);
+    RUN_TEST(test_unit_voltage);
+    RUN_TEST(test_unit_seconds);
     RUN_TEST(test_init);
     RUN_TEST(test_write_register);
     RUN_TEST(test_read_register);
@@ -432,5 +607,9 @@ int main(int argc, char** argv)
     RUN_TEST(test_read_soc);
     RUN_TEST(test_read_TTE);
     RUN_TEST(test_read_TTF);
+    RUN_TEST(test_generic_read_register);
+    RUN_TEST(test_register_classes);
+    RUN_TEST(test_reading_register_classes);
+    RUN_TEST(test_writing_register_classes);
     return UNITY_END();
 };
