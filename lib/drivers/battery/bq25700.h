@@ -22,120 +22,123 @@
 #define BQ25700_H_
 
 // === includes ===
+#include <cstdint>
 #include "drivers.h"
+#include <misc/bits.h>
 
 // === Command codes ===
 namespace BQ25700 {
     // Fixed device values
-    constexpr unsigned char i2c_address     = 0x12;
-    constexpr unsigned char manufacturer_id = 0x40;
-    constexpr unsigned char device_id       = 0x79;
+    constexpr uint8_t i2c_address     = 0x12;
+    constexpr uint8_t manufacturer_id = 0x40;
+    constexpr uint8_t device_id       = 0x79;
 
     // Option bits
     // *** Charge_Option_0 ***
-    constexpr unsigned int EN_LWPWR             = (1<<15);
-    constexpr unsigned int WDTMR_ADJ_1          = (1<<14);
-    constexpr unsigned int WDTMR_ADJ_0          = (1<<13);
-    constexpr unsigned int IDPM_AUTO_DISABLE    = (1<<12);
-    constexpr unsigned int OTG_ON_CHRGOK        = (1<<11);
-    constexpr unsigned int EN_OOA               = (1<<10);
-    constexpr unsigned int PWM_FREQ             = (1<<9); // Set Switching frequency
-    constexpr unsigned int EN_LEARN             = (1<<5);
-    constexpr unsigned int IADPT_GAIN           = (1<<4); // IADPT amplifier ratio
-    constexpr unsigned int IBAT_GAIN            = (1<<3); // IBAT amplifier ratio
-    constexpr unsigned int EN_LDO               = (1<<2);
-    constexpr unsigned int EN_IDPM              = (1<<1); // Enable IDPM regulation loop
-    constexpr unsigned int CHRG_INHIBIT         = (1<<0);
+    constexpr uint16_t EN_LWPWR             = (1<<15);
+    constexpr uint16_t WDTMR_ADJ_1          = (1<<14);
+    constexpr uint16_t WDTMR_ADJ_0          = (1<<13);
+    constexpr uint16_t IDPM_AUTO_DISABLE    = (1<<12);
+    constexpr uint16_t OTG_ON_CHRGOK        = (1<<11);
+    constexpr uint16_t EN_OOA               = (1<<10);
+    constexpr uint16_t PWM_FREQ             = (1<<9); // Set Switching frequency
+    constexpr uint16_t EN_LEARN             = (1<<5);
+    constexpr uint16_t IADPT_GAIN           = (1<<4); // IADPT amplifier ratio
+    constexpr uint16_t IBAT_GAIN            = (1<<3); // IBAT amplifier ratio
+    constexpr uint16_t EN_LDO               = (1<<2);
+    constexpr uint16_t EN_IDPM              = (1<<1); // Enable IDPM regulation loop
+    constexpr uint16_t CHRG_INHIBIT         = (1<<0);
+
     // *** Charge_Option_1 ***
-    constexpr unsigned int EN_IBAT              = (1<<15); // Enable IBAT output buffer
-    constexpr unsigned int EN_PSYS              = (1<<12); // Enable PSYS sensing circuit and output buffer
-    constexpr unsigned int RSNS_RAC             = (1<<11); // Set input sense resistor RAC
-    constexpr unsigned int RSNS_RSR             = (1<<10); // set charge sense resistor RSR
-    constexpr unsigned int PSYS_RATIO           = (1<<9); // Ratio of PSYS output current vs. total input battery power
-    constexpr unsigned int CMP_REF              = (1<<8); // Set independent comparator internal reference
-    constexpr unsigned int CMP_POL              = (1<<7); // Set independent comparator polarity
-    constexpr unsigned int FORCE_LATCHOFF       = (1<<3); // Force power path off
-    constexpr unsigned int EN_SHIP_DCHRG        = (1<<1); // Discharge SRN for shipping mode
-    constexpr unsigned int AUTO_WAKEUP_EN       = (1<<0);
+    constexpr uint16_t EN_IBAT              = (1<<15); // Enable IBAT output buffer
+    constexpr uint16_t EN_PSYS              = (1<<12); // Enable PSYS sensing circuit and output buffer
+    constexpr uint16_t RSNS_RAC             = (1<<11); // Set input sense resistor RAC
+    constexpr uint16_t RSNS_RSR             = (1<<10); // set charge sense resistor RSR
+    constexpr uint16_t PSYS_RATIO           = (1<<9); // Ratio of PSYS output current vs. total input battery power
+    constexpr uint16_t CMP_REF              = (1<<8); // Set independent comparator internal reference
+    constexpr uint16_t CMP_POL              = (1<<7); // Set independent comparator polarity
+    constexpr uint16_t FORCE_LATCHOFF       = (1<<3); // Force power path off
+    constexpr uint16_t EN_SHIP_DCHRG        = (1<<1); // Discharge SRN for shipping mode
+    constexpr uint16_t AUTO_WAKEUP_EN       = (1<<0);
     // *** Charge_Option_2 ***
-    constexpr unsigned int EN_PKPWR_IDPM        = (1<<13); // Enable peak power mode triggered by input current overshoot
-    constexpr unsigned int EN_PKPWR_VSYS        = (1<<12); // Enable peak power mode triggered by system voltage undershoot
-    constexpr unsigned int PKPWR_OVLD_STAT      = (1<<11); // Indicator at the device is in overloading cycle
-    constexpr unsigned int PKPWR_RELAX_STAT     = (1<<10); // Indicator at the device is in relaxation cycle
-    constexpr unsigned int EN_EXTILIM           = (1<<7); // Enable ILIM_HIZ pin to set input current limit
-    constexpr unsigned int EN_ICHG_IDCHG        = (1<<6);  // Set function of IBAT pin
-    constexpr unsigned int Q2_OCP               = (1<<5); // Q2 OCP threshold by sensing Q2 VDS
-    constexpr unsigned int ACX_OCP              = (1<<4); // Input current OCP threshold by sensing ACP-ACN
-    constexpr unsigned int EN_ACOC              = (1<<3); // Enable input overcurrent protection by sensing the voltage across ACP-ACN
-    constexpr unsigned int ACOC_VTH             = (1<<2); // Set Mosfet OCP threshold as percentage of IDPM
-    constexpr unsigned int EN_BATOC             = (1<<1); // Enable battery discharge overcurrent protection by sensing the voltage across SRN-SRP
-    constexpr unsigned int BATOC_VTH            = (1<<0); // Set battery discharge overcurrent threshold
+    constexpr uint16_t EN_PKPWR_IDPM        = (1<<13); // Enable peak power mode triggered by input current overshoot
+    constexpr uint16_t EN_PKPWR_VSYS        = (1<<12); // Enable peak power mode triggered by system voltage undershoot
+    constexpr uint16_t PKPWR_OVLD_STAT      = (1<<11); // Indicator at the device is in overloading cycle
+    constexpr uint16_t PKPWR_RELAX_STAT     = (1<<10); // Indicator at the device is in relaxation cycle
+    constexpr uint16_t EN_EXTILIM           = (1<<7); // Enable ILIM_HIZ pin to set input current limit
+    constexpr uint16_t EN_ICHG_IDCHG        = (1<<6);  // Set function of IBAT pin
+    constexpr uint16_t Q2_OCP               = (1<<5); // Q2 OCP threshold by sensing Q2 VDS
+    constexpr uint16_t ACX_OCP              = (1<<4); // Input current OCP threshold by sensing ACP-ACN
+    constexpr uint16_t EN_ACOC              = (1<<3); // Enable input overcurrent protection by sensing the voltage across ACP-ACN
+    constexpr uint16_t ACOC_VTH             = (1<<2); // Set Mosfet OCP threshold as percentage of IDPM
+    constexpr uint16_t EN_BATOC             = (1<<1); // Enable battery discharge overcurrent protection by sensing the voltage across SRN-SRP
+    constexpr uint16_t BATOC_VTH            = (1<<0); // Set battery discharge overcurrent threshold
     // *** Charge_Option_3 ***
-    constexpr unsigned int EN_HIZ               = (1<<15); // Device HI-Z mode enable
-    constexpr unsigned int RESET_REG            = (1<<14); // Reset registers
-    constexpr unsigned int RESET_VINDPM         = (1<<13); // Reset VINDPM threshold
-    constexpr unsigned int EN_OTG               = (1<<12); // Enable device OTG mode when EN_OTG pin is HIGH
-    constexpr unsigned int EN_ICO_MODE          = (1<<11); // Enable ICO algorithm
-    constexpr unsigned int BATFETOFF_HIZ        = (1<<1); // Control BATFET during HI-Z mode
-    constexpr unsigned int PSYS_OTG_IDCHG       = (1<<0); // PSYS function during OTG mode
+    constexpr uint16_t EN_HIZ               = (1<<15); // Device HI-Z mode enable
+    constexpr uint16_t RESET_REG            = (1<<14); // Reset registers
+    constexpr uint16_t RESET_VINDPM         = (1<<13); // Reset VINDPM threshold
+    constexpr uint16_t EN_OTG               = (1<<12); // Enable device OTG mode when EN_OTG pin is HIGH
+    constexpr uint16_t EN_ICO_MODE          = (1<<11); // Enable ICO algorithm
+    constexpr uint16_t BATFETOFF_HIZ        = (1<<1); // Control BATFET during HI-Z mode
+    constexpr uint16_t PSYS_OTG_IDCHG       = (1<<0); // PSYS function during OTG mode
     // *** Prochot_Option_0 ***
     // *** Prochot_Option_1 ***
     // *** ADC_Option ***
-    constexpr unsigned int ADC_CONV             = (1<<15); // Coonversion mode of ADC
-    constexpr unsigned int ADC_START            = (1<<14); // Start ADC conversion
-    constexpr unsigned int ADC_FULLSCALE        = (1<<13); // ADC input voltage range
-    constexpr unsigned int EN_ADC_CMPIN         = (1<<7);
-    constexpr unsigned int EN_ADC_VBUS          = (1<<6);
-    constexpr unsigned int EN_ADC_PSYS          = (1<<5);
-    constexpr unsigned int EN_ADC_IIN           = (1<<4);
-    constexpr unsigned int EN_ADC_IDCHG         = (1<<3);
-    constexpr unsigned int EN_ADC_ICHG          = (1<<2);
-    constexpr unsigned int EN_ADC_VSYS          = (1<<1);
-    constexpr unsigned int EN_ADC_VBAT          = (1<<0);
+    constexpr uint16_t ADC_CONV             = (1<<15); // Coonversion mode of ADC
+    constexpr uint16_t ADC_START            = (1<<14); // Start ADC conversion
+    constexpr uint16_t ADC_FULLSCALE        = (1<<13); // ADC input voltage range
+    constexpr uint16_t EN_ADC_CMPIN         = (1<<7);
+    constexpr uint16_t EN_ADC_VBUS          = (1<<6);
+    constexpr uint16_t EN_ADC_PSYS          = (1<<5);
+    constexpr uint16_t EN_ADC_IIN           = (1<<4);
+    constexpr uint16_t EN_ADC_IDCHG         = (1<<3);
+    constexpr uint16_t EN_ADC_ICHG          = (1<<2);
+    constexpr uint16_t EN_ADC_VSYS          = (1<<1);
+    constexpr uint16_t EN_ADC_VBAT          = (1<<0);
     // *** Charger_Status ***
-    constexpr unsigned int AC_STAT              = (1<<15); // Input source status, same as CHRG_OK bit
-    constexpr unsigned int ICO_DONE             = (1<<14); // ICO routine successfully executed
-    constexpr unsigned int IN_VINDPM            = (1<<12);
-    constexpr unsigned int IN_IINDPM            = (1<<11);
-    constexpr unsigned int IN_FCHRG             = (1<<10); // Fast charge mode
-    constexpr unsigned int IN_PCHRG             = (1<<9); // Pre-charge mode
-    constexpr unsigned int IN_OTG               = (1<<8); // OTG mode
-    constexpr unsigned int FAULT_ACOV           = (1<<7);
-    constexpr unsigned int FAULT_BATOC          = (1<<6);
-    constexpr unsigned int FAULT_ACOC           = (1<<5);
-    constexpr unsigned int SYSOVP_STAT          = (1<<4); // SYSOVP status and clear
-    constexpr unsigned int FAULT_LATCHOFF       = (1<<2);
-    constexpr unsigned int FAULT_OTG_OVP        = (1<<1);
-    constexpr unsigned int FAULT_OTG_UCP        = (1<<0);
+    constexpr uint16_t AC_STAT              = (1<<15); // Input source status, same as CHRG_OK bit
+    constexpr uint16_t ICO_DONE             = (1<<14); // ICO routine successfully executed
+    constexpr uint16_t IN_VINDPM            = (1<<12);
+    constexpr uint16_t IN_IINDPM            = (1<<11);
+    constexpr uint16_t IN_FCHRG             = (1<<10); // Fast charge mode
+    constexpr uint16_t IN_PCHRG             = (1<<9); // Pre-charge mode
+    constexpr uint16_t IN_OTG               = (1<<8); // OTG mode
+    constexpr uint16_t FAULT_ACOV           = (1<<7);
+    constexpr uint16_t FAULT_BATOC          = (1<<6);
+    constexpr uint16_t FAULT_ACOC           = (1<<5);
+    constexpr uint16_t SYSOVP_STAT          = (1<<4); // SYSOVP status and clear
+    constexpr uint16_t FAULT_LATCHOFF       = (1<<2);
+    constexpr uint16_t FAULT_OTG_OVP        = (1<<1);
+    constexpr uint16_t FAULT_OTG_UCP        = (1<<0);
     // *** Prochot_Status ***
 
     // command registers
-    enum class Register: unsigned char
+    namespace Register
     {
-        Charge_Option_0     = 0x12, // R/W
-        Charge_Option_1     = 0x30, // R/W
-        Charge_Option_2     = 0x31, // R/W
-        Charge_Option_3     = 0x32, // R/W
-        Charge_Current      = 0x14, // R/W
-        Max_Charge_Voltage  = 0x15, // R/W
-        Prochot_Option_0    = 0x33, // R/W
-        Prochot_Option_1    = 0x34, // R/W
-        ADC_Option          = 0x35, // R/W
-        Charger_Status      = 0x20, // R
-        Prochot_Status      = 0x21, // R
-        Input_Limit_DPM     = 0x22, // R Used input current limit value
-        ADC_VBUS            = 0x23, // R ADC results of VBUS and PSYS
-        ADC_BAT_Current     = 0x24, // R ADC results of battery currents
-        ADC_Input_Current   = 0x25, // R ADC results of input current and CMPNI
-        ADC_SYS_Voltage     = 0x26, // R ADC results of VSYS and VBAT
-        OTG_Voltage         = 0x3B, // R/W
-        OTG_Current         = 0x3C, // R/W
-        Input_Voltage       = 0x3D, // R/W
-        Min_SYS_Voltage     = 0x3E, // R/W
-        Input_Limit_Host    = 0x3F, // R/W Set input current limit
-        Manufacturer_ID     = 0xFE, // R/W
-        Device_ID           = 0xFF // R/W
-    };
+        constexpr uint8_t Charge_Option_0     = 0x12; // R/W
+        constexpr uint8_t Charge_Option_1     = 0x30; // R/W
+        constexpr uint8_t Charge_Option_2     = 0x31; // R/W
+        constexpr uint8_t Charge_Option_3     = 0x32; // R/W
+        constexpr uint8_t Charge_Current      = 0x14; // R/W
+        constexpr uint8_t Max_Charge_Voltage  = 0x15; // R/W
+        constexpr uint8_t Prochot_Option_0    = 0x33; // R/W
+        constexpr uint8_t Prochot_Option_1    = 0x34; // R/W
+        constexpr uint8_t ADC_Option          = 0x35; // R/W
+        constexpr uint8_t Charger_Status      = 0x20; // R
+        constexpr uint8_t Prochot_Status      = 0x21; // R
+        constexpr uint8_t Input_Limit_DPM     = 0x22; // R Used input current limit value
+        constexpr uint8_t ADC_VBUS            = 0x23; // R ADC results of VBUS and PSYS
+        constexpr uint8_t ADC_BAT_Current     = 0x24; // R ADC results of battery currents
+        constexpr uint8_t ADC_Input_Current   = 0x25; // R ADC results of input current and CMPNI
+        constexpr uint8_t ADC_SYS_Voltage     = 0x26; // R ADC results of VSYS and VBAT
+        constexpr uint8_t OTG_Voltage         = 0x3B; // R/W
+        constexpr uint8_t OTG_Current         = 0x3C; // R/W
+        constexpr uint8_t Input_Voltage       = 0x3D; // R/W
+        constexpr uint8_t Min_SYS_Voltage     = 0x3E; // R/W
+        constexpr uint8_t Input_Limit_Host    = 0x3F; // R/W Set input current limit
+        constexpr uint8_t Manufacturer_ID     = 0xFE; // R/W
+        constexpr uint8_t Device_ID           = 0xFF; // R/W
+    }; // namespace Register
 
     // Controller states
     enum class State: unsigned char
@@ -145,6 +148,36 @@ namespace BQ25700 {
 
 
     // === Classes ===
+    /**
+     * @brief Register base class.
+     */
+    struct RegisterBase
+    {
+        const uint8_t address; 
+        uint16_t value;
+        RegisterBase() = delete;
+        /**
+         * @brief Construct a new Register Base object
+         * 
+         * @param address The address of the register
+         */
+        explicit RegisterBase(uint16_t address) : address(address), value(0) {};
+    };
+
+    /** @brief ChargeOption0 Register */
+    class ChargeOption0 : public RegisterBase
+    {
+    public:
+        ChargeOption0() : RegisterBase(Register::Charge_Option_0) {};
+        /** @brief Enable Out of Audio Mode (f_switch > 25 kHz) */
+        [[nodiscard]] bool EN_OOA() const { return (this->value & (1<<10)) > 0; }
+        void set_EN_OOA(bool bit) { this->value = bits::set(value, {0b1, 10, bit}); }
+    };
+
+    /**
+     * @brief Class for the charger controller.
+     * @tparam bus_controller The bus controller class.
+     */
     template<class bus_controller>
     class Controller
     {
@@ -153,16 +186,16 @@ namespace BQ25700 {
         bus_controller mybus;
         I2C::Data_t i2c_data{};
         State state = State::Init;
-        unsigned int voltage_system = 0;
-        unsigned int voltage_input  = 0;
-        signed int   current_input  = 0;
-        unsigned int voltage_OTG    = 0;
-        unsigned int current_OTG    = 0;
-        unsigned int current_charge = 0;
+        uint16_t voltage_system = 0;
+        uint16_t voltage_input  = 0;
+        int16_t   current_input  = 0;
+        uint16_t voltage_OTG    = 0;
+        uint16_t current_OTG    = 0;
+        uint16_t current_charge = 0;
 
         // *** methods ***
         // bool        send_command_byte(const unsigned char cmd);
-        bool         read_register(const Register reg);
+        bool         read_register(uint8_t reg);
 
     public:
         // *** Constructor ***
@@ -170,29 +203,28 @@ namespace BQ25700 {
          * @brief Constructor for charger controller.
          * @param bus_used The reference to the used bus peripheral.
          */
-        Controller(bus_controller& bus_used)
-        : mybus{bus_used}
-        {
-        };
+        explicit Controller(bus_controller &bus_used)
+            : mybus{bus_used} {};
 
         // *** Properties
 
         // *** Methods ***
-        unsigned int    get_system_voltage  (void) const { return this->voltage_system; };
-        unsigned int    get_input_voltage   (void) const { return this->voltage_input; };
-        signed int      get_input_current   (void) const { return this->current_input; };
-        unsigned int    get_OTG_voltage     (void) const { return this->voltage_OTG + 4480; };
-        unsigned int    get_OTG_current     (void) const { return this->current_OTG; };
-        unsigned int    get_charge_current  (void) const { return this->current_charge; };
-        State           get_state           (void) const { return this->state; };
-        bool            initialize          (void);
-        bool            write_register      (const Register reg, const unsigned int data);
-        bool            set_charge_current  (const unsigned int current);
-        bool            set_OTG_voltage     (const unsigned int voltage);
-        bool            set_OTG_current     (const unsigned int current);
-        bool            enable_OTG          (const bool state);
-
+        [[nodiscard]] auto get_system_voltage() const -> uint16_t { return this->voltage_system; }
+        [[nodiscard]] auto get_input_voltage() const -> uint16_t { return this->voltage_input; }
+        [[nodiscard]] auto get_input_current() const -> int16_t { return this->current_input; }
+        [[nodiscard]] auto get_OTG_voltage() const -> uint16_t { return this->voltage_OTG + 4480; }
+        [[nodiscard]] auto get_OTG_current() const -> uint16_t { return this->current_OTG; }
+        [[nodiscard]] auto get_charge_current() const -> uint16_t { return this->current_charge; }
+        [[nodiscard]] auto get_state() const -> State { return this->state; }
+        bool initialize();
+        bool write_register(uint8_t reg, uint16_t data);
+        bool set_charge_current(uint16_t current);
+        bool set_OTG_voltage(uint16_t voltage);
+        bool set_OTG_current(uint16_t current);
+        bool enable_OTG(bool state);
+        bool read(RegisterBase &reg);
+        bool write(RegisterBase &reg);
     };
-};
+}; // namespace BQ25700
 
 #endif

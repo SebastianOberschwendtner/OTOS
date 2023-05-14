@@ -142,17 +142,34 @@ template class BQ25700::Controller<I2C_Mock>;
  *      ▢ Sleep mode
  */
 
-void setUp(void) {
+void setUp() {
 // set stuff up here
 };
 
-void tearDown(void) {
+void tearDown() {
 // clean stuff up here
 };
 
 // === Define Tests ===
+/// @brief Test the register classes
+void test_register_ChargeOption0()
+{
+    // Create register object
+    BQ25700::ChargeOption0 reg;
+
+    // Assert address and initial value
+    TEST_ASSERT_EQUAL(BQ25700::Register::Charge_Option_0, reg.address);
+    TEST_ASSERT_EQUAL(0x0000, reg.value);
+    TEST_ASSERT_FALSE(reg.EN_OOA());
+
+    // Assert setting the EN_OOA bit
+    reg.set_EN_OOA(true);
+    TEST_ASSERT_TRUE(reg.EN_OOA());
+    TEST_ASSERT_BITS_HIGH((1<<10), reg.value);
+}
+
 /// @brief Test the constructor
-void test_constructor(void)
+void test_constructor()
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -170,7 +187,7 @@ void test_constructor(void)
 };
 
 /// @brief Test initializing the controller
-void test_init(void)
+void test_init()
 {
     ::set_target_address.reset();
     // Setup the mocked i2c driver
@@ -189,7 +206,7 @@ void test_init(void)
 };
 
 /// @brief Test sending options
-void test_set_options(void)
+void test_set_options()
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -225,13 +242,52 @@ void test_set_options(void)
     TEST_ASSERT_EQUAL(1, static_cast<unsigned char>(UUT.get_state()));
     ::send_bytes.assert_called_once_with(0x320000); // BQ25700 expects MSB last
 };
+/// @brief Test reading register classes
+void test_read_register()
+{
+    ::set_target_address.reset();
+    ::read_word.reset();
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+    rx_buffer[0] = 0x22;
+    rx_buffer[1] = 0x11;
+
+    // create the controller object and register
+    BQ25700::Controller UUT(i2c);
+    BQ25700::ChargeOption0 reg;
+
+    // perform testing
+    TEST_ASSERT_TRUE(UUT.read(reg));
+    // ::set_target_address.assert_called_once_with(BQ25700::i2c_address);
+    TEST_ASSERT_EQUAL(1, ::read_word.call_count);
+    TEST_ASSERT_EQUAL_HEX16(0x2211, reg.value);
+}
+
+/// @brief Test writing register classes
+void test_write_register()
+{
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+
+    // create the controller object and register
+    BQ25700::Controller UUT(i2c);
+    BQ25700::ChargeOption0 reg;
+    reg.value = 0x1234;
+
+    // Test writting a register
+    TEST_ASSERT_TRUE(UUT.write(reg));
+    ::send_bytes.assert_called_once_with(0x123412); // BQ25700 expects MSB last
+}
 
 /// @brief Main test function for BQ25700
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();
+    RUN_TEST(test_register_ChargeOption0);
     RUN_TEST(test_constructor);
     RUN_TEST(test_init);
     RUN_TEST(test_set_options);
+    RUN_TEST(test_read_register);
+    RUN_TEST(test_write_register);
     return UNITY_END();
 };

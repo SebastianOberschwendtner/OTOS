@@ -42,14 +42,14 @@ template class BQ25700::Controller<I2C::Controller>;
  * @return Returns True when the register was read successfully.
  */
 template<class bus_controller>
-bool BQ25700::Controller<bus_controller>::read_register(const Register reg)
+bool BQ25700::Controller<bus_controller>::read_register(const uint8_t reg)
 {
     // All reads from the BQ25700 contain words
-    std::optional<unsigned int> response = Bus::read_word(this->mybus, static_cast<unsigned char>(reg));
+    std::optional<uint16_t> response = Bus::read_word(this->mybus, reg);
     if(!response) 
         return false;
 
-    // Read successfull, sort the data
+    // Read successful, sort the data
     this->i2c_data.byte[0] = (response.value() >> 8) & 0xFF;
     this->i2c_data.byte[1] = (response.value() >> 0) & 0xFF;
     return true;
@@ -63,11 +63,11 @@ bool BQ25700::Controller<bus_controller>::read_register(const Register reg)
  * @return Returns True when the transfer was successful.
  */
 template<class bus_controller>
-bool BQ25700::Controller<bus_controller>::write_register(const Register reg,
-    const unsigned int data)
+bool BQ25700::Controller<bus_controller>::write_register(const uint8_t reg,
+    const uint16_t data)
 {
     // send the data bytes
-    return Bus::send_bytes(this->mybus, static_cast<unsigned char>(reg), (data & 0xFF), (data >> 8));
+    return Bus::send_bytes(this->mybus, reg, (data & 0xFF), (data >> 8));
 };
 
 /**
@@ -76,7 +76,7 @@ bool BQ25700::Controller<bus_controller>::write_register(const Register reg,
  * initialized successfully.
  */
 template<class bus_controller>
-bool BQ25700::Controller<bus_controller>::initialize(void)
+bool BQ25700::Controller<bus_controller>::initialize()
 {
     // Set the target address
     Bus::change_address(this->mybus, BQ25700::i2c_address);
@@ -107,7 +107,7 @@ bool BQ25700::Controller<bus_controller>::initialize(void)
  * @return Returns True when the charge current was send successfully.
  */
 template<class bus_controller>
-bool BQ25700::Controller<bus_controller>::set_charge_current(const unsigned int current)
+bool BQ25700::Controller<bus_controller>::set_charge_current(const uint16_t current)
 {
     // Convert the current to the charger resolution
     this->current_charge = current & 0x1FC0;
@@ -122,7 +122,7 @@ bool BQ25700::Controller<bus_controller>::set_charge_current(const unsigned int 
  * @return Returns True when the charge current was send successfully.
  */
 template<class bus_controller>
-bool BQ25700::Controller<bus_controller>::set_OTG_voltage(const unsigned int voltage)
+bool BQ25700::Controller<bus_controller>::set_OTG_voltage(const uint16_t voltage)
 {
     // Convert the value to the charger resolution and clamp to min voltage
     if (voltage >= 4480)
@@ -140,7 +140,7 @@ bool BQ25700::Controller<bus_controller>::set_OTG_voltage(const unsigned int vol
  * @return Returns True when the charge current was send successfully.
  */
 template<class bus_controller>
-bool BQ25700::Controller<bus_controller>::set_OTG_current(const unsigned int current)
+bool BQ25700::Controller<bus_controller>::set_OTG_current(const uint16_t current)
 {
     // Convert the value to the charger resolution
     this->current_OTG = (current/50) << 8;
@@ -162,9 +162,32 @@ bool BQ25700::Controller<bus_controller>::enable_OTG(const bool state)
         this->state = State::OTG;
         return this->write_register(Register::Charge_Option_3, EN_OTG);
     }
-    else
-    {
-        this->state = State::Idle;
-        return this->write_register(Register::Charge_Option_3, 0x00);
-    }
+    this->state = State::Idle;
+    return this->write_register(Register::Charge_Option_3, 0x00);
 };
+/**
+ * @brief Read a register object from the controller.    
+ * 
+ * @param reg The register object read, the value is stored in the object.
+ * @return Returns True when the register was read successfully.
+ */
+template<class bus_controller>
+bool BQ25700::Controller<bus_controller>::read(RegisterBase &reg)
+{
+    if (!this->read_register(reg.address))
+        return false;
+    reg.value = this->i2c_data.word[0];
+    return true;
+}
+
+/**
+ * @brief Write a register object to the controller.
+ * 
+ * @param reg The register object to be written.
+ * @return Returns True when the register was written successfully.
+ */
+template<class bus_controller>
+bool BQ25700::Controller<bus_controller>::write(RegisterBase &reg)
+{
+    return this->write_register(reg.address, reg.value);
+}
