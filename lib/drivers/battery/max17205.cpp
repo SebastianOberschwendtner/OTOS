@@ -282,14 +282,14 @@ bool MAX17205::Controller<bus_controller>::read_cell_voltage()
     if(!Bus::read_array(this->mybus, reg, &this->i2c_data.byte[0], 4)) return false;
 
     // Convert the data
-    // Cell 1
+    // Cell 2
     uint16_t temp = this->i2c_data.byte[3];
     temp += this->i2c_data.byte[2] << 8;
-    this->voltage_cell[0] = temp;
-    // Cell 2
+    this->voltage_cell[1] = temp;
+    // Cell 1
     temp = this->i2c_data.byte[1];
     temp += this->i2c_data.byte[0] << 8;
-    this->voltage_cell[1] = temp;
+    this->voltage_cell[0] = temp;
 
     return true;
 }
@@ -309,11 +309,11 @@ bool MAX17205::Controller<bus_controller>::read_cell_voltage_avg()
     // Cell 2
     uint16_t temp = this->i2c_data.byte[3];
     temp += this->i2c_data.byte[2] << 8;
-    this->voltage_cell[0] = temp;
-    // Cell 2
+    this->voltage_cell[1] = temp;
+    // Cell 1
     temp = this->i2c_data.byte[1];
     temp += this->i2c_data.byte[0] << 8;
-    this->voltage_cell[1] = temp;
+    this->voltage_cell[0] = temp;
 
     return true;
 }

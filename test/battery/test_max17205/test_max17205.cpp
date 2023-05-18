@@ -362,9 +362,9 @@ void test_read_cell_voltage(void)
 
     // perform test
     rx_buffer[3] = 0x00;
-    rx_buffer[2] = 0xA5;
+    rx_buffer[2] = 0xD2;
     rx_buffer[1] = 0x00;
-    rx_buffer[0] = 0xD2;
+    rx_buffer[0] = 0xA5;
     TEST_ASSERT_TRUE(UUT.read_cell_voltage());
     TEST_ASSERT_EQUAL( 3300, UUT.get_cell_voltage(1));
     TEST_ASSERT_EQUAL( 4200, UUT.get_cell_voltage(2));
@@ -409,9 +409,9 @@ void test_read_cell_voltage_avg(void)
 
     // perform test
     rx_buffer[3] = 0x00;
-    rx_buffer[2] = 0xA5;
+    rx_buffer[2] = 0xD2;
     rx_buffer[1] = 0x00;
-    rx_buffer[0] = 0xD2;
+    rx_buffer[0] = 0xA5;
     TEST_ASSERT_TRUE(UUT.read_cell_voltage_avg());
     TEST_ASSERT_EQUAL( 3300, UUT.get_cell_voltage(1));
     TEST_ASSERT_EQUAL( 4200, UUT.get_cell_voltage(2));
