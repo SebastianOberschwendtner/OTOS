@@ -11,26 +11,53 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  static-analysis:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repo and submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Cache pip and platformio
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/pip
+          ~/.platformio/.cache
+        key: ${{ runner.os }}-pio
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    - name: Install PlatformIO
+      run: |
+        python -m pip install --upgrade pip
+        pip install --upgrade platformio
+    - name: Run static code analysis
+      run: pio check -d ${GITHUB_WORKSPACE} --skip-packages
+    
+  unit-test:
 
     runs-on: ubuntu-latest
+    needs: static-analysis
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Cache pip
-      uses: actions/cache@v2
+    - name: Checkout Repo and submodules
+      uses: actions/checkout@v3
       with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    - name: Cache PlatformIO
-      uses: actions/cache@v2
+        submodules: recursive
+    - name: Cache pip and platformio
+      uses: actions/cache@v3
       with:
-        path: ~/.platformio
-        key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+        path: |
+          ~/.cache/pip
+          ~/.platformio/.cache
+        key: ${{ runner.os }}-pio
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
     - name: Install PlatformIO
       run: |
         python -m pip install --upgrade pip
@@ -38,4 +65,4 @@ jobs:
     - name: Install Platform Native
       run: pio pkg install
     - name: Run the Unit Tests
-      run: pio test -d $GITHUB_WORKSPACE -e native
+      run: pio test -d ${GITHUB_WORKSPACE} -e native
