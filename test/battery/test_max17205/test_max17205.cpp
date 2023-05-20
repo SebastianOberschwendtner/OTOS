@@ -522,19 +522,16 @@ void test_register_classes()
     MAX17205::PackCfg pack_cfg;
     TEST_ASSERT_EQUAL_HEX16(MAX17205::Register::PackCfg, pack_cfg.address);
     TEST_ASSERT_EQUAL(0, pack_cfg.value);
-
     // Test setting and getting the NCELLS field
     TEST_ASSERT_EQUAL(0, pack_cfg.NCELLS());
     pack_cfg.set_NCELLS(2);
     TEST_ASSERT_EQUAL(2, pack_cfg.NCELLS());
     TEST_ASSERT_BITS(0b1111, 2, pack_cfg.value);
-
     // Test setting and getting the BALCFG field
     TEST_ASSERT_EQUAL(0, pack_cfg.BALCFG());
     pack_cfg.set_BALCFG(0b101);
     TEST_ASSERT_EQUAL(0b101, pack_cfg.BALCFG());
     TEST_ASSERT_BITS(0b11100000, 0b101 << 5, pack_cfg.value);
-
     // Other bits
     pack_cfg.value |= ( 1<< 8); // Set the CXEN bit
     TEST_ASSERT_TRUE(pack_cfg.CxEn());
@@ -544,6 +541,34 @@ void test_register_classes()
     TEST_ASSERT_FALSE(pack_cfg.A1En());
     TEST_ASSERT_FALSE(pack_cfg.A2En());
     TEST_ASSERT_FALSE(pack_cfg.FGT());
+
+    // *** Config Class ***
+    MAX17205::Config config;
+    TEST_ASSERT_EQUAL_HEX16(MAX17205::Register::Config, config.address);
+    // Test setting and getting the Aen bit
+    TEST_ASSERT_FALSE(config.Aen());
+    config.set_Aen(true);
+    TEST_ASSERT_TRUE(config.Aen());
+    TEST_ASSERT_BITS(0b100, 0b100, config.value);
+    // Test setting and getting the ALRTp bit
+    TEST_ASSERT_FALSE(config.ALRTp());
+    config.set_ALRTp(true);
+    TEST_ASSERT_TRUE(config.ALRTp());
+    TEST_ASSERT_BIT_HIGH((1 << 11), config.value);
+
+    // *** SAlrtTh Class ***
+    MAX17205::SAlrtTh salrtth;
+    TEST_ASSERT_EQUAL_HEX16(MAX17205::Register::SAlrtTh, salrtth.address);
+    // Test setting and getting the minimum SoC threshold
+    TEST_ASSERT_EQUAL(0, salrtth.SMIN());
+    salrtth.set_SMIN(20);
+    TEST_ASSERT_EQUAL(20, salrtth.SMIN());
+    TEST_ASSERT_EQUAL(20, salrtth.value);
+    // Test setting and getting the maximum SoC threshold
+    TEST_ASSERT_EQUAL(0, salrtth.SMAX());
+    salrtth.set_SMAX(80);
+    TEST_ASSERT_EQUAL(80, salrtth.SMAX());
+    TEST_ASSERT_BITS((0xFF << 8), (80 << 8), salrtth.value);
 }
 
 /// @brief Test reading register classes

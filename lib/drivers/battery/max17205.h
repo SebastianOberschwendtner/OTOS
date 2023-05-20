@@ -57,9 +57,11 @@ namespace MAX17205 {
     namespace Register // Register addresses
     {
         // === Registers ===
+        constexpr uint16_t SAlrtTh         = 0x003;
         constexpr uint16_t Cap_Remaining   = 0x005;
         constexpr uint16_t SOC             = 0x006;
         constexpr uint16_t TTE             = 0x011;    
+        constexpr uint16_t Config          = 0x01D;
         constexpr uint16_t TTF             = 0x020;    
         constexpr uint16_t Current         = 0x00A;
         constexpr uint16_t Avg_Current     = 0x00B;
@@ -94,6 +96,30 @@ namespace MAX17205 {
          * @param address The address of the register
          */
         RegisterBase(uint16_t address) : address(address), value(0) {};
+    };
+
+    class SAlrtTh : public RegisterBase<uint16_t>
+    {
+    private:
+
+    public:
+        SAlrtTh() : RegisterBase(Register::SAlrtTh) {};
+        [[nodiscard]] auto SMIN() const -> uint8_t { return static_cast<uint8_t>(bits::get(value, {0xFF, 0})); }
+        [[nodiscard]] auto SMAX() const -> uint8_t { return static_cast<uint8_t>(bits::get(value, {0xFF, 8})); }
+        void set_SMIN(const uint8_t soc) { this-> value = bits::set(this->value, {0xFF, 0, soc}); }
+        void set_SMAX(const uint8_t soc) { this-> value = bits::set(this->value, {0xFF, 8, soc}); }
+    };
+
+    class Config : public RegisterBase<uint16_t>
+    {
+    private:
+
+    public:
+        Config() : RegisterBase(Register::Config) {};
+        [[nodiscard]] auto Aen() const -> bool { return (value & (1 << 2)) > 0; }
+        [[nodiscard]] auto ALRTp() const -> bool { return (value & (1 << 11)) > 0; }
+        void set_Aen(const bool flag) { this->value = bits::set(this->value, {1, 2, flag}); }
+        void set_ALRTp(const bool flag) { this->value = bits::set(this->value, {1, 11, flag}); }
     };
 
     class PackCfg : public RegisterBase<uint16_t>
