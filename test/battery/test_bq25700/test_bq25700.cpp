@@ -161,11 +161,17 @@ void test_register_ChargeOption0()
     TEST_ASSERT_EQUAL(BQ25700::Register::Charge_Option_0, reg.address);
     TEST_ASSERT_EQUAL(0x0000, reg.value);
     TEST_ASSERT_FALSE(reg.EN_OOA());
+    TEST_ASSERT_EQUAL(0, reg.WDTMR_ADJ());
 
     // Assert setting the EN_OOA bit
     reg.set_EN_OOA(true);
     TEST_ASSERT_TRUE(reg.EN_OOA());
     TEST_ASSERT_BITS_HIGH((1<<10), reg.value);
+
+    // Assert setting the WDTMR_ADJ bits
+    reg.set_WDTMR_ADJ(0b11);
+    TEST_ASSERT_EQUAL(0b11, reg.WDTMR_ADJ());
+    TEST_ASSERT_BITS_HIGH((0b11<<13), reg.value);
 }
 
 /// @brief Test the constructor
