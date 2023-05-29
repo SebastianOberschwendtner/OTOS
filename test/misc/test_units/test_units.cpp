@@ -131,6 +131,36 @@ void test_units_array()
     TEST_ASSERT_EQUAL_INT(10, half_array3[0]);
 }
 
+/// @brief Test the derived frequency unit
+void test_units_frequency()
+{
+    // Test constructor
+    OTOS::frequency<int,std::ratio<1,1>> hertz{10};
+    OTOS::frequency<int,std::kilo> kilohertz{10};
+    OTOS::frequency<int,std::mega> mega_hertz{10};
+    TEST_ASSERT_EQUAL_INT(10, hertz);
+    TEST_ASSERT_EQUAL_INT(10, hertz.count());
+    TEST_ASSERT_EQUAL_INT(10, kilohertz);
+    TEST_ASSERT_EQUAL_INT(10, kilohertz.count());
+
+    // Test setting the value
+    hertz = 20;
+    TEST_ASSERT_EQUAL_INT(20, hertz);
+    hertz = kilohertz;
+    TEST_ASSERT_EQUAL_INT(10000, hertz);
+    kilohertz = mega_hertz;
+    TEST_ASSERT_EQUAL_INT(10000, kilohertz);
+
+    // Test literal operators
+    using namespace OTOS::literals;
+    auto hertz_literals = 10_Hz;
+    TEST_ASSERT_EQUAL_INT(10, hertz_literals);
+    auto kilohertz_literals = 10_kHz;
+    TEST_ASSERT_EQUAL_INT(10, kilohertz_literals); 
+    auto megahertz_literals = 10_MHz;
+    TEST_ASSERT_EQUAL_INT(10, megahertz_literals);
+}
+
 /// === Run Tests ===
 int main()
 {
@@ -140,5 +170,6 @@ int main()
     RUN_TEST(test_units_set_value);
     RUN_TEST(test_units_casting);
     RUN_TEST(test_units_array);
+    RUN_TEST(test_units_frequency);
     return UNITY_END();
 }

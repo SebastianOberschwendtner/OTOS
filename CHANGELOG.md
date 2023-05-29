@@ -15,6 +15,7 @@
 #### [&rarrb; v4.2.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.2.0)
 - `misc` :
     - Adds library `units` for custom unit conversion.
+    - Adds *frequency* unit to `units` library.
 - `battery` :
     - Refactors *MAX17205* driver to use the new units and register classes.
     - Refactors *BQ25700* driver to use register classes.
