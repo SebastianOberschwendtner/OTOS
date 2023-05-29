@@ -171,7 +171,9 @@ namespace BQ25700 {
         ChargeOption0() : RegisterBase(Register::Charge_Option_0) {};
         /** @brief Enable Out of Audio Mode (f_switch > 25 kHz) */
         [[nodiscard]] bool EN_OOA() const { return (this->value & (1<<10)) > 0; }
+        [[nodiscard]] uint8_t WDTMR_ADJ() const { return bits::get(this->value, {0b11, 13}); }
         void set_EN_OOA(bool bit) { this->value = bits::set(value, {0b1, 10, bit}); }
+        void set_WDTMR_ADJ(uint8_t val) { this->value = bits::set(this->value, {0b11, 13, val}); }
     };
 
     /**
