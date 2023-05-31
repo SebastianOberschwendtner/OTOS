@@ -554,7 +554,7 @@ void test_register_classes()
     TEST_ASSERT_FALSE(config.ALRTp());
     config.set_ALRTp(true);
     TEST_ASSERT_TRUE(config.ALRTp());
-    TEST_ASSERT_BIT_HIGH((1 << 11), config.value);
+    TEST_ASSERT_BIT_HIGH(11, config.value);
 
     // *** SAlrtTh Class ***
     MAX17205::SAlrtTh salrtth;
