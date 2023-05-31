@@ -27,7 +27,7 @@
 namespace Fake
 {
     // *** Variable types
-    typedef unsigned long Register_t;
+    typedef volatile uint32_t Register_t;
 
     // *** Class defines ***
 
