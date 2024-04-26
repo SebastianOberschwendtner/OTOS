@@ -21,6 +21,9 @@
     - Refactors *BQ25700* driver to use register classes.
 - `vendors`:
     - Adds *STM32L071xx* devices to compatible MCUs.
+- `drivers`:
+    - Adds first version of *timer* interface.
+    - Adds function overload to set the alternate function of an GPIO pin by directly specifying the alternate function code.
 
 ### Fixed Issues:
 - n/a
