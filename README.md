@@ -20,15 +20,17 @@ Bear bones realtime operating system for embedded systems. Focus lies on KISS (*
 ![GitHub](https://img.shields.io/github/license/SebastianOberschwendtner/otos)
 
 > Supported Microcontrollers:
+The device name is also the name of the global `#define` which enables the particular MCU.
 - STM<sup>&reg;</sub>
 
 |Device | Core | FPU | Header |
 |---|---|:---:|---|
-|STM32F429|*ARM* Cortex M4<sup>&reg;</sub>|:x:|`arm_cm4_nofpu.h`|
-|STM32F405|*ARM* Cortex M4<sup>&reg;</sub>|:x:|`arm_cm4_nofpu.h`|
-|STM32L073|*ARM* Cortex M0+<sup>&reg;</sub>|:x:|`arm_cm0plus_nofpu.h`|
-|STM32L072|*ARM* Cortex M0+<sup>&reg;</sub>|:x:|`arm_cm0plus_nofpu.h`|
-|STM32L053|*ARM* Cortex M0+<sup>&reg;</sub>|:x:|`arm_cm0plus_nofpu.h`|
+|STM32F405xx|*ARM* Cortex M4<sup>&reg;</sub>|:x:|`arm_cm4_nofpu.h`|
+|STM32F429xx|*ARM* Cortex M4<sup>&reg;</sub>|:x:|`arm_cm4_nofpu.h`|
+|STM32L053xx|*ARM* Cortex M0+<sup>&reg;</sub>|:x:|`arm_cm0plus_nofpu.h`|
+|STM32L071xx|*ARM* Cortex M0+<sup>&reg;</sub>|:x:|`arm_cm0plus_nofpu.h`|
+|STM32L072xx|*ARM* Cortex M0+<sup>&reg;</sub>|:x:|`arm_cm0plus_nofpu.h`|
+|STM32L073xx|*ARM* Cortex M0+<sup>&reg;</sub>|:x:|`arm_cm0plus_nofpu.h`|
 
 - Atmel<sup>&reg;</sub>
 

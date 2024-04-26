@@ -19,6 +19,8 @@
 - `battery` :
     - Refactors *MAX17205* driver to use the new units and register classes.
     - Refactors *BQ25700* driver to use register classes.
+- `vendors`:
+    - Adds *STM32L071xx* devices to compatible MCUs.
 
 ### Fixed Issues:
 - n/a
