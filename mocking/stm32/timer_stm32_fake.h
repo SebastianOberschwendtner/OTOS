@@ -70,10 +70,16 @@ public:
 // Fake peripheral pointers
 extern TIM_TypeDef* TIM1;
 extern TIM_TypeDef* TIM2;
+extern TIM_TypeDef* TIM3;
+extern TIM_TypeDef* TIM4;
+extern TIM_TypeDef* TIM5;
 
 // Fake addresses
 extern std::uintptr_t TIM1_BASE;
 extern std::uintptr_t TIM2_BASE;
+extern std::uintptr_t TIM3_BASE;
+extern std::uintptr_t TIM4_BASE;
+extern std::uintptr_t TIM5_BASE;
 
 // === Bitmasks ===
 

@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 -2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,8 +25,8 @@
      */
     // Supported STM32F4 Devices
     #define IS_STM32F4 defined(STM32F429xx) || defined(STM32F405xx)
-    //Supported STM32L0 Devices
-    #define IS_STM32L0 defined(STM32L073xx) || defined(STM32L072xx) || defined(STM32L053xx)
+    // Supported STM32L0 Devices
+    #define IS_STM32L0 defined(STM32L071xx) || defined(STM32L072xx) || defined(STM32L073xx) || defined(STM32L053xx)
 
     /* 
     * Check which microcontroller is used and 

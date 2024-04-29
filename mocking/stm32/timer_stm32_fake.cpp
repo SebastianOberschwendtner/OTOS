@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    timer_stm32_fake.cpp
  * @author  SO
- * @version v2.7.3
+ * @version v4.2.0
  * @date    31-October-2021
  * @brief   Fakes the timer interface for STM32 microcontrollers.
  ==============================================================================
@@ -34,14 +34,23 @@
 // Fake Peripheral
 static TIM_TypeDef TIM1_Fake;
 static TIM_TypeDef TIM2_Fake;
+static TIM_TypeDef TIM3_Fake;
+static TIM_TypeDef TIM4_Fake;
+static TIM_TypeDef TIM5_Fake;
 
 // Public Pointer to fake which mimics peripheral behaviour.
 TIM_TypeDef* TIM1 = &TIM1_Fake;
 TIM_TypeDef* TIM2 = &TIM2_Fake;
+TIM_TypeDef* TIM3 = &TIM3_Fake;
+TIM_TypeDef* TIM4 = &TIM4_Fake;
+TIM_TypeDef* TIM5 = &TIM5_Fake;
 
 // Fake register address
 std::uintptr_t TIM1_BASE = reinterpret_cast<std::uintptr_t>(TIM1);
 std::uintptr_t TIM2_BASE = reinterpret_cast<std::uintptr_t>(TIM2);
+std::uintptr_t TIM3_BASE = reinterpret_cast<std::uintptr_t>(TIM3);
+std::uintptr_t TIM4_BASE = reinterpret_cast<std::uintptr_t>(TIM4);
+std::uintptr_t TIM5_BASE = reinterpret_cast<std::uintptr_t>(TIM5);
 
 // *** Methods ***
 

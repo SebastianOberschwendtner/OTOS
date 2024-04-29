@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,13 +18,13 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    test_gpio_stm32.cpp
  * @author  SO
- * @version v2.7.3
+ * @version v4.2.0
  * @date    16-March-2021
  * @brief   Unit tests for the gpio drivers of stm32 controllers.
- ******************************************************************************
+ ==============================================================================
  */
 
 // === Includes ===
@@ -223,7 +223,7 @@ void test_toggle(void)
 };
 
 /// @brief Test reading the input value.
-void test_get(void)
+void test_get_state(void)
 {
     setUp();
     // Assume other outputs are already set
@@ -262,6 +262,11 @@ void test_alternate_function_low(void)
     // perform testing
     TEST_ASSERT_EQUAL(0b01001101, GPIOA->AFR[0]);
     TEST_ASSERT_EQUAL(0b0011, GPIOA->OTYPER);
+
+    // Test setting an alternate function with an explicit number
+    GPIO::PIN pin(GPIO::Port::A, 5);
+    pin.set_alternate_function(4);
+    TEST_ASSERT_EQUAL(0x40004D, GPIOA->AFR[0]);
 };
 
 /// @brief Test setting an alternate function in the low register
@@ -277,6 +282,11 @@ void test_alternate_function_high(void)
 
     // perform testing
     TEST_ASSERT_EQUAL(0b10111101, GPIOA->AFR[1]);
+
+    // Test setting an alternate function with an explicit number
+    GPIO::PIN pin(GPIO::Port::A, 14);
+    pin.set_alternate_function(7);
+    TEST_ASSERT_EQUAL(0x70000BD, GPIOA->AFR[1]);
 };
 
 /// @brief Test the reading of rising and falling edges
@@ -383,6 +393,7 @@ void test_reset_pending_interrupt(void)
     TEST_ASSERT_EQUAL(0b101, EXTI->PR);
 }
 
+/* === Run tests === */
 int main(int argc, char **argv)
 {
     UNITY_BEGIN();
@@ -396,7 +407,7 @@ int main(int argc, char **argv)
     RUN_TEST(test_set_low);
     RUN_TEST(test_set_state);
     RUN_TEST(test_toggle);
-    RUN_TEST(test_get);
+    RUN_TEST(test_get_state);
     RUN_TEST(test_alternate_function_low);
     RUN_TEST(test_alternate_function_high);
     RUN_TEST(test_edges);
