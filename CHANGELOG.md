@@ -15,8 +15,7 @@
 - `drivers`:
     - Adds first version of *timer* interface.
     - Adds function overload to set the alternate function of an GPIO pin by directly specifying the alternate function code.
-- [v4.2.1](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.2.1):
-    - Adjusts available peripheral to pass all builds of different devices.
+- Adjusts available peripheral to pass all builds of different devices.
 
 ### Fixed Issues:
 - #16: Add support for STM32L071xx devices
