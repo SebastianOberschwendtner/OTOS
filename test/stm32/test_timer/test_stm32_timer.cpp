@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,19 +18,20 @@
  *
  */
 /**
- ******************************************************************************
- * @file     test_timer_stm32.cpp
+ ==============================================================================
+ * @file    test_timer_stm32.cpp
  * @author  SO
  * @version v4.2.0
  * @date    31-October-2021
  * @brief   Unit tests for testing the timer driver for stm32 microcontrollers.
- ******************************************************************************
+ ==============================================================================
  */
 
 // ****** Includes ******
 #include <unity.h>
 #include <mock.h>
 #include "stm32/timer_stm32.h"
+#include "stm32/gpio_stm32.h"
 
 /** === Test List ===
  * ✓ Timer instance can be created:
@@ -39,13 +40,13 @@
  * ✓ Timer can be started
  * ✓ Timer can be stopped
  * ✓ The top value (reload value) can be set
- * ▢ The compare match value can be set
+ * ✓ The compare match value can be set
  * ✓ The timer prescaler can be set to match a certain rate
  * ▢ The timer mode can be read
  * ▢ The mode of the timer channels can be set:
- *      ▢ PWM Output Mode
+ *      ✓ PWM Output Mode
  *      ▢ Input Capture Mode
- * ▢ I/O Pins can be assigned to the timer
+ * (✓) I/O Pins can be assigned to the timer
 */
 
 // === Mocks ===
@@ -54,29 +55,30 @@ extern Mock::Callable<bool> CMSIS_NVIC_SetPriority;
 extern Mock::Callable<uint32_t> CMSIS_SysTick_Config;
 
 // === Tests ===
-void setUp(void)
+void setUp()
 {
     // set stuff up here
     TIM1->registers_to_default();
     RCC->registers_to_default();
 };
 
-void tearDown(void){
+void tearDown(){
     // clean stuff up here
 };
 
 /// @brief Test the initialization of the controller
-void test_init(void)
+void test_init()
 {
     // Create timer
     Timer::Timer UUT(IO::TIM_1);
 
     // perform tests
     TEST_ASSERT_BIT_HIGH(0, RCC->APB2ENR);
+    TEST_ASSERT_EQUAL(0xFFFF, TIM1->ARR);
 };
 
 /// @brief Test the SysTick configuration
-void test_configure_SysTick(void)
+void test_configure_SysTick()
 {
     // Reset mocked function
     CMSIS_SysTick_Config.reset();   
@@ -91,7 +93,7 @@ void test_configure_SysTick(void)
 };
 
 /// @brief Test the reading of the counter value
-void test_get_count(void)
+void test_get_count()
 {
     // Set stuff up
     setUp();
@@ -108,7 +110,7 @@ void test_get_count(void)
 };
 
 /// @brief Test enabling and disabling the timer
-void test_enable_disable(void)
+void test_enable_disable()
 {
     // Set stuff up
     setUp();
@@ -135,7 +137,7 @@ void test_enable_disable(void)
 };
 
 /// @brief Test setting the counter frequency
-void test_set_frequency(void)
+void test_set_tick_frequency()
 {
     using namespace OTOS::literals;
     // Set stuff up
@@ -146,8 +148,8 @@ void test_set_frequency(void)
     Timer::Timer UUT2(IO::TIM_2);
 
     // Set frequency
-    UUT.set_frequency(1_kHz);
-    UUT2.set_frequency(5_kHz);
+    UUT.set_tick_frequency(1_kHz);
+    UUT2.set_tick_frequency(5_kHz);
 
     // Test whether the correct value was written to the register
     uint32_t expected = F_APB2 / 1000 - 1;
@@ -157,7 +159,7 @@ void test_set_frequency(void)
 };
 
 /// @brief Test setting the top value
-void test_set_top_value(void)
+void test_set_top_value()
 {
     using namespace std::literals::chrono_literals;
     using namespace  OTOS::literals;
@@ -167,21 +169,21 @@ void test_set_top_value(void)
 
     // Create timer
     Timer::Timer UUT(IO::TIM_1);
-    UUT.set_frequency(1_kHz);
+    UUT.set_tick_frequency(1_kHz);
 
     // Set top value
     UUT.set_top_value(100);
     TEST_ASSERT_EQUAL(100, TIM1->ARR);
 
-    // Set top value as a duration
-    UUT.set_duration(1s);
+    // Set top value as a period
+    UUT.set_period(1s);
     TEST_ASSERT_EQUAL(1000, TIM1->ARR);
-    UUT.set_duration(1ms);
+    UUT.set_period(1ms);
     TEST_ASSERT_EQUAL(1, TIM1->ARR);
 };
 
 /// @brief Test setting the compare mode
-void test_set_compare_mode(void)
+void test_set_pwm_mode()
 {
     // Set stuff up
     setUp();
@@ -207,7 +209,7 @@ void test_set_compare_mode(void)
 };
 
 /// @brief Test enabling and disabling the timer channels
-void test_enable_disable_channel(void)
+void test_enable_disable_channel()
 {
     // Set stuff up
     setUp();
@@ -244,7 +246,7 @@ void test_enable_disable_channel(void)
 };
 
 /// @brief Test setting the compare values
-void test_set_compare_value(void)
+void test_set_compare_value()
 {
     using namespace OTOS::literals;
     using namespace std::literals::chrono_literals;
@@ -273,12 +275,31 @@ void test_set_compare_value(void)
     TEST_ASSERT_EQUAL(1000, TIM1->CCR1);
 
     // Set compare values as a duration
-    UUT.set_frequency(1_kHz);
+    UUT.set_tick_frequency(1_kHz);
     ch1.set_pulse_width(50ms);
     TEST_ASSERT_EQUAL(50, TIM1->CCR1);
-    UUT.set_frequency(1_Hz);
+    UUT.set_tick_frequency(1_Hz);
     ch1.set_pulse_width(1min);
     TEST_ASSERT_EQUAL(60, TIM1->CCR1);
+};
+
+/// @brief Test assigning I/O pins to the timer
+void test_assign_pins()
+{
+    // Set stuff up
+    setUp();
+    GPIOA->registers_to_default();
+
+    // Create timer and a pin
+    Timer::Timer timer(IO::TIM_1);
+    GPIO::PIN pin{GPIO::Port::A, 0};
+
+    // Assign pins
+    GPIO::assign(pin, timer);
+
+    // Test whether the pin was assigned correctly
+    TEST_ASSERT_EQUAL(0b0010, GPIOA->MODER);
+    TEST_ASSERT_EQUAL(0b0001, GPIOA->AFR[0]);
 };
 
 // === Main ===
@@ -289,10 +310,11 @@ int main(int argc, char **argv)
     RUN_TEST(test_configure_SysTick);
     RUN_TEST(test_get_count);
     RUN_TEST(test_enable_disable);
-    RUN_TEST(test_set_frequency);
+    RUN_TEST(test_set_tick_frequency);
     RUN_TEST(test_set_top_value);
-    RUN_TEST(test_set_compare_mode);
+    RUN_TEST(test_set_pwm_mode);
     RUN_TEST(test_enable_disable_channel);
     RUN_TEST(test_set_compare_value);
+    RUN_TEST(test_assign_pins);
     return UNITY_END();
 };

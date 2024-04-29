@@ -393,6 +393,7 @@ void test_reset_pending_interrupt(void)
     TEST_ASSERT_EQUAL(0b101, EXTI->PR);
 }
 
+/* === Run tests === */
 int main(int argc, char **argv)
 {
     UNITY_BEGIN();

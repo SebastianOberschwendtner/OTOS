@@ -1,18 +1,9 @@
 # Changelog for OTOS
-## [v5.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v5.0.0) *(2022-xx-xx)*
+## [v4.2.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.2.0)
 
 >Released by `SO`
 
 ### Release Notes:
-#### [&rarrb; v4.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.1.0)
-- `Battery` :
-    - Adds function to handle USB PD contracts to *TPS65987* driver.
-    - Adds handling of system configuration registers to *TPS65987* driver.
-- `Kernel` :
-    - Adds convenience function to `ipc` to yield wait until data becomes available.
-- `misc` :
-    - Adds library `bits` for manipulating bits.
-#### [&rarrb; v4.2.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.2.0)
 - `misc` :
     - Adds library `units` for custom unit conversion.
     - Adds *frequency* unit to `units` library.
@@ -28,28 +19,37 @@
 ### Fixed Issues:
 - n/a
 
+## [v4.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.1.0)
+
+>Released by `SO`
+
+### Release Notes:
+- `Battery` :
+    - Adds function to handle USB PD contracts to *TPS65987* driver.
+    - Adds handling of system configuration registers to *TPS65987* driver.
+- `Kernel` :
+    - Adds convenience function to `ipc` to yield wait until data becomes available.
+- `misc` :
+    - Adds library `bits` for manipulating bits.
+
 ## [v4.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.0.0) *(2022-11-15)*
 
 >Released by `SO`
 
 ### Release Notes:
-#### [&rarrb; v3.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.1.0)
 - `Graphics` :
-    - Moves fonts to separate header files and makes adding fonts easier.
-    - Adds custom mono spaced fonts.
-    - Coordinate class has overloads for basic arithmetic operators.
-#### [&rarrb; v3.2.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.2.0)
-- `Drivers` :
-    - Improves DMA driver for sending data.
-    - Adds 16bit mode for SPI driver.
-#### [&rarrb; v3.3.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.3.0)
-- `Drivers` :
-    - SPI can create RX and TX DMA Streams.
-    - Adjusts PLL defines for L0 devices.
-- `Graphics` :
-    - Adds << operator to display canvas for strings.
+    - Canvas inherits from `OTOS::ostream` and satisfies its interface requirements.
+- `Kernel` :
+    - Adds *endl* manipulator for ostreams.
 
-#### [&rarrb; v3.4.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.4.0)
+### Fixed Issues:
+- #12: Update core_stm32 for STM32L0 Devices
+
+## [v3.4.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.4.0)
+
+>Released by `SO`
+
+### Release Notes:
 - `Filesystem` :
     - Files can be opened using a specific mode.
     - Files can be written to.
@@ -61,14 +61,37 @@
     - `std::string_view`
     - Integer numbers
     - `const` null terminated strings
-#### [&rarrb; v4.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.0.0)
-- `Graphics` :
-    - Canvas inherits from `OTOS::ostream` and satisfies its interface requirements.
-- `Kernel` :
-    - Adds *endl* manipulator for ostreams.
 
-### Fixed Issues:
-- #12: Update core_stm32 for STM32L0 Devices
+## [v3.3.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.3.0)
+
+>Released by `SO`
+
+### Release Notes:
+- `Drivers` :
+    - SPI can create RX and TX DMA Streams.
+    - Adjusts PLL defines for L0 devices.
+- `Graphics` :
+    - Adds << operator to display canvas for strings.
+
+## [v3.2.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.2.0)
+
+>Released by `SO`
+
+### Release Notes:
+- `Drivers` :
+    - Improves DMA driver for sending data.
+    - Adds 16bit mode for SPI driver.
+
+## [v3.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.1.0)
+
+>Released by `SO`
+
+### Release Notes:
+- `Graphics` :
+    - Moves fonts to separate header files and makes adding fonts easier.
+    - Adds custom mono spaced fonts.
+    - Coordinate class has overloads for basic arithmetic operators.
+
 
 ## [v3.0.1](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.0.1) *(2022-10-07)*
 

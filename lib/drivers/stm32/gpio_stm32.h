@@ -21,16 +21,13 @@
 #ifndef GPIO_STM32_H_
 #define GPIO_STM32_H_
 
-// === Includes ===
+/* === Includes === */
 #include "interface.h"
 #include "vendors.h"
 
-// === Declarations ===
-
 namespace GPIO
 {
-
-    // === Enums ===
+    /* === Enums === */
     enum class Port : unsigned char
     {
         A = 0, B, C, D, E, F, G, H, I, J, K
@@ -57,25 +54,7 @@ namespace GPIO
         Rising = 1, Falling = 2, Both = 3
     };
 
-    // namespace detail {
-    // === Assert Functions ===
-    // template<Port PinPort>
-    // constexpr void assert_port_valid(void)
-    // {
-    //     static_assert()
-    // };
-
-    template <unsigned char PinNumber>
-    constexpr unsigned char assert_pin_number_valid()
-    {
-        static_assert((PinNumber < 16) & (PinNumber >= 0), "Pin is not valid!");
-        return PinNumber;
-    };
-
-    // === Helper functions ===
-    // };
-
-    // === Classes ===
+    /* === Classes === */
     class PIN
     {
       public:
@@ -101,13 +80,16 @@ namespace GPIO
         /**
          * @brief Enable the desired alternate function of the pin.
          * This function does also have side effects when:
-         * - Setting the AF to I2C -> The pins is automatically set to open drain.
+         * - Setting the AF to I2C -> The pin is automatically set to open drain.
          * 
-         * @attention This version works best for STM32F4 devices since
+         * @attention This function does not check whether the alternate
+         * function actually ois valid for the pin!
+         * This version works best for STM32F4 devices since
          * they assign the same alternate function code for each pin.
-         * The STM32L0 device have a bit more complex mapping and are not
+         * The STM32L0 devices have a bit more complex mapping and are not
          * fully supported by this function!
-         * -> Use the other version of this function for STM32L0 devices.
+         * -> Use the other version of this function for STM32L0 devices if
+         * you are unsure whether your use case is covered by this overload.
          * 
          * @param function The alternate function of the pin.
          */
@@ -238,7 +220,7 @@ namespace GPIO
          * @param function The desired alternate function of a pin.
          * @return The AF code of the alternate function to put into the AF register.
          */
-        auto get_af_code(IO function) const -> unsigned char;
+        auto get_af_code(IO function) const -> char;
     };
 };
 
