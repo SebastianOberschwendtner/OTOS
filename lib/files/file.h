@@ -25,6 +25,7 @@
 #include <optional>
 #include <ctime>
 #include <cstring>
+#include <cctype>
 #include <string_view>
 #include "volumes.h"
 #include "iostream.h"

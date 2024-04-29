@@ -15,9 +15,11 @@
 - `drivers`:
     - Adds first version of *timer* interface.
     - Adds function overload to set the alternate function of an GPIO pin by directly specifying the alternate function code.
+- [v4.2.1](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.2.1):
+    - Adjusts available peripheral to pass all builds of different devices.
 
 ### Fixed Issues:
-- n/a
+- #16: Add support for STM32L071xx devices
 
 ## [v4.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.1.0)
 
@@ -41,9 +43,6 @@
     - Canvas inherits from `OTOS::ostream` and satisfies its interface requirements.
 - `Kernel` :
     - Adds *endl* manipulator for ostreams.
-
-### Fixed Issues:
-- #12: Update core_stm32 for STM32L0 Devices
 
 ## [v3.4.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.4.0)
 
@@ -72,6 +71,9 @@
     - Adjusts PLL defines for L0 devices.
 - `Graphics` :
     - Adds << operator to display canvas for strings.
+
+### Fixed Issues:
+- #12: Update core_stm32 for STM32L0 Devices
 
 ## [v3.2.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v3.2.0)
 

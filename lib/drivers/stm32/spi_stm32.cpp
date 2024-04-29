@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    spi_stm32.cpp
  * @author  SO
- * @version v3.2.0
+ * @version v4.2.1
  * @date    22-Dezember-2021
  * @brief   SPI driver for STM32 microcontrollers.
  ==============================================================================
@@ -35,9 +35,11 @@ template class SPI::Controller<IO::SPI_1>;
 template class SPI::Controller<IO::SPI_2>;
 #ifdef STM32F4
 template class SPI::Controller<IO::SPI_3>;
+#ifdef STM32F429xx
 template class SPI::Controller<IO::SPI_4>;
 template class SPI::Controller<IO::SPI_5>;
 template class SPI::Controller<IO::SPI_6>;
+#endif
 #endif
 
 // === Helper functions ===

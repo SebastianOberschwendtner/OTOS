@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2022 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2022 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -45,8 +45,8 @@ void Run_Timer_Example(void)
     Timer::Timer timer(IO::TIM_2);
 
     // Configure timer
-    timer.set_frequency(1000_Hz);
-    timer.set_duration(1s);
+    timer.set_tick_frequency(1000_Hz);
+    timer.set_period(1s);
 
     // Configure the compare channel
     auto compare_channel = timer.get_channel(1);

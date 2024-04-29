@@ -43,8 +43,10 @@ namespace detail
         {
             case IO::TIM_2:
                 return TIM2_BASE;
+#ifndef STM32L053xx
             case IO::TIM_3:
                 return TIM3_BASE;
+#endif
 #ifdef STM32F4
             case IO::TIM_1:
                 return TIM1_BASE;
@@ -70,9 +72,11 @@ namespace detail
             case IO::TIM_2:
                 RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
                 break;
+#ifndef STM32L053xx
             case IO::TIM_3:
                 RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
                 break;
+#endif
 #ifdef STM32F4
             case IO::TIM_1:
                 RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
@@ -109,8 +113,10 @@ namespace detail
 #endif
             case IO::TIM_2:
                 return F_APB1;
+#ifndef STM32L053xx
             case IO::TIM_3:
                 return F_APB1;
+#endif
             default:
                 return F_CPU;
         }

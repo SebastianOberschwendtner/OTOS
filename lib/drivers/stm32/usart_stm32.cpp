@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    usart_stm32.cpp
  * @author  SO
- * @version v2.9.0
+ * @version v4.2.0
  * @date    23-Dezember-2021
  * @brief   USART driver for STM32 microcontrollers.
  ==============================================================================
@@ -33,8 +33,10 @@
 // Provide template instanciations with all allowed bus instances
 template class USART::Controller<IO::USART_1>;
 template class USART::Controller<IO::USART_2>;
+#ifndef STM32L053xx
 template class USART::Controller<IO::USART_4>;
 template class USART::Controller<IO::USART_5>;
+#endif
 #ifdef STM32F4
 template class USART::Controller<IO::USART_3>;
 template class USART::Controller<IO::USART_6>;
