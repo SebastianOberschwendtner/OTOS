@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,21 +21,21 @@
 #ifndef TPS65987_H_
 #define TPS65987_H_
 
-// === includes ===
-// #include <stdint.h>
+/* === includes === */
+#include "drivers.h"
 #include <array>
 #include <utility>
-#include "drivers.h"
-#include "misc/bits.h"
+#include <misc/bits.h>
+#include <misc/types.h>
 
-// === Command codes ===
-namespace TPS65987
+/* === Command codes === */
+namespace tps65987
 {
 
-    // === Constants ===
+    /* === Constants === */
     constexpr uint8_t i2c_address = 0x40;
 
-    // === Bits ===
+    /* === Bits === */
     constexpr uint8_t PlugDetails_0 = (1 << 0);
     constexpr uint8_t PlugDetails_1 = (1 << 1);
     constexpr uint8_t CCPullUp_0 = (1 << 2);
@@ -44,14 +44,14 @@ namespace TPS65987
     constexpr uint8_t PortType_1 = (1 << 5);
     constexpr uint8_t PresentRole = (1 << 6);
 
-    // === Registers ===
+    /* === Registers === */
     struct reg_t
     {
         uint8_t address;
         uint8_t length;
     };
 
-    namespace Register
+    namespace registers
     {
         constexpr reg_t Mode = {0x03, 4};
         constexpr reg_t Cmd1 = {0x08, 4};
@@ -67,11 +67,11 @@ namespace TPS65987
         constexpr reg_t TX_Sink_Cap = {0x33, 57};
         constexpr reg_t Active_PDO = {0x34, 6};
         constexpr reg_t Active_RDO = {0x35, 4};
-        constexpr reg_t Power_Status {0x3F, 2};
+        constexpr reg_t Power_Status = {0x3F, 2};
         constexpr reg_t PD_Status = {0x40, 4};
-    }; // namespace Register
+    }; // namespace registers
 
-    // === Modes ===
+    /* === Modes === */
     enum class Mode : uint8_t
     {
         BOOT = 0,
@@ -80,7 +80,7 @@ namespace TPS65987
         OTHER
     };
 
-    // === Power contracts ===
+    /* === Power contracts === */
     struct Contract
     {
         uint8_t role;
@@ -95,46 +95,82 @@ namespace TPS65987
      */
     class PDO
     {
-    private:
-        uint32_t data{0}; // The raw data of the PDO
-
-    public:
-        // ** Enum with PDO types ***
+      public:
+        /* === Enum with PDO types === */
         enum Type
         {
             Fixed_Supply = 0,
             Battery = 1,
             Variable_Supply = 2,
-            APDO = 3 // Augmented Power Data Object
+            APDO = 3 /* Augmented Power Data Object */
         };
 
-        // *** Constructors ***
+        /* === Constructors === */
         PDO() = default;
         explicit PDO(uint32_t data) : data(data) {}
         PDO(const PDO &other) = default;
         PDO(PDO &&other) = default;
-        PDO &operator=(const PDO &other) = default;
-        PDO &operator=(PDO &&other) = default;
-        PDO &operator=(uint32_t data)
+        auto operator=(const PDO &other) -> PDO & = default;
+        auto operator=(PDO &&other) -> PDO & = default;
+        auto operator=(uint32_t data) -> PDO &
         {
             this->data = data;
             return *this;
         }
         ~PDO() = default;
 
-        // *** Methods ***
-        [[nodiscard]] uint32_t get_data() const;
-        [[nodiscard]] uint16_t voltage() const;
-        [[nodiscard]] uint16_t current() const;
-        [[nodiscard]] Type type() const;
-        void set_voltage(uint16_t voltage);
+        /* === Getters === */
+        /**
+         * @brief Get the raw value of the PDO.
+         *
+         * @return The raw PDO in bits 0-31.
+         */
+        [[nodiscard]] auto get_data() const -> uint32_t;
+
+        /**
+         * @brief Returns the maximum current indicated by the PDO.
+         *
+         * @return The maximum current in [mA].
+         */
+        [[nodiscard]] auto current() const -> uint16_t;
+
+        /**
+         * @brief Returns the fixed voltage indicated by the PDO.
+         *
+         * @return The voltage in [mV].
+         */
+        [[nodiscard]] auto voltage() const -> uint16_t;
+
+        /**
+         * @brief Check the type of PDO object.
+         *
+         * @return Returns the type of the object.
+         */
+        [[nodiscard]] auto type() const -> Type;
+
+        /* === Setters === */
+        /**
+         * @brief Set the current of the PDO.
+         *
+         * @param current The current in [mA].
+         */
         void set_current(uint16_t current);
+
+        /**
+         * @brief Set the voltage of the PDO.
+         *
+         * @param voltage The voltage in [mV].
+         */
+        void set_voltage(uint16_t voltage);
+
+      private:
+        uint32_t data{0}; /**< The raw data of the PDO */
     };
 
-    /* Type to pair the PDO with the power path selection 
+    /* Type to pair the PDO with the power path selection
      * for setting the source and sink capabilities
      */
-    using Capability = std::pair<TPS65987::PDO, uint8_t>;
+    using Capability = std::pair<tps65987::PDO, uint8_t>;
 
     /**
      * @brief Status bit field for non-interrupt events.
@@ -142,18 +178,18 @@ namespace TPS65987
      */
     class Status : public reg_t
     {
-    private:
-        std::array<uint8_t, Register::Status.length> data{0};
-    
-    public:
-        Status() : reg_t{Register::Status} {}
+      public:
+        Status() : reg_t{registers::Status} {}
 
-        // *** Get all the options ***
-        [[nodiscard]] auto& get_data() { return this->data; }
-        [[nodiscard]] inline bool PlugPresent() const { return (this->data.at(0) & (1 << 0)) != 0; }
-        [[nodiscard]] inline uint8_t ConnState() const { return bits::get(this->data.at(0), {0b111, 1}); }
-        [[nodiscard]] inline bool PortRole() const { return (this->data.at(0) & (1 << 5)) != 0; }
-        [[nodiscard]] inline uint8_t VbusStatus() const { return bits::get(this->data.at(2), {0b11, 4}); }
+        /* === Get all the options === */
+        [[nodiscard]] auto &get_data() { return this->data; }
+        [[nodiscard]] auto PlugPresent() const -> bool{ return (this->data.at(0) & (1 << 0)) != 0; }
+        [[nodiscard]] auto ConnState() const -> uint8_t { return bits::get(this->data.at(0), {0b111, 1}); }
+        [[nodiscard]] auto PortRole() const -> bool { return (this->data.at(0) & (1 << 5)) != 0; }
+        [[nodiscard]] auto VbusStatus() const -> uint8_t { return bits::get(this->data.at(2), {0b11, 4}); }
+
+      private:
+        std::array<uint8_t, registers::Status.length> data{0};
     };
 
     /**
@@ -162,18 +198,18 @@ namespace TPS65987
      */
     class PowerPathStatus : public reg_t
     {
-    private:
-        std::array<uint8_t, Register::Power_Path_Status.length> data{0};
-    public:
+      public:
+        PowerPathStatus() : reg_t{registers::Power_Path_Status} {}
 
-        PowerPathStatus() : reg_t{Register::Power_Path_Status} {}
+        /* === Get all the options === */
+        [[nodiscard]] auto &get_data() { return this->data; }
+        [[nodiscard]] auto PP1_CABLEswitch() const -> uint8_t { return bits::get(this->data.at(0), {0b11, 0}); }
+        [[nodiscard]] auto PP2_CABLEswitch() const -> uint8_t { return bits::get(this->data.at(0), {0b11, 2}); }
+        [[nodiscard]] auto PP1switch() const -> uint8_t { return bits::get(this->data.at(0), {0b11, 6}); }
+        [[nodiscard]] auto PP2switch() const -> uint8_t { return bits::get(this->data.at(1), {0b111, 1}); }
 
-        // *** Get all the options ***
-        [[nodiscard]] auto& get_data() { return this->data; }
-        [[nodiscard]] inline uint8_t PP1_CABLEswitch() const { return bits::get(this->data.at(0), {0b11, 0}); }
-        [[nodiscard]] inline uint8_t PP2_CABLEswitch() const { return bits::get(this->data.at(0), {0b11, 2}); }
-        [[nodiscard]] inline uint8_t PP1switch() const { return bits::get(this->data.at(0), {0b11, 6}); }
-        [[nodiscard]] inline uint8_t PP2switch() const { return bits::get(this->data.at(1), {0b111, 1}); }
+      private:
+        std::array<uint8_t, registers::Power_Path_Status.length> data{0};
     };
 
     /**
@@ -182,28 +218,28 @@ namespace TPS65987
      *  require immediate action if changed. Any modifications to this
      *  register will cause a port disconnect and reconnect with the new
      *  settings.
-     * @details Initialized by Application Customization. 
+     * @details Initialized by Application Customization.
      */
     class GlobalConfiguration : public reg_t
     {
-    private:
-        std::array<uint8_t, Register::Global_SysConfig.length> data{0};
+      public:
+        GlobalConfiguration() : reg_t{registers::Global_SysConfig} {}
 
-    public:
-        GlobalConfiguration() : reg_t{Register::Global_SysConfig} {}
-
-        // *** Get all the options ***
-        [[nodiscard]] auto& get_data() { return this->data; }
-        [[nodiscard]] inline uint8_t PP1_CABLEconfig() const { return bits::get(this->data.at(0), {0b11, 0}); }
-        [[nodiscard]] inline uint8_t PP2_CABLEconfig() const { return bits::get(this->data.at(0), {0b11, 2}); }
-        [[nodiscard]] inline uint8_t PP1config() const { return bits::get(this->data.at(2), {0b111, 0}); }
-        [[nodiscard]] inline uint8_t PP2config() const { return bits::get(this->data.at(2), {0b111, 3}); }
-
-        // *** Set all the options ***
+        /* === Set all the options === */
         inline void set_PP1_CABLEconfig(const uint8_t value) { this->data[0] = bits::set(this->data.at(0), {0b11, 0, value}); }
         inline void set_PP2_CABLEconfig(const uint8_t value) { this->data[0] = bits::set(this->data.at(0), {0b11, 2, value}); }
         inline void set_PP1config(const uint8_t value) { this->data[2] = bits::set(this->data.at(2), {0b111, 0, value}); }
         inline void set_PP2config(const uint8_t value) { this->data[2] = bits::set(this->data.at(2), {0b111, 3, value}); }
+
+        /* === Get all the options === */
+        [[nodiscard]] auto &get_data() { return this->data; }
+        [[nodiscard]] auto PP1_CABLEconfig() const -> uint8_t { return bits::get(this->data.at(0), {0b11, 0}); }
+        [[nodiscard]] auto PP2_CABLEconfig() const -> uint8_t { return bits::get(this->data.at(0), {0b11, 2}); }
+        [[nodiscard]] auto PP1config() const -> uint8_t { return bits::get(this->data.at(2), {0b111, 0}); }
+        [[nodiscard]] auto PP2config() const -> uint8_t { return bits::get(this->data.at(2), {0b111, 3}); }
+
+      private:
+        std::array<uint8_t, registers::Global_SysConfig.length> data{0};
     };
 
     /**
@@ -212,27 +248,26 @@ namespace TPS65987
      *  operation or will not require immediate action if changed. Any
      *  modifications to this register will cause a port disconnect and
      *  reconnect with the new settings.
-     * @details Initialized by Application Customization. 
+     * @details Initialized by Application Customization.
      */
     class PortConfiguration : public reg_t
     {
-    private:
-        std::array<uint8_t, Register::Port_Config.length> data{0};
-    
-    public:
-        PortConfiguration() : reg_t{Register::Port_Config} {}
+      public:
+        PortConfiguration() : reg_t{registers::Port_Config} {}
 
-        // *** Get all the options ***
-        [[nodiscard]] auto& get_data() { return this->data; }
-        [[nodiscard]] inline uint8_t TypeCStateMachine() const { return bits::get(this->data.at(0), {0b11, 0}); }
-        [[nodiscard]] inline uint8_t ReceptacleType() const { return bits::get(this->data.at(0), {0b111, 3}); }
-        [[nodiscard]] inline uint8_t VCONNsupported() const { return bits::get(this->data.at(1), {0b11, 3}); }
-
-        // *** Set all the options ***
+        /* === Set all the options === */
         inline void set_TypeCStateMachine(const uint8_t value) { this->data[0] = bits::set(this->data.at(0), {0b11, 0, value}); }
         inline void set_ReceptacleType(const uint8_t value) { this->data[0] = bits::set(this->data.at(0), {0b111, 3, value}); }
         inline void set_VCONNsupported(const uint8_t value) { this->data[1] = bits::set(this->data.at(1), {0b11, 3, value}); }
 
+        /* === Get all the options === */
+        [[nodiscard]] auto &get_data() { return this->data; }
+        [[nodiscard]] auto TypeCStateMachine() const -> uint8_t { return bits::get(this->data.at(0), {0b11, 0}); }
+        [[nodiscard]] auto ReceptacleType() const -> uint8_t { return bits::get(this->data.at(0), {0b111, 3}); }
+        [[nodiscard]] auto VCONNsupported() const -> uint8_t { return bits::get(this->data.at(1), {0b11, 3}); }
+
+      private:
+        std::array<uint8_t, registers::Port_Config.length> data{0};
     };
 
     /**
@@ -241,80 +276,64 @@ namespace TPS65987
      *  port. The PD Controller will not take immediate action upon writing.
      *  Changes made to this register will take effect the next time the
      *  appropriate policy is invoked.
-     * @details Initialized by Application Customization. 
+     * @details Initialized by Application Customization.
      */
     class PortControl : public reg_t
     {
-    private:
-        std::array<uint8_t, Register::Port_Ctrl.length> data{0};
+      public:
+        PortControl() : reg_t{registers::Port_Ctrl} {}
 
-    public:
-        PortControl() : reg_t{Register::Port_Ctrl} {}
-
-        // *** Get all the options ***
-        [[nodiscard]] auto& get_data() { return this->data; }
-        [[nodiscard]] inline uint8_t TypeCCurrent() const { return bits::get(this->data.at(0), {0b11, 0}); }
-        [[nodiscard]] inline uint8_t ChargerAdvertiseEnable() const { return bits::get(this->data.at(3), {0b111, 2}); }
-        [[nodiscard]] inline uint8_t ChargerDetectEnable() const { return bits::get(this->data.at(3), {0b11, 6}); }
-
-        // *** Set all the options ***
+        /* === Set all the options === */
         inline void set_TypeCCurrent(const uint8_t value) { this->data[0] = bits::set(this->data.at(0), {0b11, 0, value}); }
         inline void set_ChargerAdvertiseEnable(const uint8_t value) { this->data[3] = bits::set(this->data.at(3), {0b111, 2, value}); }
         inline void set_ChargerDetectEnable(const uint8_t value) { this->data[3] = bits::set(this->data.at(3), {0b11, 6, value}); }
+
+        /* === Get all the options === */
+        [[nodiscard]] auto &get_data() { return this->data; }
+        [[nodiscard]] auto TypeCCurrent() const -> uint8_t { return bits::get(this->data.at(0), {0b11, 0}); }
+        [[nodiscard]] auto ChargerAdvertiseEnable() const -> uint8_t { return bits::get(this->data.at(3), {0b111, 2}); }
+        [[nodiscard]] auto ChargerDetectEnable() const -> uint8_t { return bits::get(this->data.at(3), {0b11, 6}); }
+
+      private:
+        std::array<uint8_t, registers::Port_Ctrl.length> data{0};
     };
 
-    using Bus::Data_t;
+    using bus::Data_t;
     template <class bus_controller>
     class Controller
     {
-    private:
-        // *** properties ***
-        bus_controller mybus;
-        Data_t i2c_data = {0};
-        std::array<char, 6> buffer_cmd = {0x08, 0x04, 0, 0, 0, 0}; // NOLINT
-        Mode mode_active = Mode::BOOT;
-        mutable char cmd_active[4] = {0}; // NOLINT
-        Contract contract_active = {0, 0, 0, 0};
-
-    public:
-        std::array<uint8_t, 66> buffer_data = {0}; // NOLINT
-        // *** Constructor ***
+      public:
+        /* === Constructor === */
         /**
          * @brief Constructor for PD controller.
          * @param bus_used The reference to the used bus peripheral.
          */
         explicit Controller(bus_controller bus_used) : mybus{bus_used} {}
 
-        // Properties
-
-        // *** Methods ***
-        bool initialize();
+        /* === Getters === */
         auto get_mode() const -> Mode { return this->mode_active; }
         auto get_active_command() const -> char * { return &this->cmd_active[0]; }
         auto get_active_contract() const -> Contract { return this->contract_active; }
-        bool read_register(reg_t reg);
-        bool write_register(reg_t reg);
-        bool read_active_command();
-        bool write_command(const char *cmd);
-        bool read_mode();
-        bool read_PD_status();
-        auto read_status() -> std::optional<uint32_t>;
-        auto read_active_pdo() -> std::optional<PDO>;
-        auto read_TX_sink_pdo(uint8_t pdo_number) -> std::optional<PDO>;
-        void register_TX_source_capability(const Capability &cap);
+
+        /* === Methods === */
+        /**
+         * @brief Initialize the PD IC based on its current mode.
+         * @return Returns True when the IC was initialized successfully.
+         */
+        auto initialize() -> bool;
 
         /**
          * @brief Read a register from the TPS65987 and directly
          *        copy the data to the register class.
-         * 
+         *
          * @tparam Treg The register class.
          * @param reg The register object to copy the data to.
          * @return Returns true if the register is read successfully.
          */
         template <class Treg>
-        bool read(Treg &reg)
+        auto read(Treg &reg) -> bool
         {
-            // Read the register
+            /* Read the register */
             if (!this->read_register({reg.address, reg.length}))
                 return false;
 
@@ -324,32 +343,117 @@ namespace TPS65987
             std::copy(
                 this->buffer_data.rend() - reg.length - 1,
                 this->buffer_data.rend() - 1,
-                reg.get_data().begin()
-            );
+                reg.get_data().begin());
 
             return true;
         }
 
         /**
+         * @brief Read the currently active command and update the
+         * active command property.
+         * @return Returns True when the command register was read successfully.
+         */
+        auto read_active_command() -> bool;
+
+        /**
+         * @brief Read the active PDO from the PD Controller.
+         *
+         * @return True and the active PDO when read successfully.
+         */
+        auto read_active_pdo() -> std::optional<PDO>;
+
+        /**
+         * @brief Read the active mode of the controller.
+         * @return Returns True when the mode was read successfully.
+         */
+        auto read_mode() -> bool;
+
+        /**
+         * @brief Read the current PD status from the PD Controller.
+         * @return Returns True when the status was read successfully.
+         */
+        auto read_PD_status() -> bool;
+
+        /**
+         * @brief Read a register of the PD controller.
+         * The function takes the specific length of the register into account.
+         * @param reg The register to read from.
+         * @return Returns True when the register was read successfully.
+         */
+        auto read_register(reg_t reg) -> bool;
+
+        /**
+         * @brief Read the status register [0x1A] from the PD Controller.
+         * @return Returns True and the value of the lower 4 bytes of the status when read successfully.
+         */
+        auto read_status() -> std::optional<uint32_t>;
+
+        /**
+         * @brief Read a TX source PDO from the PD Controller.
+         *
+         * @param pdo_number The PDO number to read.
+         * @return Returns True and the PDO when read successfully and when the PDO number is valid.
+         */
+        auto read_TX_sink_pdo(uint8_t pdo_number) -> std::optional<PDO>;
+
+        /**
+         * @brief Update the tx buffer with the given capability.
+         *
+         * A capability is a PDO with the corresponding power path configuration.
+         * Make sure to delete the tx buffer before calling this function!
+         *
+         * @param cap The capability to update the tx buffer with.
+         */
+        void register_TX_source_capability(const Capability &cap);
+
+        /**
          * @brief Write a register to the TPS65987.
-         * 
+         *
          * @tparam Treg The register class.
          * @param reg The register object to write.
          * @return Returns true if the register is written successfully.
          */
         template <class Treg>
-        bool write(Treg &reg)
+        auto write(Treg &reg) -> bool
         {
-            // Copy the data to the buffer
+            /* Copy the data to the buffer */
             std::copy(
                 reg.get_data().cbegin(),
                 reg.get_data().cend(),
-                this->buffer_data.begin() + 2
-            );
+                this->buffer_data.begin() + 2);
 
-            // Write the register
+            /* Write the register */
             return this->write_register({reg.address, reg.length});
         }
+
+        /**
+         * @brief Write a command to the command register
+         * The Data1 register has to be written first, when the
+         * command expects data!
+         * @param cmd The command string => has to have 4 characters.
+         * @return Returns True when the command was send successfully.
+         */
+        auto write_command(const char *cmd) -> bool;
+
+        /**
+         * @brief Write a register of the PD controller.
+         * The function takes the specific length of the register into account.
+         * @param reg The register to write to.
+         * @return Returns True when the register was written successfully.
+         */
+        auto write_register(reg_t reg) -> bool;
+
+        /* === Properties === */
+        std::array<uint8_t, 66> buffer_data = {0}; /* NOLINT */
+
+      private:
+        /* === Properties === */
+        bus_controller mybus; /**< The used bus controller. */
+        Data_t i2c_data = {0}; /**< The data buffer for the i2c communication. */
+        std::array<char, 6> buffer_cmd = {0x08, 0x04, 0, 0, 0, 0}; /* NOLINT */
+        Mode mode_active = Mode::BOOT; /**< The active mode of the TPS65987. */
+        mutable char cmd_active[4] = {0}; /* NOLINT */
+        Contract contract_active = {0, 0, 0, 0}; /**< The active PDO contract. */
     };
-}; // namespace TPS65987
-#endif
+};     // namespace TPS65987
+#endif // TPS65987_H_
