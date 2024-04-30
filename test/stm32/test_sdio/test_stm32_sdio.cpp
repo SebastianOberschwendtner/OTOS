@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,146 +18,160 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    test_stm32_sdio.cpp
  * @author  SO
- * @version v2.7.3
+ * @version v5.0.0
  * @date    29-December-2021
  * @brief   Unit tests for testing the sdio driver for stm32 microcontrollers.
- ******************************************************************************
+ ==============================================================================
  */
 
-// === Includes ===
+/* === Includes === */
 #include <unity.h>
 #include <mock.h>
 #include <array>
 #include "stm32/sdio_stm32.h"
 
-/** === Test List ===
+/* === Test List ===
 * ▢ error codes:
 *   ✓ error -130: Timeout during transfer
 *   ✓ error -131: Bus busy during start of transfer
 */
 
-// === Tests ===
-void setUp(void) {
-    // set stuff up here
+/* === Tests === */
+void setUp() {
+    /* set stuff up here */
     RCC->registers_to_default();
     SDIO->registers_to_default();
 };
 
-void tearDown(void) {
-// clean stuff up here
+void tearDown() {
+/* clean stuff up here */
 };
 
-/// @brief Test the initialization of the controller
-void test_rcc_clock_enable(void)
+/** 
+ * @brief Test the initialization of the controller
+ */
+void test_rcc_clock_enable()
 {
     setUp();
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
 
-    // Test the side effects
+    /* Test the side effects */
     TEST_ASSERT_BIT_HIGH(RCC_APB2ENR_SDIOEN_Pos, RCC->APB2ENR);
 };
 
-/// @brief Test setting the interface clock speed
-void test_set_clock(void)
+/** 
+ * @brief Test setting the interface clock speed
+ */
+void test_set_clock()
 {
     setUp();
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
 
-    // Test the side effects
+    /* Test the side effects */
     TEST_ASSERT_BITS(SDIO_CLKCR_CLKDIV_Msk, 46, SDIO->CLKCR);
     TEST_ASSERT_BIT_HIGH(SDIO_CLKCR_CLKEN_Pos, SDIO->CLKCR);
 
-    // Change clock rate again
+    /* Change clock rate again */
     SDIO->CLKCR &= ~SDIO_CLKCR_CLKEN;
     UUT.set_clock(400'000);
     TEST_ASSERT_BITS(SDIO_CLKCR_CLKDIV_Msk, 118, SDIO->CLKCR);
     TEST_ASSERT_BIT_LOW(SDIO_CLKCR_CLKEN_Pos, SDIO->CLKCR);
 
-    // Change the powersave option
+    /* Change the powersave option */
     SDIO->CLKCR |= SDIO_CLKCR_CLKEN;
     UUT.set_clock(400'000, true);
     TEST_ASSERT_BIT_HIGH(SDIO_CLKCR_PWRSAV_Pos, SDIO->CLKCR);
     TEST_ASSERT_BIT_HIGH(SDIO_CLKCR_CLKEN_Pos, SDIO->CLKCR);
 };
 
-/// @brief Test setting the width of the bus
-void test_set_width(void)
+/** 
+ * @brief Test setting the width of the bus
+ */
+void test_set_width()
 {
     setUp();
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
 
-    // Test the side effects
-    UUT.set_bus_width( SD::Width::Default );
+    /* Test the side effects */
+    UUT.set_bus_width( sdio::Width::Default );
     TEST_ASSERT_BITS_LOW( SDIO_CLKCR_WIDBUS_Msk, SDIO->CLKCR);
-    UUT.set_bus_width( SD::Width::_4Bit );
+    UUT.set_bus_width( sdio::Width::_4Bit );
     TEST_ASSERT_BIT_HIGH( SDIO_CLKCR_WIDBUS_Pos, SDIO->CLKCR);
-    UUT.set_bus_width( SD::Width::_8Bit );
+    UUT.set_bus_width( sdio::Width::_8Bit );
     TEST_ASSERT_BIT_HIGH( SDIO_CLKCR_WIDBUS_Pos + 1, SDIO->CLKCR);
 };
 
-/// @brief Test enabling the peripheral
-void test_enable(void)
+/** 
+ * @brief Test enabling the peripheral
+ */
+void test_enable()
 {
     setUp();
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
 
-    // Test the side effects
+    /* Test the side effects */
     UUT.enable();
     TEST_ASSERT_BIT_HIGH(SDIO_CLKCR_CLKEN_Pos, SDIO->CLKCR);
     TEST_ASSERT_EQUAL(0b11, SDIO->POWER);
 };
 
-/// @brief Test setting the hardware timeout
-void test_set_timeout(void)
+/** 
+ * @brief Test setting the hardware timeout
+ */
+void test_set_timeout()
 {
     setUp();
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
 
-    // Test the side effects
+    /* Test the side effects */
     UUT.set_hardware_timeout(0xFF);
     TEST_ASSERT_EQUAL(0xFF, SDIO->DTIMER);
 };
 
-/// @brief Test setting the block transfer byte length
-void test_set_block_length(void)
+/** 
+ * @brief Test setting the block transfer byte length
+ */
+void test_set_block_length()
 {
     setUp();
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
 
-    // Test the side effects
+    /* Test the side effects */
     UUT.set_data_length(512);
     TEST_ASSERT_EQUAL(512, SDIO->DLEN);
 };
 
-/// @brief Test getting the peripheral status
-void test_get_status(void)
+/** 
+ * @brief Test getting the peripheral status
+ */
+void test_get_status()
 {
     setUp();
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
 
-    // Test whether a command was sent
+    /* Test whether a command was sent */
     SDIO->STA = 0;
     TEST_ASSERT_FALSE( UUT.command_sent() );
     SDIO->STA = SDIO_STA_CMDSENT;
     TEST_ASSERT_TRUE( UUT.command_sent() );
 
-    // Test whether a command response was received
+    /* Test whether a command response was received */
     SDIO->STA = 0;
     TEST_ASSERT_FALSE( UUT.command_response_received() );
     SDIO->STA = SDIO_STA_CMDREND;
     TEST_ASSERT_TRUE( UUT.command_response_received() );
 
-    // Test whether the bus is busy
+    /* Test whether the bus is busy */
     SDIO->STA = 0;
     TEST_ASSERT_FALSE( UUT.is_busy() );
     SDIO->STA = SDIO_STA_CMDACT;
@@ -167,7 +181,7 @@ void test_get_status(void)
     SDIO->STA = SDIO_STA_TXACT;
     TEST_ASSERT_TRUE( UUT.is_busy() );
 
-    // Test hardware timeouts
+    /* Test hardware timeouts */
     SDIO->STA = 0;
     TEST_ASSERT_FALSE( UUT.hardware_timeout() );
     SDIO->STA = SDIO_STA_DTIMEOUT;
@@ -175,55 +189,59 @@ void test_get_status(void)
     SDIO->STA = SDIO_STA_CTIMEOUT;
     TEST_ASSERT_TRUE( UUT.hardware_timeout() );
 
-    // Test the command response CRC fail
+    /* Test the command response CRC fail */
     SDIO->STA = 0;
     TEST_ASSERT_FALSE( UUT.command_response_crc_fail() );
     SDIO->STA = SDIO_STA_CCRCFAIL;
     TEST_ASSERT_TRUE( UUT.command_response_crc_fail() );
 
-    // Test the end of a data block transfer
+    /* Test the end of a data block transfer */
     SDIO->STA = 0;
     TEST_ASSERT_FALSE( UUT.data_block_transfer_finished() );
     SDIO->STA = SDIO_STA_DBCKEND;
     TEST_ASSERT_TRUE( UUT.data_block_transfer_finished() );
 
-    // Test checking RX FIFO for valid data
+    /* Test checking RX FIFO for valid data */
     SDIO->STA = 0;
     TEST_ASSERT_FALSE( UUT.data_RX_available() );
     SDIO->STA = SDIO_STA_RXDAVL;
     TEST_ASSERT_TRUE( UUT.data_RX_available() );
 
-    // Test checking TX FIFO empty
+    /* Test checking TX FIFO empty */
     SDIO->STA = 0;
     TEST_ASSERT_FALSE( UUT.data_TX_empty() );
     SDIO->STA = SDIO_STA_TXFIFOE;
     TEST_ASSERT_TRUE( UUT.data_TX_empty() );
 };
 
-/// @brief Test clearing all flags
-void test_clear_flags(void)
+/** 
+ * @brief Test clearing all flags
+ */
+void test_clear_flags()
 {
     setUp();
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
 
-    // Test clearing all command flags
+    /* Test clearing all command flags */
     UUT.clear_command_flags();
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CMDSENTC_Pos, SDIO->ICR);
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CMDRENDC_Pos, SDIO->ICR);
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CCRCFAILC_Pos, SDIO->ICR);
 };
 
-/// @brief Test sending a command without expected response
-void test_command_no_response(void)
+/** 
+ * @brief Test sending a command without expected response
+ */
+void test_command_no_response()
 {
     setUp();
-    unsigned long Expected = 0;
+    uint32_t Expected = 0;
 
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
 
-    // Test a successful transfer
+    /* Test a successful transfer */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CMDSENT;
     TEST_ASSERT_TRUE( UUT.send_command_no_response(0x12, 0x34) );
@@ -233,14 +251,14 @@ void test_command_no_response(void)
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CMDSENTC_Pos, SDIO->ICR);
     TEST_ASSERT_EQUAL( Error::Code::None, UUT.get_error() );
 
-    // Test a timeout during transfer
+    /* Test a timeout during transfer */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CTIMEOUT;
     TEST_ASSERT_FALSE( UUT.send_command_no_response(0x12, 0x34) );
     TEST_ASSERT_EQUAL(0, SDIO->ICR);
     TEST_ASSERT_EQUAL(Error::Code::SDIO_Timeout, UUT.get_error() );
 
-    // Test transmitting when bus is busy
+    /* Test transmitting when bus is busy */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CMDACT;
     TEST_ASSERT_FALSE( UUT.send_command_no_response(0x12, 0x34) );
@@ -248,16 +266,18 @@ void test_command_no_response(void)
     TEST_ASSERT_EQUAL(Error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
 };
 
-/// @brief Test sending a command with a expected R1 response
-void test_command_R1_response(void)
+/** 
+ * @brief Test sending a command with a expected R1 response
+ */
+void test_command_R1_response()
 {
     setUp();
-    unsigned long Expected = 0;
+    uint32_t Expected = 0;
 
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
 
-    // Test a successful transfer
+    /* Test a successful transfer */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CMDREND;
     SDIO->RESP1 = 0x55;
@@ -270,7 +290,7 @@ void test_command_R1_response(void)
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CMDRENDC_Pos, SDIO->ICR);
     TEST_ASSERT_EQUAL( Error::Code::None, UUT.get_error() );
 
-    // Test a timeout during transfer
+    /* Test a timeout during transfer */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CTIMEOUT;
     SDIO->RESP1 = 0x55;
@@ -279,7 +299,7 @@ void test_command_R1_response(void)
     TEST_ASSERT_EQUAL(0, SDIO->ICR);
     TEST_ASSERT_EQUAL(Error::Code::SDIO_Timeout, UUT.get_error() );
 
-    // Test transmitting when bus is busy
+    /* Test transmitting when bus is busy */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CMDACT;
     SDIO->RESP1 = 0x55;
@@ -289,16 +309,18 @@ void test_command_R1_response(void)
     TEST_ASSERT_EQUAL(Error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
 };
 
-/// @brief Test sending a command with a expected R2 response
-void test_command_R2_response(void)
+/** 
+ * @brief Test sending a command with a expected R2 response
+ */
+void test_command_R2_response()
 {
     setUp();
-    unsigned long Expected = 0;
+    uint32_t Expected = 0;
 
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
 
-    // Test a successful transfer
+    /* Test a successful transfer */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CMDREND;
     SDIO->RESP1 = 0x55;
@@ -311,7 +333,7 @@ void test_command_R2_response(void)
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CMDRENDC_Pos, SDIO->ICR);
     TEST_ASSERT_EQUAL( Error::Code::None, UUT.get_error() );
 
-    // Test a timeout during transfer
+    /* Test a timeout during transfer */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CTIMEOUT;
     SDIO->RESP1 = 0x55;
@@ -320,7 +342,7 @@ void test_command_R2_response(void)
     TEST_ASSERT_EQUAL(0, SDIO->ICR);
     TEST_ASSERT_EQUAL(Error::Code::SDIO_Timeout, UUT.get_error() );
 
-    // Test transmitting when bus is busy
+    /* Test transmitting when bus is busy */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CMDACT;
     SDIO->RESP1 = 0x55;
@@ -330,16 +352,18 @@ void test_command_R2_response(void)
     TEST_ASSERT_EQUAL(Error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
 };
 
-/// @brief Test sending a command with a expected R3 response
-void test_command_R3_response(void)
+/** 
+ * @brief Test sending a command with a expected R3 response
+ */
+void test_command_R3_response()
 {
     setUp();
-    unsigned long Expected = 0;
+    uint32_t Expected = 0;
 
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
 
-    // Test a successful transfer when CRC did not match (which is allowed for R3 responses)
+    /* Test a successful transfer when CRC did not match (which is allowed for R3 responses) */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CCRCFAIL;
     SDIO->RESP1 = 0x55;
@@ -353,7 +377,7 @@ void test_command_R3_response(void)
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CCRCFAILC_Pos, SDIO->ICR);
     TEST_ASSERT_EQUAL( Error::Code::None, UUT.get_error() );
 
-    // Test a successful transfer when CRC match
+    /* Test a successful transfer when CRC match */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CMDREND;
     SDIO->RESP1 = 0x55;
@@ -367,7 +391,7 @@ void test_command_R3_response(void)
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CCRCFAILC_Pos, SDIO->ICR);
     TEST_ASSERT_EQUAL( Error::Code::None, UUT.get_error() );
 
-    // Test a timeout during transfer
+    /* Test a timeout during transfer */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CTIMEOUT;
     SDIO->RESP1 = 0x55;
@@ -376,7 +400,7 @@ void test_command_R3_response(void)
     TEST_ASSERT_EQUAL(0, SDIO->ICR);
     TEST_ASSERT_EQUAL(Error::Code::SDIO_Timeout, UUT.get_error() );
 
-    // Test transmitting when bus is busy
+    /* Test transmitting when bus is busy */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CMDACT;
     SDIO->RESP1 = 0x55;
@@ -386,35 +410,39 @@ void test_command_R3_response(void)
     TEST_ASSERT_EQUAL(Error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
 };
 
-/// @brief Test reading the data from a long response
-void test_get_long_response(void)
+/** 
+ * @brief Test reading the data from a long response
+ */
+void test_get_long_response()
 {
     setUp();
 
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
     SDIO->RESP1 = 0x12;
     SDIO->RESP2 = 0x13;
     SDIO->RESP3 = 0x14;
     SDIO->RESP4 = 0x15;
 
-    // Test reading the registers
+    /* Test reading the registers */
     TEST_ASSERT_EQUAL(0x12, UUT.get_long_response<0>() );
     TEST_ASSERT_EQUAL(0x13, UUT.get_long_response<1>() );
     TEST_ASSERT_EQUAL(0x14, UUT.get_long_response<2>() );
     TEST_ASSERT_EQUAL(0x15, UUT.get_long_response<3>() );
 };
 
-/// @brief Test reading block data
-void test_read_block(void)
+/** 
+ * @brief Test reading block data
+ */
+void test_read_block()
 {
     setUp();
 
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
-    std::array<unsigned long, 128> buffer{0};
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
+    std::array<uint32_t, 128> buffer{0};
 
-    // Test reading a block with no errors
+    /* Test reading a block with no errors */
     SDIO->STA = SDIO_STA_DBCKEND;
     TEST_ASSERT_TRUE( UUT.read_single_block(buffer.begin(), buffer.end()) );
     TEST_ASSERT_EQUAL( 512, SDIO->DLEN );
@@ -422,12 +450,12 @@ void test_read_block(void)
     TEST_ASSERT_EQUAL( SDIO_ICR_DBCKENDC | SDIO_ICR_DATAENDC, SDIO->ICR);
     TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error() );
 
-    // Test reading a block when bus is busy
+    /* Test reading a block when bus is busy */
     SDIO->STA = SDIO_STA_RXACT;
     TEST_ASSERT_FALSE( UUT.read_single_block(buffer.begin(), buffer.end()) );
     TEST_ASSERT_EQUAL(Error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
 
-    // Test reading a block when a timeout occurs
+    /* Test reading a block when a timeout occurs */
     SDIO->STA = SDIO_STA_DTIMEOUT;
     TEST_ASSERT_FALSE( UUT.read_single_block(buffer.begin(), buffer.end()) );
     TEST_ASSERT_EQUAL( 512, SDIO->DLEN );
@@ -436,16 +464,18 @@ void test_read_block(void)
     TEST_ASSERT_EQUAL(Error::Code::SDIO_Timeout, UUT.get_error() );
 };
 
-/// @brief Test write block data
-void test_write_block(void)
+/** 
+ * @brief Test write block data
+ */
+void test_write_block()
 {
     setUp();
 
-    // Create Controller -> SDIO
-    SD::Controller UUT(1'000'000);
-    std::array<unsigned long, 128> buffer{0x11};
+    /* Create Controller -> SDIO */
+    auto UUT = sdio::Controller::create(1'000'000);
+    std::array<uint32_t, 128> buffer{0x11};
 
-    // Test reading a block with no errors
+    /* Test reading a block with no errors */
     SDIO->STA = SDIO_STA_DBCKEND | SDIO_STA_TXFIFOE;
     TEST_ASSERT_TRUE( UUT.write_single_block(buffer.begin(), buffer.end()) );
     TEST_ASSERT_EQUAL( 512, SDIO->DLEN );
@@ -453,12 +483,12 @@ void test_write_block(void)
     TEST_ASSERT_EQUAL( SDIO_ICR_DBCKENDC | SDIO_ICR_DATAENDC, SDIO->ICR);
     TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error() );
 
-    // Test reading a block when bus is busy
+    /* Test reading a block when bus is busy */
     SDIO->STA = SDIO_STA_TXACT;
     TEST_ASSERT_FALSE( UUT.write_single_block(buffer.begin(), buffer.end()) );
     TEST_ASSERT_EQUAL(Error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
 
-    // Test reading a block when a timeout occurs
+    /* Test reading a block when a timeout occurs */
     SDIO->STA = SDIO_STA_DTIMEOUT;
     TEST_ASSERT_FALSE( UUT.write_single_block(buffer.begin(), buffer.end()) );
     TEST_ASSERT_EQUAL( 512, SDIO->DLEN );
@@ -467,7 +497,7 @@ void test_write_block(void)
     TEST_ASSERT_EQUAL(Error::Code::SDIO_Timeout, UUT.get_error() );
 };
 
-// === Main ===
+/* === Main === */
 int main(int argc, char **argv)
 {
     UNITY_BEGIN();

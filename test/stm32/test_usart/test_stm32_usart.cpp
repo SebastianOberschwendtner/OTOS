@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,96 +18,102 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    test_stm32_usart.cpp
  * @author  SO
- * @version v2.7.3
+ * @version v5.0.0
  * @date    23-December-2021
  * @brief   Unit tests for testing the usart driver for stm32 microcontrollers.
- ******************************************************************************
+ ==============================================================================
  */
 
-// === Includes ===
+/* === Includes === */
 #include <unity.h>
 #include <mock.h>
 #include <array>
 #include <numeric>
 #include "stm32/usart_stm32.h"
 
-/** === Test List ===
+/* === Test List ===
 * ▢ error codes:
 *   ✓ error -120: Timeout during transfer
 *   ✓ error -121: Bus busy during start of transfer
 */
 
+/* === Fixtures === */
+using stm32::Peripheral;
 
 
-// === Tests ===
-void setUp(void) {
-// set stuff up here
+/* === Tests === */
+void setUp() {
+/* set stuff up here */
 RCC->registers_to_default();
 USART1->registers_to_default();
 };
 
-void tearDown(void) {
-// clean stuff up here
+void tearDown() {
+/* clean stuff up here */
 };
 
-/// @brief Test the initialization of the controller
-void test_rcc_clock_enable(void)
+/** 
+ * @brief Test the initialization of the controller
+ */
+void test_rcc_clock_enable()
 {
     setUp();
 
-    // Create Controller -> USART1
+    /* Create Controller -> USART1 */
     RCC->registers_to_default();
-    USART::Controller<IO::USART_1> UUT1(9600);
+    auto UUT1 = usart::Controller::create<Peripheral::USART_1>(9600);
     TEST_ASSERT_BIT_HIGH(RCC_APB2ENR_USART1EN_Pos, RCC->APB2ENR);
 
-    // Create Controller -> USART2
+    /* Create Controller -> USART2 */
     RCC->registers_to_default();
-    USART::Controller<IO::USART_2> UUT2(9600);
+    auto UUT2 = usart::Controller::create<Peripheral::USART_2>(9600);
     TEST_ASSERT_BIT_HIGH(RCC_APB1ENR_USART2EN_Pos, RCC->APB1ENR);
 
-    // Create Controller -> USART3
+    /* Create Controller -> USART3 */
     RCC->registers_to_default();
-    USART::Controller<IO::USART_3> UUT3(9600);
+    auto UUT3 = usart::Controller::create<Peripheral::USART_3>(9600);
     TEST_ASSERT_BIT_HIGH(RCC_APB1ENR_USART3EN_Pos, RCC->APB1ENR);
 
-    // Create Controller -> USART4
+    /* Create Controller -> USART4 */
     RCC->registers_to_default();
-    USART::Controller<IO::USART_4> UUT4(9600);
+    auto UUT4 = usart::Controller::create<Peripheral::USART_4>(9600);
     TEST_ASSERT_BIT_HIGH(RCC_APB1ENR_UART4EN_Pos, RCC->APB1ENR);
 
-    // Create Controller -> USART5
+    /* Create Controller -> USART5 */
     RCC->registers_to_default();
-    USART::Controller<IO::USART_5> UUT5(9600);
+    auto UUT5 = usart::Controller::create<Peripheral::USART_5>(9600);
     TEST_ASSERT_BIT_HIGH(RCC_APB1ENR_UART5EN_Pos, RCC->APB1ENR);
 
-    // Create Controller -> USART6
+    /* Create Controller -> USART6 */
     RCC->registers_to_default();
-    USART::Controller<IO::USART_6> UUT6(9600);
+    auto UUT6 = usart::Controller::create<Peripheral::USART_6>(9600);
     TEST_ASSERT_BIT_HIGH(RCC_APB2ENR_USART6EN_Pos, RCC->APB2ENR);
 
-    // Create Controller -> USART7
+    /* Create Controller -> USART7 */
     RCC->registers_to_default();
-    USART::Controller<IO::USART_7> UUT7(9600);
+    auto UUT7 = usart::Controller::create<Peripheral::USART_7>(9600);
     TEST_ASSERT_BIT_HIGH(RCC_APB1ENR_UART7EN_Pos, RCC->APB1ENR);
 
-    // Create Controller -> USART8
+    /* Create Controller -> USART8 */
     RCC->registers_to_default();
-    USART::Controller<IO::USART_8> UUT8(9600);
+    auto UUT8 = usart::Controller::create<Peripheral::USART_8>(9600);
     TEST_ASSERT_BIT_HIGH(RCC_APB1ENR_UART8EN_Pos, RCC->APB1ENR);
 };
 
-/// @brief Test the configuration of the peripheral during construction
-void test_constructor(void)
+/** 
+ * @brief Test the configuration of the peripheral during construction
+ */
+void test_constructor()
 {
     setUp();
 
-    // Create Object
-    USART::Controller<IO::USART_1> UUT(9'600, 8, USART::StopBits::_1_0);
+    /* Create Object */
+    auto UUT = usart::Controller::create<Peripheral::USART_1>(9600, 8, usart::StopBits::_1_0);
 
-    // Test side effects
+    /* Test side effects */
     TEST_ASSERT_BIT_LOW(USART_CR1_M_Pos, USART1->CR1);
     TEST_ASSERT_BIT_HIGH(USART_CR1_TE_Pos, USART1->CR1);
     TEST_ASSERT_BIT_HIGH(USART_CR1_RE_Pos, USART1->CR1);
@@ -116,10 +122,10 @@ void test_constructor(void)
     TEST_ASSERT_BIT_LOW(USART_CR2_STOP_Pos + 1, USART1->CR2);
     TEST_ASSERT_EQUAL((26 << 4), USART1->BRR);
 
-    // Create Object
-    USART::Controller<IO::USART_1> UUT1(115'200, 9, USART::StopBits::_2_0);
+    /* Create Object */
+    auto UUT1 = usart::Controller::create<Peripheral::USART_1>(115'200, 9, usart::StopBits::_2_0);
 
-    // Test side effects
+    /* Test side effects */
     TEST_ASSERT_BIT_HIGH(USART_CR1_M_Pos, USART1->CR1);
     TEST_ASSERT_BIT_HIGH(USART_CR1_TE_Pos, USART1->CR1);
     TEST_ASSERT_BIT_HIGH(USART_CR1_RE_Pos, USART1->CR1);
@@ -129,58 +135,66 @@ void test_constructor(void)
     TEST_ASSERT_EQUAL((2 << 4) | 2, USART1->BRR);
 };
 
-/// @brief Test enabling the USART peripheral
-void test_enable(void)
+/** 
+ * @brief Test enabling the USART peripheral
+ */
+void test_enable()
 {
     setUp();
-    USART::Controller<IO::USART_1> UUT(9'600, 8, USART::StopBits::_1_0);
+    auto UUT = usart::Controller::create<Peripheral::USART_1>(9'600, 8, usart::StopBits::_1_0);
 
-    // Test the enabling
+    /* Test the enabling */
     UUT.enable();
     TEST_ASSERT_BIT_HIGH(USART_CR1_UE_Pos, USART1->CR1);
 
-    // Test dissabling the bus again
+    /* Test dissabling the bus again */
     UUT.disable();
     TEST_ASSERT_BIT_LOW(USART_CR1_UE_Pos, USART1->CR1);
 };
 
-/// @brief Test checking the transfer state
-void test_last_transmit_finished(void)
+/** 
+ * @brief Test checking the transfer state
+ */
+void test_last_transmit_finished()
 {
     setUp();
-    USART::Controller<IO::USART_1> UUT(9'600, 8, USART::StopBits::_1_0);
+    auto UUT = usart::Controller::create<Peripheral::USART_1>(9'600, 8, usart::StopBits::_1_0);
 
-    // When the transmit is not finished
+    /* When the transmit is not finished */
     USART1->SR = 0;
     TEST_ASSERT_FALSE( UUT.last_transmit_finished() );
 
-    // When the transmit is finished
+    /* When the transmit is finished */
     USART1->SR = USART_SR_TXE;
     TEST_ASSERT_TRUE( UUT.last_transmit_finished() );
 };
 
-/// @brief Test checking whether the bus is busy
-void test_bus_busy(void)
+/** 
+ * @brief Test checking whether the bus is busy
+ */
+void test_bus_busy()
 {
     setUp();
-    USART::Controller<IO::USART_1> UUT(9'600, 8, USART::StopBits::_1_0);
+    auto UUT = usart::Controller::create<Peripheral::USART_1>(9'600, 8, usart::StopBits::_1_0);
 
-    // Check when bus is busy
+    /* Check when bus is busy */
     USART1->SR = 0;
     TEST_ASSERT_TRUE( UUT.is_busy() );
 
-    // Check when bus is not busy
+    /* Check when bus is not busy */
     USART1->SR = USART_SR_TC;
     TEST_ASSERT_FALSE( UUT.is_busy() );
 };
 
-/// @brief Test sending data
-void test_send_data(void)
+/** 
+ * @brief Test sending data
+ */
+void test_send_data()
 {
     setUp();
-    USART::Controller<IO::USART_1> UUT(9'600, 8, USART::StopBits::_1_0);
+    auto UUT = usart::Controller::create<Peripheral::USART_1>(9'600, 8, usart::StopBits::_1_0);
 
-    // Test sending data when no error is present
+    /* Test sending data when no error is present */
     Bus::Data_t payload{0xAB};
     USART1->SR = USART_SR_TC | USART_SR_TXE;
     USART1->DR = 0;
@@ -189,7 +203,7 @@ void test_send_data(void)
     TEST_ASSERT_EQUAL( Error::Code::None, UUT.get_error() );
     TEST_ASSERT_EQUAL( payload.byte[0], USART1->DR);
 
-    // Test sending data when the TX buffer is not empty
+    /* Test sending data when the TX buffer is not empty */
     USART1->SR = USART_SR_TC;
     USART1->DR = 0;
     UUT.set_error(Error::Code::None);
@@ -197,7 +211,7 @@ void test_send_data(void)
     TEST_ASSERT_EQUAL( Error::Code::USART_Timeout, UUT.get_error() );
     TEST_ASSERT_EQUAL( 0, USART1->DR);
 
-    // Test sending data when the peripheral is busy
+    /* Test sending data when the peripheral is busy */
     USART1->SR = USART_SR_TXE;
     USART1->DR = 0;
     UUT.set_error(Error::Code::None);
@@ -205,7 +219,7 @@ void test_send_data(void)
     TEST_ASSERT_EQUAL( Error::Code::USART_BUS_Busy_Error, UUT.get_error() );
     TEST_ASSERT_EQUAL( 0, USART1->DR);
 
-    // Test sending data when no error is present
+    /* Test sending data when no error is present */
     payload.value = 0xCCDD;
     USART1->SR = USART_SR_TC | USART_SR_TXE;
     USART1->DR = 0;
@@ -215,24 +229,26 @@ void test_send_data(void)
     TEST_ASSERT_EQUAL( payload.byte[0], USART1->DR);
 };
 
-/// @brief Test sending an array
-void test_send_array(void)
+/** 
+ * @brief Test sending an array
+ */
+void test_send_array()
 {
     setUp();
-    std::array<unsigned char, 10> buffer{0};
-    USART::Controller<IO::USART_1> UUT(1'000'000);
+    std::array<uint8_t, 10> buffer{0};
+    auto UUT = usart::Controller::create<Peripheral::USART_1>(1'000'000);
 
-    // fill array with consecutive numbers
+    /* fill array with consecutive numbers */
     std::iota( buffer.begin(), buffer.end(), 0);
 
-    // Test sending the array
+    /* Test sending the array */
     USART1->SR = USART_SR_TC | USART_SR_TXE;
     UUT.set_error(Error::Code::None);
     TEST_ASSERT_TRUE( UUT.send_array(buffer.data(), 6) );
     TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
     TEST_ASSERT_EQUAL( 5, USART1->DR);
 
-    // Test sending an array, when the bus is busy
+    /* Test sending an array, when the bus is busy */
     USART1->SR = USART_SR_TXE;
     USART1->DR = 0;
     UUT.set_error(Error::Code::None);
@@ -241,7 +257,7 @@ void test_send_array(void)
     TEST_ASSERT_EQUAL( 0, USART1->DR);
 };
 
-// === Main ===
+/* === Main === */
 int main(int argc, char **argv)
 {
     UNITY_BEGIN();
