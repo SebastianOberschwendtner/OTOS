@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,9 +27,9 @@
  ==============================================================================
  */
 
-// === Includes ===
+/* === Includes === */
 #include "core_stm32.h"
 
-// === Helper functions ===
+/* === Helper functions === */
 
-// === Methods ===
+/* === Methods === */

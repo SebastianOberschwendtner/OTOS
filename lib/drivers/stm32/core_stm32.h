@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,21 +26,21 @@
 // #include <array>
 // #include <algorithm>
 
-namespace ST_Core
+namespace stm_core
 {
     // === Enum for valid voltage ranges ===
-    enum class VCC: unsigned char
+    enum class VCC: uint8_t
     {
         _2_7V_to_3_6V = 0
     };
 
     // === Enum for System Clock Sources ===
-    enum class Clock: unsigned char
+    enum class Clock: uint8_t
     {
         HSI = 0, HSE, PLL_HSI, PLL_HSE
     };
 
-    namespace PLL
+    namespace pll
     {
         /**
          * @brief Get the M value when using the internal
@@ -49,7 +49,7 @@ namespace ST_Core
          * F_VCO = F_HSI/M = 2 MHz => M = 8
          * @return Resturns the appropriate M value.
          */
-        constexpr unsigned int get_M_HSI(void)
+        constexpr uint32_t get_M_HSI(void)
         {
             return 8;
         };
@@ -60,7 +60,7 @@ namespace ST_Core
          * 
          * VCO will be 240 MHz.
          */
-        constexpr unsigned int get_N_HSI(void)
+        constexpr uint32_t get_N_HSI(void)
         {
             return 120;
         };
@@ -71,7 +71,7 @@ namespace ST_Core
          * 
          * => VCO is 240 MHz!
          */
-        constexpr unsigned int get_Q_HSI(void)
+        constexpr uint32_t get_Q_HSI(void)
         {
             return 5;
         };
@@ -83,8 +83,8 @@ namespace ST_Core
          * => VCO is 240 MHz!
          * @tparam SysClock The desired system clock frequency in [MHz]
          */
-        template<unsigned char SysClock>
-        constexpr unsigned int get_P_HSI(void)
+        template<uint8_t SysClock>
+        constexpr uint32_t get_P_HSI(void)
         {
             // Check whether the clock speed is valid
             static_assert( 
@@ -92,7 +92,7 @@ namespace ST_Core
                 , "FCPU is not a valid value!");
 
             // Value is valid, get the P value
-            constexpr unsigned char P = 240 / SysClock;
+            constexpr uint8_t P = 240 / SysClock;
 
             // Return the P value bits as defined in the STM32 datasheet
             if constexpr ( P == 2)
@@ -105,7 +105,7 @@ namespace ST_Core
                 return 3;
         };
 
-    };
+    }; // namespace pll
 
     struct Flash
     {
@@ -117,7 +117,7 @@ namespace ST_Core
          * @tparam range The VCC voltage range.
          * @tparam SysClock The Clock speed of the system clock in [MHz].
          */
-        template<VCC range, unsigned char SysClock>
+        template<VCC range, uint8_t SysClock>
         static void configure()
         {
             // Only normal voltage range is supported now
@@ -152,10 +152,10 @@ namespace ST_Core
         };
     };
 
-    template<unsigned char f_cpu, unsigned char f_apb1>
-    constexpr unsigned long get_APB1_prescaler()
+    template<uint8_t f_cpu, uint8_t f_apb1>
+    constexpr uint32_t get_APB1_prescaler()
     {
-        constexpr unsigned char pre1 = f_cpu / f_apb1;
+        constexpr uint8_t pre1 = f_cpu / f_apb1;
         if constexpr (pre1 == 1)
             return RCC_CFGR_PPRE1_DIV1;
         else if constexpr (pre1 == 2)
@@ -170,10 +170,10 @@ namespace ST_Core
             return 1;
     };
 
-    template<unsigned char f_cpu, unsigned char f_apb2>
-    constexpr unsigned long get_APB2_prescaler()
+    template<uint8_t f_cpu, uint8_t f_apb2>
+    constexpr uint32_t get_APB2_prescaler()
     {
-        constexpr unsigned char pre2 = f_cpu / f_apb2;
+        constexpr uint8_t pre2 = f_cpu / f_apb2;
         if constexpr (pre2 == 1)
             return RCC_CFGR_PPRE2_DIV1;
         else if constexpr (pre2 == 2)
@@ -189,7 +189,7 @@ namespace ST_Core
     };
 
     template<Clock source>
-    constexpr unsigned long clock_enable()
+    constexpr uint32_t clock_enable()
     {
         if constexpr (source == Clock::HSI)
             return RCC_CR_HSION;
@@ -204,7 +204,7 @@ namespace ST_Core
     };
 
     template<Clock source>
-    constexpr unsigned long clock_ready()
+    constexpr uint32_t clock_ready()
     {
         if constexpr (source == Clock::HSI)
             return RCC_CR_HSIRDY;
@@ -219,7 +219,7 @@ namespace ST_Core
     };
 
     template<Clock source>
-    constexpr unsigned long clock_source()
+    constexpr uint32_t clock_source()
     {
         if constexpr (source == Clock::HSI)
             return RCC_CFGR_SW_HSI;
@@ -230,7 +230,7 @@ namespace ST_Core
     };
 
     template<Clock source>
-    constexpr unsigned long clock_source_status()
+    constexpr uint32_t clock_source_status()
     {
         if constexpr (source == Clock::HSI)
             return RCC_CFGR_SWS_HSI;
@@ -249,7 +249,7 @@ namespace ST_Core
      * @tparam f_apb1 The clock speed of the APB1 domain in [MHz].
      * @tparam f_apb2 The clock speed of the APB2 domain in [Mhz].
      */
-    template<Clock source, unsigned char f_cpu, unsigned char f_apb1, unsigned char f_apb2>
+    template<Clock source, uint8_t f_cpu, uint8_t f_apb1, uint8_t f_apb2>
     void switch_system_clock()
     {
         // Check clock limits
@@ -264,11 +264,11 @@ namespace ST_Core
 #endif
 
         // Get the APB1 prescaler
-        constexpr unsigned long APB1_Prescaler = get_APB1_prescaler<f_cpu, f_apb1>();
+        constexpr uint32_t APB1_Prescaler = get_APB1_prescaler<f_cpu, f_apb1>();
         static_assert(APB1_Prescaler != 1, "F_APB1 cannot be achieved with current clocks!");
 
         // Get the APB2 prescaler
-        constexpr unsigned long APB2_Prescaler = get_APB2_prescaler<f_cpu, f_apb2>();
+        constexpr uint32_t APB2_Prescaler = get_APB2_prescaler<f_cpu, f_apb2>();
         static_assert(APB2_Prescaler != 1, "F_APB2 cannot be achieved with current clocks!");
 
 #ifdef STM32F4
@@ -279,10 +279,10 @@ namespace ST_Core
         static_assert(source != Clock::PLL_HSE, "Configuring the PLL source with HSE is not yet supported!");
         if constexpr (source == Clock::PLL_HSI)
         {
-            constexpr unsigned int M = ST_Core::PLL::get_M_HSI();
-            constexpr unsigned int N = ST_Core::PLL::get_N_HSI();
-            constexpr unsigned int Q = ST_Core::PLL::get_Q_HSI();
-            constexpr unsigned int P = ST_Core::PLL::get_P_HSI<f_cpu>();
+            constexpr uint32_t M = stm_core::pll::get_M_HSI();
+            constexpr uint32_t N = stm_core::pll::get_N_HSI();
+            constexpr uint32_t Q = stm_core::pll::get_Q_HSI();
+            constexpr uint32_t P = stm_core::pll::get_P_HSI<f_cpu>();
             RCC->PLLCFGR = (Q << RCC_PLLCFGR_PLLQ_Pos) | (P << RCC_PLLCFGR_PLLP_Pos) | (N << RCC_PLLCFGR_PLLN_Pos) | M;
         }
 #elif defined(STM32L0)
@@ -293,8 +293,8 @@ namespace ST_Core
         static_assert(source != Clock::PLL_HSE, "Configuring the PLL source with HSE is not yet supported!");
         if constexpr (source == Clock::PLL_HSI)
         {
-            constexpr unsigned int Mul = 0b0001; // Multiply by 4;
-            constexpr unsigned int Div = 0b0001;   // Divide by 2;
+            constexpr uint32_t Mul = 0b0001; // Multiply by 4;
+            constexpr uint32_t Div = 0b0001;   // Divide by 2;
             RCC->CFGR = (Mul << RCC_CFGR_PLLMUL_Pos) | (Div << RCC_CFGR_PLLDIV_Pos) | RCC_CFGR_PLLSRC_HSI;
         }
 #endif
@@ -312,6 +312,6 @@ namespace ST_Core
         if constexpr (source != Clock::HSI)
             while(not (RCC->CFGR & clock_source_status<source>()) );
     };
-};
+}; // namespace stm_core
 
 #endif

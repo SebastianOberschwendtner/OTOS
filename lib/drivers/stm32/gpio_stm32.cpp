@@ -21,363 +21,416 @@
  ==============================================================================
  * @file    gpio_stm32.cpp
  * @author  SO
- * @version v4.2.0
+ * @version v5.0.0
  * @date    25-August-2021
  * @brief   GPIO driver for STM32 microcontrollers.
  ==============================================================================
  */
 /* === Includes === */
 #include "gpio_stm32.h"
+using stm32::Peripheral;
 
-/* === Functions === */
-/**
- * @brief Return the enable bit position for the RCC register
- * for the given GPIO port.
- * @param Port The identifier of the port.
- * @return Return the bit position of the enable bit.
- */
-constexpr auto get_RCCEN_position(const GPIO::Port Port) -> unsigned char
-{
-    // Return the bit position according to the used port
-    switch (Port)
-    {
-        case GPIO::Port::A:
-            return 0;
-        case GPIO::Port::B:
-            return 1;
-        case GPIO::Port::C:
-            return 2;
-        case GPIO::Port::D:
-            return 3;
-        case GPIO::Port::E:
-            return 4;
-        case GPIO::Port::H:
-            return 7;
-#ifdef STM32F4
-        case GPIO::Port::F:
-            return 5;
-        case GPIO::Port::G:
-            return 6;
-        case GPIO::Port::I:
-            return 8;
-#ifdef STM32F429xx
-        case GPIO::Port::J:
-            return 9;
-        case GPIO::Port::K:
-            return 10;
-#endif
-#endif
-        default:
-            return 32;
-    }
-};
-
-/**
- * @brief Return the peripheral address for the desired port.
- * @param Port The identifier of the port.
- * @return Returns the address of the port as an integer.
- */
-constexpr auto get_port_address(const GPIO::Port Port) -> std::uintptr_t
-{
-    switch (Port)
-    {
-        case GPIO::Port::A:
-            return GPIOA_BASE;
-
-        case GPIO::Port::B:
-            return GPIOB_BASE;
-
-        case GPIO::Port::C:
-            return GPIOC_BASE;
-
-        case GPIO::Port::D:
-            return GPIOD_BASE;
+/* === Valid GPIO Port instantiations === */
+template gpio::Pin gpio::Pin::create<gpio::Port::A>(std::uint8_t, gpio::Mode);
+template gpio::Pin gpio::Pin::create<gpio::Port::B>(std::uint8_t, gpio::Mode);
+template gpio::Pin gpio::Pin::create<gpio::Port::C>(std::uint8_t, gpio::Mode);
+template gpio::Pin gpio::Pin::create<gpio::Port::D>(std::uint8_t, gpio::Mode);
 #ifndef STM32L053xx
-        case GPIO::Port::E:
-            return GPIOE_BASE;
+template gpio::Pin gpio::Pin::create<gpio::Port::E>(std::uint8_t, gpio::Mode);
+#endif // STM32L053xx
+template gpio::Pin gpio::Pin::create<gpio::Port::H>(std::uint8_t, gpio::Mode);
+#ifdef STM32F4
+template gpio::Pin gpio::Pin::create<gpio::Port::F>(std::uint8_t, gpio::Mode);
+template gpio::Pin gpio::Pin::create<gpio::Port::G>(std::uint8_t, gpio::Mode);
+template gpio::Pin gpio::Pin::create<gpio::Port::I>(std::uint8_t, gpio::Mode);
+#ifdef STM32F429xx
+template gpio::Pin gpio::Pin::create<gpio::Port::J>(std::uint8_t, gpio::Mode);
+template gpio::Pin gpio::Pin::create<gpio::Port::K>(std::uint8_t, gpio::Mode);
+#endif // STM32F429xx
+#endif // STM32F4
+
+namespace detail
+{
+    /* === Functions === */
+    /**
+     * @brief Return the enable bit position for the RCC register
+     * for the given GPIO port.
+     * @tparam port_used The identifier of the port.
+     * @return Return the bit position of the enable bit.
+     */
+    template <gpio::Port port_used>
+    constexpr auto get_RCCEN_position() -> std::uint8_t
+    {
+        /* Return the bit position according to the used port */
+        switch (port_used)
+        {
+            case gpio::Port::A:
+                return 0;
+            case gpio::Port::B:
+                return 1;
+            case gpio::Port::C:
+                return 2;
+            case gpio::Port::D:
+                return 3;
+            case gpio::Port::E:
+                return 4;
+            case gpio::Port::H:
+                return 7;
+#ifdef STM32F4
+            case gpio::Port::F:
+                return 5;
+            case gpio::Port::G:
+                return 6;
+            case gpio::Port::I:
+                return 8;
+#ifdef STM32F429xx
+            case gpio::Port::J:
+                return 9;
+            case gpio::Port::K:
+                return 10;
+#endif // STM32F429xx
+#endif // STM32F4
+            default:
+                return 32;
+        }
+    };
+
+    /**
+     * @brief Return the peripheral address for the desired port.
+     * @tparam port_used The identifier of the port.
+     * @return Returns the address of the port as an integer.
+     */
+    template <gpio::Port port_used>
+    constexpr auto get_port_address() -> std::uintptr_t
+    {
+        switch (port_used)
+        {
+            case gpio::Port::A:
+                return GPIOA_BASE;
+
+            case gpio::Port::B:
+                return GPIOB_BASE;
+
+            case gpio::Port::C:
+                return GPIOC_BASE;
+
+            case gpio::Port::D:
+                return GPIOD_BASE;
+#ifndef STM32L053xx
+            case gpio::Port::E:
+                return GPIOE_BASE;
 #endif
-        case GPIO::Port::H:
-            return GPIOH_BASE;
+            case gpio::Port::H:
+                return GPIOH_BASE;
 
 #ifdef STM32F4
-        case GPIO::Port::F:
-            return GPIOF_BASE;
+            case gpio::Port::F:
+                return GPIOF_BASE;
 
-        case GPIO::Port::G:
-            return GPIOG_BASE;
+            case gpio::Port::G:
+                return GPIOG_BASE;
 
-        case GPIO::Port::I:
-            return GPIOI_BASE;
+            case gpio::Port::I:
+                return GPIOI_BASE;
 
 #ifdef STM32F429xx
-        case GPIO::Port::J:
-            return GPIOJ_BASE;
+            case gpio::Port::J:
+                return GPIOJ_BASE;
 
-        case GPIO::Port::K:
-            return GPIOK_BASE;
+            case gpio::Port::K:
+                return GPIOK_BASE;
 #endif
 #endif
-        default:
-            return 0;
-    }
-};
-
-/**
- * @brief Get the alternate function code of the
- * GPIO pin of a *STM32F4xx* device.
- *
- * @param port The port of the pin
- * @param pin The pin number
- * @param function The peripheral to assign the pin to
- * @return The alternate function code of the pin.
- * If alternate function or peripheral is not valid, -1 is returned.
- */
-auto get_af_code_f4xx(const GPIO::Port port, const unsigned char pin, const IO function) -> char
-{
-    /* The *STM32F4xx* devices have constant AF map */
-    switch (function)
-    {
-        case IO::SYSTEM_:
-            return 0;
-        case IO::TIM_1:
-        case IO::TIM_2:
-            return 1;
-        case IO::TIM_3:
-        case IO::TIM_4:
-        case IO::TIM_5:
-            return 2;
-        case IO::TIM_8:
-        case IO::TIM_9:
-        case IO::TIM_10:
-        case IO::TIM_11:
-            return 3;
-        case IO::I2C_1:
-        case IO::I2C_2:
-        case IO::I2C_3:
-            return 4;
-        case IO::SPI_1:
-        case IO::SPI_2:
-        case IO::SPI_4:
-        case IO::SPI_5:
-            return 5;
-        case IO::SPI_3:
-            return 6;
-        case IO::USART_1:
-        case IO::USART_2:
-        case IO::USART_3:
-            return 7;
-        case IO::CAN_1:
-        case IO::CAN_2:
-        case IO::TIM_12:
-        case IO::TIM_13:
-        case IO::TIM_14:
-            return 9;
-        case IO::OTG_FS_:
-        case IO::OTG_HS_:
-            return 10;
-        case IO::ETH_:
-            return 11;
-        case IO::FSMC_:
-        case IO::SDIO_:
-            return 12;
-        case IO::DCMI_:
-            return 13;
-        case IO::EVENTOUT_:
-            return 15;
-        default:
-            return -1;
-    }
-};
-
-/**
- * @brief Get the af code for the GPIO pin of a *STM32L0xx* device.
- *
- * @param port The port of the pin
- * @param pin The pin number
- * @param function The peripheral to assign the pin to
- * @return The alternate function code of the pin.
- * If alternate function or peripheral is not valid, -1 is returned.
- */
-auto get_af_code_l0xx(const GPIO::Port port, const unsigned char pin, const IO function) -> char
-{
-    // The *STM32L0xx* devices assign different AF functions depending on the pin number
-    switch (function)
-    {
-        case IO::I2C_1:
-            if (port == GPIO::Port::A)
-                return 6;
-            if (port == GPIO::Port::B)
-            {
-                if (pin < 8)
-                    return 1;
-                else
-                    return 4;
-            }
-            return -1; // This pin cannot be assigned to I2C1
-        case IO::I2C_2:
-            if (port == GPIO::Port::B)
-            {
-                if (pin < 12)
-                    return 6;
-                else
-                    return 5;
-            }
-            return -1; // This pin cannot be assigned to I2C2
-        case IO::I2C_3:
-            return 7;
-        case IO::TIM_2:
-            if (port == GPIO::Port::E)
+            default:
                 return 0;
-        case IO::TIM_3:
-            return 2;
-        default:
-            return -1;
-    }
-};
+        }
+    };
 
-namespace GPIO
-{
-    // === Constructors ===
-    PIN::PIN(const Port Port, const unsigned char Pin)
-        : thisPort{reinterpret_cast<volatile GPIO_TypeDef *>(get_port_address(Port))}, thisPin{Pin}, PortID{Port}
+    /**
+     * @brief Get the alternate function code of the
+     *
+     * @param port The port of the pin
+     * @param pin The pin number
+     * @param function The peripheral to assign the pin to
+     * @return The alternate function code of the pin.
+     * If alternate function or peripheral is not valid, -1 is returned.
+     */
+    auto get_af_code(const gpio::Port port, const uint8_t pin, const Peripheral function) -> char
     {
-        // static_assert(pin_number_valid<1>());
-        // enable the clock for this gpio port
 #if defined(STM32F4)
-        RCC->AHB1ENR |= (1 << get_RCCEN_position(Port));
+        /* The *STM32F4xx* devices have constant AF map */
+        switch (function)
+        {
+            case Peripheral::SYSTEM_:
+                return 0;
+            case Peripheral::TIM_1:
+            case Peripheral::TIM_2:
+                return 1;
+            case Peripheral::TIM_3:
+            case Peripheral::TIM_4:
+            case Peripheral::TIM_5:
+                return 2;
+            case Peripheral::TIM_8:
+            case Peripheral::TIM_9:
+            case Peripheral::TIM_10:
+            case Peripheral::TIM_11:
+                return 3;
+            case Peripheral::I2C_1:
+            case Peripheral::I2C_2:
+            case Peripheral::I2C_3:
+                return 4;
+            case Peripheral::SPI_1:
+            case Peripheral::SPI_2:
+            case Peripheral::SPI_4:
+            case Peripheral::SPI_5:
+                return 5;
+            case Peripheral::SPI_3:
+                return 6;
+            case Peripheral::USART_1:
+            case Peripheral::USART_2:
+            case Peripheral::USART_3:
+                return 7;
+            case Peripheral::CAN_1:
+            case Peripheral::CAN_2:
+            case Peripheral::TIM_12:
+            case Peripheral::TIM_13:
+            case Peripheral::TIM_14:
+                return 9;
+            case Peripheral::OTG_FS_:
+            case Peripheral::OTG_HS_:
+                return 10;
+            case Peripheral::ETH_:
+                return 11;
+            case Peripheral::FSMC_:
+            case Peripheral::SDIO_:
+                return 12;
+            case Peripheral::DCMI_:
+                return 13;
+            case Peripheral::EVENTOUT_:
+                return 15;
+            default:
+                return -1;
+        }
+#endif // STM32F4
+
+#if defined(STM32L0)
+        /* The *STM32L0xx* devices assign different AF functions depending on the pin number */
+        switch (function)
+        {
+            case Peripheral::I2C_1:
+                if (port == gpio::Port::A)
+                    return 6;
+                if (port == gpio::Port::B)
+                {
+                    if (pin < 8)
+                        return 1;
+                    else
+                        return 4;
+                }
+                return -1; /* This pin cannot be assigned to I2C1 */
+            case Peripheral::I2C_2:
+                if (port == gpio::Port::B)
+                {
+                    if (pin < 12)
+                        return 6;
+                    else
+                        return 5;
+                }
+                return -1; /* This pin cannot be assigned to I2C2 */
+            case Peripheral::I2C_3:
+                return 7;
+            case Peripheral::TIM_2:
+                if (port == gpio::Port::E)
+                    return 0;
+            case Peripheral::TIM_3:
+                return 2;
+            default:
+                return -1;
+        }
+#endif // STM32L0
+    };
+}; // namespace detail
+
+namespace gpio
+{
+    /* === Factory === */
+    template <Port port_used>
+    auto Pin::create(std::uint8_t pin, Mode mode) -> Pin
+    {
+        /* enable the clock for this gpio port */
+#if defined(STM32F4)
+        RCC->AHB1ENR |= (1 << detail::get_RCCEN_position<port_used>());
 #elif defined(STM32L0)
-        RCC->IOPENR |= (1 << get_RCCEN_position(Port));
+        RCC->IOPENR |= (1 << detail::get_RCCEN_position<port_used>());
 #endif
+
+        /* Get the address of the port */
+        auto address = detail::get_port_address<port_used>();
+
+        /* Return the created pin */
+        return Pin{address, port_used, pin, mode};
+    }
+
+    /* === Constructors === */
+    Pin::Pin(const std::uintptr_t port_address, const Port port_id, const std::uint8_t Pin, Mode mode)
+        : port{reinterpret_cast<volatile GPIO_TypeDef *>(port_address)}, pin{Pin}, port_id{port_id}
+    {
+        /* Set the mode of the pin */
+        this->set_mode(mode);
     };
 
-    PIN::PIN(const Port Port, const unsigned char Pin, const Mode PinMode)
-        : PIN{Port, Pin}
+    /* === Methods === */
+    auto Pin::set_alternate_function(const Peripheral function) -> Pin &
     {
-        this->set_mode(PinMode);
-    };
-
-    // === Methods ===
-    void PIN::set_alternate_function(const IO function)
-    {
-        // Get the alternate function code and check if it is valid
+        /* Get the alternate function code and check if it is valid */
         const auto af_code = this->get_af_code(function);
         if (af_code >= 0)
         {
-            // Assign the alternate function
+            /* Assign the alternate function */
             this->set_alternate_function(this->get_af_code(function));
 
-            // Set AF specific options
-            if ((function == IO::I2C_1) | (function == IO::I2C_2) | (function == IO::I2C_3))
+            /* Set AF specific options */
+            if ((function == Peripheral::I2C_1) | (function == Peripheral::I2C_2) | (function == Peripheral::I2C_3))
                 this->set_output_type(Output::Open_Drain);
-        } else {
-            // Invalid alternate function -> reset the pin mode
-            this->set_mode(Mode::Input);
-        }
-    };
-
-    void PIN::set_alternate_function(const unsigned char af_code)
-    {
-        // Set AF mode
-        this->set_mode(Mode::AF_Mode);
-
-        // Assign the alternate function
-        if (this->thisPin < 8)
-        {
-            // Save old register state and delete the part which will change
-            uint32_t _Reg = this->thisPort->AFR[0] & ~(0b1111 << (4 * this->thisPin));
-            // Get the code for teh alternate function and set the register
-            this->thisPort->AFR[0] = _Reg | (af_code << (4 * this->thisPin));
         }
         else
         {
-            // Save old register state and delete the part which will change
-            uint32_t _Reg = this->thisPort->AFR[1] & ~(0b1111 << (4 * (this->thisPin - 8)));
-            // Get the code for teh alternate function and set the register
-            this->thisPort->AFR[1] = _Reg | (af_code << (4 * (this->thisPin - 8)));
+            /* Invalid alternate function -> reset the pin mode */
+            this->set_mode(Mode::Input);
         }
+
+        /* Return the reference to the pin object */
+        return *this;
     };
 
-    void PIN::set_high(void)
+    auto Pin::set_alternate_function(const uint8_t af_code) -> Pin &
     {
-        // Set the BS bit
-        thisPort->BSRR = (1 << this->thisPin);
+        /* Set AF mode */
+        this->set_mode(Mode::AF_Mode);
+
+        /* Assign the alternate function */
+        if (this->pin < 8)
+        {
+            /* Save old register state and delete the part which will change */
+            uint32_t _Reg = this->port->AFR[0] & ~(0b1111 << (4 * this->pin));
+            /* Get the code for teh alternate function and set the register */
+            this->port->AFR[0] = _Reg | (af_code << (4 * this->pin));
+        }
+        else
+        {
+            /* Save old register state and delete the part which will change */
+            uint32_t _Reg = this->port->AFR[1] & ~(0b1111 << (4 * (this->pin - 8)));
+            /* Get the code for teh alternate function and set the register */
+            this->port->AFR[1] = _Reg | (af_code << (4 * (this->pin - 8)));
+        }
+
+        /* Return the reference to the pin object */
+        return *this;
     };
 
-    void PIN::set_low(void)
+    auto Pin::set_high() -> Pin &
     {
-        // Set the BR bit
-        thisPort->BSRR = (1 << (this->thisPin + 16));
+        /* Set the BS bit */
+        port->BSRR = (1 << this->pin);
+
+        /* Return the reference to the pin object */
+        return *this;
     };
 
-    void PIN::set_mode(const Mode NewMode)
+    auto Pin::set_low() -> Pin &
     {
-        // Save old register state and delete the part which will change
-        uint32_t _Reg = this->thisPort->MODER & ~(0b11 << (2 * this->thisPin));
+        /* Set the BR bit */
+        port->BSRR = (1 << (this->pin + 16));
 
-        // Combine the old and the new data and write the register
-        this->thisPort->MODER = _Reg | (static_cast<unsigned char>(NewMode) << (2 * this->thisPin));
+        /* Return the reference to the pin object */
+        return *this;
     };
 
-    void PIN::set_output_type(const Output NewType)
+    auto Pin::set_mode(const Mode NewMode) -> Pin &
     {
-        // Save old register state and delete the part which will change
-        uint32_t _Reg = this->thisPort->OTYPER & ~(1 << this->thisPin);
+        /* Save old register state and delete the part which will change */
+        uint32_t _Reg = this->port->MODER & ~(0b11 << (2 * this->pin));
 
-        // Combine the old and the new data and write the register
-        this->thisPort->OTYPER = _Reg | (static_cast<unsigned char>(NewType) << this->thisPin);
+        /* Combine the old and the new data and write the register */
+        this->port->MODER = _Reg | (static_cast<uint8_t>(NewMode) << (2 * this->pin));
+
+        /* Return the reference to the pin object */
+        return *this;
     };
 
-    void PIN::set_pull(const Pull NewPull)
+    auto Pin::set_output_type(const Output NewType) -> Pin &
     {
-        // Save old register state and delete the part which will change
-        uint32_t _Reg = this->thisPort->PUPDR & ~(0b11 << (2 * this->thisPin));
+        /* Save old register state and delete the part which will change */
+        uint32_t _Reg = this->port->OTYPER & ~(1 << this->pin);
 
-        // Combine the old and the new data and write the register
-        this->thisPort->PUPDR = _Reg | (static_cast<unsigned char>(NewPull) << (2 * this->thisPin));
+        /* Combine the old and the new data and write the register */
+        this->port->OTYPER = _Reg | (static_cast<uint8_t>(NewType) << this->pin);
+
+        /* Return the reference to the pin object */
+        return *this;
     };
 
-    void PIN::set_speed(const Speed NewSpeed)
+    auto Pin::set_pull(const Pull NewPull) -> Pin &
     {
-        // Save old register state and delete the part which will change
-        uint32_t _Reg = this->thisPort->OSPEEDR & ~(0b11 << (2 * this->thisPin));
+        /* Save old register state and delete the part which will change */
+        uint32_t _Reg = this->port->PUPDR & ~(0b11 << (2 * this->pin));
 
-        // Combine the old and the new data and write the register
-        this->thisPort->OSPEEDR = _Reg | (static_cast<unsigned char>(NewSpeed) << (2 * this->thisPin));
+        /* Combine the old and the new data and write the register */
+        this->port->PUPDR = _Reg | (static_cast<uint8_t>(NewPull) << (2 * this->pin));
+
+        /* Return the reference to the pin object */
+        return *this;
     };
 
-    void PIN::set_state(const bool NewState)
+    auto Pin::set_speed(const Speed NewSpeed) -> Pin &
     {
-        // Call the setHigh or setLow function according to NewState
+        /* Save old register state and delete the part which will change */
+        uint32_t _Reg = this->port->OSPEEDR & ~(0b11 << (2 * this->pin));
+
+        /* Combine the old and the new data and write the register */
+        this->port->OSPEEDR = _Reg | (static_cast<uint8_t>(NewSpeed) << (2 * this->pin));
+
+        /* Return the reference to the pin object */
+        return *this;
+    };
+
+    auto Pin::set_state(const bool NewState) -> Pin &
+    {
+        /* Call the setHigh or setLow function according to NewState */
         if (NewState)
             this->set_high();
         else
             this->set_low();
+
+        /* Return the reference to the pin object */
+        return *this;
     };
 
-    void PIN::toggle(void)
+    auto Pin::toggle() -> Pin &
     {
-        thisPort->ODR ^= (1 << this->thisPin);
+        port->ODR ^= (1 << this->pin);
+        return *this;
     };
 
-    auto PIN::get_state(void) const -> bool
+    auto Pin::get_state() const -> bool
     {
-        return (this->thisPort->IDR & (1 << this->thisPin));
+        return (this->port->IDR & (1 << this->pin));
     };
 
-    auto PIN::falling_edge(void) const -> bool
+    auto Pin::falling_edge() const -> bool
     {
         return this->edge_falling;
     };
 
-    auto PIN::rising_edge(void) const -> bool
+    auto Pin::rising_edge() const -> bool
     {
         return this->edge_rising;
     };
 
-    auto PIN::enable_interrupt(const Edge NewEdge) const -> bool
+    auto Pin::enable_interrupt(const Edge NewEdge) const -> bool
     {
-        // Enable the EXTI line
-        const unsigned int bitmask = (1 << this->thisPin);
+        /* Enable the EXTI line */
+        const uint32_t bitmask = (1 << this->pin);
         EXTI->IMR |= bitmask;
         switch (NewEdge)
         {
@@ -395,15 +448,15 @@ namespace GPIO
                 return false;
         }
 
-        // Configure the pin of the EXTI line in the
-        // System configuration
+        /* Configure the pin of the EXTI line in the */
+        /* System configuration */
         RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
-        SYSCFG->EXTICR[this->thisPin / 4] |= (static_cast<unsigned char>(this->PortID) << 4 * (this->thisPin % 4));
+        SYSCFG->EXTICR[this->pin / 4] |= (static_cast<uint8_t>(this->port_id) << 4 * (this->pin % 4));
 
-        // Enable the EXTI line in the NVIC
+        /* Enable the EXTI line in the NVIC */
         IRQn_Type ThisIRQn;
 #if defined(STM32F4)
-        switch (this->thisPin)
+        switch (this->pin)
         {
             case 0:
                 ThisIRQn = EXTI0_IRQn;
@@ -439,7 +492,7 @@ namespace GPIO
                 return false;
         }
 #elif defined(STM32L0)
-        switch (this->thisPin)
+        switch (this->pin)
         {
             case 0:
             case 1:
@@ -473,30 +526,26 @@ namespace GPIO
         return true;
     };
 
-    void PIN::read_edge(void)
+    void Pin::read_edge()
     {
-        // Get the rising edge
+        /* Get the rising edge */
         this->edge_rising = (this->get_state() && !this->state_old);
 
-        // Get the falling edge
+        /* Get the falling edge */
         this->edge_falling = (!this->get_state() && this->state_old);
 
-        // Remember old state
+        /* Remember old state */
         this->state_old = this->get_state();
     };
 
-    void PIN::reset_pending_interrupt(void) const
+    void Pin::reset_pending_interrupt() const
     {
-        EXTI->PR |= (1 << this->thisPin);
+        EXTI->PR |= (1 << this->pin);
     };
 
-    auto PIN::get_af_code(const IO function) const -> char
+    auto Pin::get_af_code(const Peripheral function) const -> char
     {
-#if defined(STM32F4)
-        return get_af_code_f4xx(this->PortID, this->thisPin, function);
-#elif defined(STM32L0)
-        return get_af_code_l0xx(this->PortID, this->thisPin, function);
-#endif
+        return detail::get_af_code(this->port_id, this->pin, function);
     };
 
 }; // namespace GPIO

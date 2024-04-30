@@ -31,8 +31,11 @@
 #include <memory>
 #include <ratio>
 
+/* === Get the available peripherals === */
+#include "peripherals_stm32.h"
+
 // === Declarations ===
-namespace Timer
+namespace timer
 {
     // === Enums ===
     enum class Mode
@@ -53,19 +56,26 @@ namespace Timer
         class Channel; // forward declaration so that get_channel can return a Channel object.
 
       public:
-        // === Constructor ===
+        /* === Builder === */
+        /**
+         * @brief Create a new timer instance.
+         * This enables the peripheral clock, initializes the timer
+         * tick frequency to the default CPU frequency and sets the
+         * top value of the timer to the maximum value.
+         *
+         * @tparam timer The timer instance to be used.
+         * @return Timer The timer object.
+         */
+        template <stm32::Peripheral timer>
+        static auto create() -> Timer;
+
+        /* === Constructors === */
         /* No default constructor */
         Timer() = delete;
-
-        /**
-         * @brief Constructor for timer object.
-         * @details
-         * - Enables the clock for the selected timer instance.
-         * - Sets the timer tick frequency to the default CPU frequency.
-         * - Sets the top value of the timer to the maximum value.
-         * @param timer The instance of the timer to be used.
-         */
-        Timer(const IO timer);
+        Timer(const Timer &) = default;
+        Timer(Timer &&) = default;
+        auto operator=(const Timer &) -> Timer & = default;
+        auto operator=(Timer &&) -> Timer & = default;
 
         /* === Setters === */
         /**
@@ -75,8 +85,9 @@ namespace Timer
          *
          * @param channel The channel to be configured.
          * @param mode The mode of the channel.
+         * @return Timer& Returns a reference to the timer object.
          */
-        void set_channel(uint8_t channel, Mode mode);
+        auto set_channel(uint8_t channel, Mode mode) -> Timer &;
 
         /**
          * @brief Set the period of the timer until overflow/underflow.
@@ -86,9 +97,10 @@ namespace Timer
          * @tparam rep The representation type of the duration.
          * @tparam period The ratio defining the period of the duration.
          * @param duration The period value of the timer until it overflows/underflows.
+         * @return Timer& Returns a reference to the timer object.
          */
         template <typename rep, typename period>
-        void set_period(std::chrono::duration<rep, period> duration)
+        auto set_period(std::chrono::duration<rep, period> duration) -> Timer &
         {
             // calculate the top value
             rep top_value = duration.count() * f_tick.count();
@@ -97,26 +109,31 @@ namespace Timer
 
             // set the top value
             this->set_top_value(static_cast<uint32_t>(top_value));
+
+            // Return the timer reference
+            return *this;
         }
 
         /**
          * @brief Set the tick frequency of the timer.
          * @param frequency The frequency in Hz.
+         * @return Timer& Returns a reference to the timer object.
          */
-        void set_tick_frequency(OTOS::hertz frequency);
+        auto set_tick_frequency(OTOS::hertz frequency) -> Timer &;
 
         /**
          * @brief Set the top tick count of the timer.
          * @param top The top value in ticks.
+         * @return Timer& Returns a reference to the timer object.
          */
-        void set_top_value(uint32_t top_value);
+        auto set_top_value(uint32_t top_value) -> Timer &;
 
         /* === Getters === */
         /**
          * @brief Get the channel class instance of one timer capture/compare channel.
          * @attention The returned channel keeps a reference to the timer and can
          * modify the timer properties. This getter is therefore not const!
-         * 
+         *
          * @param channel The channel to be configured.
          */
         [[nodiscard]] auto get_channel(uint8_t channel) -> Channel;
@@ -163,15 +180,10 @@ namespace Timer
         void stop();
 
         /* Let the GPIO assign function access the private members */
-        template<class IO>
-        friend void GPIO::assign(IO pin, Timer &timer);
+        template <class IO>
+        friend void gpio::assign(IO pin, Timer &timer);
 
       private:
-        /* === Properties === */
-        volatile TIM_TypeDef *thisTimer; /**< The underlying timer hardware address of the peripheral. */
-        IO thisInstance;                 /**< The instance of the timer. */
-        OTOS::hertz f_tick{F_CPU};       /**< The tick frequency of the timer. */
-
         /**
          * @brief Class representing a timer channel.
          * The class keeps are reference to the timer and sets its
@@ -203,32 +215,55 @@ namespace Timer
              * @param CompareRegister The reference to the compare register of the channel.
              */
             Channel(const uint8_t channel, Timer *const timer, volatile uint32_t &CompareRegister)
-                : theTimer(timer), thisChannel(channel), compareValue(CompareRegister)
+                : theTimer(timer), channel(channel), compare_value(CompareRegister)
             {
             }
 
-            /* === Methods === */
+            /* === Setters === */
             /**
-             * @brief Enable the operation of the channel.
+             * @brief Set the compare value of the channel.
+             * @param value The compare value of the channel.
+             * @return Channel& Returns a reference to the channel object.
              */
-            void enable() { this->theTimer->enable_channel(this->thisChannel); }
+            auto set_compare_value(const uint32_t value) -> Channel &
+            {
+                this->compare_value = value;
+
+                // Return the channel reference
+                return *this;
+            }
 
             /**
-             * @brief Disable the operation of the channel.
+             * @brief Set the duty cycle of the channel when in PWM mode.
+             * @note When the duty cycle is set to a value greater than 1.0f or less than 0.0f,
+             * the function will return without setting the duty cycle!
+             *
+             * @param percentage The duty cycle percentage of the channel.
+             * @return Channel& Returns a reference to the channel object.
              */
-            void disable() { this->theTimer->disable_channel(this->thisChannel); }
+            auto set_duty_cycle(const float percentage) -> Channel &
+            {
+                // check if percentage is in range
+                if (percentage > 1.0f || percentage < 0.0f)
+                    return *this;
+                this->compare_value = static_cast<uint32_t>(percentage * this->theTimer->timer->ARR);
+
+                // Return the channel reference
+                return *this;
+            }
 
             /**
              * @brief Set the operating mode of the channel.
              * @param mode The mode of the channel.
+             * @return Channel& Returns a reference to the channel object.
              */
-            void set_mode(Mode mode) { this->theTimer->set_channel(this->thisChannel, mode); }
+            auto set_mode(const Mode mode) -> Channel &
+            {
+                this->theTimer->set_channel(this->channel, mode);
 
-            /**
-             * @brief Set the compare value of the channel.
-             * @param value The compare value of the channel.
-             */
-            void set_compare_value(const uint32_t value) { this->compareValue = value; }
+                // Return the channel reference
+                return *this;
+            }
 
             /**
              * @brief Set the pulse width of the channel when in PWM mode.
@@ -238,38 +273,60 @@ namespace Timer
              * @tparam rep The representation type of the duration.
              * @tparam period The ratio defining the period of the duration.
              * @param duration The duration value of the pulse width.
+             * @return Channel& Returns a reference to the channel object.
              */
             template <typename rep, typename period>
-            void set_pulse_width(const std::chrono::duration<rep, period> duration)
+            auto set_pulse_width(const std::chrono::duration<rep, period> duration) -> Channel &
             {
                 // calculate the compare value and match the ratios
                 rep calc_value = duration.count() * this->theTimer->f_tick.count();
                 calc_value *= period::num;
                 calc_value /= period::den;
-                this->compareValue = calc_value;
+                this->compare_value = calc_value;
+
+                // Return the channel reference
+                return *this;
             }
 
+            /* === Methods === */
             /**
-             * @brief Set the duty cycle of the channel when in PWM mode.
-             * @note When the duty cycle is set to a value greater than 1.0f or less than 0.0f,
-             * the function will return without setting the duty cycle!
-             *
-             * @param percentage The duty cycle percentage of the channel.
+             * @brief Enable the operation of the channel.
              */
-            void set_duty_cycle(const float percentage)
-            {
-                // check if percentage is in range
-                if (percentage > 1.0f || percentage < 0.0f)
-                    return;
-                this->compareValue = static_cast<uint32_t>(percentage * this->theTimer->thisTimer->ARR);
-            }
+            void enable() { this->theTimer->enable_channel(this->channel); }
+
+            /**
+             * @brief Disable the operation of the channel.
+             */
+            void disable() { this->theTimer->disable_channel(this->channel); }
 
           private:
             /* === Properties === */
-            Timer *theTimer;                 /**< Pointer to the timer instance the channel belongs to.*/
-            uint8_t thisChannel{0};          /**< The channel number of the channel instance.*/
-            volatile uint32_t &compareValue; /**< Reference to the compare register of the channel.*/
+            Timer *theTimer;                  /**< Pointer to the timer instance the channel belongs to.*/
+            uint8_t channel{0};               /**< The channel number of the channel instance.*/
+            volatile uint32_t &compare_value; /**< Reference to the compare register of the channel.*/
         };
+
+        /* === Constructor === */
+        /**
+         * @brief Constructor for timer object.
+         * @details
+         * - Enables the clock for the selected timer instance.
+         * - Sets the timer tick frequency to the default CPU frequency.
+         * - Sets the top value of the timer to the maximum value.
+         * @note This does not enable the peripheral clock. This constructor
+         * is intended to be used by the builder method.
+         *
+         * @param timer_address The address of the timer peripheral.
+         * @param timer The instance of the timer to be used.
+         * @param f_apb [Hz] The frequency of the APB bus.
+         */
+        Timer(std::uintptr_t timer_address, stm32::Peripheral timer, uint32_t f_apb);
+
+        /* === Properties === */
+        volatile TIM_TypeDef *timer; /**< The underlying timer hardware address of the peripheral. */
+        stm32::Peripheral instance;  /**< The instance of the timer. */
+        uint32_t f_base{0};          /**< [Hz] The frequency of the timer base clock. */
+        OTOS::hertz f_tick{F_CPU};   /**< [Hz] The tick frequency of the timer. */
     };
 
     // === Functions ===
@@ -277,26 +334,26 @@ namespace Timer
      * @brief Configure the SysTick timer for interrupts every 1 ms.
      */
     void SysTick_Configure();
-}; // namespace Timer
+}; // namespace timer
 
-namespace GPIO
+namespace gpio
 {
     /**
      * @brief Assign the I/O pin to the timer.
-     * 
+     *
      * @attention This does not check whether the alternate function is
      * actually available for the pin. It is the responsibility of the
      * user to ensure that the pin can be assigned to the timer!
-     * 
+     *
      * @tparam IO The class implementing the GPIO interface.
      * @param pin The pin to be assigned to the timer.
      * @param timer The timer the pin is assigned to.
      */
-    template<class IO>
-    void assign(IO pin, Timer::Timer &timer)
+    template <class IO>
+    void assign(IO pin, timer::Timer &timer)
     {
-        pin.set_alternate_function(timer.thisInstance);
+        pin.set_alternate_function(timer.instance);
     }
-}; // namespace GPIO 
+}; // namespace gpio
 
 #endif
