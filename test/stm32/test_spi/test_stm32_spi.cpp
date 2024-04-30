@@ -290,34 +290,34 @@ void test_send_data()
 
     /* Test sending a byte, when TX buffer is empty */
     SPI1->SR = SPI_SR_TXE;
-    UUT.set_error(Error::Code::None);
-    Bus::Data_t payload{0xAA};
+    UUT.set_error(error::Code::None);
+    bus::Data_t payload{0xAA};
     TEST_ASSERT_TRUE(UUT.send_data(payload, 1));
-    TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::None, UUT.get_error());
     TEST_ASSERT_EQUAL(payload.value, SPI1->DR);
 
     /* Test sending a byte, when TX buffer is not empty */
     SPI1->SR = 0;
     SPI1->DR = 0;
-    UUT.set_error(Error::Code::None);
+    UUT.set_error(error::Code::None);
     TEST_ASSERT_FALSE(UUT.send_data(payload, 1));
-    TEST_ASSERT_EQUAL(Error::Code::SPI_Timeout, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::SPI_Timeout, UUT.get_error());
     TEST_ASSERT_EQUAL(0, SPI1->DR);
 
     /* Test sending a byte, when the bus is busy */
     SPI1->SR = SPI_SR_BSY;
     SPI1->DR = 0;
-    UUT.set_error(Error::Code::None);
+    UUT.set_error(error::Code::None);
     TEST_ASSERT_FALSE(UUT.send_data(payload, 1));
-    TEST_ASSERT_EQUAL(Error::Code::SPI_BUS_Busy_Error, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::SPI_BUS_Busy_Error, UUT.get_error());
     TEST_ASSERT_EQUAL(0, SPI1->DR);
 
     /* Test sending a word, when TX buffer is empty */
     SPI1->SR = SPI_SR_TXE;
     payload.value = 0xAABB;
-    UUT.set_error(Error::Code::None);
+    UUT.set_error(error::Code::None);
     TEST_ASSERT_TRUE(UUT.send_data(payload, 2));
-    TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::None, UUT.get_error());
     TEST_ASSERT_EQUAL(payload.byte[0], SPI1->DR);
 };
 
@@ -333,14 +333,14 @@ void test_read_data()
     SPI1->SR = SPI_SR_RXNE | SPI_SR_TXE;
     SPI1->DR = 0x12;
     TEST_ASSERT_TRUE(UUT.read_data(0x12, 1));
-    TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::None, UUT.get_error());
     TEST_ASSERT_EQUAL(0x00, UUT.get_rx_data().byte[0]);
 
     /* Test read a byte, when RX buffer is empty */
     SPI1->SR = SPI_SR_TXE;
     SPI1->DR = 0x12;
     TEST_ASSERT_FALSE(UUT.read_data(0x12, 1));
-    TEST_ASSERT_EQUAL(Error::Code::SPI_Timeout, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::SPI_Timeout, UUT.get_error());
 };
 
 /** 
@@ -357,17 +357,17 @@ void test_send_array()
 
     /* Test sending the array */
     SPI1->SR = SPI_SR_TXE;
-    UUT.set_error(Error::Code::None);
+    UUT.set_error(error::Code::None);
     TEST_ASSERT_TRUE(UUT.send_array(buffer.data(), 6));
-    TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::None, UUT.get_error());
     TEST_ASSERT_EQUAL(5, SPI1->DR);
 
     /* Test sending an array, when the bus is busy */
     SPI1->SR = SPI_SR_BSY;
     SPI1->DR = 0;
-    UUT.set_error(Error::Code::None);
+    UUT.set_error(error::Code::None);
     TEST_ASSERT_FALSE(UUT.send_array(buffer.data(), 6));
-    TEST_ASSERT_EQUAL(Error::Code::SPI_BUS_Busy_Error, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::SPI_BUS_Busy_Error, UUT.get_error());
     TEST_ASSERT_EQUAL(0, SPI1->DR);
 };
 
@@ -386,7 +386,7 @@ void test_read_array()
     /* Test reading the array */
     SPI1->SR = SPI_SR_RXNE | SPI_SR_TXE;
     TEST_ASSERT_TRUE(UUT.read_array(buffer.data(), 6));
-    TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::None, UUT.get_error());
     TEST_ASSERT_EQUAL(0x00, buffer[0]);
     TEST_ASSERT_EQUAL(0x00, buffer[5]);
     TEST_ASSERT_EQUAL(0x07, buffer[6]);
@@ -394,7 +394,7 @@ void test_read_array()
     /* Test reading an array, when the bus is busy */
     SPI1->SR = SPI_SR_BSY;
     TEST_ASSERT_FALSE(UUT.read_array(buffer.data(), 6));
-    TEST_ASSERT_EQUAL(Error::Code::SPI_BUS_Busy_Error, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::SPI_BUS_Busy_Error, UUT.get_error());
 };
 
 /** 
@@ -408,7 +408,7 @@ void test_set_data_width()
     /* Test setting the data width to 16 bits */
     UUT.set_data_to_16bit();
     TEST_ASSERT_BIT_HIGH(SPI_CR1_DFF_Pos, SPI1->CR1);
-    TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::None, UUT.get_error());
 };
 
 /** 

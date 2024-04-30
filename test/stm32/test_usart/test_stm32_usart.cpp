@@ -195,37 +195,37 @@ void test_send_data()
     auto UUT = usart::Controller::create<Peripheral::USART_1>(9'600, 8, usart::StopBits::_1_0);
 
     /* Test sending data when no error is present */
-    Bus::Data_t payload{0xAB};
+    bus::Data_t payload{0xAB};
     USART1->SR = USART_SR_TC | USART_SR_TXE;
     USART1->DR = 0;
-    UUT.set_error(Error::Code::None);
+    UUT.set_error(error::Code::None);
     TEST_ASSERT_TRUE( UUT.send_data(payload, 1) );
-    TEST_ASSERT_EQUAL( Error::Code::None, UUT.get_error() );
+    TEST_ASSERT_EQUAL( error::Code::None, UUT.get_error() );
     TEST_ASSERT_EQUAL( payload.byte[0], USART1->DR);
 
     /* Test sending data when the TX buffer is not empty */
     USART1->SR = USART_SR_TC;
     USART1->DR = 0;
-    UUT.set_error(Error::Code::None);
+    UUT.set_error(error::Code::None);
     TEST_ASSERT_FALSE( UUT.send_data(payload, 1) );
-    TEST_ASSERT_EQUAL( Error::Code::USART_Timeout, UUT.get_error() );
+    TEST_ASSERT_EQUAL( error::Code::USART_Timeout, UUT.get_error() );
     TEST_ASSERT_EQUAL( 0, USART1->DR);
 
     /* Test sending data when the peripheral is busy */
     USART1->SR = USART_SR_TXE;
     USART1->DR = 0;
-    UUT.set_error(Error::Code::None);
+    UUT.set_error(error::Code::None);
     TEST_ASSERT_FALSE( UUT.send_data(payload, 1) );
-    TEST_ASSERT_EQUAL( Error::Code::USART_BUS_Busy_Error, UUT.get_error() );
+    TEST_ASSERT_EQUAL( error::Code::USART_BUS_Busy_Error, UUT.get_error() );
     TEST_ASSERT_EQUAL( 0, USART1->DR);
 
     /* Test sending data when no error is present */
     payload.value = 0xCCDD;
     USART1->SR = USART_SR_TC | USART_SR_TXE;
     USART1->DR = 0;
-    UUT.set_error(Error::Code::None);
+    UUT.set_error(error::Code::None);
     TEST_ASSERT_TRUE( UUT.send_data(payload, 2) );
-    TEST_ASSERT_EQUAL( Error::Code::None, UUT.get_error() );
+    TEST_ASSERT_EQUAL( error::Code::None, UUT.get_error() );
     TEST_ASSERT_EQUAL( payload.byte[0], USART1->DR);
 };
 
@@ -243,17 +243,17 @@ void test_send_array()
 
     /* Test sending the array */
     USART1->SR = USART_SR_TC | USART_SR_TXE;
-    UUT.set_error(Error::Code::None);
+    UUT.set_error(error::Code::None);
     TEST_ASSERT_TRUE( UUT.send_array(buffer.data(), 6) );
-    TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::None, UUT.get_error());
     TEST_ASSERT_EQUAL( 5, USART1->DR);
 
     /* Test sending an array, when the bus is busy */
     USART1->SR = USART_SR_TXE;
     USART1->DR = 0;
-    UUT.set_error(Error::Code::None);
+    UUT.set_error(error::Code::None);
     TEST_ASSERT_FALSE( UUT.send_array(buffer.data(), 6) );
-    TEST_ASSERT_EQUAL(Error::Code::USART_BUS_Busy_Error, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::USART_BUS_Busy_Error, UUT.get_error());
     TEST_ASSERT_EQUAL( 0, USART1->DR);
 };
 

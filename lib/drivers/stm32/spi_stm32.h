@@ -33,7 +33,7 @@
 namespace spi
 {
     /* === Classes === */
-    class Controller : public Driver::Base<stm32::Peripheral>
+    class Controller : public driver::Base<stm32::Peripheral>
     {
       public:
         /* === Builder === */
@@ -115,7 +115,7 @@ namespace spi
          * @return Union which contains the received data. The union can be used
          * to use certain parts of the read values.
          */
-        auto get_rx_data() const -> Bus::Data_t;
+        auto get_rx_data() const -> bus::Data_t;
 
         /**
          * @brief Check whether the RX buffer contains valid data.
@@ -149,7 +149,7 @@ namespace spi
          * @return Returns True when the data was sent successfully, False otherwise.
          * @details blocking function
          */
-        auto send_data(Bus::Data_t payload, uint8_t n_bytes) -> bool;
+        auto send_data(bus::Data_t payload, uint8_t n_bytes) -> bool;
 
         /**
          * @brief Send an array with n bytes to a spi target.
@@ -262,7 +262,7 @@ namespace spi
 
         /* === Properties === */
         SPI_TypeDef *peripheral; /**< Pointer to the underlying peripheral hardware address. */
-        Bus::Data_t rx_data{0};  /**< The last received data. */
+        bus::Data_t rx_data{0};  /**< The last received data. */
     };
 }; // namespace spi
 

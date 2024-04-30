@@ -44,7 +44,7 @@ namespace sdio
     };
 
     /* === Classes === */
-    class Controller : public Driver::Base<stm32::Peripheral>
+    class Controller : public driver::Base<stm32::Peripheral>
     {
     public:
         /* === Builder === */

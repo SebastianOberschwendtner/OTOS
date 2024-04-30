@@ -180,7 +180,7 @@ namespace sdio
         /* Only when bus is not busy */
         if (this->is_busy())
         {
-            this->set_error(Error::Code::SDIO_BUS_Busy_Error);
+            this->set_error(error::Code::SDIO_BUS_Busy_Error);
             return false;
         }
 
@@ -259,7 +259,7 @@ namespace sdio
             /* Check for timeouts */
             if (this->hardware_timeout() || this->timed_out())
             {
-                this->set_error(Error::Code::SDIO_Timeout);
+                this->set_error(error::Code::SDIO_Timeout);
                 return false;
             }
 
@@ -283,7 +283,7 @@ namespace sdio
         /* Only when bus is not busy */
         if (this->is_busy())
         {
-            this->set_error(Error::Code::SDIO_BUS_Busy_Error);
+            this->set_error(error::Code::SDIO_BUS_Busy_Error);
             return false;
         };
 
@@ -297,7 +297,7 @@ namespace sdio
         {
             if (this->hardware_timeout() || this->timed_out())
             {
-                this->set_error(Error::Code::SDIO_Timeout);
+                this->set_error(error::Code::SDIO_Timeout);
                 return false;
             }
         }
@@ -314,7 +314,7 @@ namespace sdio
         /* Only when bus is not busy */
         if (this->is_busy())
         {
-            this->set_error(Error::Code::SDIO_BUS_Busy_Error);
+            this->set_error(error::Code::SDIO_BUS_Busy_Error);
             return {};
         };
 
@@ -328,7 +328,7 @@ namespace sdio
         {
             if (this->hardware_timeout() || this->timed_out())
             {
-                this->set_error(Error::Code::SDIO_Timeout);
+                this->set_error(error::Code::SDIO_Timeout);
                 return {};
             }
         }
@@ -345,7 +345,7 @@ namespace sdio
         /* Only when bus is not busy */
         if (this->is_busy())
         {
-            this->set_error(Error::Code::SDIO_BUS_Busy_Error);
+            this->set_error(error::Code::SDIO_BUS_Busy_Error);
             return {};
         };
 
@@ -359,7 +359,7 @@ namespace sdio
         {
             if (this->hardware_timeout() || this->timed_out())
             {
-                this->set_error(Error::Code::SDIO_Timeout);
+                this->set_error(error::Code::SDIO_Timeout);
                 return {};
             }
         }
@@ -376,7 +376,7 @@ namespace sdio
         /* Only when bus is not busy */
         if (this->is_busy())
         {
-            this->set_error(Error::Code::SDIO_BUS_Busy_Error);
+            this->set_error(error::Code::SDIO_BUS_Busy_Error);
             return {};
         };
 
@@ -390,7 +390,7 @@ namespace sdio
         {
             if (this->hardware_timeout() || this->timed_out())
             {
-                this->set_error(Error::Code::SDIO_Timeout);
+                this->set_error(error::Code::SDIO_Timeout);
                 return {};
             }
         }
@@ -421,7 +421,7 @@ namespace sdio
         /* Only when bus is not busy */
         if (this->is_busy())
         {
-            this->set_error(Error::Code::SDIO_BUS_Busy_Error);
+            this->set_error(error::Code::SDIO_BUS_Busy_Error);
             return false;
         }
 
@@ -500,7 +500,7 @@ namespace sdio
             /* Check for timeouts */
             if (this->hardware_timeout()) /* || this->timed_out() ) */
             {
-                this->set_error(Error::Code::SDIO_Timeout);
+                this->set_error(error::Code::SDIO_Timeout);
                 return false;
             }
 

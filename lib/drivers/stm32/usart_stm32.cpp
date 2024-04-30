@@ -253,7 +253,7 @@ namespace usart
             /* Catch timeouts */
             if (this->timed_out())
             {
-                this->set_error(Error::Code::USART_Timeout);
+                this->set_error(error::Code::USART_Timeout);
                 return false;
             }
         }
@@ -266,13 +266,13 @@ namespace usart
     }
 
     auto Controller::send_data(
-        const Bus::Data_t payload,
+        const bus::Data_t payload,
         const uint8_t n_bytes) -> bool
     {
         /* Only when bus is not busy */
         if (this->is_busy())
         {
-            this->set_error(Error::Code::USART_BUS_Busy_Error);
+            this->set_error(error::Code::USART_BUS_Busy_Error);
             return false;
         }
 
@@ -293,7 +293,7 @@ namespace usart
         /* Only when bus is not busy */
         if (this->is_busy())
         {
-            this->set_error(Error::Code::USART_BUS_Busy_Error);
+            this->set_error(error::Code::USART_BUS_Busy_Error);
             return false;
         }
 

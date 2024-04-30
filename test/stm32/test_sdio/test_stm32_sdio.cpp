@@ -249,21 +249,21 @@ void test_command_no_response()
     TEST_ASSERT_EQUAL(Expected, SDIO->CMD);
     TEST_ASSERT_EQUAL( 0x34, SDIO->ARG);
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CMDSENTC_Pos, SDIO->ICR);
-    TEST_ASSERT_EQUAL( Error::Code::None, UUT.get_error() );
+    TEST_ASSERT_EQUAL( error::Code::None, UUT.get_error() );
 
     /* Test a timeout during transfer */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CTIMEOUT;
     TEST_ASSERT_FALSE( UUT.send_command_no_response(0x12, 0x34) );
     TEST_ASSERT_EQUAL(0, SDIO->ICR);
-    TEST_ASSERT_EQUAL(Error::Code::SDIO_Timeout, UUT.get_error() );
+    TEST_ASSERT_EQUAL(error::Code::SDIO_Timeout, UUT.get_error() );
 
     /* Test transmitting when bus is busy */
     SDIO->registers_to_default();
     SDIO->STA = SDIO_STA_CMDACT;
     TEST_ASSERT_FALSE( UUT.send_command_no_response(0x12, 0x34) );
     TEST_ASSERT_EQUAL(0, SDIO->ICR);
-    TEST_ASSERT_EQUAL(Error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
+    TEST_ASSERT_EQUAL(error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
 };
 
 /** 
@@ -288,7 +288,7 @@ void test_command_R1_response()
     TEST_ASSERT_EQUAL(Expected, SDIO->CMD);
     TEST_ASSERT_EQUAL( 0x34, SDIO->ARG);
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CMDRENDC_Pos, SDIO->ICR);
-    TEST_ASSERT_EQUAL( Error::Code::None, UUT.get_error() );
+    TEST_ASSERT_EQUAL( error::Code::None, UUT.get_error() );
 
     /* Test a timeout during transfer */
     SDIO->registers_to_default();
@@ -297,7 +297,7 @@ void test_command_R1_response()
     response = UUT.send_command_R1_response(0x12, 0x34);
     TEST_ASSERT_FALSE(response);
     TEST_ASSERT_EQUAL(0, SDIO->ICR);
-    TEST_ASSERT_EQUAL(Error::Code::SDIO_Timeout, UUT.get_error() );
+    TEST_ASSERT_EQUAL(error::Code::SDIO_Timeout, UUT.get_error() );
 
     /* Test transmitting when bus is busy */
     SDIO->registers_to_default();
@@ -306,7 +306,7 @@ void test_command_R1_response()
     response = UUT.send_command_R1_response(0x12, 0x34);
     TEST_ASSERT_FALSE(response);
     TEST_ASSERT_EQUAL(0, SDIO->ICR);
-    TEST_ASSERT_EQUAL(Error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
+    TEST_ASSERT_EQUAL(error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
 };
 
 /** 
@@ -331,7 +331,7 @@ void test_command_R2_response()
     TEST_ASSERT_EQUAL(Expected, SDIO->CMD);
     TEST_ASSERT_EQUAL( 0x34, SDIO->ARG);
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CMDRENDC_Pos, SDIO->ICR);
-    TEST_ASSERT_EQUAL( Error::Code::None, UUT.get_error() );
+    TEST_ASSERT_EQUAL( error::Code::None, UUT.get_error() );
 
     /* Test a timeout during transfer */
     SDIO->registers_to_default();
@@ -340,7 +340,7 @@ void test_command_R2_response()
     response = UUT.send_command_R2_response(0x12, 0x34);
     TEST_ASSERT_FALSE(response);
     TEST_ASSERT_EQUAL(0, SDIO->ICR);
-    TEST_ASSERT_EQUAL(Error::Code::SDIO_Timeout, UUT.get_error() );
+    TEST_ASSERT_EQUAL(error::Code::SDIO_Timeout, UUT.get_error() );
 
     /* Test transmitting when bus is busy */
     SDIO->registers_to_default();
@@ -349,7 +349,7 @@ void test_command_R2_response()
     response = UUT.send_command_R2_response(0x12, 0x34);
     TEST_ASSERT_FALSE(response);
     TEST_ASSERT_EQUAL(0, SDIO->ICR);
-    TEST_ASSERT_EQUAL(Error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
+    TEST_ASSERT_EQUAL(error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
 };
 
 /** 
@@ -375,7 +375,7 @@ void test_command_R3_response()
     TEST_ASSERT_EQUAL( 0x34, SDIO->ARG);
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CMDRENDC_Pos, SDIO->ICR);
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CCRCFAILC_Pos, SDIO->ICR);
-    TEST_ASSERT_EQUAL( Error::Code::None, UUT.get_error() );
+    TEST_ASSERT_EQUAL( error::Code::None, UUT.get_error() );
 
     /* Test a successful transfer when CRC match */
     SDIO->registers_to_default();
@@ -389,7 +389,7 @@ void test_command_R3_response()
     TEST_ASSERT_EQUAL( 0x34, SDIO->ARG);
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CMDRENDC_Pos, SDIO->ICR);
     TEST_ASSERT_BIT_HIGH(SDIO_ICR_CCRCFAILC_Pos, SDIO->ICR);
-    TEST_ASSERT_EQUAL( Error::Code::None, UUT.get_error() );
+    TEST_ASSERT_EQUAL( error::Code::None, UUT.get_error() );
 
     /* Test a timeout during transfer */
     SDIO->registers_to_default();
@@ -398,7 +398,7 @@ void test_command_R3_response()
     response = UUT.send_command_R3_response(0x12, 0x34);
     TEST_ASSERT_FALSE(response);
     TEST_ASSERT_EQUAL(0, SDIO->ICR);
-    TEST_ASSERT_EQUAL(Error::Code::SDIO_Timeout, UUT.get_error() );
+    TEST_ASSERT_EQUAL(error::Code::SDIO_Timeout, UUT.get_error() );
 
     /* Test transmitting when bus is busy */
     SDIO->registers_to_default();
@@ -407,7 +407,7 @@ void test_command_R3_response()
     response = UUT.send_command_R3_response(0x12, 0x34);
     TEST_ASSERT_FALSE(response);
     TEST_ASSERT_EQUAL(0, SDIO->ICR);
-    TEST_ASSERT_EQUAL(Error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
+    TEST_ASSERT_EQUAL(error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
 };
 
 /** 
@@ -448,12 +448,12 @@ void test_read_block()
     TEST_ASSERT_EQUAL( 512, SDIO->DLEN );
     TEST_ASSERT_EQUAL( (9 << 4) | SDIO_DCTRL_DTDIR | SDIO_DCTRL_DTEN, SDIO->DCTRL);
     TEST_ASSERT_EQUAL( SDIO_ICR_DBCKENDC | SDIO_ICR_DATAENDC, SDIO->ICR);
-    TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error() );
+    TEST_ASSERT_EQUAL(error::Code::None, UUT.get_error() );
 
     /* Test reading a block when bus is busy */
     SDIO->STA = SDIO_STA_RXACT;
     TEST_ASSERT_FALSE( UUT.read_single_block(buffer.begin(), buffer.end()) );
-    TEST_ASSERT_EQUAL(Error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
+    TEST_ASSERT_EQUAL(error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
 
     /* Test reading a block when a timeout occurs */
     SDIO->STA = SDIO_STA_DTIMEOUT;
@@ -461,7 +461,7 @@ void test_read_block()
     TEST_ASSERT_EQUAL( 512, SDIO->DLEN );
     TEST_ASSERT_EQUAL( (9 << 4) | SDIO_DCTRL_DTDIR | SDIO_DCTRL_DTEN, SDIO->DCTRL);
     TEST_ASSERT_EQUAL( SDIO_ICR_DBCKENDC | SDIO_ICR_DATAENDC, SDIO->ICR);
-    TEST_ASSERT_EQUAL(Error::Code::SDIO_Timeout, UUT.get_error() );
+    TEST_ASSERT_EQUAL(error::Code::SDIO_Timeout, UUT.get_error() );
 };
 
 /** 
@@ -481,12 +481,12 @@ void test_write_block()
     TEST_ASSERT_EQUAL( 512, SDIO->DLEN );
     TEST_ASSERT_EQUAL( (9 << 4) | SDIO_DCTRL_DTEN, SDIO->DCTRL);
     TEST_ASSERT_EQUAL( SDIO_ICR_DBCKENDC | SDIO_ICR_DATAENDC, SDIO->ICR);
-    TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error() );
+    TEST_ASSERT_EQUAL(error::Code::None, UUT.get_error() );
 
     /* Test reading a block when bus is busy */
     SDIO->STA = SDIO_STA_TXACT;
     TEST_ASSERT_FALSE( UUT.write_single_block(buffer.begin(), buffer.end()) );
-    TEST_ASSERT_EQUAL(Error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
+    TEST_ASSERT_EQUAL(error::Code::SDIO_BUS_Busy_Error, UUT.get_error() );
 
     /* Test reading a block when a timeout occurs */
     SDIO->STA = SDIO_STA_DTIMEOUT;
@@ -494,7 +494,7 @@ void test_write_block()
     TEST_ASSERT_EQUAL( 512, SDIO->DLEN );
     TEST_ASSERT_EQUAL( (9 << 4) | SDIO_DCTRL_DTEN, SDIO->DCTRL);
     TEST_ASSERT_EQUAL( SDIO_ICR_DBCKENDC | SDIO_ICR_DATAENDC, SDIO->ICR);
-    TEST_ASSERT_EQUAL(Error::Code::SDIO_Timeout, UUT.get_error() );
+    TEST_ASSERT_EQUAL(error::Code::SDIO_Timeout, UUT.get_error() );
 };
 
 /* === Main === */

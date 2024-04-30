@@ -28,13 +28,13 @@
 /* === Needed Interfaces === */
 #include "interface.h"
 #include "peripherals_stm32.h"
-using Bus::Data_t;
+using bus::Data_t;
 
 /* === Declarations === */
 namespace i2c
 {
     /* === Classes === */
-    class Controller : public Driver::Base<stm32::Peripheral>
+    class Controller : public driver::Base<stm32::Peripheral>
     {
       public:
         /* === Builder === */

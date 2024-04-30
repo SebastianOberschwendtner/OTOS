@@ -417,7 +417,7 @@ namespace i2c
         }
         else
         {
-            this->set_error(Error::Code::I2C_BUS_Busy_Error);
+            this->set_error(error::Code::I2C_BUS_Busy_Error);
             return false;
         }
         return true;
@@ -482,7 +482,7 @@ namespace i2c
         }
         else
         {
-            this->set_error(Error::Code::I2C_BUS_Busy_Error);
+            this->set_error(error::Code::I2C_BUS_Busy_Error);
             return false;
         }
         return true;
@@ -499,7 +499,7 @@ namespace i2c
         {
             if (this->timed_out())
             {
-                this->set_error(Error::Code::I2C_Timeout);
+                this->set_error(error::Code::I2C_Timeout);
                 return false;
             }
         }
@@ -519,7 +519,7 @@ namespace i2c
             if (!this->ack_received())
             {
                 /* Set the error */
-                this->set_error(Error::Code::I2C_Address_Error);
+                this->set_error(error::Code::I2C_Address_Error);
                 /* reset the error flag and stop waiting */
                 return false;
             }
@@ -555,7 +555,7 @@ namespace i2c
         }
         else
         {
-            this->set_error(Error::Code::I2C_BUS_Busy_Error);
+            this->set_error(error::Code::I2C_BUS_Busy_Error);
             return false;
         }
     };
@@ -590,7 +590,7 @@ namespace i2c
         }
         else
         {
-            this->set_error(Error::Code::I2C_BUS_Busy_Error);
+            this->set_error(error::Code::I2C_BUS_Busy_Error);
             return false;
         }
     };
@@ -619,7 +619,7 @@ namespace i2c
         }
         else
         {
-            this->set_error(Error::Code::I2C_BUS_Busy_Error);
+            this->set_error(error::Code::I2C_BUS_Busy_Error);
             return false;
         }
     };
@@ -641,7 +641,7 @@ namespace i2c
             /* Check for timeouts */
             if (this->timed_out())
             {
-                this->set_error(Error::Code::I2C_Timeout);
+                this->set_error(error::Code::I2C_Timeout);
                 return {};
             }
         }
@@ -669,7 +669,7 @@ namespace i2c
             /* Check for timeouts */
             if (this->timed_out())
             {
-                this->set_error(Error::Code::I2C_Timeout);
+                this->set_error(error::Code::I2C_Timeout);
                 return false;
             }
         }
@@ -683,14 +683,14 @@ namespace i2c
             /* Check for ack or nack */
             if (!this->ack_received())
             {
-                this->set_error(Error::Code::I2C_Data_ACK_Error);
+                this->set_error(error::Code::I2C_Data_ACK_Error);
                 return false;
             }
 
             /* Check for timeouts */
             if (this->timed_out())
             {
-                this->set_error(Error::Code::I2C_Timeout);
+                this->set_error(error::Code::I2C_Timeout);
                 return false;
             }
         }

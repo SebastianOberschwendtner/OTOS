@@ -212,7 +212,7 @@ namespace spi
             if (this->timed_out())
             {
                 /* Peripheral timed out -> set error */
-                this->set_error(Error::Code::SPI_Timeout);
+                this->set_error(error::Code::SPI_Timeout);
                 return *this;
             }
         }
@@ -254,7 +254,7 @@ namespace spi
         return this->peripheral->SR & SPI_SR_BSY;
     };
 
-    auto Controller::get_rx_data() const -> Bus::Data_t
+    auto Controller::get_rx_data() const -> bus::Data_t
     {
         return this->rx_data;
     };
@@ -285,7 +285,7 @@ namespace spi
             if (this->timed_out())
             {
                 /* Peripheral timed out -> set error */
-                this->set_error(Error::Code::SPI_Timeout);
+                this->set_error(error::Code::SPI_Timeout);
                 return false;
             }
         }
@@ -311,7 +311,7 @@ namespace spi
             if (this->timed_out())
             {
                 /* Peripheral timed out -> set error */
-                this->set_error(Error::Code::SPI_Timeout);
+                this->set_error(error::Code::SPI_Timeout);
                 return {};
             }
         }
@@ -327,7 +327,7 @@ namespace spi
             if (this->timed_out())
             {
                 /* Peripheral timed out -> set error */
-                this->set_error(Error::Code::SPI_Timeout);
+                this->set_error(error::Code::SPI_Timeout);
                 return {};
             }
         }
@@ -337,13 +337,13 @@ namespace spi
         return rx;
     };
 
-    auto Controller::send_data(const Bus::Data_t payload,
+    auto Controller::send_data(const bus::Data_t payload,
                                const uint8_t n_bytes) -> bool
     {
         /* only when bus is not busy! */
         if (this->is_busy())
         {
-            this->set_error(Error::Code::SPI_BUS_Busy_Error);
+            this->set_error(error::Code::SPI_BUS_Busy_Error);
             return false;
         }
 
@@ -360,7 +360,7 @@ namespace spi
         {
             if (this->timed_out())
             {
-                this->set_error(Error::Code::SPI_Timeout);
+                this->set_error(error::Code::SPI_Timeout);
                 return false;
             }
         }
@@ -375,7 +375,7 @@ namespace spi
         /* only when bus is not busy! */
         if (this->is_busy())
         {
-            this->set_error(Error::Code::SPI_BUS_Busy_Error);
+            this->set_error(error::Code::SPI_BUS_Busy_Error);
             return false;
         }
 
@@ -392,7 +392,7 @@ namespace spi
         {
             if (this->timed_out())
             {
-                this->set_error(Error::Code::SPI_Timeout);
+                this->set_error(error::Code::SPI_Timeout);
                 return false;
             }
         }
@@ -410,7 +410,7 @@ namespace spi
         /* only when bus is not busy! */
         if (this->is_busy())
         {
-            this->set_error(Error::Code::SPI_BUS_Busy_Error);
+            this->set_error(error::Code::SPI_BUS_Busy_Error);
             return false;
         }
 
@@ -435,7 +435,7 @@ namespace spi
         {
             if (this->timed_out())
             {
-                this->set_error(Error::Code::SPI_Timeout);
+                this->set_error(error::Code::SPI_Timeout);
                 return false;
             }
         }
@@ -451,7 +451,7 @@ namespace spi
         /* only when bus is not busy! */
         if (this->is_busy())
         {
-            this->set_error(Error::Code::SPI_BUS_Busy_Error);
+            this->set_error(error::Code::SPI_BUS_Busy_Error);
             return false;
         }
 
@@ -472,7 +472,7 @@ namespace spi
         {
             if (this->timed_out())
             {
-                this->set_error(Error::Code::SPI_Timeout);
+                this->set_error(error::Code::SPI_Timeout);
                 return false;
             }
         }

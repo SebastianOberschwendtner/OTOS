@@ -42,7 +42,7 @@ namespace usart
     };
 
     /* === Classes === */
-    class Controller : public Driver::Base<stm32::Peripheral>
+    class Controller : public driver::Base<stm32::Peripheral>
     {
       public:
         /* === Factory === */
@@ -125,7 +125,7 @@ namespace usart
          * @return Returns True when the data was sent successfully, False otherwise.
          * @details blocking function
          */
-        auto send_data(const Bus::Data_t payload, const uint8_t n_bytes) -> bool;
+        auto send_data(const bus::Data_t payload, const uint8_t n_bytes) -> bool;
 
         /**
          * @brief Send an array with n bytes to an USART target.
@@ -177,7 +177,7 @@ namespace usart
 
         /* === Properties === */
         USART_TypeDef *peripheral; /**< Pointer to the used peripheral hardware. */
-        Bus::Data_t rx_data{0};    /**< Data received from the bus. */
+        bus::Data_t rx_data{0};    /**< Data received from the bus. */
     };
 }; // namespace usart
 
