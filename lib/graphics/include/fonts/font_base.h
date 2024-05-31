@@ -21,7 +21,11 @@
 #ifndef FONT_BASE_H_
 #define FONT_BASE_H_
 
-namespace Font
+/* === Includes === */
+#include <misc/types.h>
+
+/* === Font Class === */
+namespace font
 {
     /**
      * @brief Struct to store the properties of a font.
@@ -33,10 +37,10 @@ namespace Font
      */
     struct Base_t
     {
-        const unsigned char * const data;
-        const unsigned char width_px;
-        const unsigned char height_px;
-        const unsigned char stride;
+        const uint8_t * const data;
+        const uint8_t width_px;
+        const uint8_t height_px;
+        const uint8_t stride;
     };
 
 };

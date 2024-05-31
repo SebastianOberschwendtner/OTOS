@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2022 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2022 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -28,10 +28,10 @@
  */
 #include "main.h" // => include not strictly necessary, but for intellisense to work
 
-// *** Variables ***
-Graphics::Buffer_BW<240, 320> display_buffer;
+/* === Variables === */
+graphics::Buffer_BW<240, 320> display_buffer;
 
-// === Example Task ===
+/* === Example Task === */
 /**
  * @brief Example task for using the ILI9341 display.
  * The following pins are used:
@@ -47,67 +47,67 @@ Graphics::Buffer_BW<240, 320> display_buffer;
  */
 void Run_ILI9341_Example(void)
 {
-    // Timed Task
-    OTOS::Timed_Task task(OTOS::get_time_ms);
+    /* Timed Task */
+    OTOS::TimedTask task(OTOS::get_time_ms);
 
-    // IO Pins
-    GPIO::PIN DX(GPIO::Port::D, 13, GPIO::Mode::Output);
-    GPIO::PIN CS(GPIO::Port::C, 2, GPIO::Mode::Output);
-    GPIO::PIN SCK(GPIO::Port::F, 7, GPIO::Mode::Output);
-    GPIO::PIN MOSI(GPIO::Port::F, 9, GPIO::Mode::Output);
-    GPIO::PIN Led_Green(GPIO::Port::G, 13, GPIO::Mode::Output);
+    /* IO Pins */
+    auto DX = gpio::Pin::create<gpio::Port::D>(13, gpio::Mode::Output);
+    auto CS = gpio::Pin::create<gpio::Port::C>(2, gpio::Mode::Output);
+    auto SCK = gpio::Pin::create<gpio::Port::F>(7, gpio::Mode::Output);
+    auto MOSI = gpio::Pin::create<gpio::Port::F>(9, gpio::Mode::Output);
+    auto Led_Green = gpio::Pin::create<gpio::Port::G>(13, gpio::Mode::Output);
 
-    // SPI
-    SPI::Controller<IO::SPI_5> spi_display(8'000'000);
-    GPIO::assign(SCK, spi_display);
-    GPIO::assign(MOSI, spi_display);
+    /* SPI */
+    auto spi_display = spi::Controller::create<stm32::Peripheral::SPI_5>(8'000'000);
+    gpio::assign(SCK, spi_display);
+    gpio::assign(MOSI, spi_display);
 
-    // Display controller
-    ILI9341::setup_spi_bus(spi_display);
-    ILI9341::Controller display(spi_display, DX, CS);
+    /* Display controller */
+    ili9341::setup_spi_bus(spi_display);
+    ili9341::Controller display(spi_display, DX, CS);
 
-    // Canvas
-    Graphics::Canvas_BW canvas(display_buffer.data.data(), display_buffer.width_px, display_buffer.height_px);
-    canvas.set_font(Font::_24px::DelugiaPLMono);
+    /* Canvas */
+    graphics::Canvas_BW canvas(display_buffer.data.data(), display_buffer.width_px, display_buffer.height_px);
+    canvas.set_font(font::_24px::DelugiaPLMono);
 
-    // Add strings
+    /* Add strings */
     /** @attention The constant string stream does not yet support the
      * newline character. You you have to terminate each line with a
      * `OTOS::endl` instead. 
      * => std::string_view supports the newline character!*/
     canvas << "hello world!" << OTOS::endl;
 
-    // Add string_view
+    /* Add string_view */
     std::string_view sv = "string_view\n";
     canvas << sv;
 
-    // Add integer numbers
+    /* Add integer numbers */
     canvas << 42;
 
-    // Add floating point numbers
+    /* Add floating point numbers */
     /* *** -> Coming soon *** */
 
-    // Initialize display
+    /* Initialize display */
     display.wake_up();
     task.wait_ms(100);
     display.initialize();
     display.on();
 
-    // Start drawing the display buffer
+    /* Start drawing the display buffer */
     while (true)
     {
-        // Flash LED to indicate each display update
+        /* Flash LED to indicate each display update */
         Led_Green.set_high();
 
-        // Draw the BW canvas with specified foreground and background color
+        /* Draw the BW canvas with specified foreground and background color */
         display.draw(
             display_buffer.data.cbegin(),
             display_buffer.data.cend(),
-            ILI9341::RGB_16bit<255, 255, 255>(),
+            ili9341::RGB_16bit<255, 255, 255>(),
             0);
         Led_Green.set_low();
 
-        // Wait for next update
+        /* Wait for next update */
         OTOS::Task::yield();
     }
 };

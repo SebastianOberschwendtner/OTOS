@@ -1,5 +1,17 @@
 # Changelog for OTOS
-## [v4.2.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.2.0)
+## [v5.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v5.0.0) *(2024-05-31)*
+
+>Released by `SO`
+
+### Release Notes:
+- Major refactoring of comments.
+- 🔥 Implements a builder method for all peripheral controller classes.
+- Replaces integral types with types which explicitly specify the bit size.
+
+### Fixed Issues:
+- n/a
+
+## [v4.2.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v4.2.0) *(2024-04-29)*
 
 >Released by `SO`
 

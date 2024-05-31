@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2022 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2022 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,97 +21,104 @@
 #ifndef IOSTREAM_H_
 #define IOSTREAM_H_
 
-// === Includes ===
+/* === Includes === */
 #include <array>
-#include <string_view>
 #include <charconv>
+#include <string_view>
 
-// === Details ===
+/* === Details === */
 namespace detail
 {
     constexpr std::size_t max_int_decimals = 10;
-}; // !namespace detail
+}; // namespace detail
 
-// === IO Streams ===
+/* === IO Streams === */
 namespace OTOS
 {
     /**
      * @brief Output stream class to write to output devices.
-     * 
+     *
      * @tparam o_device The device which holds the output buffer/interface.
      */
     template <class o_device>
     class ostream
     {
-    private:
-        o_device* const pimpl; // Pointer to the implementation of the output device
+      public:
+        /* === Constructors === */
+        ostream() = delete;
+        ostream(const ostream &) = delete;
+        ostream(ostream &&) = delete;
+        ostream(o_device &device) : pimpl(&device){};
+        auto operator=(const ostream &) -> ostream & = delete;
+        auto operator=(ostream &&) -> ostream & = delete;
 
-    public:
-        // *** Constructors ***
-        ostream(void) = delete;
-        ostream(const ostream&) = delete;
-        ostream(ostream&&) = delete;
-        ostream(o_device& device): pimpl(&device) {};
+        /* === Destructor === */
+        ~ostream(){};
 
-        // *** Destructor ***
-        ~ostream(void) {};
+        /* === Methods === */
+        auto put(const char c) -> ostream &
+        {
+            pimpl->put(c);
+            return *this;
+        };
+        auto write(const char *str, const std::size_t n) -> ostream &
+        {
+            pimpl->write(str, n);
+            return *this;
+        };
+        auto flush() -> ostream &
+        {
+            pimpl->flush();
+            return *this;
+        };
 
-        // *** Operators ***
-        ostream& operator=(const ostream&) = delete;
-        ostream& operator=(ostream&&) = delete;
-
-        // *** Methods ***
-        ostream& put(const char c) { pimpl->put(c); return *this;}; 
-        ostream& write(const char* str, const std::size_t n) { pimpl->write(str, n); return *this;};
-        ostream& flush(void) { pimpl->flush(); return *this;};
-
-        // *** Overloaded stream operators ***
+        /* === Overloaded stream operators === */
         /**
          * @brief Add a string to the stream.
          *
          * => Prefer using `std::string_views` instead of null terminated strings.
          * String views can be implemented more efficient.
-         * 
+         *
          * @param str The pointer to the  null terminated (!) string to add.
          * @return ostream& Returns a reference to the stream.
          */
-        ostream& operator<<(char * str)
+        auto operator<<(char *str) -> ostream &
         {
-            // Loop as long as the string is not terminated
-            while(*str)
+            /* Loop as long as the string is not terminated */
+            while (*str)
                 this->put(*str++);
             return *this;
-        }; 
+        };
 
         /**
          * @brief Add a const string to the stream.
          *
          * => Prefer using `std::string_views` instead of null terminated strings.
          * String views can be implemented more efficient.
-         * 
+         *
          * @param str The pointer to the  null terminated (!) string to add.
          * @return ostream& Returns a reference to the stream.
          */
-        ostream& operator<<(const char * str)
+        auto operator<<(const char *str) -> ostream &
         {
-            // Get the temporary non-const pointer to the data
+            /* Get the temporary non-const pointer to the data */
             auto ptr = const_cast<char *>(str);
 
-            // Loop as long as the string is not terminated
-            while(*ptr)
+            /* Loop as long as the string is not terminated */
+            while (*ptr)
                 this->put(*ptr++);
             return *this;
-        }; 
+        };
 
         /**
          * @brief Add a string view to the stream.
-         * 
+         *
          * @param str_view The reference to the string view to add.
          * @return ostream& Returns a reference to the stream.
          */
-        ostream& operator<<(const std::string_view & str_view)
+        auto operator<<(const std::string_view &str_view) -> ostream &
         {
-            // Write all characters of the string view
+            /* Write all characters of the string view */
             this->write(str_view.data(), str_view.size());
             return *this;
         };
@@ -126,7 +133,7 @@ namespace OTOS
          * @param __pf The function pointer to the manipulator.
          * @return Returns a reference to the stream.
          */
-        ostream & operator<<(ostream &(*__pf)(ostream &))
+        auto operator<<(ostream &(*__pf)(ostream &)) -> ostream &
         {
             return __pf(*this);
         };
@@ -134,41 +141,44 @@ namespace OTOS
         /**
          * @brief Add an integer number to the stream.
          *
-         * The maximum number of decimals which can be 
+         * The maximum number of decimals which can be
          * converted is defined by `detail::max_int_decimals`.
-         * 
+         *
          * @tparam int_type The integral type of the number to add.
          * @param num The number to add.
          * @return ostream& Returns a reference to the stream.
          */
         template <typename int_type>
-        ostream& operator<<(const int_type num)
+        auto operator<<(const int_type num) -> ostream &
         {
-            // Check if the template type is an integral type
+            /* Check if the template type is an integral type */
             static_assert(std::is_integral_v<int_type>, "Only integral types are allowed.");
 
-            // Temporary container for result
+            /* Temporary container for result */
             std::array<char, detail::max_int_decimals> result;
 
-            // convert the number to a string
+            /* convert the number to a string */
             auto [ptr, ec] = std::to_chars(
-                    result.data(),
-                    result.data() + result.size(),
-                    num);
-            // @TODO Check for errors in the string conversion
-            
-            // Calculate the length of the result
+                result.data(),
+                result.data() + result.size(),
+                num);
+            /* @TODO Check for errors in the string conversion */
+
+            /* Calculate the length of the result */
             auto len = std::distance(result.begin(), ptr);
 
-            // Write the string to the stream
+            /* Write the string to the stream */
             this->write(result.begin(), len);
             return *this;
         };
+
+      private:
+        o_device *const pimpl; /**< Pointer to the implementation of the output device */
     };
 
     /**
      * @brief Input stream class to read from input devices.
-     * 
+     *
      * @tparam i_device The device which holds the input buffer/interface.
      */
     template <class i_device>
@@ -178,50 +188,47 @@ namespace OTOS
 
     /**
      * @brief Input and output stream class to read and write from input and output devices.
-     * 
+     *
      * @tparam io_device The device which holds the input and output buffer/interface.
      */
     template <class io_device>
-    class iostream: public istream<io_device>, public ostream<io_device>
+    class iostream : public istream<io_device>, public ostream<io_device>
     {
-    public:
-        // *** Constructors ***
-        iostream(void) = delete;
-        iostream(const iostream&) = delete;
-        iostream(iostream&&) = delete;
-        iostream(io_device& device): ostream<io_device>(device) {};
+      public:
+        /* === Constructors === */
+        iostream() = delete;
+        iostream(const iostream &) = delete;
+        iostream(iostream &&) = delete;
+        iostream(io_device &device) : ostream<io_device>(device){};
+        auto operator=(const iostream &) -> iostream & = delete;
+        auto operator=(iostream &&) -> iostream & = delete;
 
-        // *** Destructor ***
-        ~iostream(void) {};
+        /* === Destructor === */
+        ~iostream(){};
 
-        // *** Operators ***
-        iostream& operator=(const iostream&) = delete;
-        iostream& operator=(iostream&&) = delete;
-
-        // *** Methods ***
-        // iostream& get(char& c) { this->pimpl->get(c); return *this;};
-        // iostream& read(char* str, std::size_t n) { this->pimpl->read(str, n); return *this;};
+        /* === Methods === */
+        /* iostream& get(char& c) { this->pimpl->get(c); return *this;}; */
+        /* iostream& read(char* str, std::size_t n) { this->pimpl->read(str, n); return *this;}; */
     };
 
-    // === Manipulators ===
-
+    /* === Manipulators === */
     /**
      * @brief Function template to end the current line.
      * In the C++ standard this manipulator also flushes the stream.
      * This behavior might be added in the future.
-     * 
+     *
      * @tparam o_device The output device which holds the output buffer/interface.
      * @param stream The reference to the output stream.
      * @return Returns a reference to the output stream.
      */
     template <class o_device>
-    inline ostream<o_device>& endl(ostream<o_device>& stream)
+    auto endl(ostream<o_device> &stream) -> ostream<o_device> &
     {
-        // write one character, since put() does not always check for newlines
+        /* write one character, since put() does not always check for newlines */
         stream.write("\n", 1);
         return stream;
     };
 
-}; // !namespace OTOS
+}; // namespace OTOS
 
-#endif
+#endif // IOSTREAM_H_

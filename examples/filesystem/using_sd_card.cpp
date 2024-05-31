@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2022 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2022 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -43,51 +43,51 @@
  */
 void Run_SD_Example(void)
 {
-    // Create timed task
-    OTOS::Timed_Task task(OTOS::get_time_ms);
+    /* Create timed task */
+    OTOS::TimedTask task(OTOS::get_time_ms);
 
-    // Create SD IO Pins
-    GPIO::PIN CLK(GPIO::Port::C, 12, GPIO::Mode::Output);
-    GPIO::PIN CMD(GPIO::Port::D, 2, GPIO::Mode::Output);
-    GPIO::PIN D0(GPIO::Port::C, 8, GPIO::Mode::Output);
-    GPIO::PIN CD(GPIO::Port::C, 11, GPIO::Mode::Output);
-    CMD.set_output_type(GPIO::Output::Open_Drain);
-    D0.set_output_type(GPIO::Output::Open_Drain);
-    CD.set_output_type(GPIO::Output::Open_Drain);
-    CMD.set_pull(GPIO::Pull::Pull_Up);
-    D0.set_pull(GPIO::Pull::Pull_Up);
-    CD.set_pull(GPIO::Pull::Pull_Up);
+    /* Create SD IO Pins */
+    auto CLK = gpio::Pin::create<gpio::Port::C>(12, gpio::Mode::Output);
+    auto CMD = gpio::Pin::create<gpio::Port::D>(2, gpio::Mode::Output)
+        .set_output_type(gpio::Output::Open_Drain)
+        .set_pull(gpio::Pull::Pull_Up);
+    auto D0 = gpio::Pin::create<gpio::Port::C>(8, gpio::Mode::Output)
+        .set_output_type(gpio::Output::Open_Drain)
+        .set_pull(gpio::Pull::Pull_Up);
+    auto CD = gpio::Pin::create<gpio::Port::C>(11, gpio::Mode::Output)
+        .set_output_type(gpio::Output::Open_Drain)
+        .set_pull(gpio::Pull::Pull_Up);
 
-    // Create SD Card  
-    SDHC::service<SD::Controller> sd_service(400'000);
-    GPIO::assign(CLK, sd_service.bus);
-    GPIO::assign(CMD, sd_service.bus);
-    GPIO::assign(D0, sd_service.bus);
-    GPIO::assign(CD, sd_service.bus);
+    /* Create SD Card   */
+    sdhc::service<sdio::Controller> sd_service(400'000);
+    gpio::assign(CLK, sd_service.bus);
+    gpio::assign(CMD, sd_service.bus);
+    gpio::assign(D0, sd_service.bus);
+    gpio::assign(CD, sd_service.bus);
 
 
-    // init Card
+    /* init Card */
     sd_service.initialize(task);
 
-    // mount volume
-    FAT32::Volume volume(sd_service.card);
+    /* mount volume */
+    fat32::Volume volume(sd_service.card);
     volume.mount();
 
-    // Read root 
-    FAT32::Filehandler root;
+    /* Read root  */
+    fat32::Filehandler root;
     volume.read_root(root);
 
-    // create test_file if it does not exist
-    auto test_file = FAT32::open(volume, "0:/TEST.DAT");
-    if (test_file.state == Files::State::Not_Found)
-        test_file = FAT32::open(volume, "0:/TEST.DAT", Files::Mode::out);
+    /* create test_file if it does not exist */
+    auto test_file = fat32::open(volume, "0:/TEST.DAT");
+    if (test_file.state == files::State::Not_Found)
+        test_file = fat32::open(volume, "0:/TEST.DAT", files::Mode::out);
 
-    // Write to the file
+    /* Write to the file */
     test_file << "Hello World!" << "\n";
     std::string_view test_string{"TestString"};
     test_file << test_string;
 
-    // close file again
+    /* close file again */
     test_file.close();
 
     while (1)

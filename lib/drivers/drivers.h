@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,8 +30,8 @@
 #ifndef DRIVERS_H_
 #define DRIVERS_H_
 
-// *** Includes ***
-/// @todo Check for the microcontroller type (STM32/AVR/...) before including the drivers.
+/* === Includes === */
+/// @todo Check for the microcontroller type (STM32/AVR/...) before including the drivers. */
 #include "stm32/core_stm32.h"
 #include "stm32/dma_stm32.h"
 #include "stm32/gpio_stm32.h"
@@ -41,13 +41,13 @@
 #include "stm32/timer_stm32.h"
 #include "stm32/usart_stm32.h"
 
-// === Chip driver ===
-// *** BMS chips
+/* === Chip driver === */
+/* BMS chips */
 #include "battery/bq25700.h"
 #include "battery/tps65987.h"
 #include "battery/max17205.h"
 
-// *** Display driver chips
+/* Display driver chips */
 #include "display/ssd1306.h"
 #include "display/ili9341.h"
 #include "display/uc1611.h"

@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,60 +21,52 @@
 #ifndef TASK_H_
 #define TASK_H_
 
-// === Includes ===
-#include "processors.h"
-#include "types.h"
+/* === Includes === */
 #include <chrono>
+#include <processors.h>
+#include <misc/types.h>
 
-// === defines ===
+/* === defines === */
 
 /**
  * @brief This macro can be used to wait as long as 
  * the condition is true without blocking other tasks.
+ * 
+ * @param condition The condition which has to be true to wait.
  */
 #define YIELD_WHILE(condition) while(condition) { __otos_yield(); }
 
 namespace OTOS {
 
-    // === Class Definitions ===
+    /* === Class Definitions === */
+    /**
+     * @struct Task
+     * @brief Basic task class for yielding execution.
+     */
     struct Task
     {
         Task() = delete;
-        static void yield(void) { __otos_yield(); };
+        static void yield() { __otos_yield(); };
     };
 
-    class Timed_Task
+    /**
+     * @brief Task class which can be timed to
+     * be executed with in a certain time interval.
+     */
+    class TimedTask
     {
-    private:
-        // *** Properties ***
-        std::uint32_t time_last{0};
-        std::uint32_t (*const get_time_ms)();
-
     public:
-        // *** Constructor ***
-        Timed_Task() = delete;
-        Timed_Task(std::uint32_t(*timer_handle)());
+        /* === Constructors === */
+        TimedTask() = delete;
 
-        // *** Methods ***
-        void yield(void);
-        void tic(void);
-        std::uint32_t toc(void) const;
-        std::uint32_t time_elapsed_ms(void) const;
-
-        // *** Method templates ***
         /**
-         * @brief Wait for a specified amount of time. The
-         * task yields as long as the wait time is not over.
-         * 
-         * @param time_ms The wait time in [ms].
+         * @brief Construct a new timed Task object.
+         *
+         * @param timer_handle The function handle to the timer which provides the time in ms.
          */
-        void wait_ms(const unsigned long time_ms)
-        {
-            this->tic();
-            while(this->time_elapsed_ms() < static_cast<std::uint32_t>(time_ms))
-                this->yield();
-        };
+        explicit TimedTask(std::uint32_t(*timer_handle)());
 
+        /* === Methods === */
         /**
          * @brief Wait for a specified amount of time. The
          * task blocks execution as long as the wait time
@@ -87,15 +79,57 @@ namespace OTOS {
          * @param time_ms The wait time in [ms].
          * @details Blocking function
          */
-        void block_ms(const unsigned long time_ms)
+        void block_ms(const uint32_t time_ms)
         {
-            // Remember the time when the function was called
+            /* Remember the time when the function was called */
             this->tic();
 
-            // Block the task until the wait time is over
+            /* Block the task until the wait time is over */
             while(this->time_elapsed_ms() < static_cast<std::uint32_t>(time_ms));
         };
-    };
-};
 
-#endif
+        /**
+         * @brief Start a time measurement by saving the current time.
+         */
+        void tic();
+
+        /**
+         * @brief Measure the elapsed time since tic() was called.
+         *
+         * @return std::uint32_t Elapsed time in [ms].
+         */
+        auto time_elapsed_ms() const -> std::uint32_t;
+
+        /**
+         * @brief Return the current time of the assigned timer in ms.
+         *
+         * @return std::uint32_t: Current time in [ms].
+         */
+        auto toc() const -> std::uint32_t;
+
+        /**
+         * @brief Wait for a specified amount of time. The
+         * task yields as long as the wait time is not over.
+         * 
+         * @param time_ms The wait time in [ms].
+         */
+        void wait_ms(const uint32_t time_ms)
+        {
+            this->tic();
+            while(this->time_elapsed_ms() < static_cast<std::uint32_t>(time_ms))
+                this->yield();
+        };
+
+        /**
+         * @brief Yield execution and give control to kernel.
+         */
+        void yield();
+
+    private:
+        /* === Properties === */
+        std::uint32_t time_last{0}; /**< The last time the tic function was called. */
+        std::uint32_t (*const get_time_ms)(); /**< Function pointer to get the current time in ms. */
+    };
+}; // namespace OTOS
+
+#endif // TASK_H_

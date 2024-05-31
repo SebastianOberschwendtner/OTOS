@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
  */
 /**
  ==============================================================================
- * @file    schedule.c
+ * @file    schedule.cpp
  * @author  SO
  * @version v1.6.0
  * @date    16-March-2021
@@ -27,7 +27,10 @@
  ==============================================================================
  */
 
-// *** Includes ***
+/* === Includes === */
 #include "schedule.h"
 
-// *** Methods ***
+namespace OTOS
+{
+    /* === Methods === */
+}; // namespace OTOS

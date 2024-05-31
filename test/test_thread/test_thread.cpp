@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,42 +19,42 @@
  */
 /**
  ==============================================================================
- * @file    test_thread.c
+ * @file    test_thread.cpp
  * @author  SO
- * @version v2.8.2
+ * @version v5.0.0
  * @date    16-March-2021
  * @brief   Unit tests for the thread handler of OTOS.
  ==============================================================================
  */
 
-// *** Includes ***
+/* === Includes === */
 #include <array>
 #include <unity.h>
 #include <mock.h>
 #include <thread.h>
 
-// Mock Stack Memory
+/* Mock Stack Memory */
 std::array<u_base_t, 256> LocalStack;
 
-void setUp(void) {
-// set stuff up here
+void setUp() {
+/* set stuff up here */
 };
 
-void tearDown(void) {
-// clean stuff up here
+void tearDown() {
+/* clean stuff up here */
 };
 
-// *** Define Tests ***
+/* === Define Tests === */
 
 /**
  * @brief Test the correct behavior of the constructor.
  */
-void test_Constructor(void)
+void test_Constructor()
 {
-    // Create UUT
+    /* Create UUT */
     OTOS::Thread UUT;
 
-    // Test the constructor
+    /* Test the constructor */
     TEST_ASSERT_EQUAL( 0, UUT.get_stacksize() );
     TEST_ASSERT_EQUAL( 0, UUT.Stack_pointer );
 };
@@ -62,12 +62,12 @@ void test_Constructor(void)
 /**
  * @brief Test setting the stack data.
  */
-void test_SetStack(void)
+void test_SetStack()
 {
-    // Create UUT
+    /* Create UUT */
     OTOS::Thread UUT;
 
-    // Set the stack to the local stack with size 50
+    /* Set the stack to the local stack with size 50 */
     UUT.set_stack(LocalStack.end(), 50);
     TEST_ASSERT_EQUAL( LocalStack.end(), UUT.Stack_pointer);
     TEST_ASSERT_EQUAL( 50, UUT.get_stacksize() );
@@ -77,29 +77,29 @@ void test_SetStack(void)
 /**
  * @brief Test the stack overflow warning.
  */
-void test_StackOverflow(void)
+void test_StackOverflow()
 {
-    // Create UUT
+    /* Create UUT */
     OTOS::Thread UUT;
 
-    // Set the stack to the local stack with size 50
+    /* Set the stack to the local stack with size 50 */
     UUT.set_stack(LocalStack.end(), 50);
     
-    // After initializing the stack, no overflow should occur
+    /* After initializing the stack, no overflow should occur */
     TEST_ASSERT_FALSE( UUT.get_stackoverflow() );
 
-    // Increase the stack pointer of the thread just before its limit
-    // -> No overflow should occur now.
+    /* Increase the stack pointer of the thread just before its limit */
+    /* -> No overflow should occur now. */
     UUT.Stack_pointer = LocalStack.end() - 49;
     TEST_ASSERT_FALSE( UUT.get_stackoverflow() );
 
-    // Increase the stack pointer of the thread exactly to its limit
-    // -> An overflow should occur now.
+    /* Increase the stack pointer of the thread exactly to its limit */
+    /* -> An overflow should occur now. */
     UUT.Stack_pointer = LocalStack.end() - 50;
     TEST_ASSERT_TRUE( UUT.get_stackoverflow() );
 
-    // Increase the stack pointer of the thread beyond its limit
-    // -> An overflow should occur now.
+    /* Increase the stack pointer of the thread beyond its limit */
+    /* -> An overflow should occur now. */
     UUT.Stack_pointer = LocalStack.end() - 51;
     TEST_ASSERT_TRUE( UUT.get_stackoverflow() );
 
@@ -109,27 +109,27 @@ void test_StackOverflow(void)
  * @brief Test the state change of a thread which is scheduled
  * to run always. 
  */
-void test_is_runnable_execute_always(void)
+void test_is_runnable_execute_always()
 {
-    // Create UUT
+    /* Create UUT */
     OTOS::Thread UUT;
 
-    // After initializing the thread should not be runnable
+    /* After initializing the thread should not be runnable */
     TEST_ASSERT_FALSE( UUT.is_runnable() );
 
-    // Set the thread schedule to always be runnable
+    /* Set the thread schedule to always be runnable */
     UUT.set_schedule(0, OTOS::Priority::Normal);
 
-    // Thread should now be runnable
+    /* Thread should now be runnable */
     TEST_ASSERT_TRUE( UUT.is_runnable() );
 
-    // When thread is running it should not be runnable
+    /* When thread is running it should not be runnable */
     UUT.set_running();
     TEST_ASSERT_FALSE( UUT.is_runnable() );
     UUT.count_tick();
     TEST_ASSERT_FALSE( UUT.is_runnable() );
 
-    // When the thread finishes execution, it should be runnable after a tick count
+    /* When the thread finishes execution, it should be runnable after a tick count */
     UUT.set_blocked();
     TEST_ASSERT_TRUE( UUT.is_runnable() );
     UUT.count_tick();
@@ -139,58 +139,58 @@ void test_is_runnable_execute_always(void)
 /**
  * @brief Test the state change of a schedule when it reaches the runnable state.
  */
-void test_is_runnable_with_schedule(void)
+void test_is_runnable_with_schedule()
 {
-    // Create UUT
+    /* Create UUT */
     OTOS::Thread UUT;
 
-    // After initializing the thread should not be runnable
+    /* After initializing the thread should not be runnable */
     TEST_ASSERT_FALSE( UUT.is_runnable() );
 
-    // Set the thread schedule to run every second tick 
+    /* Set the thread schedule to run every second tick  */
     UUT.set_schedule(1, OTOS::Priority::Normal);
 
-    // Thread should now not be runnable
+    /* Thread should now not be runnable */
     TEST_ASSERT_FALSE( UUT.is_runnable() );
 
-    // Increment tick counter
+    /* Increment tick counter */
     UUT.count_tick();
 
-    // Thread should now be runnable
+    /* Thread should now be runnable */
     TEST_ASSERT_TRUE( UUT.is_runnable() );
 
-    // Set thread running
+    /* Set thread running */
     UUT.set_running();
     TEST_ASSERT_FALSE( UUT.is_runnable() );
 
-    // A tick count does not affect running threads
+    /* A tick count does not affect running threads */
     UUT.count_tick();
     TEST_ASSERT_FALSE( UUT.is_runnable() );
 
-    // After execution the thread should be blocked
+    /* After execution the thread should be blocked */
     UUT.set_blocked();
     TEST_ASSERT_FALSE( UUT.is_runnable() );
 
-    // A tick count should now make the thread runnable
+    /* A tick count should now make the thread runnable */
     UUT.count_tick();
     TEST_ASSERT_TRUE( UUT.is_runnable() );
 };
 
-void test_priority(void)
+void test_priority()
 {
-    // Create UUT
+    /* Create UUT */
     OTOS::Thread UUT;
 
-    // Test initial Priority
+    /* Test initial Priority */
     UUT.set_schedule(1, OTOS::Priority::High);
     TEST_ASSERT_EQUAL(OTOS::Priority::High, UUT.get_priority());
 
-    // Test changing the priority
+    /* Test changing the priority */
     UUT.set_schedule(1, OTOS::Priority::Low);
     TEST_ASSERT_EQUAL(OTOS::Priority::Low, UUT.get_priority());
 };
 
-// *** Perform the tests *** 
+/* === Perform the tests ===  */
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();

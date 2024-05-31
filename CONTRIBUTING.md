@@ -15,58 +15,47 @@ There are some general rules to keep the code nice and tidy:
 # Naming Convention
 There are some simple rules on how to name things.
 
-## Defines
-General defines should be **all uppercase** with a **short** and **concise** name. Use **underscores** to make the name more readable.
-
-Example:
-```c
-#define CONTEXT_NEW_SYMBOL  value // optional comment.
-```
-
-Try to include the context of the define in the beginning of the name.
-
 ## Variables
-Variables are **all lowercase**. In the beginning they should have an abbreviation with the variable type. The sign is not part of this abbreviation.
-Examples for the abbreviations of the variable type:
-> The *p* stands for pointer.
+Variables are **all_lowercase**.
+For integral types, use the types which explicitly specify the number of bits, for example:
 
-|Type|Abbreviation|
-|---:|:---:|
-|char|`ch_`|
-|*char|`pch_`|
-|int|`i_`|
-|*int|`pi_`|
-|long|`l_`|
-|*long|`pl_`|
+```cpp
+uin32_t some_value
+```
 
-You do not need to use these variable types, you can use the `uint8_t` type for example, this naming convention is just a recommendation.
-> For more complex typedefs, the abbreviation does not make sense anymore.
-
-> Also when writing in *C++* the compiler handles more of the type checks, so it is not as relevant here to include the types in the variable names.
+## Constexpr
+When defining constant use `constexpr`!
+You can use the constants the same way as variables so the same naming rules apply:
 
 Example:
-```c
-unsigned char pch_array = {}; // Example pointer to a char array
+```cpp
+constexpr uint8_t new_constant = value; // optional comment.
 ```
+
+Try to group all constants at the top of the file.
 
 ## Functions
-Functions follow the same rules as [variables](#variables), but they have a short abbreviation of the context in the beginning of the name.
-This is an attempt to mimic the name spaces of *C++*. The abbreviation should be as **short** as possible. The return type does not have to be in
-the name.
+Functions follow the same rules as [variables](#variables).
 
 > When writing in *C++* use namespaces wherever appropriate.
 
 ## Classes
-When you use classes, use *capitalized words* as the class names. Also use namespaces wherever applicable.
+When you use classes, use *CapitalizedWords* as the class names. Also use namespaces wherever applicable.
 
-- **Properties** should use *CamelCase*.
-- **Methods** should start with a *lower case letter* and then also use *camelCase*.
+- **Properties** should use *small_case*.
+- **Methods** should use *small_case*.
 
 # Comments
 We use the *doxygen* documentation flags in the headers, to make them more readable. Although we do not export the documentation as *html*, the flags
 are useful, because *VSCode* recognizes them, and renders them when hovering over the function name.
 
 In general try to code like the person who is reading your code knows where you live. :wink:
+
+When using *inline comments* make them **comment blocks**:
+```cpp
+/* I am an inline comment */
+do_something();
+```
 
 ## File Header
 The file header gives a short description of what the file does. Also the [license](#license) information is added here.
@@ -106,16 +95,16 @@ A function header gives a short **description**, defines the **inputs** and the 
  ## File Sections
  Try to separate *sections within one file. Sections can be anything which combines the same content, for example function declarations or variable declaration can be sections.
  Mark them according to:
- ```c
- // *** Section Name ***
+ ```cpp
+ /* === Section Name === */
  -> Code here.
  ```
  
 # Commits
 - Commit messages should be clear and concise 
-- Use **English** as far as possible.
+- Use **English** as language.
 - Use the `#` to close issues. 
-- *Present* tense is **not** required, but appreciated. :wink:
+- Please use *present* tense!
 
 Symbols for commits:
 - :art: `:art:` Improvements in the *User Experience*
@@ -142,7 +131,7 @@ The following should be included in every file header:
 ```c
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify

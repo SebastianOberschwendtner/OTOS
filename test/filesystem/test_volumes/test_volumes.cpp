@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2022 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2022 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,16 +18,16 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    test_volumes.cpp
  * @author  SO
  * @version v2.7.3
  * @date    04-January-2022
  * @brief   Unit tests for testing the Volume interface.
- ******************************************************************************
+ ==============================================================================
  */
 
-// === Includes ===
+/* === Includes === */
 #include <unity.h>
 #include <mock.h>
 #include <array>
@@ -41,21 +41,21 @@
  * ✓ Make entry in directory for (mkdir/mkfile)
 */
 
-// === Fixtures ===
+/* === Fixtures === */
 struct Mock_Memory
 {
 };
 Mock::Callable<bool> read_single_block;
 Mock::Callable<bool> write_single_block;
 
-namespace Drive
+namespace drive
 {
-    bool read_single_block(Mock_Memory& memory, const unsigned long* buffer, const unsigned long block)
+    bool read_single_block(Mock_Memory& memory, const uint32_t* buffer, const uint32_t block)
     {
         ::read_single_block.add_call(static_cast<int>(block));
         return true; 
     };
-    bool write_single_block(Mock_Memory& memory, const unsigned long* buffer, const unsigned long block)
+    bool write_single_block(Mock_Memory& memory, const uint32_t* buffer, const uint32_t block)
     {
         ::write_single_block.add_call(static_cast<int>(block));
         return true; 
@@ -64,78 +64,86 @@ namespace Drive
 
 #include "volumes.h"
 #include "volumes.cpp"
-template class FAT32::Volume<Mock_Memory>;
+template class fat32::Volume<Mock_Memory>;
 
-// === Tests ===
-void setUp(void) {
-    // set stuff up here
+/* === Tests === */
+void setUp() {
+    /* set stuff up here */
     ::read_single_block.reset();
     ::write_single_block.reset();
 };
 
-void tearDown(void) {
-    // clean stuff up here
+void tearDown() {
+    /* clean stuff up here */
 };
 
-/// @brief Test the constructor
-void test_constructor(void)
+/** 
+ * @brief Test the constructor
+ */
+void test_constructor()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
 };
 
-/// @brief Test reading cluster
-void test_read_cluster(void)
+/** 
+ * @brief Test reading cluster
+ */
+void test_read_cluster()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
-    FAT32::Filehandler file{};
+    fat32::Filehandler file{};
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     UUT.partition.First_Data_Sector = 0x12;
 
-    // Test reading a cluster
+    /* Test reading a cluster */
     TEST_ASSERT_TRUE( UUT.read_cluster(file, 2) );
     TEST_ASSERT_EQUAL( 2, file.current.cluster );
     TEST_ASSERT_EQUAL( 1, file.current.sector );
     ::read_single_block.assert_called_once_with( 0x12 );
 };
 
-/// @brief Test writing the current sector of a file
-void test_write_current_sector(void)
+/** 
+ * @brief Test writing the current sector of a file
+ */
+void test_write_current_sector()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
-    FAT32::Filehandler file{};
+    fat32::Filehandler file{};
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     UUT.partition.First_Data_Sector = 0x12;
     file.current.sector = 1;
     file.current.cluster = 2;
 
-    // Test reading a cluster
+    /* Test reading a cluster */
     TEST_ASSERT_TRUE( UUT.write_current_sector(file) );
     ::write_single_block.assert_called_once_with( 0x12 );
 };
 
-/// @brief Test reading the FAT and getting the next sector of a cluster
-void test_get_FAT_entry(void)
+/** 
+ * @brief Test reading the FAT and getting the next sector of a cluster
+ */
+void test_get_FAT_entry()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
-    FAT32::Filehandler file{};
+    fat32::Filehandler file{};
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     UUT.partition.First_Data_Sector = 0x12;
     UUT.partition.Sectors_per_Cluster = 0x40;
     UUT.partition.FAT_Begin = 0x64;
@@ -143,14 +151,14 @@ void test_get_FAT_entry(void)
     file.current.sector = 1;
     file.current.cluster = 2;
 
-    // Test reading the next sector when no new cluster is required
+    /* Test reading the next sector when no new cluster is required */
     auto response = UUT.read_FAT_entry(2);
     TEST_ASSERT_TRUE( response );
     TEST_ASSERT_EQUAL( 0x56, response.value() );
     ::read_single_block.assert_called_once_with(0x64);
 
-    // Test reading the next sector when no new cluster is required
-    // and the FAT containing the entry was alread read
+    /* Test reading the next sector when no new cluster is required */
+    /* and the FAT containing the entry was alread read */
     setUp();
     UUT.FAT[12] = 0x57;
     response = UUT.read_FAT_entry(3);
@@ -159,16 +167,18 @@ void test_get_FAT_entry(void)
     TEST_ASSERT_EQUAL(0, ::read_single_block.call_count);
 };
 
-/// @brief Test reading the next sector of a cluster
-void test_read_next_sector(void)
+/** 
+ * @brief Test reading the next sector of a cluster
+ */
+void test_read_next_sector()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
-    FAT32::Filehandler file{};
+    fat32::Filehandler file{};
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     UUT.partition.First_Data_Sector = 0x12;
     UUT.partition.Sectors_per_Cluster = 0x40;
     UUT.partition.FAT_Begin = 0x64;
@@ -176,20 +186,20 @@ void test_read_next_sector(void)
     file.current.sector = 1;
     file.current.cluster = 2;
 
-    // Test reading the next sector when no new cluster is required
+    /* Test reading the next sector when no new cluster is required */
     TEST_ASSERT_TRUE( UUT.read_next_sector_of_cluster(file) );
     ::read_single_block.assert_called_once_with(0x13);
     TEST_ASSERT_EQUAL( 2, file.current.cluster);
     TEST_ASSERT_EQUAL( 2, file.current.sector);
 
-    // Test reading the next sector when a new cluster is required
+    /* Test reading the next sector when a new cluster is required */
     setUp();
     file.current.sector = UUT.partition.Sectors_per_Cluster;
     file.current.cluster = 2;
     TEST_ASSERT_TRUE( UUT.read_next_sector_of_cluster(file) );
     ::read_single_block.assert_called_last_with(0x12 + 2*0x40);
 
-    // Test reading the next sector when end of file is reached -> FAT32
+    /* Test reading the next sector when end of file is reached -> FAT32 */
     setUp();
     UUT.partition.is_fat16 = false;
     UUT.FAT[4] = 0xFF;
@@ -203,9 +213,9 @@ void test_read_next_sector(void)
     file.current.sector = UUT.partition.Sectors_per_Cluster;
     file.current.cluster = 2;
     TEST_ASSERT_FALSE( UUT.read_next_sector_of_cluster(file) );
-    TEST_ASSERT_EQUAL(Error::Code::End_of_File_Reached, UUT.error );
+    TEST_ASSERT_EQUAL(error::Code::End_of_File_Reached, UUT.error );
 
-    // Test reading the next sector when end of file is reached -> FAT16
+    /* Test reading the next sector when end of file is reached -> FAT16 */
     setUp();
     UUT.partition.is_fat16 = true;
     UUT.FAT[4] = 0xFF;
@@ -219,9 +229,9 @@ void test_read_next_sector(void)
     file.current.sector = UUT.partition.Sectors_per_Cluster;
     file.current.cluster = 2;
     TEST_ASSERT_FALSE( UUT.read_next_sector_of_cluster(file) );
-    TEST_ASSERT_EQUAL(Error::Code::End_of_File_Reached, UUT.error );
+    TEST_ASSERT_EQUAL(error::Code::End_of_File_Reached, UUT.error );
 
-    // Test reading the next sector when a bad is reached -> FAT32
+    /* Test reading the next sector when a bad is reached -> FAT32 */
     setUp();
     UUT.partition.is_fat16 = false;
     UUT.FAT[4] = 0xF8;
@@ -235,9 +245,9 @@ void test_read_next_sector(void)
     file.current.sector = UUT.partition.Sectors_per_Cluster;
     file.current.cluster = 2;
     TEST_ASSERT_FALSE( UUT.read_next_sector_of_cluster(file) );
-    TEST_ASSERT_EQUAL(Error::Code::Bad_Sector, UUT.error );
+    TEST_ASSERT_EQUAL(error::Code::Bad_Sector, UUT.error );
 
-    // Test reading the next sector when a bad is reached -> FAT16
+    /* Test reading the next sector when a bad is reached -> FAT16 */
     setUp();
     UUT.partition.is_fat16 = true;
     UUT.FAT[4] = 0xF8;
@@ -251,9 +261,9 @@ void test_read_next_sector(void)
     file.current.sector = UUT.partition.Sectors_per_Cluster;
     file.current.cluster = 2;
     TEST_ASSERT_FALSE( UUT.read_next_sector_of_cluster(file) );
-    TEST_ASSERT_EQUAL(Error::Code::Bad_Sector, UUT.error );
+    TEST_ASSERT_EQUAL(error::Code::Bad_Sector, UUT.error );
 
-    // Test reading the next sector when the FAT is corrupted-> FAT32
+    /* Test reading the next sector when the FAT is corrupted-> FAT32 */
     setUp();
     UUT.partition.is_fat16 = false;
     UUT.FAT[4] = 0xF8;
@@ -267,9 +277,9 @@ void test_read_next_sector(void)
     file.current.sector = UUT.partition.Sectors_per_Cluster;
     file.current.cluster = 2;
     TEST_ASSERT_FALSE( UUT.read_next_sector_of_cluster(file) );
-    TEST_ASSERT_EQUAL(Error::Code::FAT_Corrupted, UUT.error );
+    TEST_ASSERT_EQUAL(error::Code::FAT_Corrupted, UUT.error );
 
-    // Test reading the next sector when the FAT is corrupted-> FAT16
+    /* Test reading the next sector when the FAT is corrupted-> FAT16 */
     setUp();
     UUT.partition.is_fat16 = true;
     UUT.FAT[4] = 0x00;
@@ -283,56 +293,60 @@ void test_read_next_sector(void)
     file.current.sector = UUT.partition.Sectors_per_Cluster;
     file.current.cluster = 2;
     TEST_ASSERT_FALSE( UUT.read_next_sector_of_cluster(file) );
-    TEST_ASSERT_EQUAL(Error::Code::FAT_Corrupted, UUT.error );
+    TEST_ASSERT_EQUAL(error::Code::FAT_Corrupted, UUT.error );
 };
 
-/// @brief Test reading a file/directory using its ID
-void test_get_file_with_id(void)
+/** 
+ * @brief Test reading a file/directory using its ID
+ */
+void test_get_file_with_id()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
-    FAT32::Filehandler file{};
+    fat32::Filehandler file{};
     file.start_cluster = 2;
-    file.attributes = FAT32::Attribute::is_Directory;
+    file.attributes = fat32::Attribute::is_Directory;
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     UUT.partition.First_Data_Sector = 0x12;
     UUT.partition.Sectors_per_Cluster = 0x40;
 
-    // Test successful read
+    /* Test successful read */
     TEST_ASSERT_TRUE( UUT.get_file(file, 1) );
     TEST_ASSERT_EQUAL( 1, file.id);
     ::read_single_block.assert_called_once_with( 0x12 );
-    TEST_ASSERT_EQUAL( Error::Code::None, UUT.error);
+    TEST_ASSERT_EQUAL( error::Code::None, UUT.error);
 
-    // Test successful read when entry is not in current sector
+    /* Test successful read when entry is not in current sector */
     setUp();
     file.start_cluster = 2;
-    file.attributes = FAT32::Attribute::is_Directory;
+    file.attributes = fat32::Attribute::is_Directory;
     TEST_ASSERT_TRUE( UUT.get_file(file, 17) );
     TEST_ASSERT_EQUAL( 17, file.id );
     TEST_ASSERT_EQUAL( 2, ::read_single_block.call_count );
     ::read_single_block.assert_called_last_with( 0x13 );
-    TEST_ASSERT_EQUAL( Error::Code::None, UUT.error );
+    TEST_ASSERT_EQUAL( error::Code::None, UUT.error );
 
-    // Test read when the provided file handle is not a directory
+    /* Test read when the provided file handle is not a directory */
     setUp();
     file.start_cluster = 2;
     file.attributes = 0;
     TEST_ASSERT_FALSE( UUT.get_file(file, 1) );
     TEST_ASSERT_EQUAL( 0, ::read_single_block.call_count);
-    TEST_ASSERT_EQUAL( Error::Code::Not_a_Directory, UUT.error);
+    TEST_ASSERT_EQUAL( error::Code::Not_a_Directory, UUT.error);
 };
 
-/// @brief Test reading the root directory of a mounted volume
-void test_read_root(void)
+/** 
+ * @brief Test reading the root directory of a mounted volume
+ */
+void test_read_root()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
-    FAT32::Filehandler file{};
+    fat32::Filehandler file{};
     file.block_buffer[0] = 'V';
     file.block_buffer[1] = 'o';
     file.block_buffer[2] = 'l';
@@ -346,27 +360,29 @@ void test_read_root(void)
     file.block_buffer[10] = ' ';
 
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     UUT.partition.Root_Directory_Cluster = 0x02;
     UUT.partition.First_Data_Sector = 0x12;
     UUT.partition.Sectors_per_Cluster = 0x40;
 
-    // Test successful read
+    /* Test successful read */
     TEST_ASSERT_TRUE( UUT.read_root(file) );
     TEST_ASSERT_TRUE( file.is_directory() );
     ::read_single_block.assert_called_once_with( 0x02 );
 };
 
-/// @brief Test mounting a volume
-void test_mount(void)
+/** 
+ * @brief Test mounting a volume
+ */
+void test_mount()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     UUT.FAT[11] = 0x02;
     UUT.FAT[13] = 0x40;
     UUT.FAT[450] = 0x06;
@@ -377,27 +393,29 @@ void test_mount(void)
     UUT.FAT[510] = 0x55;
     UUT.FAT[511] = 0xAA;
 
-    // Test successful read
+    /* Test successful read */
     TEST_ASSERT_TRUE( UUT.mount() );
     TEST_ASSERT_EQUAL(2, ::read_single_block.call_count);
     ::read_single_block.assert_called_last_with(0x12131415);
-    TEST_ASSERT_EQUAL( Error::Code::None, UUT.error);
+    TEST_ASSERT_EQUAL( error::Code::None, UUT.error);
 };
 
-/// @brief Test setting the state of a cluster in the FAT
-void test_set_cluster(void)
+/** 
+ * @brief Test setting the state of a cluster in the FAT
+ */
+void test_set_cluster()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     UUT.partition.Sectors_per_Cluster = 0x40;
     UUT.partition.FAT_Begin = 0x12;
     UUT.partition.FAT_Size = 0x88;
 
-    // Test setting the cluster state
+    /* Test setting the cluster state */
     TEST_ASSERT_TRUE( UUT.write_FAT_entry(8, 0x14) );
     TEST_ASSERT_EQUAL(0x14, UUT.FAT[32] );
     ::read_single_block.assert_called_once_with( 0x12 );
@@ -405,39 +423,41 @@ void test_set_cluster(void)
     ::write_single_block.assert_called_last_with( 0x12 + 0x88 );
 };
 
-/// @brief Test getting the id of the next empty file/directory
-void test_get_empty_file_id(void)
+/** 
+ * @brief Test getting the id of the next empty file/directory
+ */
+void test_get_empty_file_id()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
-    FAT32::Filehandler directory;
+    fat32::Filehandler directory;
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     UUT.partition.Sectors_per_Cluster = 0x40;
     UUT.partition.FAT_Begin = 0x12;
     UUT.partition.FAT_Size = 0x88;
 
-    // Only read the id when filehandler is directory
+    /* Only read the id when filehandler is directory */
     auto id = UUT.get_empty_id(directory);
     TEST_ASSERT_FALSE( id );
 
-    // Read the id when the directory is valid, first entry is empty
-    directory.attributes = FAT32::Attribute::is_Directory;
+    /* Read the id when the directory is valid, first entry is empty */
+    directory.attributes = fat32::Attribute::is_Directory;
     id = UUT.get_empty_id(directory);
     TEST_ASSERT_TRUE( id );
     TEST_ASSERT_EQUAL( 0, id.value() );
 
-    // Read the id when the directory is valid, first entry is deleted
-    directory.attributes = FAT32::Attribute::is_Directory;
+    /* Read the id when the directory is valid, first entry is deleted */
+    directory.attributes = fat32::Attribute::is_Directory;
     directory.block_buffer[0] = 0xE5;
     id = UUT.get_empty_id(directory);
     TEST_ASSERT_TRUE( id );
     TEST_ASSERT_EQUAL( 0, id.value() );
 
-    // Read the id when the directory is valid, third entry is empty
-    directory.attributes = FAT32::Attribute::is_Directory;
+    /* Read the id when the directory is valid, third entry is empty */
+    directory.attributes = fat32::Attribute::is_Directory;
     directory.block_buffer[0] = 'F';
     directory.block_buffer[32] = 'F';
     directory.block_buffer[64] = 0x00;
@@ -445,8 +465,8 @@ void test_get_empty_file_id(void)
     TEST_ASSERT_TRUE( id );
     TEST_ASSERT_EQUAL( 2, id.value() );
 
-    // Read the id when the directory is valid, third entry is deleted
-    directory.attributes = FAT32::Attribute::is_Directory;
+    /* Read the id when the directory is valid, third entry is deleted */
+    directory.attributes = fat32::Attribute::is_Directory;
     directory.block_buffer[0] = 'F';
     directory.block_buffer[32] = 'F';
     directory.block_buffer[64] = 0xE5;
@@ -455,15 +475,17 @@ void test_get_empty_file_id(void)
     TEST_ASSERT_EQUAL( 2, id.value() );
 };
 
-/// @brief Get the next empty cluster which can be allocated
-void test_get_next_empty_cluster(void)
+/** 
+ * @brief Get the next empty cluster which can be allocated
+ */
+void test_get_next_empty_cluster()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     UUT.partition.FAT_Size = 0x40;
     UUT.FAT.fill(0x11);
     UUT.FAT[8] = 0x00;
@@ -471,25 +493,27 @@ void test_get_next_empty_cluster(void)
     UUT.FAT[10] = 0x00;
     UUT.FAT[11] = 0x00;
 
-    // Test reading next empty cluster is 2
+    /* Test reading next empty cluster is 2 */
     auto empty_cluster = UUT.get_next_empty_cluster();
     TEST_ASSERT_TRUE( empty_cluster );
     TEST_ASSERT_EQUAL( 2, empty_cluster.value() );
 
-    // Test when no space is left
+    /* Test when no space is left */
     UUT.FAT.fill(0x11);
     empty_cluster = UUT.get_next_empty_cluster();
     TEST_ASSERT_FALSE( empty_cluster );
-    TEST_ASSERT_EQUAL( Error::Code::No_Memory_Left, UUT.error );
+    TEST_ASSERT_EQUAL( error::Code::No_Memory_Left, UUT.error );
 };
 
-/// @brief Test getting the fileid of a file by name
-void test_get_fileid(void)
+/** 
+ * @brief Test getting the fileid of a file by name
+ */
+void test_get_fileid()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
-    FAT32::Filehandler directory;
+    fat32::Filehandler directory;
     directory.block_buffer[32] = 'T';
     directory.block_buffer[33] = 'e';
     directory.block_buffer[34] = 's';
@@ -502,45 +526,47 @@ void test_get_fileid(void)
     directory.block_buffer[41] = 'x';
     directory.block_buffer[42] = 't';
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     std::array<char, 12> filename = {"Test    txt"};
 
-    // Test getting the file id, when filehandle is not a directory
+    /* Test getting the file id, when filehandle is not a directory */
     auto id = UUT.get_fileid(directory, filename);
     TEST_ASSERT_FALSE( id );
-    TEST_ASSERT_EQUAL( Error::Code::Not_a_Directory, UUT.error );
+    TEST_ASSERT_EQUAL( error::Code::Not_a_Directory, UUT.error );
 
-    // Test getting the file id
-    directory.attributes = FAT32::Attribute::is_Directory;
+    /* Test getting the file id */
+    directory.attributes = fat32::Attribute::is_Directory;
     id = UUT.get_fileid(directory, filename);
     TEST_ASSERT_TRUE( id );
     TEST_ASSERT_EQUAL( 1, id.value() );
 };
 
-/// @brief Read the last sector of a file after loading it
-void test_read_last_sector(void)
+/** 
+ * @brief Read the last sector of a file after loading it
+ */
+void test_read_last_sector()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
-    FAT32::Filehandler file;
+    fat32::Filehandler file;
     file.start_cluster = 0x04;
     file.size = 120;
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     UUT.partition.Sectors_per_Cluster = 0x40;
     UUT.partition.First_Data_Sector = 0x02;
 
-    // Test reading the last sector when no new cluster is required
+    /* Test reading the last sector when no new cluster is required */
     TEST_ASSERT_TRUE( UUT.read_last_sector_of_file(file) );
     TEST_ASSERT_EQUAL( 0x04, file.current.cluster);
     TEST_ASSERT_EQUAL( 0x01, file.current.sector);
     TEST_ASSERT_EQUAL( 120, file.current.byte);
     ::read_single_block.assert_called_once_with( 0x02 + 2*0x40 );
     
-    // Test reading the last sector when an new sector is required
+    /* Test reading the last sector when an new sector is required */
     setUp();
     file.size = 600;
     TEST_ASSERT_TRUE( UUT.read_last_sector_of_file(file) );
@@ -549,7 +575,7 @@ void test_read_last_sector(void)
     TEST_ASSERT_EQUAL( 88, file.current.byte);
     ::read_single_block.assert_called_once_with( 0x02 + 2*0x40 + 1 );
     
-    // Test reading the last sector when an new cluster is required
+    /* Test reading the last sector when an new cluster is required */
     setUp();
     file.size = 0x8001;
     UUT.FAT[16] = 0x05;
@@ -561,46 +587,50 @@ void test_read_last_sector(void)
     ::read_single_block.assert_called_last_with( 0x02 + 3*0x40 );
 };
 
-/// @brief Update the filesize of a file in the directory
-void test_update_filesize(void)
+/** 
+ * @brief Update the filesize of a file in the directory
+ */
+void test_update_filesize()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
-    FAT32::Filehandler file;
+    fat32::Filehandler file;
     file.directory_cluster = 0x02;
     file.start_cluster = 0x04;
     file.size = 120;
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     UUT.partition.Sectors_per_Cluster = 0x40;
     UUT.partition.First_Data_Sector = 0x02;
 
-    // Test writing the file size when fileid requires no new sector or cluster
+    /* Test writing the file size when fileid requires no new sector or cluster */
     file.id = 2;
     TEST_ASSERT_TRUE( UUT.write_filesize_to_directory(file) );
-    TEST_ASSERT_EQUAL( 0x78, file.block_buffer[2*32 + FAT32::Filesize]);
+    TEST_ASSERT_EQUAL( 0x78, file.block_buffer[2*32 + fat32::Filesize]);
     ::read_single_block.assert_called_once_with( 0x02 + 0*0x40 );
     ::write_single_block.assert_called_once_with( 0x02 + 0*0x40 );
 
-    // Test writing the file size when fileid requires a new sector
+    /* Test writing the file size when fileid requires a new sector */
     setUp();
     file.id = 19;
     TEST_ASSERT_TRUE( UUT.write_filesize_to_directory(file) );
-    TEST_ASSERT_EQUAL( 0x78, file.block_buffer[3*32 + FAT32::Filesize]);
+    TEST_ASSERT_EQUAL( 0x78, file.block_buffer[3*32 + fat32::Filesize]);
     TEST_ASSERT_EQUAL( 2, ::read_single_block.call_count);
     ::read_single_block.assert_called_last_with( 0x02 + 0*0x40 + 1);
     ::write_single_block.assert_called_once_with( 0x02 + 0*0x40 + 1);
 };
 
-/// @brief Test writing the current file buffer to memory
-void test_write_file_content(void)
+/** 
+ * @brief Test writing the current file buffer to memory
+ */
+void test_write_file_content()
 {
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
-    FAT32::Filehandler file;
+    fat32::Filehandler file;
     file.directory_cluster = 0x02;
     file.start_cluster = 0x04;
     file.size = 120;
@@ -608,17 +638,17 @@ void test_write_file_content(void)
     file.current.sector = 1;
     file.current.byte = 120;
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     UUT.partition.Sectors_per_Cluster = 0x40;
     UUT.partition.First_Data_Sector = 0x02;
     UUT.partition.FAT_Size = 0x02;
 
-    // Test writing the file content when no new sector or cluster is required
+    /* Test writing the file content when no new sector or cluster is required */
     TEST_ASSERT_TRUE( UUT.write_file_to_memory(file) );
     ::write_single_block.assert_called_once_with( 0x02 + 0*0x40 );
 
-    // Test writing the file content when sector is full after the write
+    /* Test writing the file content when sector is full after the write */
     setUp();
     file.size = 512;
     file.current.byte = 512;
@@ -627,7 +657,7 @@ void test_write_file_content(void)
     TEST_ASSERT_EQUAL(0, file.current.byte);
     ::write_single_block.assert_called_once_with( 0x02 + 0*0x40 );
 
-    // Test writing the file content when cluster is full after the write
+    /* Test writing the file content when cluster is full after the write */
     setUp();
     file.size = 64 * 512;
     file.current.sector = 64;
@@ -647,29 +677,31 @@ void test_write_file_content(void)
     TEST_ASSERT_EQUAL(0, file.current.byte);
 };
 
-/// @brief Test making a file entry in a directory
-void test_make_file_entry(void)
+/** 
+ * @brief Test making a file entry in a directory
+ */
+void test_make_file_entry()
 {
-    // Provide test date
+    /* Provide test date */
     std::tm date_time = {4, 15, 20, 23, 1, 94};
     time_t file_time = std::mktime(&date_time);
 
-    // Setup Test
+    /* Setup Test */
     setUp();
     Mock_Memory memory;
-    FAT32::Filehandler directory;
+    fat32::Filehandler directory;
     directory.current.cluster = 0x02;
     directory.current.sector = 1;
 
-    // Create volume
-    FAT32::Volume<Mock_Memory> UUT(memory);
+    /* Create volume */
+    fat32::Volume<Mock_Memory> UUT(memory);
     UUT.partition.Sectors_per_Cluster = 0x40;
     UUT.partition.First_Data_Sector = 0x02;
     UUT.partition.FAT_Size = 0x02;
 
-    // Test making an entry in the current directory
-    unsigned long id = 2, start_cluster = 0x01020304;
-    unsigned char attributes = FAT32::Attribute::Read_Only;
+    /* Test making an entry in the current directory */
+    uint32_t id = 2, start_cluster = 0x01020304;
+    uint8_t attributes = fat32::Attribute::Read_Only;
     std::array<char, 12> name = {"Test    txt"};
     TEST_ASSERT_TRUE( UUT.make_directory_entry(directory, id, start_cluster, name, attributes, file_time));
     ::write_single_block.assert_called_once_with(0x02 + 0*0x40);
@@ -684,24 +716,24 @@ void test_make_file_entry(void)
     TEST_ASSERT_EQUAL( 't', directory.block_buffer[id*32 + 8]);
     TEST_ASSERT_EQUAL( 'x', directory.block_buffer[id*32 + 9]);
     TEST_ASSERT_EQUAL( 't', directory.block_buffer[id*32 + 10]);
-    TEST_ASSERT_EQUAL( 0x04, directory.block_buffer[id*32 + FAT32::DIR_Entry::First_Cluster_L]);
-    TEST_ASSERT_EQUAL( 0x03, directory.block_buffer[id*32 + FAT32::DIR_Entry::First_Cluster_L + 1]);
-    TEST_ASSERT_EQUAL( 0x02, directory.block_buffer[id*32 + FAT32::DIR_Entry::First_Cluster_H]);
-    TEST_ASSERT_EQUAL( 0x01, directory.block_buffer[id*32 + FAT32::DIR_Entry::First_Cluster_H + 1]);
-    TEST_ASSERT_EQUAL( FAT32::Attribute::Read_Only, directory.block_buffer[id*32 + FAT32::DIR_Entry::Attributes]);
-    TEST_ASSERT_EQUAL( 0xE2, directory.block_buffer[id*32 + FAT32::DIR_Entry::Creation_Time]);
-    TEST_ASSERT_EQUAL( 0xA1, directory.block_buffer[id*32 + FAT32::DIR_Entry::Creation_Time + 1]);
-    TEST_ASSERT_EQUAL( 0xE2, directory.block_buffer[id*32 + FAT32::DIR_Entry::Write_Time]);
-    TEST_ASSERT_EQUAL( 0xA1, directory.block_buffer[id*32 + FAT32::DIR_Entry::Write_Time + 1]);
-    TEST_ASSERT_EQUAL( 0x57, directory.block_buffer[id*32 + FAT32::DIR_Entry::Creation_Date]);
-    TEST_ASSERT_EQUAL( 0x1C, directory.block_buffer[id*32 + FAT32::DIR_Entry::Creation_Date + 1]);
-    TEST_ASSERT_EQUAL( 0x57, directory.block_buffer[id*32 + FAT32::DIR_Entry::Write_Date]);
-    TEST_ASSERT_EQUAL( 0x1C, directory.block_buffer[id*32 + FAT32::DIR_Entry::Write_Date + 1]);
-    TEST_ASSERT_EQUAL( 0x57, directory.block_buffer[id*32 + FAT32::DIR_Entry::Access_Date]);
-    TEST_ASSERT_EQUAL( 0x1C, directory.block_buffer[id*32 + FAT32::DIR_Entry::Access_Date + 1]);
+    TEST_ASSERT_EQUAL( 0x04, directory.block_buffer[id*32 + fat32::DIR_Entry::First_Cluster_L]);
+    TEST_ASSERT_EQUAL( 0x03, directory.block_buffer[id*32 + fat32::DIR_Entry::First_Cluster_L + 1]);
+    TEST_ASSERT_EQUAL( 0x02, directory.block_buffer[id*32 + fat32::DIR_Entry::First_Cluster_H]);
+    TEST_ASSERT_EQUAL( 0x01, directory.block_buffer[id*32 + fat32::DIR_Entry::First_Cluster_H + 1]);
+    TEST_ASSERT_EQUAL( fat32::Attribute::Read_Only, directory.block_buffer[id*32 + fat32::DIR_Entry::Attributes]);
+    TEST_ASSERT_EQUAL( 0xE2, directory.block_buffer[id*32 + fat32::DIR_Entry::Creation_Time]);
+    TEST_ASSERT_EQUAL( 0xA1, directory.block_buffer[id*32 + fat32::DIR_Entry::Creation_Time + 1]);
+    TEST_ASSERT_EQUAL( 0xE2, directory.block_buffer[id*32 + fat32::DIR_Entry::Write_Time]);
+    TEST_ASSERT_EQUAL( 0xA1, directory.block_buffer[id*32 + fat32::DIR_Entry::Write_Time + 1]);
+    TEST_ASSERT_EQUAL( 0x57, directory.block_buffer[id*32 + fat32::DIR_Entry::Creation_Date]);
+    TEST_ASSERT_EQUAL( 0x1C, directory.block_buffer[id*32 + fat32::DIR_Entry::Creation_Date + 1]);
+    TEST_ASSERT_EQUAL( 0x57, directory.block_buffer[id*32 + fat32::DIR_Entry::Write_Date]);
+    TEST_ASSERT_EQUAL( 0x1C, directory.block_buffer[id*32 + fat32::DIR_Entry::Write_Date + 1]);
+    TEST_ASSERT_EQUAL( 0x57, directory.block_buffer[id*32 + fat32::DIR_Entry::Access_Date]);
+    TEST_ASSERT_EQUAL( 0x1C, directory.block_buffer[id*32 + fat32::DIR_Entry::Access_Date + 1]);
 };
 
-// === Main ===
+/* === Main === */
 int main(int argc, char **argv)
 {
     UNITY_BEGIN();

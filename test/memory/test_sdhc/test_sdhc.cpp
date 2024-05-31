@@ -18,13 +18,13 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    test_sdhc.cpp
  * @author  SO
  * @version v2.7.3
  * @date    29-December-2021
  * @brief   Unit tests for testing the SDHC interface.
- ******************************************************************************
+ ==============================================================================
  */
 
 // === Includes ===
@@ -38,7 +38,7 @@
 */
 
 // === Fixtures ===
-struct Mock_SDIO : public SDHC::interface
+struct Mock_SDIO : public sdhc::interface
 {
     Mock::Callable<bool> call_command_no_response;
     Mock::Callable<bool> call_command_R1_response;
@@ -48,75 +48,75 @@ struct Mock_SDIO : public SDHC::interface
     Mock::Callable<bool> call_command_R7_response;
     Mock::Callable<bool> call_read_single_block;
     Mock::Callable<bool> call_write_single_block;
-    unsigned long last_argument = 0;
-    unsigned long R1_response = 0;
-    unsigned long R2_response = 0;
-    unsigned long R3_response = 0;
-    unsigned long R6_response = 0;
-    unsigned long R7_response = 0;
-    bool send_command_no_response(const unsigned char command, const unsigned long argument) override
+    uint32_t last_argument = 0;
+    uint32_t R1_response = 0;
+    uint32_t R2_response = 0;
+    uint32_t R3_response = 0;
+    uint32_t R6_response = 0;
+    uint32_t R7_response = 0;
+    bool send_command_no_response(const uint8_t command, const uint32_t argument) override
     {
         last_argument = argument;
         return call_command_no_response(command);
     };
-    std::optional<unsigned long> send_command_R1_response(const unsigned char command, const unsigned long argument) override
+    std::optional<uint32_t> send_command_R1_response(const uint8_t command, const uint32_t argument) override
     {
         last_argument = argument;
         call_command_R1_response.add_call(command);
         return this->R1_response;
     };
-    std::optional<unsigned long> send_command_R2_response(const unsigned char command, const unsigned long argument) override
+    std::optional<uint32_t> send_command_R2_response(const uint8_t command, const uint32_t argument) override
     {
         last_argument = argument;
         call_command_R2_response.add_call(command);
         return this->R2_response;
     };
-    std::optional<unsigned long> send_command_R3_response(const unsigned char command, const unsigned long argument) override
+    std::optional<uint32_t> send_command_R3_response(const uint8_t command, const uint32_t argument) override
     {
         last_argument = argument;
         call_command_R3_response.add_call(command);
         return this->R3_response;
     };
-    std::optional<unsigned long> send_command_R6_response(const unsigned char command, const unsigned long argument) override
+    std::optional<uint32_t> send_command_R6_response(const uint8_t command, const uint32_t argument) override
     {
         last_argument = argument;
         call_command_R6_response.add_call(command);
         return this->R6_response;
     };
-    std::optional<unsigned long> send_command_R7_response(const unsigned char command, const unsigned long argument) override
+    std::optional<uint32_t> send_command_R7_response(const uint8_t command, const uint32_t argument) override
     {
         last_argument = argument;
         call_command_R7_response.add_call(command);
         return this->R7_response;
     };
-    bool read_single_block(const unsigned long* buffer_begin, const unsigned long* buffer_end) override
+    bool read_single_block(const uint32_t* buffer_begin, const uint32_t* buffer_end) override
     {
         return call_read_single_block();
     };
-    bool write_single_block(const unsigned long* buffer_begin, const unsigned long* buffer_end) override
+    bool write_single_block(const uint32_t* buffer_begin, const uint32_t* buffer_end) override
     {
         return call_write_single_block();
     };
 };
-Mock_SDIO sdio;
+Mock_SDIO mock_sdio;
 
 // === Tests ===
 void setUp(void) {
     // set stuff up here
-    sdio.last_argument = 0;
-    sdio.R1_response = 0;
-    sdio.R2_response = 0;
-    sdio.R3_response = 0;
-    sdio.R6_response = 0;
-    sdio.R7_response = 0;
-    sdio.call_command_no_response.reset();
-    sdio.call_command_R1_response.reset();
-    sdio.call_command_R2_response.reset();
-    sdio.call_command_R3_response.reset();
-    sdio.call_command_R6_response.reset();
-    sdio.call_command_R7_response.reset();
-    sdio.call_read_single_block.reset();
-    sdio.call_write_single_block.reset();
+    mock_sdio.last_argument = 0;
+    mock_sdio.R1_response = 0;
+    mock_sdio.R2_response = 0;
+    mock_sdio.R3_response = 0;
+    mock_sdio.R6_response = 0;
+    mock_sdio.R7_response = 0;
+    mock_sdio.call_command_no_response.reset();
+    mock_sdio.call_command_R1_response.reset();
+    mock_sdio.call_command_R2_response.reset();
+    mock_sdio.call_command_R3_response.reset();
+    mock_sdio.call_command_R6_response.reset();
+    mock_sdio.call_command_R7_response.reset();
+    mock_sdio.call_read_single_block.reset();
+    mock_sdio.call_write_single_block.reset();
 };
 
 void tearDown(void) {
@@ -128,10 +128,10 @@ void test_constructor(void)
 {
     // Create Card
     setUp();
-    SDHC::Card UUT(sdio);
+    sdhc::Card UUT(mock_sdio);
 
     // Test members
-    TEST_ASSERT_EQUAL(SDHC::State::Identification, UUT.state );
+    TEST_ASSERT_EQUAL(sdhc::State::Identification, UUT.state );
     TEST_ASSERT_EQUAL(0, UUT.RCA );
     TEST_ASSERT_TRUE( UUT.is_SDSC() );
 };
@@ -141,12 +141,12 @@ void test_reset(void)
 {
     // Create Card
     setUp();
-    SDHC::Card UUT(sdio);
+    sdhc::Card UUT(mock_sdio);
 
     // Test the reset
     TEST_ASSERT_TRUE( UUT.reset() );
-    TEST_ASSERT_EQUAL(0, sdio.last_argument);
-    sdio.call_command_no_response.assert_called_once_with(SDHC::CMD<0>());
+    TEST_ASSERT_EQUAL(0, mock_sdio.last_argument);
+    mock_sdio.call_command_no_response.assert_called_once_with(sdhc::CMD<0>());
 };
 
 /// @brief Test setting the power supply voltage
@@ -154,20 +154,20 @@ void test_set_supply_voltage(void)
 {
     // Create Card
     setUp();
-    SDHC::Card UUT(sdio);
-    sdio.R7_response = SDHC::CHECK_PATTERN;
+    sdhc::Card UUT(mock_sdio);
+    mock_sdio.R7_response = sdhc::CHECK_PATTERN;
 
     // Test setting the supply voltage when card does respond
     TEST_ASSERT_TRUE( UUT.set_supply_voltage() );
-    TEST_ASSERT_EQUAL(SDHC::CMD8::Voltage_0 | SDHC::CHECK_PATTERN, sdio.last_argument);
-    sdio.call_command_R7_response.assert_called_once_with(SDHC::CMD<8>());
+    TEST_ASSERT_EQUAL(sdhc::CMD8::Voltage_0 | sdhc::CHECK_PATTERN, mock_sdio.last_argument);
+    mock_sdio.call_command_R7_response.assert_called_once_with(sdhc::CMD<8>());
 
     // Test setting the supply voltage when card does not respond
-    sdio.R7_response = 0;
+    mock_sdio.R7_response = 0;
     TEST_ASSERT_FALSE( UUT.set_supply_voltage() );
-    TEST_ASSERT_EQUAL(SDHC::CMD8::Voltage_0 | SDHC::CHECK_PATTERN, sdio.last_argument);
-    sdio.call_command_R7_response.assert_called_once_with(SDHC::CMD<8>());
-    TEST_ASSERT_EQUAL(SDHC::State::Disconnected, UUT.state );
+    TEST_ASSERT_EQUAL(sdhc::CMD8::Voltage_0 | sdhc::CHECK_PATTERN, mock_sdio.last_argument);
+    mock_sdio.call_command_R7_response.assert_called_once_with(sdhc::CMD<8>());
+    TEST_ASSERT_EQUAL(sdhc::State::Disconnected, UUT.state );
 };
 
 /// @brief Test the card initialization commnad
@@ -175,48 +175,48 @@ void test_initialize_card(void)
 {
     // Create Card
     setUp();
-    SDHC::Card UUT(sdio);
+    sdhc::Card UUT(mock_sdio);
 
     // Test the successfull initialization of SDSC card
-    sdio.R1_response = SDHC::R1::APP_CMD;
-    sdio.R3_response = SDHC::R3::NOT_BUSY;
+    mock_sdio.R1_response = sdhc::R1::APP_CMD;
+    mock_sdio.R3_response = sdhc::R3::NOT_BUSY;
     TEST_ASSERT_TRUE( UUT.initialize_card() );
-    sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<55>() );
-    sdio.call_command_R3_response.assert_called_once_with(SDHC::ACMD<41>() );
-    TEST_ASSERT_EQUAL( SDHC::ACMD41::HCS | SDHC::ACMD41::XPC | SDHC::OCR::_3_0V, sdio.last_argument);
-    TEST_ASSERT_EQUAL( SDHC::State::Identification, UUT.state );
+    mock_sdio.call_command_R1_response.assert_called_once_with(sdhc::CMD<55>() );
+    mock_sdio.call_command_R3_response.assert_called_once_with(sdhc::ACMD<41>() );
+    TEST_ASSERT_EQUAL( sdhc::ACMD41::HCS | sdhc::ACMD41::XPC | sdhc::OCR::_3_0V, mock_sdio.last_argument);
+    TEST_ASSERT_EQUAL( sdhc::State::Identification, UUT.state );
     TEST_ASSERT_TRUE( UUT.is_SDSC() );
 
     // Test the successfull initialization of SDSC card
     setUp();
-    sdio.R1_response = SDHC::R1::APP_CMD;
-    sdio.R3_response = SDHC::R3::CCS | SDHC::R3::NOT_BUSY;
+    mock_sdio.R1_response = sdhc::R1::APP_CMD;
+    mock_sdio.R3_response = sdhc::R3::CCS | sdhc::R3::NOT_BUSY;
     TEST_ASSERT_TRUE( UUT.initialize_card() );
-    sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<55>() );
-    sdio.call_command_R3_response.assert_called_once_with(SDHC::ACMD<41>() );
-    TEST_ASSERT_EQUAL( SDHC::ACMD41::HCS | SDHC::ACMD41::XPC | SDHC::OCR::_3_0V, sdio.last_argument);
-    TEST_ASSERT_EQUAL( SDHC::State::Identification, UUT.state );
+    mock_sdio.call_command_R1_response.assert_called_once_with(sdhc::CMD<55>() );
+    mock_sdio.call_command_R3_response.assert_called_once_with(sdhc::ACMD<41>() );
+    TEST_ASSERT_EQUAL( sdhc::ACMD41::HCS | sdhc::ACMD41::XPC | sdhc::OCR::_3_0V, mock_sdio.last_argument);
+    TEST_ASSERT_EQUAL( sdhc::State::Identification, UUT.state );
     TEST_ASSERT_FALSE( UUT.is_SDSC() );
 
     // Test sending the command while card is busy
     setUp();
-    sdio.R1_response = SDHC::R1::APP_CMD;
-    sdio.R3_response = 0;
+    mock_sdio.R1_response = sdhc::R1::APP_CMD;
+    mock_sdio.R3_response = 0;
     TEST_ASSERT_FALSE( UUT.initialize_card() );
-    sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<55>() );
-    sdio.call_command_R3_response.assert_called_once_with(SDHC::ACMD<41>() );
-    TEST_ASSERT_EQUAL( SDHC::ACMD41::HCS | SDHC::ACMD41::XPC | SDHC::OCR::_3_0V, sdio.last_argument);
-    TEST_ASSERT_EQUAL( SDHC::State::Identification, UUT.state );
+    mock_sdio.call_command_R1_response.assert_called_once_with(sdhc::CMD<55>() );
+    mock_sdio.call_command_R3_response.assert_called_once_with(sdhc::ACMD<41>() );
+    TEST_ASSERT_EQUAL( sdhc::ACMD41::HCS | sdhc::ACMD41::XPC | sdhc::OCR::_3_0V, mock_sdio.last_argument);
+    TEST_ASSERT_EQUAL( sdhc::State::Identification, UUT.state );
 
     // Test sending the command when card does not accept the command
     setUp();
-    sdio.R1_response = 0;
-    sdio.R3_response = SDHC::R3::NOT_BUSY;
+    mock_sdio.R1_response = 0;
+    mock_sdio.R3_response = sdhc::R3::NOT_BUSY;
     TEST_ASSERT_FALSE( UUT.initialize_card() );
-    sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<55>() );
-    TEST_ASSERT_EQUAL(0 ,sdio.call_command_R3_response.call_count);
-    TEST_ASSERT_EQUAL( 0 , sdio.last_argument);
-    TEST_ASSERT_EQUAL( SDHC::State::Disconnected, UUT.state );
+    mock_sdio.call_command_R1_response.assert_called_once_with(sdhc::CMD<55>() );
+    TEST_ASSERT_EQUAL(0 ,mock_sdio.call_command_R3_response.call_count);
+    TEST_ASSERT_EQUAL( 0 , mock_sdio.last_argument);
+    TEST_ASSERT_EQUAL( sdhc::State::Disconnected, UUT.state );
 };
 
 /// @brief Test getting the RCA (Relative Card Address)
@@ -224,15 +224,15 @@ void test_get_RCA(void)
 {
     // Create Card
     setUp();
-    SDHC::Card UUT(sdio);
+    sdhc::Card UUT(mock_sdio);
 
     // Test successfull read of RCA
-    sdio.R6_response = (0xAB << 16);
+    mock_sdio.R6_response = (0xAB << 16);
     TEST_ASSERT_TRUE( UUT.get_RCA() );
-    sdio.call_command_R2_response.assert_called_once_with(SDHC::CMD<2>() );
-    sdio.call_command_R6_response.assert_called_once_with(SDHC::CMD<3>() );
+    mock_sdio.call_command_R2_response.assert_called_once_with(sdhc::CMD<2>() );
+    mock_sdio.call_command_R6_response.assert_called_once_with(sdhc::CMD<3>() );
     TEST_ASSERT_EQUAL(0xAB, UUT.RCA );
-    TEST_ASSERT_EQUAL( SDHC::State::StandBy, UUT.state );
+    TEST_ASSERT_EQUAL( sdhc::State::StandBy, UUT.state );
 };
 
 /// @brief Test selecting a card using its RCA
@@ -240,24 +240,24 @@ void test_select_card(void)
 {
     // Create Card
     setUp();
-    SDHC::Card UUT(sdio);
+    sdhc::Card UUT(mock_sdio);
 
     // Test successfull selecting card
-    sdio.R1_response = 0;
+    mock_sdio.R1_response = 0;
     UUT.RCA = 0xAB;
     TEST_ASSERT_TRUE( UUT.select() );
-    sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<7>() );
-    TEST_ASSERT_EQUAL( 0xAB << 16, sdio.last_argument);
-    TEST_ASSERT_EQUAL( SDHC::State::Transfering, UUT.state );
+    mock_sdio.call_command_R1_response.assert_called_once_with(sdhc::CMD<7>() );
+    TEST_ASSERT_EQUAL( 0xAB << 16, mock_sdio.last_argument);
+    TEST_ASSERT_EQUAL( sdhc::State::Transfering, UUT.state );
 
     // Test selecting card with error
-    sdio.R1_response = SDHC::R1::ERROR;
+    mock_sdio.R1_response = sdhc::R1::ERROR;
     UUT.RCA = 0xAB;
-    UUT.state = SDHC::State::StandBy;
+    UUT.state = sdhc::State::StandBy;
     TEST_ASSERT_FALSE( UUT.select() );
-    sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<7>() );
-    TEST_ASSERT_EQUAL( 0xAB << 16, sdio.last_argument);
-    TEST_ASSERT_EQUAL( SDHC::State::StandBy, UUT.state );
+    mock_sdio.call_command_R1_response.assert_called_once_with(sdhc::CMD<7>() );
+    TEST_ASSERT_EQUAL( 0xAB << 16, mock_sdio.last_argument);
+    TEST_ASSERT_EQUAL( sdhc::State::StandBy, UUT.state );
 };
 
 /// @brief Test changing the bus width to 4bits
@@ -265,19 +265,19 @@ void test_change_bus_width(void)
 {
     // Create Card
     setUp();
-    SDHC::Card UUT(sdio);
+    sdhc::Card UUT(mock_sdio);
 
     // Test the successfull change of the bus width
-    sdio.R1_response = SDHC::R1::APP_CMD;
+    mock_sdio.R1_response = sdhc::R1::APP_CMD;
     TEST_ASSERT_TRUE( UUT.set_bus_width_4bits() );
-    sdio.call_command_R1_response.assert_called_last_with(SDHC::ACMD<6>() );
-    TEST_ASSERT_EQUAL( 0b10, sdio.last_argument);
+    mock_sdio.call_command_R1_response.assert_called_last_with(sdhc::ACMD<6>() );
+    TEST_ASSERT_EQUAL( 0b10, mock_sdio.last_argument);
 
     // Test the successfull change of the bus width
-    sdio.R1_response = SDHC::R1::APP_CMD | SDHC::R1::ERROR;
+    mock_sdio.R1_response = sdhc::R1::APP_CMD | sdhc::R1::ERROR;
     TEST_ASSERT_FALSE( UUT.set_bus_width_4bits() );
-    sdio.call_command_R1_response.assert_called_last_with(SDHC::ACMD<6>() );
-    TEST_ASSERT_EQUAL( 0b10, sdio.last_argument);
+    mock_sdio.call_command_R1_response.assert_called_last_with(sdhc::ACMD<6>() );
+    TEST_ASSERT_EQUAL( 0b10, mock_sdio.last_argument);
 };
 
 /// @brief Test ejecting the card
@@ -285,24 +285,24 @@ void test_eject(void)
 {
     // Create Card
     setUp();
-    SDHC::Card UUT(sdio);
+    sdhc::Card UUT(mock_sdio);
 
     // Test ejecting the card when it can be ejected
-    UUT.state = SDHC::State::Transfering;
+    UUT.state = sdhc::State::Transfering;
     UUT.RCA = 0xDE;
     UUT.eject();
-    sdio.call_command_no_response.assert_called_once_with( SDHC::CMD<15>() );
-    TEST_ASSERT_EQUAL( 0xDE << 16, sdio.last_argument );
-    TEST_ASSERT_EQUAL( SDHC::State::Disconnected, UUT.state );
+    mock_sdio.call_command_no_response.assert_called_once_with( sdhc::CMD<15>() );
+    TEST_ASSERT_EQUAL( 0xDE << 16, mock_sdio.last_argument );
+    TEST_ASSERT_EQUAL( sdhc::State::Disconnected, UUT.state );
 
     // Test ejecting the card when it is already ejected
     setUp();
-    UUT.state = SDHC::State::Disconnected;
+    UUT.state = sdhc::State::Disconnected;
     UUT.RCA = 0xDE;
     UUT.eject();
-    TEST_ASSERT_EQUAL(0, sdio.call_command_no_response.call_count);
-    TEST_ASSERT_EQUAL(0, sdio.last_argument );
-    TEST_ASSERT_EQUAL( SDHC::State::Disconnected, UUT.state );
+    TEST_ASSERT_EQUAL(0, mock_sdio.call_command_no_response.call_count);
+    TEST_ASSERT_EQUAL(0, mock_sdio.last_argument );
+    TEST_ASSERT_EQUAL( sdhc::State::Disconnected, UUT.state );
 };
 
 /// @brief Test reading a single block
@@ -310,22 +310,22 @@ void test_read_single_block(void)
 {
     // Create Card
     setUp();
-    SDHC::Card UUT(sdio);
-    auto buffer = SDHC::create_block_buffer<1>();
+    sdhc::Card UUT(mock_sdio);
+    auto buffer = sdhc::create_block_buffer<1>();
 
     // Test a successful read of one block for SDSC cards
     TEST_ASSERT_TRUE( UUT.read_single_block(buffer.begin(), 1) );
-    sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<17>());
-    sdio.call_read_single_block.assert_called_once();
-    TEST_ASSERT_EQUAL(1*SDHC::BLOCKLENGTH, sdio.last_argument);
+    mock_sdio.call_command_R1_response.assert_called_once_with(sdhc::CMD<17>());
+    mock_sdio.call_read_single_block.assert_called_once();
+    TEST_ASSERT_EQUAL(1*sdhc::BLOCKLENGTH, mock_sdio.last_argument);
 
     // Test a successful read of one block for SDHC cards
     setUp();
     UUT.type_sdsc = false;
     TEST_ASSERT_TRUE( UUT.read_single_block(buffer.begin(), 1) );
-    sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<17>());
-    sdio.call_read_single_block.assert_called_once();
-    TEST_ASSERT_EQUAL(1, sdio.last_argument);
+    mock_sdio.call_command_R1_response.assert_called_once_with(sdhc::CMD<17>());
+    mock_sdio.call_read_single_block.assert_called_once();
+    TEST_ASSERT_EQUAL(1, mock_sdio.last_argument);
 };
 
 /// @brief Test writing a single block
@@ -333,32 +333,32 @@ void test_write_single_block(void)
 {
     // Create Card
     setUp();
-    SDHC::Card UUT(sdio);
-    auto buffer = SDHC::create_block_buffer<1>();
+    sdhc::Card UUT(mock_sdio);
+    auto buffer = sdhc::create_block_buffer<1>();
 
     // Test a successful read of one block for SDSC cards
     TEST_ASSERT_TRUE( UUT.write_single_block(buffer.begin(), 1) );
-    sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<24>());
-    sdio.call_write_single_block.assert_called_once();
-    TEST_ASSERT_EQUAL(1*SDHC::BLOCKLENGTH, sdio.last_argument);
+    mock_sdio.call_command_R1_response.assert_called_once_with(sdhc::CMD<24>());
+    mock_sdio.call_write_single_block.assert_called_once();
+    TEST_ASSERT_EQUAL(1*sdhc::BLOCKLENGTH, mock_sdio.last_argument);
 
     // Test a successful read of one block for SDHC cards
     setUp();
     UUT.type_sdsc = false;
     TEST_ASSERT_TRUE( UUT.write_single_block(buffer.begin(), 1) );
-    sdio.call_command_R1_response.assert_called_once_with(SDHC::CMD<24>());
-    sdio.call_write_single_block.assert_called_once();
-    TEST_ASSERT_EQUAL(1, sdio.last_argument);
+    mock_sdio.call_command_R1_response.assert_called_once_with(sdhc::CMD<24>());
+    mock_sdio.call_write_single_block.assert_called_once();
+    TEST_ASSERT_EQUAL(1, mock_sdio.last_argument);
 };
 
 void test_data_access(void)
 {
     // auto buffer = SDHC::create_block_buffer<1>();
-    std::array<unsigned int, 128> buffer{0};
+    std::array<uint32_t, 128> buffer{0};
     buffer[0] = 0x03020100;
     buffer[1] = 0x07060504;
 
-    unsigned char* char_pointer = reinterpret_cast<unsigned char*>(buffer.begin());
+    uint8_t* char_pointer = reinterpret_cast<uint8_t*>(buffer.begin());
 
     TEST_ASSERT_EQUAL( 0x00, *(char_pointer + 0));
     TEST_ASSERT_EQUAL( 0x01, *(char_pointer + 1));

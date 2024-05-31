@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2022 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2022 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,190 +18,139 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    file.cpp
  * @author  SO
  * @version v3.4.0
  * @date    09-January-2022
  * @brief   Interface for files.
- ******************************************************************************
+ ==============================================================================
  */
 
-// === Includes ===
+/* === Includes === */
 #include "file.h"
 
-// Provide valid template instanciations
-template class FAT32::File<FAT32::Volume<SDHC::Card>>;
+/* Provide valid template instantiations */
+template class fat32::File<fat32::Volume<sdhc::Card>>;
 
-// === Class Methods ===
-
-/**
- * @brief Return the current size of the file
- * in bytes.
- * 
- * @tparam Volume_t The volume class which is used for memory access.
- * @return Returns the file size in bytes.
- */
-template<class Volume_t>
-unsigned long FAT32::File<Volume_t>::size(void) const
+namespace fat32
 {
-    return this->handle.size;
-};
-
-/**
- * @brief Get the internal access position pointer
- * for read and write access of the file.
- * 
- * @tparam Volume_t The volume class which is used for memory access.
- * @return The current access position in bytes of the file.
- */
-template<class Volume_t>
-unsigned long FAT32::File<Volume_t>::tell(void) const
-{
-    return this->access_position;
-};
-
-/**
- * @brief Read data from the file. After
- * each access the byte counter is increased.
- * 
- * When the end of file is reached, the function
- * consecutively returns 0.
- * 
- * @tparam Volume_t The volume class which is used for memory access.
- * @return The data byte at the current access position.
- */
-template<class Volume_t>
-unsigned char FAT32::File<Volume_t>::read(void)
-{
-    // Check whether the end of file is already reached
-    if (this->tell() == this->size())
-        return 0;
-
-    // Check whether end of sector was reached
-    if (this->handle.current.byte == 512)
+    /* === Methods === */
+    template <class Volume_t>
+    auto File<Volume_t>::close() -> bool
     {
-        volume->read_next_sector_of_cluster(this->handle);
-        this->handle.current.byte = 0;
-    }
+        /* Flush the block buffer to the card */
+        this->flush();
 
-    // return the data at the current block position
-    this->access_position++;
-    return this->handle.block_buffer[this->handle.current.byte++];
-};
+        /* Set file state to closed */
+        this->state = files::State::Closed;
 
-/**
- * @brief Put a byte to the file. After
- * each access the byte counter is increased.
- * 
- * @tparam Volume_t The volume class which is used for memory access.
- * @param data The data byte to write to the file.
- * @return Return True when the byte was successfully written.
- */
-template<class Volume_t>
-bool FAT32::File<Volume_t>::put(const char byte)
-{
-    // Only when file is not read-only
-    if (
-        (this->state == Files::State::Read_only) or 
-        (this->state == Files::State::Closed) )
-        return false;
+        return true;
+    };
 
-    // Set file state to changed
-    this->state = Files::State::Changed;
-     
-    // Write the byte to the current buffer position
-    this->handle.block_buffer[this->handle.current.byte] = byte;
-
-    // Update position counter
-    this->handle.current.byte++;
-    this->handle.size++;
-    this->access_position++;
-
-    // When block buffer is full flush it to the card
-    if (this->handle.current.byte == 512)
+    template <class Volume_t>
+    void File<Volume_t>::flush()
     {
         this->volume->write_file_to_memory(this->handle);
         this->volume->write_filesize_to_directory(this->handle);
-        this->handle.current.byte = 0;
-    }
+    };
 
-    return true;
-};
-
-/**
- * @brief Write data to the file using an iterator. After
- * each access the byte counter is increased.
- * 
- * @tparam Volume_t The volume class which is used for memory access.
- * @param begin The begin iterator of the data to write.
- * @param len The number of bytes to write.
- * @return Return True when the data was successfully written.
- */
-template<class Volume_t>
-bool FAT32::File<Volume_t>::write(
-    const char* begin,
-    const std::size_t len
-    )
-{
-    // Only when file is not read-only
-    if (
-        (this->state == Files::State::Read_only) or 
-        (this->state == Files::State::Closed) )
-        return false;
-
-    // Set file state to changed
-    this->state = Files::State::Changed;
-     
-    // iterate through the data
-    auto ptr = begin;
-    for (std::size_t iByte = 0; iByte < len; iByte++)
+    template <class Volume_t>
+    auto File<Volume_t>::put(const char byte) -> bool
     {
-        // Write the byte to the current buffer position
-        this->handle.block_buffer[this->handle.current.byte] = *ptr++;
+        /* Only when file is not read-only */
+        if (
+            (this->state == files::State::Read_only) or
+            (this->state == files::State::Closed))
+            return false;
 
-        // Update position counter
+        /* Set file state to changed */
+        this->state = files::State::Changed;
+
+        /* Write the byte to the current buffer position */
+        this->handle.block_buffer[this->handle.current.byte] = byte;
+
+        /* Update position counter */
         this->handle.current.byte++;
         this->handle.size++;
         this->access_position++;
 
-        // When block buffer is full flush it to the card
+        /* When block buffer is full flush it to the card */
         if (this->handle.current.byte == 512)
         {
-            this->flush();
+            this->volume->write_file_to_memory(this->handle);
+            this->volume->write_filesize_to_directory(this->handle);
             this->handle.current.byte = 0;
         }
-    }
 
-    return true;
-};
+        return true;
+    };
 
-/**
- * @brief Flush the file and write data.
- * 
- * @tparam Volume_t The volume class which is used for memory access.
- */
-template<class Volume_t>
-void FAT32::File<Volume_t>::flush(void)
-{
-    this->volume->write_file_to_memory(this->handle);
-    this->volume->write_filesize_to_directory(this->handle);
-};
+    template <class Volume_t>
+    auto File<Volume_t>::read() -> uint8_t
+    {
+        /* Check whether the end of file is already reached */
+        if (this->tell() == this->size())
+            return 0;
 
-/**
- * @brief Close the file and write data.
- * 
- * @tparam Volume_t The volume class which is used for memory access.
- * @return Return True when the file was successfully written.
- */
-template<class Volume_t>
-bool FAT32::File<Volume_t>::close(void)
-{
-    // Flush the block buffer to the card
-    this->flush();
+        /* Check whether end of sector was reached */
+        if (this->handle.current.byte == 512)
+        {
+            volume->read_next_sector_of_cluster(this->handle);
+            this->handle.current.byte = 0;
+        }
 
-    // Set file state to closed
-    this->state = Files::State::Closed;
+        /* return the data at the current block position */
+        this->access_position++;
+        return this->handle.block_buffer[this->handle.current.byte++];
+    };
 
-    return true;
-};
+    template <class Volume_t>
+    auto File<Volume_t>::size() const -> uint32_t
+    {
+        return this->handle.size;
+    };
+
+    template <class Volume_t>
+    auto File<Volume_t>::tell() const -> uint32_t
+    {
+        return this->access_position;
+    };
+
+    template <class Volume_t>
+    auto File<Volume_t>::write(
+        const char *begin,
+        const std::size_t len) -> bool
+    {
+        /* Only when file is not read-only */
+        if (
+            (this->state == files::State::Read_only) or
+            (this->state == files::State::Closed))
+            return false;
+
+        /* Set file state to changed */
+        this->state = files::State::Changed;
+
+        /* iterate through the data */
+        auto ptr = begin;
+        for (std::size_t iByte = 0; iByte < len; iByte++)
+        {
+            /* Write the byte to the current buffer position */
+            this->handle.block_buffer[this->handle.current.byte] = *ptr++;
+
+            /* Update position counter */
+            this->handle.current.byte++;
+            this->handle.size++;
+            this->access_position++;
+
+            /* When block buffer is full flush it to the card */
+            if (this->handle.current.byte == 512)
+            {
+                this->flush();
+                this->handle.current.byte = 0;
+            }
+        }
+
+        return true;
+    };
+}; // namespace fat32

@@ -24,13 +24,13 @@
 // === Includes ===
 #include "font_base.h"
 
-namespace Font
+namespace font
 {
     /**
      * @brief Ascii font look up table
      * @details width: 6 px, height: 8 px
      */
-    constexpr unsigned char Lookup_Default_8px[256 * 6] =
+    constexpr uint8_t Lookup_Default_8px[256 * 6] =
         {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // 0x00
             0x00, 0x3E, 0x45, 0x51, 0x45, 0x3E, // 0x01
@@ -294,7 +294,7 @@ namespace Font
      * @brief Ascii font look up table
      * @details width: 12 px, height: 16 px
      */
-    constexpr unsigned char Lookup_Default_16px[256*24] =
+    constexpr uint8_t Lookup_Default_16px[256*24] =
         {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // 0x00
             0x00, 0x00, 0x03, 0xF0, 0x0C, 0x0C, 0x10, 0x02, 0x11, 0x32, 0x22, 0x31, 0x22, 0x01, 0x22, 0x31, 0x11, 0x32, 0x10, 0x02, 0x0C, 0x0C, 0x03, 0xF0, // 0x01
@@ -559,7 +559,7 @@ namespace Font
     // Default Font Small: 8px
     namespace _8px
     {
-        constexpr Font::Base_t Default = {
+        constexpr font::Base_t Default = {
             .data = Lookup_Default_8px,
             .width_px = 6,
             .height_px = 8,
@@ -570,7 +570,7 @@ namespace Font
     // Default Font Normal: 16px
     namespace _16px
     {
-        constexpr Font::Base_t Default = {
+        constexpr font::Base_t Default = {
             .data = Lookup_Default_16px,
             .width_px = 12,
             .height_px = 16,

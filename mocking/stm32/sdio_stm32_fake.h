@@ -88,7 +88,7 @@
 
 #define SDIO_CMD_WAITINT_Pos           (8U)                                    
 #define SDIO_CMD_WAITINT_Msk           (0x1UL << SDIO_CMD_WAITINT_Pos)          /*!< 0x00000100 */
-#define SDIO_CMD_WAITINT               SDIO_CMD_WAITINT_Msk                    /*!<CPSM Waits for Interrupt Request                               */
+#define SDIO_CMD_WAITint32_t              SDIO_CMD_WAITINT_Msk                    /*!<CPSM Waits for Interrupt Request                               */
 #define SDIO_CMD_WAITPEND_Pos          (9U)                                    
 #define SDIO_CMD_WAITPEND_Msk          (0x1UL << SDIO_CMD_WAITPEND_Pos)         /*!< 0x00000200 */
 #define SDIO_CMD_WAITPEND              SDIO_CMD_WAITPEND_Msk                   /*!<CPSM Waits for ends of data transfer (CmdPend internal signal) */

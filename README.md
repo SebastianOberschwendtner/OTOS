@@ -63,7 +63,7 @@ Each thread handles **one** task. You can bundle multiple actions in one task, o
 The tasks are scheduled using their *function name*:
 ```cpp
 // Schedule task with the function name MyTask and a stack size of 128 bytes
-OS.scheduleTask<128>(&MyTask, OTOS:PrioNormal);
+OS.schedule_thread<128>(&MyTask, OTOS:Priority::Normal);
 ```
 - You have to schedule the thread in the file where your *kernel* object is created.
 - The task can be defined in a separate file.
@@ -76,7 +76,7 @@ That means:
 To define a execution frequency the task is allowed to execute use this task constructor:
 ```cpp
 // Schedule task with the function name MyTask and run it with 10 Hz
-OS.scheduleTask<128>(&MyTask, OTOS:PrioNormal, 10);
+OS.schedule_thread<128>(&MyTask, OTOS:Priority::Normal, 10);
 ```
 
 ### Control within Thread/Task
@@ -94,7 +94,7 @@ Currently, only the *SysTick* timer is used as a time base, but you can give the
 To create a task using the *SysTick* timer use this:
 ```cpp
 // Create a timed task using SysTick as the timebase
-OTOS::Timed_Task MyTask(OTOS::get_time_ms);
+OTOS::TimedTask MyTask(OTOS::get_time_ms);
 ```
 
 The function `get_time_ms()` is a static class method of the OTOS kernel and can be called from anywhere to get the current time in *[ms]* since the system was started.
@@ -116,7 +116,7 @@ extern "C" void SysTick_Handler(void)
 In the main function configure the interrupt using the following function:
 ```cpp
 // Configure SysTick timer for interrupts every 1 ms
-Timer::SysTick_Configure();
+timer::SysTick_Configure();
 ```
 The function takes the configured CPU clock into account and configures the *SysTick* interrupt for an interrupt every 1ms.
 

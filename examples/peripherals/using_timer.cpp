@@ -34,31 +34,31 @@
  */
 void Run_Timer_Example(void)
 {
-    // namespace aliases
-    using namespace OTOS::literals;        // OTOS defines frequency literals
-    using namespace std::chrono_literals;  // std::chrono defines time literals
+    /* namespace aliases */
+    using namespace OTOS::literals;       /* OTOS defines frequency literals */
+    using namespace std::chrono_literals; /* std::chrono defines time literals */
 
-    // Create timed task
-    OTOS::Timed_Task task(OTOS::get_time_ms);
+    /* Create timed task */
+    OTOS::TimedTask task(OTOS::get_time_ms);
 
-    // Create timer instance
-    Timer::Timer timer(IO::TIM_2);
+    /* Create timer instance */
+    constexpr stm32::Peripheral timer_used = stm32::Peripheral::TIM_2;
+    auto timer = timer::Timer::create<timer_used>();
 
-    // Configure timer
-    timer.set_tick_frequency(1000_Hz);
-    timer.set_period(1s);
+    /* Configure timer */
+    timer.set_tick_frequency(1000_Hz).set_period(1s);
 
-    // Configure the compare channel
-    auto compare_channel = timer.get_channel(1);
-    compare_channel.set_mode(Timer::Mode::PWM);
-    compare_channel.set_duty_cycle(0.5f);
+    /* Assign the GPIO to the compare channel */
+    auto pin = gpio::Pin::create<gpio::Port::A>(5);
+    pin.set_alternate_function(timer_used);
 
-    // Assign the GPIO to the compare channel
-    GPIO::PIN pin(GPIO::Port::A, 5);
-    pin.set_alternate_function(IO::TIM_2);
+    /* Configure the compare channel */
+    timer.get_channel(1)
+        .set_mode(timer::Mode::PWM)
+        .set_duty_cycle(0.5f)
+        .enable();
 
-    // Start the timer and the compare channel
-    compare_channel.enable();
+    /* Start the timer and the compare channel */
     timer.start();
 
     while (1)
@@ -66,4 +66,3 @@ void Run_Timer_Example(void)
         OTOS::Task::yield();
     }
 };
-

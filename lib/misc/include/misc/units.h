@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2023 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2023 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,12 +21,12 @@
 #ifndef UNITS_H_
 #define UNITS_H_
 
-// === Includes ===
-#include <cstdint>
+/* === Includes === */
+#include "types.h"
 #include <ratio>
+
 namespace OTOS
 {
-    // === Classes ===
     /**
      * @brief A class template to define a unit.
      * You can use the instantiated objects like values of the target unit.
@@ -44,10 +44,8 @@ namespace OTOS
         static_assert(ratio::num > 0, "Unit Ratio must be positive!");
         static_assert(ratio::den > 0, "Unit Denominator must be > 0!");
 
-      private:
-        base value{0}; // The value in the target unit
-
       public:
+        /* === Constructors === */
         /**
          * @brief Construct a new Unit object.
          *
@@ -55,9 +53,9 @@ namespace OTOS
          * @param rhs The raw value to assign. The value is not converted!
          */
         template <typename T>
-        Unit(const T &rhs) : value(static_cast<base>(rhs)){}; // NOLINT(google*)
+        Unit(const T &rhs) : value(static_cast<base>(rhs)){}; /* NOLINT(google*) */
 
-        // Default constructor, assignment and destructor
+        /* Default constructor, assignment and destructor */
         Unit() = default;
         Unit(const Unit &) = default;
         Unit(Unit &&) noexcept = default;
@@ -65,6 +63,7 @@ namespace OTOS
         Unit &operator=(Unit &&) noexcept = default;
         ~Unit() = default;
 
+        /* === Methods === */
         /**
          * @brief Cast operator to use the object like a value of the target unit.
          *
@@ -84,13 +83,13 @@ namespace OTOS
          * @todo Select the calculation type based on the size of the raw value
          */
         template <typename T>
-        Unit &operator=(const T &rhs)
+        auto operator=(const T &rhs) -> Unit &
         {
-            value = static_cast<base>(rhs); // Convert to base type
-            // Use larger temporary variable to prevent overflow
+            value = static_cast<base>(rhs); /* Convert to base type */
+            /* Use larger temporary variable to prevent overflow */
             int64_t temp = value * ratio::num;
-            temp /= ratio::den;              // Convert to target unit
-            value = static_cast<base>(temp); // Convert to base type
+            temp /= ratio::den;              /* Convert to target unit */
+            value = static_cast<base>(temp); /* Convert to base type */
             return *this;
         }
 
@@ -102,16 +101,21 @@ namespace OTOS
          * @return Unit& Reference to the object.
          */
         template <typename T>
-        Unit &set_value(const T &new_val)
+        auto set_value(const T &new_val) -> Unit &
         {
-            value = static_cast<base>(new_val); // Convert to to base type
+            value = static_cast<base>(new_val); /* Convert to to base type */
             return *this;
         }
 
         /**
          * @brief Access the underlying base value.
+         * @return base The value in the target unit.
          */
         [[nodiscard]] auto get() const -> base { return value; }
+
+      private:
+        /* === Properties === */
+        base value{0}; /**< The value in the target unit */
     };
 
     /**
@@ -129,7 +133,7 @@ namespace OTOS
         using rep = _Repr;
         using ratio = typename _Ratio::type;
 
-        /* Constructors */
+        /* === Constructors === */
         constexpr frequency() = default;
         constexpr explicit frequency(const rep &rhs) : value(rhs) {}
         frequency(const frequency &) = default;
@@ -140,24 +144,25 @@ namespace OTOS
 
         /**
          * @brief Construct a new frequency object from a frequency object with a different ratio.
-         * 
+         *
          * @tparam _Ratio2 The ratio of the source frequency object.
          * @param rhs The source frequency object.
          */
         template <typename _Ratio2>
         frequency(const frequency<rep, _Ratio2> &rhs)
         {
-            // Calculate the value in the target unit
+            /* Calculate the value in the target unit */
             value = rhs.count() * _Ratio2::num / _Ratio2::den;
 
-            // Calculate the value in the base unit
+            /* Calculate the value in the base unit */
             value *= ratio::den;
             value /= ratio::num;
         }
 
+        /* === Methods === */
         /**
          * @brief Cast operator to use the object like a value of the target unit.
-         * 
+         *
          * @tparam T The type to cast to.
          * @return T The value in the target unit.
          */
@@ -166,11 +171,11 @@ namespace OTOS
 
         /**
          * @brief Assignment operator to assign a raw value.
-         * 
+         *
          * @param rhs The raw value to assign.
          * @return frequency& Reference to the object.
          */
-        constexpr frequency &operator=(const rep &rhs)
+        constexpr auto operator=(const rep &rhs) -> frequency &
         {
             value = rhs;
             return *this;
@@ -178,11 +183,13 @@ namespace OTOS
 
         /**
          * @brief Access the underlying base value.
+         * @return rep The value in the target unit.
          */
         [[nodiscard]] auto count() const -> rep { return value; }
 
       private:
-        rep value{0}; // The value in the target unit
+        /* === Properties === */
+        rep value{0}; /**< The value in the target unit */
     };
 
     /* Frequency types */
@@ -192,7 +199,7 @@ namespace OTOS
 
     namespace literals
     {
-        // Frequency literals
+        /* Frequency literals */
         constexpr hertz operator"" _Hz(unsigned long long val) { return hertz(val); }
         constexpr kilohertz operator"" _kHz(unsigned long long val) { return kilohertz(val); }
         constexpr megahertz operator"" _MHz(unsigned long long val) { return megahertz(val); }

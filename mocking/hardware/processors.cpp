@@ -31,7 +31,7 @@
 #include "processors.h"
 
 // *** Mocks ***
-Mock::Callable<unsigned long> otos_switch;
+Mock::Callable<uint32_t> otos_switch;
 Mock::Callable<bool> otos_yield;
 Mock::Callable<bool> otos_call_kernel;
 Mock::Callable<bool> otos_init_kernel;

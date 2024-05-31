@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,52 +21,52 @@
 #ifndef OTOS_BITS_H_
 #define OTOS_BITS_H_
 
-// === includes ===
-#include <stdint.h>
+/* === Includes === */
+#include "types.h"
 
 namespace bits
 {
-    // === classes ===
+    /* === Classes === */
     /**
      * @brief Class to define a bit field.
+     * @tparam T The integral type of the bit field effectively defining the maximum size of the field.
      */
     template <typename T>
     struct BitField
     {
-        uint8_t mask{0xFF};
-        uint8_t shift{0};
-        T value{0};
+        uint8_t mask{0xFF}; /**< The mask which defines valid bits in the field. */
+        uint8_t shift{0};   /**< The shift to the right to get the field. */
+        T value{0};         /**< The value to set in the field. */
     };
 
-    // === functions ===
+    /* === Functions === */
     /**
      * @brief Get the a subset of bits from an integral type.
      *
      * @tparam T The integral type to extract the bits from.
      * @param data The data to extract the bits from.
      * @param field The bit field to extract.
-     * @return constexpr T The extracted bits.
+     * @return T The extracted bits.
      */
     template <typename T>
-    [[nodiscard]] constexpr inline T get(const T data, const BitField<T> &field)
+    [[nodiscard]] constexpr auto get(const T data, const BitField<T> &field) -> T
     {
         return (data >> field.shift) & field.mask;
     }
 
     /**
      * @brief Set a subset of bits in an integral type.
-     * 
+     *
      * @tparam T The integral type to set the bits in.
      * @param data The data to set the bits in.
      * @param field The bit field to extract.
-     * @return constexpr T The data with the updated bits.
+     * @return T The data with the updated bits.
      */
     template <typename T>
-    [[nodiscard]] constexpr inline T set(const T data, const BitField<T> &field)
+    [[nodiscard]] constexpr auto set(const T data, const BitField<T> &field) -> T
     {
         return (data & ~(field.mask << field.shift)) | ((field.value & field.mask) << field.shift);
     }
-
 }; // namespace bits
 
-#endif /* OTOS_BITS_H_ */
+#endif // OTOS_BITS_H_

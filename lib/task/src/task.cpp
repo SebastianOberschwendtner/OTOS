@@ -27,54 +27,33 @@
  ==============================================================================
  */
 
-// *** Includes ***
+/* === Includes === */
 #include "task.h"
 
-// *** Methods ***
-/**
- * @brief Construct a new timed Task object.
- * 
- * @param timer_handle The function handle to the timer which provides the time in ms.
- */
-OTOS::Timed_Task::Timed_Task(std::uint32_t(*timer_handle)())
-: get_time_ms{timer_handle}
+namespace OTOS
 {
+    /* === Constructors === */
+    TimedTask::TimedTask(std::uint32_t (*timer_handle)())
+        : get_time_ms{timer_handle} {};
 
-};
+    /* === Methods === */
+    void TimedTask::tic()
+    {
+        this->time_last = this->get_time_ms();
+    };
 
-/**
- * @brief Yield execution and give control to kernel.
- */
-void OTOS::Timed_Task::yield(void)
-{
-    __otos_yield();
-};
+    auto TimedTask::time_elapsed_ms() const -> std::uint32_t
+    {
+        return this->get_time_ms() - this->time_last;
+    };
 
-/**
- * @brief Start a time measurement by saving the current time.
- * 
- */
-void OTOS::Timed_Task::tic(void)
-{
-    this->time_last = this->get_time_ms();
-};
+    auto TimedTask::toc() const -> std::uint32_t
+    {
+        return this->get_time_ms();
+    };
 
-/**
- * @brief Return the current time of the assigned timer in ms.
- * 
- * @return std::uint32_t: Current time in [ms].
- */
-std::uint32_t OTOS::Timed_Task::toc(void) const
-{
-    return this->get_time_ms();
-};
-
-/**
- * @brief Measure the elapsed time since tic() was called.
- * 
- * @return std::uint32_t Elapsed time in [ms].
- */
-std::uint32_t OTOS::Timed_Task::time_elapsed_ms(void) const
-{
-    return this->get_time_ms() - this->time_last;
-};
+    void TimedTask::yield()
+    {
+        __otos_yield();
+    };
+}; // namespace OTOS

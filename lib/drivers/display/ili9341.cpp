@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,490 +18,330 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    ili9341.cpp
  * @author  SO
  * @version v2.3.0
  * @date    23-Dezember-2021
  * @brief   Driver for the ILI9341 display controller.
- ******************************************************************************
+ ==============================================================================
  */
 
-// === Includes ===
+/* === Includes === */
 #include "ili9341.h"
 
-// Provide valid instanciations => use this as "concepts" for the display controller
-/// @todo This seems a bit much work, the template approach of the bus controllers is nice though...
-template class ILI9341::Controller<SPI::Controller<IO::SPI_1>, GPIO::PIN>;
-template class ILI9341::Controller<SPI::Controller<IO::SPI_2>, GPIO::PIN>;
-template class ILI9341::Controller<SPI::Controller<IO::SPI_3>, GPIO::PIN>;
-template class ILI9341::Controller<SPI::Controller<IO::SPI_4>, GPIO::PIN>;
-template class ILI9341::Controller<SPI::Controller<IO::SPI_5>, GPIO::PIN>;
+/* Provide valid instantiations => use this as "concepts" for the display controller */
+//* @todo This seems a bit much work, the template approach of the bus controllers is nice though... */
+template class ili9341::Controller<spi::Controller, gpio::Pin>;
 
-// === Functions ===
-/**
- * @brief Constructor for display controller.
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param bus_used The reference to the used bus peripheral.
- */
-template <class bus_controller, class gpio>
-ILI9341::Controller<bus_controller, gpio>::Controller(
-    bus_controller &bus_used,
-    gpio &dx_used,
-    gpio &cs_used)
-    : mybus{bus_used}, dx_pin{&dx_used}, cs_pin{&cs_used}
+namespace ili9341
 {
-    this->cs_pin->set_high();
-};
-
-/**
- * @brief Initialize the Display.
- * The configuration assumes the configuration of the
- * display as it is used on the STM32F429 Discovery Board.
- * 
- * The display should be waked up before calling this command.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @return Returns true when the display was initialized successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::initialize(void)
-{
-    // Set Power Control
-    if(!this->set_power_control_1(0x03))
-        return false;
-    
-    // set VCOM control
-    if(!this->set_VCOM_control_1(0x01, 0x3C))
-        return false;
-
-    // Inverse the Y Pixel mapping
-    if(!this->set_memory_access((1<<7)))
-        return false;
-
-    // Set RGB format to 16 bits per pixel
-    if(!this->set_16bits_per_pixel())
-        return false;
-    return true;
-};
-
-/**
- * @brief Send a command byte to the display.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param cmd The command code to send to the display.
- * @return Returns True when command was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::send_command_byte(const Command cmd)
-{
-    // Indicate that next byte is a command
-    this->dx_pin->set_low();
-
-    // Select Chip
-    this->cs_pin->set_low();
-    // Send the byte
-    bool response = Bus::send_byte(this->mybus, static_cast<unsigned char>(cmd));
-    // deselect chip
-    this->cs_pin->set_high();
-
-    // Return responce
-    return response;
-};
-
-/**
- * @brief Send a data byte to the display.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param data The data byte to send to the display.
- * @return Returns True when command was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::send_data_byte(const unsigned char data)
-{
-    // Indicate that next byte is data
-    this->dx_pin->set_high();
-
-    // Select Chip
-    this->cs_pin->set_low();
-    // Send the byte
-    bool response = Bus::send_byte(this->mybus, data);
-    // deselect chip
-    this->cs_pin->set_high();
-
-    // Return responce
-    return response;
-};
-
-/**
- * @brief Send a command and 1 payload byte to the display.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param cmd The command code to send to the display.
- * @param byte0 The payload byte for the command.
- * @return Returns True when command was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::send_command(
-    const Command cmd,
-    const unsigned char byte0
-)
-{
-    // Select Chip
-    this->cs_pin->set_low();
-    // Send the command and payload
-    // Send the command
-    this->dx_pin->set_low();
-    if(!Bus::send_byte(this->mybus, static_cast<unsigned char>(cmd)))
-        return false;
-    // Send the data
-    this->dx_pin->set_high();
-    if(!Bus::send_byte(this->mybus, byte0))
-        return false;
-
-    // deselect chip
-    this->cs_pin->set_high();
-
-    // Return responce
-    return true;
-};
-
-/**
- * @brief Send a command and 2 payload bytes to the display.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param cmd The command code to send to the display.
- * @param byte0 The 1st payload byte for the command.
- * @param byte1 The 2nd payload byte for the command.
- * @return Returns True when command was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::send_command(
-    const Command cmd,
-    const unsigned char byte0,
-    const unsigned char byte1
-)
-{
-    // Select Chip
-    this->cs_pin->set_low();
-    // Send the command and payload
-    // Send the command
-    this->dx_pin->set_low();
-    if(!Bus::send_byte(this->mybus, static_cast<unsigned char>(cmd)))
-        return false;
-    // Send the data
-    this->dx_pin->set_high();
-    if(!Bus::send_byte(this->mybus, byte0))
-        return false;
-    if(!Bus::send_byte(this->mybus, byte1))
-        return false;
-
-    // deselect chip
-    this->cs_pin->set_high();
-
-    // Return responce
-    return true;
-};
-
-/**
- * @brief Turn the display on.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @return Returns True when command was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::on(void)
-{
-    return this->send_command_byte(Command::Display_On);
-};
-
-/**
- * @brief Turn the display off.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @return Returns True when command was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::off(void)
-{
-    return this->send_command_byte(Command::Display_Off);
-};
-
-/**
- * @brief Reset the Display.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @return Returns True when command was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::reset(void)
-{
-    return this->send_command_byte(Command::Reset);
-};
-
-/**
- * @brief Go out of sleep mode.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @return Returns True when command was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::wake_up(void)
-{
-    return this->send_command_byte(Command::Sleep_Out);
-};
-
-/**
- * @brief Set the pixelformat for the communication
- * to 16 bits per pixel for all interface methods.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @return Returns True when command was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::set_16bits_per_pixel(void)
-{
-    constexpr unsigned char format = (0b101 << 4 ) | (0b101);
-    return this->send_command(Command::Set_Pixel_Format, format);
-};
-
-/**
- * @brief Set the Power Control 1 register of the display.
- * 
- * The datasheet describes VRH as:
- * "Set the GVDD level, which is a reference level for the
- * VCOM level and grayscale voltage level."
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param VHR THE GVDD level to set.
- * @return Returns True when command was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::set_power_control_1(
-    const unsigned char VHR
-)
-{
-    return this->send_command(Command::Power_Ctrl_1, VHR);
-};
-
-/**
- * @brief Set the memory access control of the display.
- * 
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param configuration The configuration bits as byte.
- * @return Returns True when command was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::set_memory_access(
-    const unsigned char configuration
-)
-{
-    return this->send_command(Command::Memory_Access_Ctrl, configuration);
-};
-
-/**
- * @brief Set the VCOM Control 1 register of the display.
- * 
- * The datasheet describes VMH and VML as:
- * "VMH: Set the VCOMH voltage."
- * "VML: Set the VCOML voltage."
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param VHR THE GVDD level to set.
- * @return Returns True when command was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::set_VCOM_control_1(
-    const unsigned char VMH,
-    const unsigned char VML
-)
-{
-    return this->send_command(Command::VCOM_Ctrl_1, VMH, VML);
-};
-
-// template <class bus_controller, class gpio>
-// bool ILI9341::Controller<bus_controller, gpio>::fill(
-//     const unsigned int color
-// )
-// {
-//     if(!this->send_command_byte(Command::Write_Memory))
-//         return false;
-//     for(unsigned int i=0; i<(320*240); i++)
-//         if(!this->send_data_byte(color))
-//             return false;
-//     return true;
-// };
-
-/**
- * @brief Draw a buffer which contains a color value for
- * every pixel of the display.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param buffer_begin The begin iterator of the buffer.
- * @param buffer_end The end of the buffer
- * @return Returns true when the buffer was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::draw(
-    const unsigned short* buffer_begin,
-    const unsigned short* buffer_end
-)
-{
-    // Start memory write
-    if(!this->send_command_byte(Command::Write_Memory))
-        return false;
-
-    // Switch to data transfer
-    this->dx_pin->set_high();
-    this->cs_pin->set_low();
-
-    // For every pixel in the buffer transmit its color value
-    for(const unsigned short* iter = buffer_begin; iter!=buffer_end; iter++)
+    /* === Functions === */
+    template <class bus_controller, class gpio>
+    Controller<bus_controller, gpio>::Controller(
+        bus_controller &bus_used,
+        gpio &dx_used,
+        gpio &cs_used)
+        : mybus{bus_used}, dx_pin{&dx_used}, cs_pin{&cs_used}
     {
-        if(!Bus::send_word(this->mybus, *iter))
+        this->cs_pin->set_high();
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::set_16bits_per_pixel() -> bool
+    {
+        constexpr uint8_t format = (0b101 << 4) | (0b101);
+        return this->send_command(Command::Set_Pixel_Format, format);
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::set_memory_access(
+        const uint8_t configuration) -> bool
+    {
+        return this->send_command(Command::Memory_Access_Ctrl, configuration);
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::set_power_control_1(
+        const uint8_t VHR) -> bool
+    {
+        return this->send_command(Command::Power_Ctrl_1, VHR);
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::set_VCOM_control_1(
+        const uint8_t VMH,
+        const uint8_t VML) -> bool
+    {
+        return this->send_command(Command::VCOM_Ctrl_1, VMH, VML);
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::draw(
+        const uint16_t *buffer_begin,
+        const uint16_t *buffer_end) -> bool
+    {
+        /* Start memory write */
+        if (!this->send_command_byte(Command::Write_Memory))
             return false;
-    }
-    this->cs_pin->set_low();
 
-    // Transmit successful
-    return true;
-};
+        /* Switch to data transfer */
+        this->dx_pin->set_high();
+        this->cs_pin->set_low();
 
-/**
- * @brief Draw a buffer which contains only a black-white value for
- * every pixel of the display.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param buffer_begin The begin iterator of the buffer.
- * @param buffer_end The end of the buffer
- * @param color The foreground color for "white" pixels.
- * @param background The background color for "black" pixels.
- * @return Returns true when the buffer was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::draw(
-    const unsigned char* buffer_begin,
-    const unsigned char* buffer_end,
-    const unsigned int color,
-    const unsigned int background
-)
-{
-    // Start memory write
-    if(!this->send_command_byte(Command::Write_Memory))
-        return false;
-
-    // Switch to data transfer
-    this->dx_pin->set_high();
-    this->cs_pin->set_low();
-
-    // The BW buffer encodes 8 pixels per byte -> transform this to singular pixels
-    // Split the buffer into pages which fit the width (240 pixels) of the display.
-    for(const unsigned char* page = buffer_begin; page != buffer_end; page +=240)
-    {
-        // 8 Pixels per byte
-        for (unsigned char iPixel = 0; iPixel<8; iPixel++)
+        /* For every pixel in the buffer transmit its color value */
+        for (const uint16_t *iter = buffer_begin; iter != buffer_end; iter++)
         {
-            // Add one page of data
-            for(const unsigned char* iter = page; iter!=(page+240); iter++)
+            if (!bus::send_word(this->mybus, *iter))
+                return false;
+        }
+        this->cs_pin->set_low();
+
+        /* Transmit successful */
+        return true;
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::draw(
+        const uint8_t *buffer_begin,
+        const uint8_t *buffer_end,
+        const uint32_t color,
+        const uint32_t background) -> bool
+    {
+        /* Start memory write */
+        if (!this->send_command_byte(Command::Write_Memory))
+            return false;
+
+        /* Switch to data transfer */
+        this->dx_pin->set_high();
+        this->cs_pin->set_low();
+
+        /* The BW buffer encodes 8 pixels per byte -> transform this to singular pixels */
+        /* Split the buffer into pages which fit the width (240 pixels) of the display. */
+        for (const uint8_t *page = buffer_begin; page != buffer_end; page += 240)
+        {
+            /* 8 Pixels per byte */
+            for (uint8_t iPixel = 0; iPixel < 8; iPixel++)
             {
-                // Check whether pixel is black or white
-                if(*iter & (1<<(iPixel)))
+                /* Add one page of data */
+                for (const uint8_t *iter = page; iter != (page + 240); iter++)
                 {
-                if(!Bus::send_word(this->mybus, color))
-                    return false;
-                }
-                else
-                {
-                if(!Bus::send_word(this->mybus, background))
-                    return false;
+                    /* Check whether pixel is black or white */
+                    if (*iter & (1 << (iPixel)))
+                    {
+                        if (!bus::send_word(this->mybus, color))
+                            return false;
+                    }
+                    else
+                    {
+                        if (!bus::send_word(this->mybus, background))
+                            return false;
+                    }
                 }
             }
         }
-    }
-    this->cs_pin->set_low();
+        this->cs_pin->set_low();
 
-    // Transmit successful
-    return true;
-};
+        /* Transmit successful */
+        return true;
+    };
 
-/**
- * @brief Draw a buffer which contains only a black-white value for
- * every pixel of the display.
- * 
- * This function can be given a call hook, for calling i.e. the
- * yield() function.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param buffer_begin The begin iterator of the buffer.
- * @param buffer_end The end of the buffer
- * @param color The foreground color for "white" pixels.
- * @param background The background color for "black" pixels.
- * @param hook Additional hook to function which gets called after each pixel transfer.
- * @return Returns true when the buffer was send successfully.
- */
-template <class bus_controller, class gpio>
-bool ILI9341::Controller<bus_controller, gpio>::draw(
-    const unsigned char* buffer_begin,
-    const unsigned char* buffer_end,
-    const unsigned int color,
-    const unsigned int background,
-    void (*hook)()
-)
-{
-    // Start memory write
-    if(!this->send_command_byte(Command::Write_Memory))
-        return false;
-
-    // Switch to data transfer
-    this->dx_pin->set_high();
-    this->cs_pin->set_low();
-
-    // The BW buffer encodes 8 pixels per byte -> transform this to singular pixels
-    // Split the buffer into pages which fit the width (240 pixels) of the display.
-    for(const unsigned char* page = buffer_begin; page != buffer_end; page +=240)
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::draw(
+        const uint8_t *buffer_begin,
+        const uint8_t *buffer_end,
+        const uint32_t color,
+        const uint32_t background,
+        void (*hook)()) -> bool
     {
-        // 8 Pixels per byte
-        for (unsigned char iPixel = 0; iPixel<8; iPixel++)
-        {
-            // Add one page of data
-            for(const unsigned char* iter = page; iter!=(page+240); iter++)
-            {
-                // Check whether pixel is black or white
-                if(*iter & (1<<(iPixel)))
-                {
-                if(!Bus::send_word(this->mybus, color))
-                    return false;
-                }
-                else
-                {
-                if(!Bus::send_word(this->mybus, background))
-                    return false;
-                }
-            }
-            // Call the hook function after pixel is transmitted
-            hook();
-        }
-    }
-    this->cs_pin->set_low();
+        /* Start memory write */
+        if (!this->send_command_byte(Command::Write_Memory))
+            return false;
 
-    // Transmit successful
-    return true;
-};
+        /* Switch to data transfer */
+        this->dx_pin->set_high();
+        this->cs_pin->set_low();
+
+        /* The BW buffer encodes 8 pixels per byte -> transform this to singular pixels */
+        /* Split the buffer into pages which fit the width (240 pixels) of the display. */
+        for (const uint8_t *page = buffer_begin; page != buffer_end; page += 240)
+        {
+            /* 8 Pixels per byte */
+            for (uint8_t iPixel = 0; iPixel < 8; iPixel++)
+            {
+                /* Add one page of data */
+                for (const uint8_t *iter = page; iter != (page + 240); iter++)
+                {
+                    /* Check whether pixel is black or white */
+                    if (*iter & (1 << (iPixel)))
+                    {
+                        if (!bus::send_word(this->mybus, color))
+                            return false;
+                    }
+                    else
+                    {
+                        if (!bus::send_word(this->mybus, background))
+                            return false;
+                    }
+                }
+                /* Call the hook function after pixel is transmitted */
+                hook();
+            }
+        }
+        this->cs_pin->set_low();
+
+        /* Transmit successful */
+        return true;
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::initialize() -> bool
+    {
+        /* Set Power Control */
+        if (!this->set_power_control_1(0x03))
+            return false;
+
+        /* set VCOM control */
+        if (!this->set_VCOM_control_1(0x01, 0x3C))
+            return false;
+
+        /* Inverse the Y Pixel mapping */
+        if (!this->set_memory_access((1 << 7)))
+            return false;
+
+        /* Set RGB format to 16 bits per pixel */
+        if (!this->set_16bits_per_pixel())
+            return false;
+        return true;
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::off() -> bool
+    {
+        return this->send_command_byte(Command::Display_Off);
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::on() -> bool
+    {
+        return this->send_command_byte(Command::Display_On);
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::reset() -> bool
+    {
+        return this->send_command_byte(Command::Reset);
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::wake_up() -> bool
+    {
+        return this->send_command_byte(Command::Sleep_Out);
+    };
+
+    /* template <class bus_controller, class gpio> */
+    /* bool Controller<bus_controller, gpio>::fill( */
+    /*     const uint32_t color */
+    /* ) */
+    /* { */
+    /*     if(!this->send_command_byte(Command::Write_Memory)) */
+    /*         return false; */
+    /*     for(uint32_t i=0; i<(320*240); i++) */
+    /*         if(!this->send_data_byte(color)) */
+    /*             return false; */
+    /*     return true; */
+    /* }; */
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::send_command(
+        const Command cmd,
+        const uint8_t byte0) -> bool
+    {
+        /* Select Chip */
+        this->cs_pin->set_low();
+        /* Send the command and payload */
+        /* Send the command */
+        this->dx_pin->set_low();
+        if (!bus::send_byte(this->mybus, static_cast<uint8_t>(cmd)))
+            return false;
+        /* Send the data */
+        this->dx_pin->set_high();
+        if (!bus::send_byte(this->mybus, byte0))
+            return false;
+
+        /* deselect chip */
+        this->cs_pin->set_high();
+
+        /* Return responce */
+        return true;
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::send_command(
+        const Command cmd,
+        const uint8_t byte0,
+        const uint8_t byte1) -> bool
+    {
+        /* Select Chip */
+        this->cs_pin->set_low();
+        /* Send the command and payload */
+        /* Send the command */
+        this->dx_pin->set_low();
+        if (!bus::send_byte(this->mybus, static_cast<uint8_t>(cmd)))
+            return false;
+        /* Send the data */
+        this->dx_pin->set_high();
+        if (!bus::send_byte(this->mybus, byte0))
+            return false;
+        if (!bus::send_byte(this->mybus, byte1))
+            return false;
+
+        /* deselect chip */
+        this->cs_pin->set_high();
+
+        /* Return responce */
+        return true;
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::send_command_byte(const Command cmd) -> bool
+    {
+        /* Indicate that next byte is a command */
+        this->dx_pin->set_low();
+
+        /* Select Chip */
+        this->cs_pin->set_low();
+        /* Send the byte */
+        bool response = bus::send_byte(this->mybus, static_cast<uint8_t>(cmd));
+        /* deselect chip */
+        this->cs_pin->set_high();
+
+        /* Return responce */
+        return response;
+    };
+
+    /**
+     * @brief Send a data byte to the display.
+     *
+     * @tparam bus_controller The type of the used bus controller.
+     * @tparam gpio The Pin class used for the bus communication.
+     * @param data The data byte to send to the display.
+     * @return Returns True when command was send successfully.
+     */
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::send_data_byte(const uint8_t data) -> bool
+    {
+        /* Indicate that next byte is data */
+        this->dx_pin->set_high();
+
+        /* Select Chip */
+        this->cs_pin->set_low();
+        /* Send the byte */
+        bool response = bus::send_byte(this->mybus, data);
+        /* deselect chip */
+        this->cs_pin->set_high();
+
+        /* Return response */
+        return response;
+    };
+}; // namespace ili9341

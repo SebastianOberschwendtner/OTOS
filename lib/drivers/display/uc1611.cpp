@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,315 +18,182 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    uc1611.cpp
  * @author  SO
  * @version v2.3.0
  * @date    26-Dezember-2021
  * @brief   Driver for the UC1611S display controller.
- ******************************************************************************
+ ==============================================================================
  */
 
-// === Includes ===
+/* === Includes === */
 #include "uc1611.h"
 
-// Provide valid instanciations => use this as "concepts" for the display controller
-/// @todo This seems a bit much work, the template approach of the bus controllers is nice though...
-template class UC1611::Controller<SPI::Controller<IO::SPI_1>, GPIO::PIN>;
-template class UC1611::Controller<SPI::Controller<IO::SPI_2>, GPIO::PIN>;
-template class UC1611::Controller<SPI::Controller<IO::SPI_3>, GPIO::PIN>;
-template class UC1611::Controller<SPI::Controller<IO::SPI_4>, GPIO::PIN>;
-template class UC1611::Controller<SPI::Controller<IO::SPI_5>, GPIO::PIN>;
+/* Provide valid instantiations => use this as "concepts" for the display controller */
+//* @todo This seems a bit much work, the template approach of the bus controllers is nice though... */
+template class uc1611::Controller<spi::Controller, gpio::Pin>;
 
-// === Functions ===
-/**
- * @brief Constructor for display controller.
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param bus_used The reference to the used bus peripheral.
- */
-template <class bus_controller, class gpio>
-UC1611::Controller<bus_controller, gpio>::Controller(
-    bus_controller &bus_used,
-    gpio &dx_used,
-    gpio &cs_used)
-    : mybus{bus_used}, dx_pin{&dx_used}, cs_pin{&cs_used}
+namespace uc1611
 {
-    this->cs_pin->set_high();
-};
-
-/**
- * @brief Send a command byte to the display controller.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param cmd The command byte to send.
- * @return Returns True when the byte was send successfully.
- */
-template <class bus_controller, class gpio>
-bool UC1611::Controller<bus_controller, gpio>::send_command_byte(const unsigned char cmd)
-{
-    // signal command
-    this->dx_pin->set_low();
-
-    // select chip
-    this->cs_pin->set_low();
-
-    // Send byte and return -> Display stays selected for now
-    return Bus::send_byte(this->mybus, cmd);
-};
-
-/**
- * @brief Send a command byte to the display controller.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param cmd The command byte to send.
- * @return Returns True when the byte was send successfully.
- */
-template <class bus_controller, class gpio>
-bool UC1611::Controller<bus_controller, gpio>::send_command_bytes(
-    const unsigned char byte0,
-    const unsigned char byte1
-)
-{
-    // signal command
-    this->dx_pin->set_low();
-
-    // select chip
-    this->cs_pin->set_low();
-
-    // Send byte and return -> Display stays selected for now
-    return Bus::send_bytes(this->mybus, byte0, byte1);
-};
-
-/**
- * @brief Send a data byte to the display controller.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param data The data byte to send.
- * @return Returns True when the byte was send successfully.
- */
-template <class bus_controller, class gpio>
-bool UC1611::Controller<bus_controller, gpio>::send_data_byte(const unsigned char data)
-{
-    // signal data
-    this->dx_pin->set_high();
-
-    // select chip
-    this->cs_pin->set_low();
-
-    // Send byte and return -> Display stays selected for now
-    return Bus::send_byte(this->mybus, data);
-};
-
-/**
- * @brief Set the temperature compensation curve the controller
- * uses.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param curve One of the four available compensation curves.
- * @return Returns True when the command was sent successfully.
- */
-template <class bus_controller, class gpio>
-bool UC1611::Controller<bus_controller, gpio>::set_temperature_compensation(const TC curve)
-{
-    unsigned char command =
-        static_cast<unsigned char>(Command::Temperature_Compensation)
-        | static_cast<unsigned char>(curve);
-
-    return this->send_command_byte(command);
-};
-
-/**
- * @brief Control the contrast of the display.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param value The contrast value to set.
- * @return Returns True when the command was sent successfully.
- */
-template <class bus_controller, class gpio>
-bool UC1611::Controller<bus_controller, gpio>::set_contrast(const unsigned char value)
-{
-    return this->send_command_bytes( static_cast<unsigned char>(Command::Set_Potentiometer), value);
-};
-
-/**
- * @brief Control the line rate of the display.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param rate The configuration bits for the line rate. Should be [0..3].
- * @return Returns True when the command was sent successfully.
- */
-template <class bus_controller, class gpio>
-bool UC1611::Controller<bus_controller, gpio>::set_line_rate(const unsigned char rate)
-{
-    return this->send_command_byte( static_cast<unsigned char>(Command::Set_Line_Rate) | (rate & 0b11) );
-};
-
-/**
- * @brief Enable the display in black-white mode.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @return Returns True when the display was enabled successfully.
- */
-template <class bus_controller, class gpio>
-bool UC1611::Controller<bus_controller, gpio>::enable_bw()
-{
-    return this->send_command_byte( static_cast<unsigned char>(Command::Set_Display_Enable) |  0b001 );
-};
-
-/**
- * @brief Select which pattern the display should show when in black-white mode.
- * In this mode the display controller can store 4 patterns individually.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param pattern The pattern to display. Should be [0..3].
- * @return Returns True when the command was sent successfully.
- */
-template <class bus_controller, class gpio>
-bool UC1611::Controller<bus_controller, gpio>::show_pattern(const unsigned char pattern)
-{
-    return this->send_command_byte(
-        static_cast<unsigned char>(Command::Set_Display_Pattern) 
-        | ((pattern & 0b11) << 1) | 1 );
-};
-
-/**
- * @brief Select the end COM segment which is active, when
- * the display does not use all the available COM segments.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param com_end The end of the COM segment. Should be [0..159].
- * @return Returns True when the command was sent successfully.
- */
-template <class bus_controller, class gpio>
-bool UC1611::Controller<bus_controller, gpio>::set_COM_end(const unsigned char com_end)
-{
-    return this->send_command_bytes( static_cast<unsigned char>(Command::Set_COM_End), com_end);
-};
-
-/**
- * @brief Select the start COM segment for the COM scan period.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param start The start of the COM segment. Should be [0..159].
- * @return Returns True when the command was sent successfully.
- */
-template <class bus_controller, class gpio>
-bool UC1611::Controller<bus_controller, gpio>::set_partial_start(const unsigned char start)
-{
-    return this->send_command_bytes( static_cast<unsigned char>(Command::Set_Partial_Display_Start), start);
-};
-
-/**
- * @brief Select the end COM segment for the COM scan period.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param end The end of the COM segment. Should be [0..159].
- * @return Returns True when the command was sent successfully.
- */
-template <class bus_controller, class gpio>
-bool UC1611::Controller<bus_controller, gpio>::set_partial_end(const unsigned char end)
-{
-    return this->send_command_bytes( static_cast<unsigned char>(Command::Set_Partial_Display_End), end);
-};
-
-
-/**
- * @brief Select the mirror options fot the display.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param x_mirror Mirror the X direction.
- * @param y_mirror Mirror the Y direction.
- * @return Returns True when the command was sent successfully.
- */
-template <class bus_controller, class gpio>
-bool UC1611::Controller<bus_controller, gpio>::set_mirrored( const bool x_mirror, const bool y_mirror)
-{
-    const unsigned char config = (y_mirror << 2) | (x_mirror << 1);
-    return this->send_command_bytes( static_cast<unsigned char>(Command::Set_LCD_Mapping_Ctrl), config);
-};
-
-/**
- * @brief Send a complete display buffer to the display controller.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param buffer_begin The begin iterator of the buffer data.
- * @param buffer_end  The end iterator of the buffer data.
- * @return Returns True when the buffer data was sent successfully.
- */
-template <class bus_controller, class gpio>
-bool UC1611::Controller<bus_controller, gpio>::draw(
-    const unsigned char *buffer_begin,
-    const unsigned char *buffer_end
-)
-{
-    // signal data
-    this->dx_pin->set_high();
-
-    // select chip
-    this->cs_pin->set_low();
-
-    // iterate throught the given buffer and send the data
-    for (const unsigned char* iter=buffer_begin; iter!=buffer_end; iter++)
+    /* === Functions === */
+    template <class bus_controller, class gpio>
+    Controller<bus_controller, gpio>::Controller(
+        bus_controller &bus_used,
+        gpio &dx_used,
+        gpio &cs_used)
+        : mybus{bus_used}, dx_pin{&dx_used}, cs_pin{&cs_used}
     {
-        // Check whether data was send successfully
-        if(!Bus::send_byte(this->mybus, *iter))
-            return false;
-    }
+        this->cs_pin->set_high();
+    };
 
-    // Data was transmitted successfully
-    return true;
-};
-
-/**
- * @brief Send a complete display buffer to the display controller.
- * In addition, you can give a call hook which gets called after each
- * byte transfer.
- * 
- * @tparam bus_controller The type of the used bus controller.
- * @tparam gpio The Pin class used for the bus communication.
- * @param buffer_begin The begin iterator of the buffer data.
- * @param buffer_end  The end iterator of the buffer data.
- * @param hook The function to be called after each byte transfer.
- * @return Returns True when the buffer data was sent successfully.
- */
-template <class bus_controller, class gpio>
-bool UC1611::Controller<bus_controller, gpio>::draw(
-    const unsigned char *buffer_begin,
-    const unsigned char *buffer_end,
-    void (*hook)()
-)
-{
-    // signal data
-    this->dx_pin->set_high();
-
-    // select chip
-    this->cs_pin->set_low();
-
-    // iterate throught the given buffer and send the data
-    for (const unsigned char* iter=buffer_begin; iter!=buffer_end; iter++)
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::set_COM_end(const uint8_t com_end) -> bool
     {
-        // Check whether data was send successfully
-        if(!Bus::send_byte(this->mybus, *iter))
-            return false;
+        return this->send_command_bytes(static_cast<uint8_t>(Command::Set_COM_End), com_end);
+    };
 
-        // Call the hook function
-        hook();
-    }
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::set_contrast(const uint8_t value) -> bool
+    {
+        return this->send_command_bytes(static_cast<uint8_t>(Command::Set_Potentiometer), value);
+    };
 
-    // Data was transmitted successfully
-    return true;
-};
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::set_line_rate(const uint8_t rate) -> bool
+    {
+        return this->send_command_byte(static_cast<uint8_t>(Command::Set_Line_Rate) | (rate & 0b11));
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::set_mirrored(const bool x_mirror, const bool y_mirror) -> bool
+    {
+        const uint8_t config = (y_mirror << 2) | (x_mirror << 1);
+        return this->send_command_bytes(static_cast<uint8_t>(Command::Set_LCD_Mapping_Ctrl), config);
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::set_partial_end(const uint8_t end) -> bool
+    {
+        return this->send_command_bytes(static_cast<uint8_t>(Command::Set_Partial_Display_End), end);
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::set_partial_start(const uint8_t start) -> bool
+    {
+        return this->send_command_bytes(static_cast<uint8_t>(Command::Set_Partial_Display_Start), start);
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::set_temperature_compensation(const TC curve) -> bool
+    {
+        uint8_t command =
+            static_cast<uint8_t>(Command::Temperature_Compensation) | static_cast<uint8_t>(curve);
+
+        return this->send_command_byte(command);
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::draw(
+        const uint8_t *buffer_begin,
+        const uint8_t *buffer_end) -> bool
+    {
+        /* signal data */
+        this->dx_pin->set_high();
+
+        /* select chip */
+        this->cs_pin->set_low();
+
+        /* iterate throught the given buffer and send the data */
+        for (const uint8_t *iter = buffer_begin; iter != buffer_end; iter++)
+        {
+            /* Check whether data was send successfully */
+            if (!bus::send_byte(this->mybus, *iter))
+                return false;
+        }
+
+        /* Data was transmitted successfully */
+        return true;
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::draw(
+        const uint8_t *buffer_begin,
+        const uint8_t *buffer_end,
+        void (*hook)()) -> bool
+    {
+        /* signal data */
+        this->dx_pin->set_high();
+
+        /* select chip */
+        this->cs_pin->set_low();
+
+        /* iterate throught the given buffer and send the data */
+        for (const uint8_t *iter = buffer_begin; iter != buffer_end; iter++)
+        {
+            /* Check whether data was send successfully */
+            if (!bus::send_byte(this->mybus, *iter))
+                return false;
+
+            /* Call the hook function */
+            hook();
+        }
+
+        /* Data was transmitted successfully */
+        return true;
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::enable_bw() -> bool
+    {
+        return this->send_command_byte(static_cast<uint8_t>(Command::Set_Display_Enable) | 0b001);
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::show_pattern(const uint8_t pattern) -> bool
+    {
+        return this->send_command_byte(
+            static_cast<uint8_t>(Command::Set_Display_Pattern) | ((pattern & 0b11) << 1) | 1);
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::send_command_byte(const uint8_t cmd) -> bool
+    {
+        /* signal command */
+        this->dx_pin->set_low();
+
+        /* select chip */
+        this->cs_pin->set_low();
+
+        /* Send byte and return -> Display stays selected for now */
+        return bus::send_byte(this->mybus, cmd);
+    };
+
+    template <class bus_controller, class gpio>
+    auto Controller<bus_controller, gpio>::send_command_bytes(
+        const uint8_t byte0,
+        const uint8_t byte1) -> bool
+    {
+        /* signal command */
+        this->dx_pin->set_low();
+
+        /* select chip */
+        this->cs_pin->set_low();
+
+        /* Send byte and return -> Display stays selected for now */
+        return bus::send_bytes(this->mybus, byte0, byte1);
+    };
+
+    template <class bus_controller, class gpio>
+    bool Controller<bus_controller, gpio>::send_data_byte(const uint8_t data)
+    {
+        /* signal data */
+        this->dx_pin->set_high();
+
+        /* select chip */
+        this->cs_pin->set_low();
+
+        /* Send byte and return -> Display stays selected for now */
+        return bus::send_byte(this->mybus, data);
+    };
+}; // namespace uc1611

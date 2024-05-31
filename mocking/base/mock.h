@@ -38,12 +38,12 @@ namespace Mock
     {
     public:
         // *** Properties ***
-        int call_count{0};
-        int last_called_with{0};
+        int32_t call_count{0};
+        int32_t last_called_with{0};
 
         // *** Constructors ***
         // Callable(): call_count(0), last_called_with(0){};
-        // Callable(const int count, const arg_type args): call_count(count), last_called_with(args){};
+        // Callable(const int32_t count, const arg_type args): call_count(count), last_called_with(args){};
 
         // *** Operators ***
         /**
@@ -73,7 +73,7 @@ namespace Mock
          * @brief Remember the function call
          * @param args The argument the function was called with.
          */
-        void add_call(const int args)
+        void add_call(const int32_t args)
         {
             this->call_count++;
             this->last_called_with = args;
@@ -96,7 +96,7 @@ namespace Mock
         void assert_called_once(void) { 
             // Prepare errors message
             const char *fmt = "Expected to be called once, but was called %d times.";
-            int sz = std::snprintf(nullptr, 0, fmt, this->call_count);
+            int32_t sz = std::snprintf(nullptr, 0, fmt, this->call_count);
             std::vector<char> buf(sz + 1); // note +1 for null terminator
             std::snprintf(&buf[0], buf.size(), fmt, this->call_count);
 
@@ -112,10 +112,10 @@ namespace Mock
          * @param Expected The last expected argument
          * @details Calls the unit TEST_ macros.
          */
-        void assert_called_last_with(const int Expected) {
+        void assert_called_last_with(const int32_t Expected) {
             // Prepare errors message
             const char *fmt = "Expected to be called last with ((int) %d), but was called with ((int) %d).";
-            int sz = std::snprintf(nullptr, 0, fmt, Expected, this->last_called_with);
+            int32_t sz = std::snprintf(nullptr, 0, fmt, Expected, this->last_called_with);
             std::vector<char> buf(sz + 1); // note +1 for null terminator
             std::snprintf(&buf[0], buf.size(), fmt, Expected, this->last_called_with);
 
@@ -133,7 +133,7 @@ namespace Mock
          * @param Expected The last expected argument
          * @details Calls the unit TEST_ macros.
          */
-        void assert_called_once_with(const int Expected) { 
+        void assert_called_once_with(const int32_t Expected) { 
             // Call the corresponding tests.
             this->assert_called_last_with(Expected);
             this->assert_called_once();

@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,13 +18,13 @@
  *
  */
 /**
- ******************************************************************************
+ ==============================================================================
  * @file    test_driver_interface.cpp
  * @author  SO
- * @version v2.11.0
+ * @version v5.0.0
  * @date    30-August-2021
  * @brief   Unit tests for testing driver interfaces for OTOS.
- ******************************************************************************
+ ==============================================================================
  */
 
 // ****** Includes ******
@@ -40,6 +40,12 @@
  * ▢ timeout methods sets timeout error
  */
 
+/* === Mocks === */
+enum class IO {
+   SYSTEM_ = 0, 
+   I2C_1 
+};
+
 // === Tests ===
 void setUp(void) {
 // set stuff up here
@@ -53,11 +59,11 @@ void tearDown(void) {
 void test_init(void)
 {
     // create object
-    Driver::Base UUT;
-    Driver::Base IO{IO::I2C_1};
+    driver::Base<IO> UUT;
+    driver::Base IO{IO::I2C_1};
 
     // perform testing
-    TEST_ASSERT_EQUAL(Error::Code::None, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::None, UUT.get_error());
     TEST_ASSERT_TRUE(UUT.timed_out());
     TEST_ASSERT_EQUAL(IO::SYSTEM_, UUT.instance);
     TEST_ASSERT_EQUAL(IO::I2C_1, IO.instance);
@@ -67,18 +73,18 @@ void test_init(void)
 void test_set_error(void)
 {
     // create object
-    Driver::Base UUT;
-    UUT.set_error(Error::Code::I2C_Address_Error);
+    driver::Base<IO> UUT;
+    UUT.set_error(error::Code::I2C_Address_Error);
 
     // perform testing
-    TEST_ASSERT_EQUAL(Error::Code::I2C_Address_Error, UUT.get_error());
+    TEST_ASSERT_EQUAL(error::Code::I2C_Address_Error, UUT.get_error());
 };
 
 /// @brief test the timeout methods
 void test_timeout(void)
 {
     // create object
-    Driver::Base UUT;
+    driver::Base<IO> UUT;
     UUT.set_timeout(5); // set timeout to 5 calls
 
     // perform testing
@@ -91,7 +97,7 @@ void test_timeout(void)
     // perform testing for larger timeoutvalues
     UUT.set_timeout(65000);
     UUT.reset_timeout();
-    for (unsigned int count = 0; count < 65000; count++)
+    for (uint32_t count = 0; count < 65000; count++)
         TEST_ASSERT_FALSE(UUT.timed_out());
     TEST_ASSERT_TRUE(UUT.timed_out());
     UUT.reset_timeout();
@@ -107,10 +113,10 @@ void test_gpio_interface(void)
         Mock::Callable<bool> set_alternate_function;
     };
     Mock_Pin mypin{};
-    Driver::Base controller{IO::I2C_1};
+    driver::Base controller{IO::I2C_1};
 
     // Test assigning alternate function
-    GPIO::assign(mypin, controller);
+    gpio::assign(mypin, controller);
     mypin.set_alternate_function.assert_called_once_with(
         static_cast<int>(IO::I2C_1)
     );
@@ -121,54 +127,54 @@ void test_bus_interface(void)
 {
     struct Mock_Bus
     {
-        Bus::Data_t buffer{0};
+        bus::Data_t buffer{0};
         Mock::Callable<bool> set_target_address;
         Mock::Callable<bool> send_data;
         Mock::Callable<bool> send_array;
         Mock::Callable<bool> send_array_leader;
         Mock::Callable<bool> read_array;
         Mock::Callable<bool> read_data;
-        Bus::Data_t get_rx_data(void) { return this->buffer; };
+        bus::Data_t get_rx_data(void) { return this->buffer; };
     };
     Mock_Bus mybus{};
 
     // Test address setting
-    Bus::change_address(mybus, 0x12);
+    bus::change_address(mybus, 0x12);
     mybus.set_target_address.assert_called_once_with(0x12);
 
     // Test send byte(s)
-    TEST_ASSERT_TRUE(Bus::send_byte(mybus, 0x34));
+    TEST_ASSERT_TRUE(bus::send_byte(mybus, 0x34));
     mybus.send_data.assert_called_once_with(0x34);
-    TEST_ASSERT_TRUE(Bus::send_bytes(mybus, 0x12, 0x34));
+    TEST_ASSERT_TRUE(bus::send_bytes(mybus, 0x12, 0x34));
     mybus.send_data.assert_called_once_with(0x1234);
-    TEST_ASSERT_TRUE(Bus::send_bytes(mybus, 0x12, 0x34, 0x56));
+    TEST_ASSERT_TRUE(bus::send_bytes(mybus, 0x12, 0x34, 0x56));
     mybus.send_data.assert_called_once_with(0x123456);
 
     // Test send word
-    TEST_ASSERT_TRUE(Bus::send_word(mybus, 0x4312));
+    TEST_ASSERT_TRUE(bus::send_word(mybus, 0x4312));
     mybus.send_data.assert_called_once_with(0x4312);
 
     // Test send_array
-    unsigned char temp = 69;
-    TEST_ASSERT_TRUE(Bus::send_array(mybus, &temp, 1));
+    uint8_t temp = 69;
+    TEST_ASSERT_TRUE(bus::send_array(mybus, &temp, 1));
     mybus.send_array.assert_called_once_with(69);
 
     // Test send array with leading byte
-    TEST_ASSERT_TRUE(Bus::send_array_leader(mybus, 0x34, &temp, 1));
+    TEST_ASSERT_TRUE(bus::send_array_leader(mybus, 0x34, &temp, 1));
     mybus.send_array_leader.assert_called_once_with(0x34);
 
     // test read array
-    TEST_ASSERT_TRUE(Bus::read_array(mybus, 0x56, &temp, 1));
+    TEST_ASSERT_TRUE(bus::read_array(mybus, 0x56, &temp, 1));
     mybus.read_array.assert_called_once_with(0x56);
 
     // test read array without sending register first
     mybus.read_array.reset();
-    TEST_ASSERT_TRUE(Bus::read_array(mybus, &temp, 1));
+    TEST_ASSERT_TRUE(bus::read_array(mybus, &temp, 1));
     mybus.read_array.assert_called_once();
 
     // test read word
     mybus.buffer.value = 0x43;
-    auto response = Bus::read_word(mybus, 0x20);
+    auto response = bus::read_word(mybus, 0x20);
     mybus.read_data.assert_called_once_with(0x20);
     TEST_ASSERT_TRUE(response);
     TEST_ASSERT_EQUAL(0x43, response.value());
@@ -176,20 +182,20 @@ void test_bus_interface(void)
     // test read byte without sending address
     mybus.buffer.value = 0x44;
     mybus.read_data.reset();
-    response = Bus::read_byte(mybus);
+    response = bus::read_byte(mybus);
     mybus.read_data.assert_called_once();
     TEST_ASSERT_TRUE(response);
     TEST_ASSERT_EQUAL(0x44, response.value());
 
     // Test sending an std::array
     mybus.send_array.reset();
-    std::array<unsigned char, 6> std_array{0};
-    TEST_ASSERT_TRUE(Bus::send_array(mybus, std_array));
+    std::array<uint8_t, 6> std_array{0};
+    TEST_ASSERT_TRUE(bus::send_array(mybus, std_array));
     mybus.send_array.assert_called_once();
 
     // Test reading an std::array
     mybus.read_array.reset();
-    TEST_ASSERT_TRUE(Bus::read_array(mybus, std_array));
+    TEST_ASSERT_TRUE(bus::read_array(mybus, std_array));
     mybus.read_array.assert_called_once();
 };
 
@@ -201,16 +207,16 @@ void test_timer_interface(void)
     {
         Mock::Callable<bool> start;
         Mock::Callable<bool> stop;
-        Mock::Callable<unsigned int> get_count;
+        Mock::Callable<uint32_t> get_count;
     };
     Mock_Timer mytime{};
 
     // Call interface
-    Timer::start(mytime);
+    timer::start(mytime);
     mytime.start.assert_called_once();
-    Timer::stop(mytime);
+    timer::stop(mytime);
     mytime.stop.assert_called_once();
-    TEST_ASSERT_EQUAL(1, Timer::get_count(mytime));
+    TEST_ASSERT_EQUAL(1, timer::get_count(mytime));
     mytime.get_count.assert_called_once();
 };
 

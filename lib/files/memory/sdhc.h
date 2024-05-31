@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,187 +21,287 @@
 #ifndef SDHC_H_
 #define SDHC_H_
 
-// === Includes ===
-#include <optional>
+/* === Includes === */
 #include <array>
+#include <optional>
 
-// === Needed Interfaces ===
-#include "interface.h"
-#include "task.h"
+/* === Needed Interfaces === */
+#include <interface.h>
+#include <task.h>
 
-// === Declarations ===
-namespace SDHC
+namespace sdhc
 {
-    // === helper ===
-    // SD Check Pattern
-    constexpr unsigned char CHECK_PATTERN = 0b10101;
+    /* === Helper === */
+    /* SD Check Pattern */
+    constexpr uint8_t CHECK_PATTERN = 0b10101;
     /*
-    * The standard block length, since SDHC cards only support
-    * 512 bytes it is the default value.
-    *  -> Should not be changed for SDSC/SDHC cards
-    */
-   constexpr unsigned long BLOCKLENGTH = 512;
+     * The standard block length, since SDHC cards only support
+     * 512 bytes it is the default value.
+     *  -> Should not be changed for SDSC/SDHC cards
+     */
+    constexpr uint32_t BLOCKLENGTH = 512;
 
-   // Create a buffer for n blocks, 1 block has 512 bytes -> 128 longs
-   template<unsigned int n_blocks>
-   constexpr auto create_block_buffer(void)
-   {
-        std::array<unsigned long, n_blocks*128> buffer{0};
+    /* Create a buffer for n blocks, 1 block has 512 bytes -> 128 longs */
+    template <uint32_t n_blocks>
+    constexpr auto create_block_buffer()
+    {
+        std::array<uint32_t, n_blocks * 128> buffer{0};
         return buffer;
-   };
-
-    // SD Commands
-    template<unsigned char number>
-    constexpr unsigned char CMD() { return number; };
-
-    template<unsigned char number>
-    constexpr unsigned char ACMD() { return number; };
-
-    //SD Command bits
-    enum CMD8: unsigned long
-    {
-        Voltage_0 = (1<<8)   //Voltage Range 2.7V - 3.0V
     };
 
-    enum ACMD41: unsigned long
+    /* SD Commands */
+    template <uint8_t number>
+    constexpr auto CMD() -> uint8_t { return number; };
+
+    template <uint8_t number>
+    constexpr auto ACMD() -> uint8_t { return number; };
+
+    /* SD Command bits */
+    enum CMD8 : uint32_t
     {
-        HCS      = (1U<<30),  //Host Capacity Support
-        XPC      = (1U<<28)   //Power Control (0: 0.36W; 1: 0.54W)
+        Voltage_0 = (1 << 8) // Voltage Range 2.7V - 3.0V
     };
 
-    //Response bits
-    enum R1: unsigned long
+    enum ACMD41 : uint32_t
     {
-        APP_CMD      = (1U<<5),   //Card will accept ACMD as next command
-        ERROR        = (1U<<19),  //Generic error bit
-        ILLEGAL_CMD  = (1U<<22),  //Illegal command
-        READY_4_DATA = (1U<<8)    //Card processed old data and is ready to receive new data
+        HCS = (1U << 30), // Host Capacity Support
+        XPC = (1U << 28)  // Power Control (0: 0.36W; 1: 0.54W)
     };
 
-    enum R3: unsigned long
+    /* Response bits */
+    enum R1 : uint32_t
     {
-        NOT_BUSY     = (1U<<31),  //Card indicates whether initialization is completed
-        CCS      = (1U<<30)   //Card Capacity Status
+        APP_CMD = (1U << 5),      // Card will accept ACMD as next command
+        ERROR = (1U << 19),       // Generic error bit
+        ILLEGAL_CMD = (1U << 22), // Illegal command
+        READY_4_DATA = (1U << 8)  // Card processed old data and is ready to receive new data
     };
 
-    //SD Register bits
-    enum OCR: unsigned long
+    enum R3 : uint32_t
     {
-        _3_0V   = (1U<<17)
+        NOT_BUSY = (1U << 31), // Card indicates whether initialization is completed
+        CCS = (1U << 30)       // Card Capacity Status
     };
 
-    // === Enums ===
-    // Card states
-    enum class State: unsigned long
+    /* SD Register bits */
+    enum OCR : uint32_t
+    {
+        _3_0V = (1U << 17)
+    };
+
+    /* === Enums === */
+    /* Card states */
+    enum class State : uint32_t
     {
         Identification = 0,
-        StandBy, Transfering, Sending, Receiving, Programming, Disconnected
+        StandBy,
+        Transfering,
+        Sending,
+        Receiving,
+        Programming,
+        Disconnected
     };
 
-    // === Classes ===
+    /* === Classes === */
+    /**
+     * @brief Interface to the SDHC bus controller.
+     *
+     * This interface is used to communicate with the SDHC bus controller.
+     * It provides the necessary methods to send commands and read/write data.
+     */
     struct interface
     {
-        virtual ~interface() {};
-        virtual bool send_command_no_response(const unsigned char command, const unsigned long argument) = 0;
-        virtual std::optional<unsigned long> send_command_R1_response(const unsigned char command, const unsigned long argument) = 0;
-        virtual std::optional<unsigned long> send_command_R2_response(const unsigned char command, const unsigned long argument) = 0;
-        virtual std::optional<unsigned long> send_command_R3_response(const unsigned char command, const unsigned long argument) = 0;
-        virtual std::optional<unsigned long> send_command_R6_response(const unsigned char command, const unsigned long argument) = 0;
-        virtual std::optional<unsigned long> send_command_R7_response(const unsigned char command, const unsigned long argument) = 0;
-        virtual bool read_single_block(const unsigned long* buffer_begin, const unsigned long* buffer_end) = 0;
-        virtual bool write_single_block(const unsigned long* buffer_begin, const unsigned long* buffer_end) = 0;
+        virtual ~interface(){};
+        virtual auto send_command_no_response(const uint8_t command, const uint32_t argument) -> bool = 0;
+        virtual auto send_command_R1_response(const uint8_t command, const uint32_t argument) -> std::optional<uint32_t> = 0;
+        virtual auto send_command_R2_response(const uint8_t command, const uint32_t argument) -> std::optional<uint32_t> = 0;
+        virtual auto send_command_R3_response(const uint8_t command, const uint32_t argument) -> std::optional<uint32_t> = 0;
+        virtual auto send_command_R6_response(const uint8_t command, const uint32_t argument) -> std::optional<uint32_t> = 0;
+        virtual auto send_command_R7_response(const uint8_t command, const uint32_t argument) -> std::optional<uint32_t> = 0;
+        virtual auto read_single_block(const uint32_t *buffer_begin, const uint32_t *buffer_end) -> bool = 0;
+        virtual auto write_single_block(const uint32_t *buffer_begin, const uint32_t *buffer_end) -> bool = 0;
     };
 
-    // Class template to provide the bus implementation
-    template<class bus>
-    struct interface_impl final: public interface
+    /**
+     * @brief Class template to provide the bus implementation
+     */
+    template <class bus>
+    struct interface_impl final : public interface
     {
-        // Member is the pointer to the bus controller
-        bus* const pimpl;
+        /* Member is the pointer to the bus controller */
+        bus *const pimpl;
 
-        // *** Constructor ***
+        /* === Constructor === */
         interface_impl() = delete;
-        interface_impl(bus& bus_used): pimpl(&bus_used) {};
+        interface_impl(bus &bus_used) : pimpl(&bus_used){};
 
-        // Provide the implementations
-        bool send_command_no_response(const unsigned char command, const unsigned long argument) final
+        /* Provide the implementations */
+        auto send_command_no_response(const uint8_t command, const uint32_t argument) -> bool final
         {
-            return SD::send_command_no_response(*this->pimpl, command, argument);
+            return sdio::send_command_no_response(*this->pimpl, command, argument);
         };
-        std::optional<unsigned long> send_command_R1_response(const unsigned char command, const unsigned long argument) final
+        auto send_command_R1_response(const uint8_t command, const uint32_t argument) -> std::optional<uint32_t> final
         {
-            return SD::send_command_R1_response(*this->pimpl, command, argument);
+            return sdio::send_command_R1_response(*this->pimpl, command, argument);
         };
-        std::optional<unsigned long> send_command_R2_response(const unsigned char command, const unsigned long argument) final
+        auto send_command_R2_response(const uint8_t command, const uint32_t argument) -> std::optional<uint32_t> final
         {
-            return SD::send_command_R2_response(*this->pimpl, command, argument);
+            return sdio::send_command_R2_response(*this->pimpl, command, argument);
         };
-        std::optional<unsigned long> send_command_R3_response(const unsigned char command, const unsigned long argument) final
+        auto send_command_R3_response(const uint8_t command, const uint32_t argument) -> std::optional<uint32_t> final
         {
-            return SD::send_command_R3_response(*this->pimpl, command, argument);
+            return sdio::send_command_R3_response(*this->pimpl, command, argument);
         };
-        std::optional<unsigned long> send_command_R6_response(const unsigned char command, const unsigned long argument) final
+        auto send_command_R6_response(const uint8_t command, const uint32_t argument) -> std::optional<uint32_t> final
         {
-            return SD::send_command_R6_response(*this->pimpl, command, argument);
+            return sdio::send_command_R6_response(*this->pimpl, command, argument);
         };
-        std::optional<unsigned long> send_command_R7_response(const unsigned char command, const unsigned long argument) final
+        auto send_command_R7_response(const uint8_t command, const uint32_t argument) -> std::optional<uint32_t> final
         {
-            return SD::send_command_R7_response(*this->pimpl, command, argument);
+            return sdio::send_command_R7_response(*this->pimpl, command, argument);
         };
-        bool read_single_block(const unsigned long* buffer_begin, const unsigned long* buffer_end) final
+        auto read_single_block(const uint32_t *buffer_begin, const uint32_t *buffer_end) -> bool final
         {
-            return SD::read_single_block(*this->pimpl, buffer_begin, buffer_end);
+            return sdio::read_single_block(*this->pimpl, buffer_begin, buffer_end);
         };
-        bool write_single_block(const unsigned long* buffer_begin, const unsigned long* buffer_end) final
+        auto write_single_block(const uint32_t *buffer_begin, const uint32_t *buffer_end) -> bool final
         {
-            return SD::write_single_block(*this->pimpl, buffer_begin, buffer_end);
+            return sdio::write_single_block(*this->pimpl, buffer_begin, buffer_end);
         };
     };
 
+    /**
+     * @brief Class representing a SDHC card.
+     *
+     * This class provides the necessary methods to communicate with a SDHC card.
+     */
     class Card
     {
-    private:
-        // *** Properties ***
-        interface* const mybus;
-
-    public:
-
-        // *** Constructor ***
+      public:
+        /* === Constructor === */
         Card() = delete;
-        Card(interface& bus_used): mybus{&bus_used} {};
+        Card(interface &bus_used) : mybus{&bus_used} {};
 
-        // *** Properties ***
-        bool type_sdsc{true};
-        State state{State::Identification};
-        unsigned short RCA{0};
+        /* === Setters === */
+        /**
+         * @brief Set the supply voltage range to 2.7-3.6V.
+         * -> Needed for card identification, other ranges are reserved.
+         *
+         * @return Returns True when the card responded and accepted the voltage range.
+         */
+        auto set_supply_voltage() -> bool;
 
-        // *** Methods ***
-        bool is_SDSC(void) const {return this->type_sdsc; };
-        bool reset(void);
-        bool set_supply_voltage(void);
-        bool initialize_card(void);
-        bool get_RCA(void);
-        bool select(void);
-        bool set_bus_width_4bits(void);
-        void eject(void);
-        bool read_single_block(const unsigned long* buffer_begin, const unsigned long block);
-        bool write_single_block(const unsigned long* buffer_begin, const unsigned long block);
+        /**
+         * @brief Change the bus width for the communication to
+         * 4bits.
+         *
+         * This is only possible when the used SDIO peripheral
+         * does support that!
+         *
+         * After issuing this change, you should wait 10ms for
+         * the card to change its mode.
+         * Also the change has to be forwared to the SDIO
+         * peripheral.
+         *
+         * @return Returns True when the card switched to a 4bit bus.
+         */
+        auto set_bus_width_4bits() -> bool;
+
+        /* === Getters === */
+        /**
+         * @brief Read the RCA (Relative Card Address) of the connected
+         * Card. This command concludes the identification phase.
+         *
+         * @return Returns True when the RCA was read successfully.
+         */
+        auto get_RCA() -> bool;
+
+        /**
+         * @brief Check whether the card is a **SDSC** card.
+         *
+         * @return Returns True when the card is a **SDSC** card.
+         * If false the card is a **SDHC** card.
+         */
+        auto is_SDSC() -> bool const { return this->type_sdsc; };
+
+        /* === Methods === */
+        /**
+         * @brief Eject the card from the bus.
+         *
+         * This command is used to eject the card from the bus.
+         * The card is not usable after this command.
+         */
+        void eject();
+
+        /**
+         * @brief Tell the card to start its initialization procedure.
+         * This command returns False until the card finished the procedure.
+         *
+         * Check the card state to catch non-responding cards.
+         *
+         * @return Returns True when the card is initialized.
+         */
+        auto initialize_card() -> bool;
+
+        /**
+         * @brief Read a single block from the Card.
+         *
+         * @param buffer_begin The begin iterator of the receive buffer.
+         * @param block The block address to read from the card.
+         * @return Returns True when block was read successfully.
+         */
+        auto read_single_block(const uint32_t *buffer_begin, uint32_t block) -> bool;
+
+        /**
+         * @brief Reset the SDHC card.
+         *
+         * @return Returns True when the reset was sent to the card.
+         */
+        auto reset() -> bool;
+
+        /**
+         * @brief Select a card using its RCA.
+         *
+         * @return Returns True when the card is selected.
+         */
+        auto select() -> bool;
+
+        /**
+         * @brief Write a single block from the Card.
+         *
+         * @param buffer_begin The begin iterator of the data to send.
+         * @param block The block address to write to the card.
+         * @return Returns True when block was written successfully.
+         */
+        auto write_single_block(const uint32_t *buffer_begin, uint32_t block) -> bool;
+
+        /* === Properties === */
+        bool type_sdsc{true};               /**< The type of the card, true for SDSC and false for SDHC. */
+        State state{State::Identification}; /**< The current state of the card. */
+        uint16_t RCA{0};                    /**< The relative card address of the card. */
+
+      private:
+        /* === Properties === */
+        interface *mybus; /**< The pointer to the bus controller implementing the bus interface. */
     };
 
-    template<class Bus_Controller>
+    /**
+     * @brief Class representing a SDHC service.
+     * This class provides the necessary methods to communicate with a SDHC card.
+     * The service is the "glue" between the volume and the car bus controller.
+     *
+     * @tparam Bus_Controller The bus controller class which is used for communication.
+     */
+    template <class Bus_Controller>
     class service
     {
-    public:
-        Bus_Controller bus;
-    private:
-        interface_impl<Bus_Controller> bus_impl;
-    public:
-        Card card;
+      public:
+        /* === Constructor === */
+        service() : service{400'000} {};
+        service(const uint32_t frequency) : bus{frequency}, bus_impl{bus}, card{bus_impl} {};
 
-        service():service{400'000} {};
-        service(const unsigned long frequency): bus{frequency}, bus_impl{bus}, card{bus_impl} {};
-
-        bool initialize(OTOS::Timed_Task& mytask)
+        /* === Methods === */
+        auto initialize(OTOS::TimedTask &mytask) -> bool
         {
             if (not this->card.reset())
                 return false;
@@ -210,7 +310,7 @@ namespace SDHC
             if (not this->card.set_supply_voltage())
                 return false;
 
-            while(not this->card.initialize_card())
+            while (not this->card.initialize_card())
             {
                 mytask.wait_ms(100);
             }
@@ -218,7 +318,14 @@ namespace SDHC
             this->card.select();
             return true;
         }
-        
+
+        /* === Properties === */
+        Card card;          /**< The used SDHC card. */
+        Bus_Controller bus; /**< The used bus controller. */
+
+      private:
+        /* === Properties === */
+        interface_impl<Bus_Controller> bus_impl; /**< The implementation of the bus controller interface. */
     };
-};
-#endif
+}; // namespace sdhc
+#endif // SDHC_H_

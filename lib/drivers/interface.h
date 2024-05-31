@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,59 +21,13 @@
 #ifndef INTERFACE_H_
 #define INTERFACE_H_
 
-// === Includes ===
-#include "error_codes.h"
+/* === Includes === */
 #include <optional>
 #include <cstdint>
 #include <array>
+#include <misc/error_codes.h>
 
-// === Common identifier for specialized IOs ===
-enum class IO : unsigned char
-{
-    SYSTEM_ = 0,
-    TIM_1,
-    TIM_2,
-    TIM_3,
-    TIM_4,
-    TIM_5,
-    TIM_6,
-    TIM_7,
-    TIM_8,
-    TIM_9,
-    TIM_10,
-    TIM_11,
-    TIM_12,
-    TIM_13,
-    TIM_14,
-    I2C_1,
-    I2C_2,
-    I2C_3,
-    SPI_1,
-    SPI_2,
-    SPI_3,
-    SPI_4,
-    SPI_5,
-    SPI_6,
-    USART_1,
-    USART_2,
-    USART_3,
-    USART_4,
-    USART_5,
-    USART_6,
-    USART_7,
-    USART_8,
-    CAN_1,
-    CAN_2,
-    OTG_FS_,
-    OTG_HS_,
-    ETH_,
-    FSMC_,
-    SDIO_,
-    DCMI_,
-    EVENTOUT_
-};
-
-// Common enums
+/* === Common enums === */
 enum class Edge: bool
 {
     Falling = false,
@@ -86,38 +40,39 @@ enum class Level: bool
     High = true
 };
 
-// === Common base class for every driver ===
-namespace Driver
+/* === Common base class for every driver === */
+namespace driver
 {
+    template<typename Peripheral_t>
     class Base
     {
-    private:
-        // *** Properties ***
-        Error::Code error{Error::Code::None};
-        unsigned int timeout{0};
-        unsigned int called{0};
-
     public:
-        // *** Constructor ***
+        /* === Constructor === */
         Base() = default;
-        Base(const IO IO_instance) : instance{IO_instance} {};
+        Base(const Peripheral_t IO_instance) : instance{IO_instance} {};
 
-        // *** Methods ***
-        void set_error(const Error::Code err) { this->error = err; };
-        void set_timeout(const unsigned int call_count) { this->timeout = call_count; };
-        void reset_timeout(void) { this->called = 0; };
-        bool timed_out(void) { return (++this->called > this->timeout); };
-        Error::Code get_error(void) const { return this->error; };
+        /* === Methods === */
+        void set_error(const error::Code err) { this->error = err; };
+        void set_timeout(const uint32_t call_count) { this->timeout = call_count; };
+        void reset_timeout() { this->called = 0; };
+        auto timed_out() -> bool { return (++this->called > this->timeout); };
+        auto get_error(void) const -> error::Code { return this->error; };
 
-        // *** Properties ***
-        IO instance{IO::SYSTEM_};
+        /* === Properties === */
+        Peripheral_t instance{};
+
+    private:
+        /* === Properties === */
+        error::Code error{error::Code::None};
+        uint32_t timeout{0};
+        uint32_t called{0};
     };
 };
 
 // === Define the Interfaces ===
 
 // => GPIO Interface
-namespace GPIO
+namespace gpio
 {
     /**
      * @brief Set the alternate function of a GPIO pin.
@@ -126,19 +81,19 @@ namespace GPIO
      * @param Pin The instance of the pin class.
      * @param IO_Controller The desired alternate function of the pin.
      */
-    template <class IO>
-    void assign(IO &Pin, Driver::Base &IO_Controller)
+    template <class IO, typename Peripheral_t>
+    void assign(IO &Pin, driver::Base<Peripheral_t> &IO_Controller)
     {
         Pin.set_alternate_function(IO_Controller.instance);
     }
 };
 
 // => Bus Communication Interface
-namespace Bus
+namespace bus
 {
     // === Enums ===
     // Bus state
-    enum class State: unsigned char
+    enum class State: uint8_t
     {
         Init = 1, Idle, Busy, Error
     };
@@ -146,12 +101,12 @@ namespace Bus
     // Data type to handle different byte formats
     union Data_t
     {
-        unsigned long value;
-        unsigned int word[2];
-        unsigned char byte[4];
+        uint32_t value;
+        uint16_t word[2];
+        uint8_t byte[4];
 
         // Overload the cast operator to int(), mainly for testing but maybe it can be useful in general
-        operator int() { return static_cast<unsigned int>(this->value); };
+        operator int() { return static_cast<uint32_t>(this->value); };
     };
 
     /* === Bus interface === */
@@ -162,7 +117,7 @@ namespace Bus
      * @param address The address of the target.
      */
     template <class bus_controller>
-    void change_address(bus_controller &bus, const unsigned char address)
+    void change_address(bus_controller &bus, const uint8_t address)
     {
         bus.set_target_address(address);
         return;
@@ -175,7 +130,7 @@ namespace Bus
      * @details blocking function
      */
     template <class bus_controller>
-    bool send_byte(bus_controller &bus, const unsigned char byte)
+    bool send_byte(bus_controller &bus, const uint8_t byte)
     {
         // set the payload data
         Data_t payload{};
@@ -188,8 +143,8 @@ namespace Bus
     template <class bus_controller>
     bool send_bytes(
         bus_controller &bus,
-        const unsigned char first_byte,
-        const unsigned char second_byte)
+        const uint8_t first_byte,
+        const uint8_t second_byte)
     {
         // set the payload data
         Data_t payload{};
@@ -203,9 +158,9 @@ namespace Bus
     template <class bus_controller>
     bool send_bytes(
         bus_controller &bus,
-        const unsigned char first_byte,
-        const unsigned char second_byte,
-        const unsigned char third_byte)
+        const uint8_t first_byte,
+        const uint8_t second_byte,
+        const uint8_t third_byte)
     {
         // set the payload data
         Data_t payload{};
@@ -224,7 +179,7 @@ namespace Bus
      * @details blocking function
      */
     template <class bus_controller>
-    bool send_word(bus_controller &bus, const unsigned int word)
+    bool send_word(bus_controller &bus, const uint16_t word)
     {
         // set the payload data
         Data_t payload{};
@@ -243,7 +198,7 @@ namespace Bus
      * @details blocking function
      */
     template <class bus_controller>
-    bool send_array(bus_controller &bus, const unsigned char *data, const unsigned char n_bytes)
+    bool send_array(bus_controller &bus, uint8_t *const data, const uint8_t n_bytes)
     {
         return bus.send_array(data, n_bytes);
     };
@@ -256,7 +211,7 @@ namespace Bus
      * @details blocking function
      */
     template <class bus_controller, size_t n_bytes>
-    bool send_array(bus_controller &bus, std::array<unsigned char, n_bytes> &data)
+    bool send_array(bus_controller &bus, std::array<uint8_t, n_bytes> &data)
     {
         return bus.send_array(data.data(), n_bytes);
     };
@@ -272,7 +227,7 @@ namespace Bus
      * @details blocking function
      */
     template <class bus_controller>
-    bool send_array_leader(bus_controller &bus, const unsigned char byte, const unsigned char *data, const unsigned char n_bytes)
+    bool send_array_leader(bus_controller &bus, const uint8_t byte, uint8_t *const data, const uint8_t n_bytes)
     {
         return bus.send_array_leader(byte, data, n_bytes);
     };
@@ -283,7 +238,7 @@ namespace Bus
      * @details blocking function
      */
     template <class bus_controller>
-    std::optional<unsigned char> read_byte(bus_controller &bus)
+    std::optional<uint8_t> read_byte(bus_controller &bus)
     {
         if (bus.read_data(1))
             return bus.get_rx_data().byte[0];
@@ -297,7 +252,7 @@ namespace Bus
      * @details blocking function
      */
     template <class bus_controller>
-    std::optional<unsigned int> read_word(bus_controller &bus, const unsigned char reg)
+    std::optional<uint16_t> read_word(bus_controller &bus, const uint8_t reg)
     {
         if (bus.read_data(reg, 2))
             return bus.get_rx_data().word[0];
@@ -314,7 +269,7 @@ namespace Bus
      * @details blocking function
      */
     template <class bus_controller>
-    bool read_array(bus_controller &bus, const unsigned char reg, unsigned char *dest, const unsigned char n_bytes)
+    bool read_array(bus_controller &bus, const uint8_t reg, uint8_t *dest, const uint8_t n_bytes)
     {
         return bus.read_array(reg, dest, n_bytes);
     };
@@ -328,7 +283,7 @@ namespace Bus
      * @details blocking function
      */
     template <class bus_controller>
-    bool read_array(bus_controller &bus, unsigned char *dest, const unsigned char n_bytes)
+    bool read_array(bus_controller &bus, uint8_t *dest, const uint8_t n_bytes)
     {
         return bus.read_array(dest, n_bytes);
     };
@@ -341,14 +296,14 @@ namespace Bus
      * @details blocking function
      */
     template <class bus_controller, size_t n_bytes>
-    bool read_array(bus_controller &bus, std::array<unsigned char, n_bytes> &dest)
+    bool read_array(bus_controller &bus, std::array<uint8_t, n_bytes> &dest)
     {
         return bus.read_array(dest.data(), n_bytes);
     };
 };
 
 // => SD Card Interface
-namespace SD
+namespace sdio
 {
     /*
     * The following functions are just wrapper for the SDIO controller class
@@ -356,49 +311,49 @@ namespace SD
     * to communicate with an sd card.
     */
     template<class sdio>
-    bool send_command_no_response(sdio& card, const unsigned char command, const unsigned long arguments)
+    bool send_command_no_response(sdio& card, const uint8_t command, const uint32_t arguments)
     {
         return card.send_command_no_response(command, arguments);
     };
     template<class sdio>
-    std::optional<unsigned long> send_command_R1_response(sdio& card, const unsigned char command, const unsigned long arguments)
+    std::optional<uint32_t> send_command_R1_response(sdio& card, const uint8_t command, const uint32_t arguments)
     {
         return card.send_command_R1_response(command, arguments);
     };
     template<class sdio>
-    std::optional<unsigned long> send_command_R2_response(sdio& card, const unsigned char command, const unsigned long arguments)
+    std::optional<uint32_t> send_command_R2_response(sdio& card, const uint8_t command, const uint32_t arguments)
     {
         return card.send_command_R2_response(command, arguments);
     };
     template<class sdio>
-    std::optional<unsigned long> send_command_R3_response(sdio& card, const unsigned char command, const unsigned long arguments)
+    std::optional<uint32_t> send_command_R3_response(sdio& card, const uint8_t command, const uint32_t arguments)
     {
         return card.send_command_R3_response(command, arguments);
     };
     template<class sdio>
-    std::optional<unsigned long> send_command_R6_response(sdio& card, const unsigned char command, const unsigned long arguments)
+    std::optional<uint32_t> send_command_R6_response(sdio& card, const uint8_t command, const uint32_t arguments)
     {
         return card.send_command_R6_response(command, arguments);
     };
     template<class sdio>
-    std::optional<unsigned long> send_command_R7_response(sdio& card, const unsigned char command, const unsigned long arguments)
+    std::optional<uint32_t> send_command_R7_response(sdio& card, const uint8_t command, const uint32_t arguments)
     {
         return card.send_command_R1_response(command, arguments);
     };
     template<class sdio>
-    bool read_single_block(sdio& card, const unsigned long* buffer_begin, const unsigned long* buffer_end)
+    bool read_single_block(sdio& card, const uint32_t* buffer_begin, const uint32_t* buffer_end)
     {
         return card.read_single_block(buffer_begin, buffer_end);
     };
     template<class sdio>
-    bool write_single_block(sdio& card, const unsigned long* buffer_begin, const unsigned long* buffer_end)
+    bool write_single_block(sdio& card, const uint32_t* buffer_begin, const uint32_t* buffer_end)
     {
         return card.write_single_block(buffer_begin, buffer_end);
     };
 };
 
 // => Timer Interface
-namespace Timer
+namespace timer
 {
 
     /**
@@ -424,13 +379,13 @@ namespace Timer
      * 
      * @tparam timer Timer controller class which implements behavior.
      * @param my_timer The instance of the timer class where the count should be returned from.
-     * @return unsigned int: The current count of the timer.
+     * @return uint32_t: The current count of the timer.
      */
     template <class timer>
-    unsigned int get_count(timer &my_timer) { return my_timer.get_count(); };
+    uint32_t get_count(timer &my_timer) { return my_timer.get_count(); };
 };
 
-namespace DMA
+namespace dma
 {
     // === Enums ===
     enum class Direction
@@ -439,11 +394,11 @@ namespace DMA
         memory_to_peripheral,
         memory_to_memory
     };
-    enum class Width: unsigned char
+    enum class Width: uint8_t
     {
         _8bit = 0,
         _16bit = 1,
         _32bit = 2
     };
-};
+}; // namespace dma
 #endif
