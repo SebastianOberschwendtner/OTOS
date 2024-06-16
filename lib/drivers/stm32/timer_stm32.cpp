@@ -256,9 +256,23 @@ namespace timer
         return this->timer->CNT;
     }
 
+    auto Timer::get_status() const volatile -> status::Flags
+    {
+        return static_cast<status::Flags>(this->timer->SR);
+    }
+
     auto Timer::is_running() const -> bool
     {
         return (timer->CR1 & TIM_CR1_CEN) > 0;
+    }
+
+    auto Timer::clear_status(const status::Flags status) -> Timer &
+    {
+        /* Clear the status flags */
+        this->timer->SR &= ~static_cast<uint32_t>(status);
+
+        /* Return the timer reference */
+        return *this;
     }
 
     void Timer::enable_channel(const uint8_t channel)

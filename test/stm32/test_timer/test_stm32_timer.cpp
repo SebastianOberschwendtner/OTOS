@@ -28,10 +28,10 @@
  */
 
 /* === Includes === */
-#include <unity.h>
-#include <mock.h>
-#include "stm32/timer_stm32.h"
 #include "stm32/gpio_stm32.h"
+#include "stm32/timer_stm32.h"
+#include <mock.h>
+#include <unity.h>
 
 /* === Test List ===
  * ✓ Timer instance can be created:
@@ -47,7 +47,7 @@
  *      ✓ PWM Output Mode
  *      ✓ Input Capture Mode
  * (✓) I/O Pins can be assigned to the timer
-*/
+ */
 
 /* === Mocks === */
 extern Mock::Callable<bool> CMSIS_NVIC_EnableIRQ;
@@ -66,11 +66,11 @@ void setUp()
     RCC->registers_to_default();
 };
 
-void tearDown(){
+void tearDown() {
     /* clean stuff up here */
 };
 
-/** 
+/**
  * @brief Test the initialization of the controller
  */
 void test_init()
@@ -83,13 +83,13 @@ void test_init()
     TEST_ASSERT_EQUAL(0xFFFF, TIM1->ARR);
 };
 
-/** 
+/**
  * @brief Test the SysTick configuration
  */
 void test_configure_SysTick()
 {
     /* Reset mocked function */
-    CMSIS_SysTick_Config.reset();   
+    CMSIS_SysTick_Config.reset();
 
     /* Configure SysTick */
     timer::SysTick_Configure();
@@ -100,7 +100,7 @@ void test_configure_SysTick()
     TEST_ASSERT_EQUAL(2, CMSIS_NVIC_SetPriority.call_count);
 };
 
-/** 
+/**
  * @brief Test the reading of the counter value
  */
 void test_get_count()
@@ -119,7 +119,7 @@ void test_get_count()
     TEST_ASSERT_EQUAL(1, UUT.get_count());
 };
 
-/** 
+/**
  * @brief Test enabling and disabling the timer
  */
 void test_enable_disable()
@@ -148,7 +148,7 @@ void test_enable_disable()
     TEST_ASSERT_FALSE(UUT.is_running());
 };
 
-/** 
+/**
  * @brief Test setting the counter frequency
  */
 void test_set_tick_frequency()
@@ -172,13 +172,13 @@ void test_set_tick_frequency()
     TEST_ASSERT_EQUAL(expected, TIM2->PSC);
 };
 
-/** 
+/**
  * @brief Test setting the top value
  */
 void test_set_top_value()
 {
     using namespace std::literals::chrono_literals;
-    using namespace  OTOS::literals;
+    using namespace OTOS::literals;
 
     /* Set stuff up */
     setUp();
@@ -198,7 +198,7 @@ void test_set_top_value()
     TEST_ASSERT_EQUAL(1, TIM1->ARR);
 };
 
-/** 
+/**
  * @brief Test setting the compare mode
  */
 void test_set_pwm_mode()
@@ -214,19 +214,19 @@ void test_set_pwm_mode()
     ch1.set_mode(timer::Mode::PWM);
     /* UUT.set_channel(1, Timer::Mode::PWM); */
     TEST_ASSERT_BITS_LOW(0b11, TIM1->CCMR1);
-    TEST_ASSERT_BITS((0b111<<4), (0b110<<4), TIM1->CCMR1);
+    TEST_ASSERT_BITS((0b111 << 4), (0b110 << 4), TIM1->CCMR1);
     UUT.set_channel(2, timer::Mode::PWM);
     TEST_ASSERT_BITS_LOW(0b11 << 8, TIM1->CCMR1);
-    TEST_ASSERT_BITS((0b111<<12), (0b110<<12), TIM1->CCMR1);
+    TEST_ASSERT_BITS((0b111 << 12), (0b110 << 12), TIM1->CCMR1);
     UUT.set_channel(3, timer::Mode::PWM);
     TEST_ASSERT_BITS_LOW(0b11, TIM1->CCMR2);
-    TEST_ASSERT_BITS((0b111<<4), (0b110<<4), TIM1->CCMR2);
+    TEST_ASSERT_BITS((0b111 << 4), (0b110 << 4), TIM1->CCMR2);
     UUT.set_channel(4, timer::Mode::PWM);
     TEST_ASSERT_BITS_LOW(0b11 << 8, TIM1->CCMR2);
-    TEST_ASSERT_BITS((0b111<<12), (0b110<<12), TIM1->CCMR2);
+    TEST_ASSERT_BITS((0b111 << 12), (0b110 << 12), TIM1->CCMR2);
 };
 
-/** 
+/**
  * @brief Test enabling and disabling the timer channels
  */
 void test_enable_disable_channel()
@@ -265,7 +265,7 @@ void test_enable_disable_channel()
     TEST_ASSERT_BIT_LOW(TIM_CCER_CC1E_Pos, TIM1->CCER);
 };
 
-/** 
+/**
  * @brief Test setting the compare values
  */
 void test_set_compare_value()
@@ -305,7 +305,7 @@ void test_set_compare_value()
     TEST_ASSERT_EQUAL(60, TIM1->CCR1);
 };
 
-/** 
+/**
  * @brief Test assigning I/O pins to the timer
  */
 void test_assign_pins()
@@ -404,8 +404,28 @@ void test_enable_disable_interrupts()
     timer.disable_interrupt(timer::interrupt::Update);
     TEST_ASSERT_BIT_LOW(TIM_DIER_UIE_Pos, TIM2->DIER);
     TEST_ASSERT_EQUAL(0, CMSIS_NVIC_DisableIRQ.call_count);
-
 }
+
+/**
+ * @brief Test clearing the interrupt flags of the timer.
+ */
+void test_status_flags()
+{
+    /* Set stuff up */
+    setUp();
+    TIM1->SR = TIM_SR_CC1IF | TIM_SR_UIF;
+    auto timer = timer::Timer::create<Peripheral::TIM_1>();
+
+    /* Test reading the status flags */
+    auto status = timer.get_status();
+    TEST_ASSERT_EQUAL(timer::status::Channel1 | timer::status::Update, status);
+
+    /* Clear interrupt flags */
+    timer.clear_status(timer::status::Channel1);
+
+    /* Check whether the correct bits are cleared */
+    TEST_ASSERT_EQUAL(TIM_SR_UIF, TIM1->SR);
+};
 
 /* === Main === */
 int main(int argc, char **argv)
@@ -423,5 +443,6 @@ int main(int argc, char **argv)
     RUN_TEST(test_assign_pins);
     RUN_TEST(test_input_capture);
     RUN_TEST(test_enable_disable_interrupts);
+    RUN_TEST(test_status_flags);
     return UNITY_END();
 };

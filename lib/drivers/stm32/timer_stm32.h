@@ -60,6 +60,24 @@ namespace timer
         static constexpr Flags Trigger = TIM_DIER_TIE; /**< Interrupt on trigger input event. */
     };
 
+    namespace status
+    {
+        /**
+         * @brief Bitmask flags for the timer status.
+         */
+        typedef uint16_t Flags;
+        static constexpr Flags Update = TIM_SR_UIF; /**< Timer update event. */
+        static constexpr Flags Channel1 = TIM_SR_CC1IF; /**< Capture/compare channel 1 event. */
+        static constexpr Flags Channel2 = TIM_SR_CC2IF; /**< Capture/compare channel 2 event. */
+        static constexpr Flags Channel3 = TIM_SR_CC3IF; /**< Capture/compare channel 3 event. */
+        static constexpr Flags Channel4 = TIM_SR_CC4IF; /**< Capture/compare channel 4 event. */
+        static constexpr Flags Trigger = TIM_SR_TIF; /**< Trigger input event. */
+        static constexpr Flags Overcapture1 = TIM_SR_CC1OF; /**< Overcapture on channel 1. */
+        static constexpr Flags Overcapture2 = TIM_SR_CC2OF; /**< Overcapture on channel 2. */
+        static constexpr Flags Overcapture3 = TIM_SR_CC3OF; /**< Overcapture on channel 3. */
+        static constexpr Flags Overcapture4 = TIM_SR_CC4OF; /**< Overcapture on channel 4. */
+    }
+
     // === Classes ===
     /**
      * @brief Timer abstraction class for STM32 microcontrollers.
@@ -166,12 +184,25 @@ namespace timer
         [[nodiscard]] auto get_count() const volatile -> uint32_t;
 
         /**
+         * @brief Get the status flags of the timer.
+         * @return The status flags of the timer.
+         */
+        [[nodiscard]] auto get_status() const volatile -> status::Flags;
+
+        /**
          * @brief Check if the timer is enabled.
          * @return True if the timer is enabled, false otherwise.
          */
         [[nodiscard]] auto is_running() const -> bool;
 
         /* === Methods === */
+        /**
+         * @brief Clear the status flags of the timer.
+         * @param status The status flags to be cleared.
+         * @return Timer& Returns a reference to the timer object.
+         */
+        [[maybe_unused]] auto clear_status(status::Flags status) -> Timer &;
+
         /**
          * @brief Enable one capture/compare channel of the timer.
          * @details This should in theory take less CPU cycles than

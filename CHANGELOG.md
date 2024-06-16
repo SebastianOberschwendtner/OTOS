@@ -7,6 +7,7 @@
 - `drivers`:
     - Timer channel can be configured to input capture mode.
     - Adds enabling and disabling of timer interrupts.
+    - Adds readout and clearing of timer interrupt status flags.
 
 ### Fixed Issues:
 - n/a
