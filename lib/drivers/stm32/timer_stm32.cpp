@@ -200,12 +200,21 @@ namespace timer
                 break;
         }
 
-        /* Get the pointer to the correct register */
+        /* Get the pointer to the correct capture/compare register */
         auto *CCMRx = channel > 2 ? &this->timer->CCMR2 : &this->timer->CCMR1;
 
         /* Update the mode bits */
         uint8_t bit_pos = (((channel - 1) % 2) * 8);
         *CCMRx = bits::set(*CCMRx, {0xff, bit_pos, mode_bits});
+
+        /* Return the timer reference */
+        return *this;
+    }
+
+    auto Timer::set_count(const uint16_t count) -> Timer &
+    {
+        /* Set the count */
+        this->timer->CNT = count;
 
         /* Return the timer reference */
         return *this;
@@ -361,6 +370,15 @@ namespace timer
                     break;
             }
         }
+
+        /* Return the timer reference */
+        return *this;
+    }
+
+    auto Timer::reset_count() -> Timer &
+    {
+        /* Generate the update event to reset the count*/
+        this->timer->EGR |= TIM_EGR_UG;
 
         /* Return the timer reference */
         return *this;

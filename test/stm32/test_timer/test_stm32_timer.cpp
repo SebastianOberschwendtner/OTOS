@@ -103,7 +103,7 @@ void test_configure_SysTick()
 /**
  * @brief Test the reading of the counter value
  */
-void test_get_count()
+void test_count()
 {
     /* Set stuff up */
     setUp();
@@ -117,6 +117,14 @@ void test_get_count()
     /* Increase the actual counter and test whether result is correct */
     TIM1->CNT++;
     TEST_ASSERT_EQUAL(1, UUT.get_count());
+
+    /* Test setting the count */
+    UUT.set_count(100);
+    TEST_ASSERT_EQUAL(100, TIM1->CNT);
+
+    /* Reset the count */
+    UUT.reset_count();
+    TEST_ASSERT_BIT_HIGH(TIM_EGR_UG_Pos, TIM1->EGR);
 };
 
 /**
@@ -433,7 +441,7 @@ int main(int argc, char **argv)
     UNITY_BEGIN();
     RUN_TEST(test_init);
     RUN_TEST(test_configure_SysTick);
-    RUN_TEST(test_get_count);
+    RUN_TEST(test_count);
     RUN_TEST(test_enable_disable);
     RUN_TEST(test_set_tick_frequency);
     RUN_TEST(test_set_top_value);

@@ -126,7 +126,15 @@ namespace timer
          * @param mode The mode of the channel.
          * @return Timer& Returns a reference to the timer object.
          */
-        auto set_channel(uint8_t channel, Mode mode) -> Timer &;
+        [[maybe_unused]] auto set_channel(uint8_t channel, Mode mode) -> Timer &;
+
+        /**
+         * @brief Set the count of the timer.
+         * 
+         * @param count The count value of the timer.
+         * @return Timer& Returns a reference to the timer object.
+         */
+        [[maybe_unused]] auto set_count(uint16_t count) -> Timer &;
 
         /**
          * @brief Set the period of the timer until overflow/underflow.
@@ -139,7 +147,7 @@ namespace timer
          * @return Timer& Returns a reference to the timer object.
          */
         template <typename rep, typename period>
-        auto set_period(std::chrono::duration<rep, period> duration) -> Timer &
+        [[maybe_unused]] auto set_period(std::chrono::duration<rep, period> duration) -> Timer &
         {
             // calculate the top value
             rep top_value = duration.count() * f_tick.count();
@@ -158,14 +166,14 @@ namespace timer
          * @param frequency The frequency in Hz.
          * @return Timer& Returns a reference to the timer object.
          */
-        auto set_tick_frequency(OTOS::hertz frequency) -> Timer &;
+        [[maybe_unused]] auto set_tick_frequency(OTOS::hertz frequency) -> Timer &;
 
         /**
          * @brief Set the top tick count of the timer.
          * @param top The top value in ticks.
          * @return Timer& Returns a reference to the timer object.
          */
-        auto set_top_value(uint32_t top_value) -> Timer &;
+        [[maybe_unused]] auto set_top_value(uint32_t top_value) -> Timer &;
 
         /* === Getters === */
         /**
@@ -240,6 +248,16 @@ namespace timer
          * @return Timer& Returns a reference to the timer object.
          */
         [[maybe_unused]] auto disable_interrupt(interrupt::Flags interrupt) -> Timer &;
+
+        /**
+         * @brief Reset the count of the timer.
+         * This issues an update event of the timer which resets the count.
+         * The timer automatically resets the count register according to
+         * the counter mode.
+         * 
+         * @return Timer& Returns a reference to the timer object.
+         */
+        [[maybe_unused]] auto reset_count() -> Timer &;
 
         /**
          * @brief Start the timer.
