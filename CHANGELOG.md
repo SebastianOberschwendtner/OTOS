@@ -1,4 +1,17 @@
 # Changelog for OTOS
+## [v5.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v5.1.0) *(2024-mm-dd)*
+
+>Released by `SO`
+
+### Release Notes:
+- `drivers`:
+    - Timer channel can be configured to input capture mode.
+    - Adds enabling and disabling of timer interrupts.
+
+### Fixed Issues:
+- n/a
+
+# Changelog for OTOS
 ## [v5.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v5.0.0) *(2024-05-31)*
 
 >Released by `SO`

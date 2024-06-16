@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    test_timer_stm32.cpp
  * @author  SO
- * @version v5.0.0
+ * @version v5.1.0
  * @date    31-October-2021
  * @brief   Unit tests for testing the timer driver for stm32 microcontrollers.
  ==============================================================================
@@ -45,12 +45,13 @@
  * ▢ The timer mode can be read
  * ▢ The mode of the timer channels can be set:
  *      ✓ PWM Output Mode
- *      ▢ Input Capture Mode
+ *      ✓ Input Capture Mode
  * (✓) I/O Pins can be assigned to the timer
 */
 
 /* === Mocks === */
 extern Mock::Callable<bool> CMSIS_NVIC_EnableIRQ;
+extern Mock::Callable<bool> CMSIS_NVIC_DisableIRQ;
 extern Mock::Callable<bool> CMSIS_NVIC_SetPriority;
 extern Mock::Callable<uint32_t> CMSIS_SysTick_Config;
 
@@ -325,6 +326,87 @@ void test_assign_pins()
     TEST_ASSERT_EQUAL(0b0001, GPIOA->AFR[0]);
 };
 
+/**
+ * @brief Test setting a channel to input capture mode
+ */
+void test_input_capture()
+{
+    /* Set stuff up */
+    setUp();
+    auto timer = timer::Timer::create<Peripheral::TIM_1>();
+    TIM1->CCMR1 = 0x00;
+    TIM1->CCR1 = 0x12;
+
+    /* Set channel to input capture mode */
+    timer.set_channel(1, timer::Mode::Capture);
+    auto channel = timer.get_channel(1);
+    channel.enable();
+
+    /* Test the channel behavior */
+    TEST_ASSERT_EQUAL(0b01, TIM1->CCMR1);
+    TEST_ASSERT_EQUAL(0x12, channel.get_capture_value());
+
+    /* Test the capture methods when no input was captured */
+    TIM1->SR = 0;
+    TEST_ASSERT_FALSE(channel.input_capture());
+
+    /* Test the capture methods when input was captured */
+    TIM1->SR = TIM_SR_CC1IF;
+    auto capture = channel.input_capture();
+    TEST_ASSERT_TRUE(capture);
+    TEST_ASSERT_EQUAL(0x12, capture.value());
+    TEST_ASSERT_EQUAL(0, TIM1->SR);
+}
+
+/**
+ * @brief Test enabling interrupts of the timer.
+ */
+void test_enable_disable_interrupts()
+{
+    /* Set stuff up */
+    setUp();
+    auto timer = timer::Timer::create<Peripheral::TIM_1>();
+
+    /* Enable interrupts */
+    timer.enable_interrupt(timer::interrupt::Update | timer::interrupt::Channel1);
+    TEST_ASSERT_BIT_HIGH(TIM_DIER_UIE_Pos, TIM1->DIER);
+    TEST_ASSERT_BIT_HIGH(TIM_DIER_CC1IE_Pos, TIM1->DIER);
+    TEST_ASSERT_EQUAL(2, CMSIS_NVIC_EnableIRQ.call_count);
+    CMSIS_NVIC_EnableIRQ.assert_called_last_with(TIM1_CC_IRQn);
+
+    /* Disable one interrupt */
+    timer.disable_interrupt(timer::interrupt::Update);
+    TEST_ASSERT_BIT_LOW(TIM_DIER_UIE_Pos, TIM1->DIER);
+    TEST_ASSERT_BIT_HIGH(TIM_DIER_CC1IE_Pos, TIM1->DIER);
+    CMSIS_NVIC_DisableIRQ.assert_called_last_with(TIM1_UP_TIM10_IRQn);
+
+    /* Switch enabled channel interrupts */
+    CMSIS_NVIC_DisableIRQ.reset();
+    timer.enable_interrupt(timer::interrupt::Channel2);
+    timer.disable_interrupt(timer::interrupt::Channel1);
+    TEST_ASSERT_EQUAL(0, CMSIS_NVIC_DisableIRQ.call_count);
+
+    /* Disable all channel interrupts */
+    timer.disable_interrupt(timer::interrupt::Channel2 | timer::interrupt::Channel3);
+    CMSIS_NVIC_DisableIRQ.assert_called_once_with(TIM1_CC_IRQn);
+
+    /* Test a timer which shares an IRQn for all interrupts */
+    CMSIS_NVIC_EnableIRQ.reset();
+    timer = timer::Timer::create<Peripheral::TIM_2>();
+    timer.enable_interrupt(timer::interrupt::Update | timer::interrupt::Channel1);
+    TEST_ASSERT_BIT_HIGH(TIM_DIER_UIE_Pos, TIM2->DIER);
+    TEST_ASSERT_BIT_HIGH(TIM_DIER_CC1IE_Pos, TIM2->DIER);
+    TEST_ASSERT_EQUAL(1, CMSIS_NVIC_EnableIRQ.call_count);
+    CMSIS_NVIC_EnableIRQ.assert_called_last_with(TIM2_IRQn);
+
+    /* Disable one interrupt */
+    CMSIS_NVIC_DisableIRQ.reset();
+    timer.disable_interrupt(timer::interrupt::Update);
+    TEST_ASSERT_BIT_LOW(TIM_DIER_UIE_Pos, TIM2->DIER);
+    TEST_ASSERT_EQUAL(0, CMSIS_NVIC_DisableIRQ.call_count);
+
+}
+
 /* === Main === */
 int main(int argc, char **argv)
 {
@@ -339,5 +421,7 @@ int main(int argc, char **argv)
     RUN_TEST(test_enable_disable_channel);
     RUN_TEST(test_set_compare_value);
     RUN_TEST(test_assign_pins);
+    RUN_TEST(test_input_capture);
+    RUN_TEST(test_enable_disable_interrupts);
     return UNITY_END();
 };

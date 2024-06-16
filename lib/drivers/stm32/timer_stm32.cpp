@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    timer_stm32.cpp
  * @author  SO
- * @version v5.0.0
+ * @version v5.1.0
  * @date    31-October-2021
  * @brief   Timer driver for STM32 microcontrollers.
  ==============================================================================
@@ -29,6 +29,9 @@
 
 /* === Includes === */
 #include "timer_stm32.h"
+#include <bitset>
+
+/* === Defines === */
 using stm32::Peripheral;
 
 /* === Valid Timer peripheral instantiations === */
@@ -43,7 +46,7 @@ namespace detail
      * @tparam timer The timer instance which is used.
      * @return Return the peripheral base address of the timer instance.
      */
-    template<Peripheral timer>
+    template <Peripheral timer>
     constexpr auto get_timer_address() -> std::uintptr_t
     {
         switch (timer)
@@ -71,7 +74,7 @@ namespace detail
      * @brief Enable the clock for the selected timer instance.
      * @tparam timer The timer instance which is used.
      */
-    template<Peripheral timer>
+    template <Peripheral timer>
     constexpr void enable_timer_clock()
     {
         /* Enable the clock */
@@ -107,7 +110,7 @@ namespace detail
      * @tparam timer The timer instance which is used.
      * @return The base clock frequency of the timer.
      */
-    template<Peripheral timer>
+    template <Peripheral timer>
     constexpr auto get_timer_clock_frequency() -> uint32_t
     {
         switch (timer)
@@ -130,7 +133,6 @@ namespace detail
                 return F_CPU;
         }
     }
-
 }; // namespace detail
 
 namespace timer
@@ -154,7 +156,7 @@ namespace timer
     }
 
     /* === Factory === */
-    template<Peripheral timer>
+    template <Peripheral timer>
     auto Timer::create() -> Timer
     {
         /* Enable the peripheral clock */
@@ -185,24 +187,24 @@ namespace timer
     auto Timer::set_channel(const uint8_t channel, const Mode mode) -> Timer &
     {
         /* Get the bits for the mode */
-        uint32_t mode_bits = 0;
+        uint16_t mode_bits{0};
         switch (mode)
         {
-        case Mode::Normal:
-            break;
-        case Mode::PWM:
-            mode_bits = 0b110;
-            break;
-        default:
-            break;
+            case Mode::Capture:
+                mode_bits = TIM_CCMR1_CC1S_0;
+                break;
+            case Mode::PWM:
+                mode_bits = TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1;
+                break;
+            default:
+                break;
         }
 
         /* Get the pointer to the correct register */
-        auto* CCMRx = channel > 2 ? &this->timer->CCMR2 : &this->timer->CCMR1;
+        auto *CCMRx = channel > 2 ? &this->timer->CCMR2 : &this->timer->CCMR1;
 
         /* Update the mode bits */
         uint8_t bit_pos = (((channel - 1) % 2) * 8);
-        bit_pos += 4;
         *CCMRx = bits::set(*CCMRx, {0xff, bit_pos, mode_bits});
 
         /* Return the timer reference */
@@ -238,18 +240,18 @@ namespace timer
         /* Switch according to the channel */
         switch (channel)
         {
-        case 1:
-            return {channel, this, this->timer->CCR1};
-        case 2:
-            return {channel, this, this->timer->CCR2};
-        case 3:
-            return {channel, this, this->timer->CCR3};
-        default:
-            return {channel, this, this->timer->CCR4};
+            case 1:
+                return {channel, this, this->timer->CCR1};
+            case 2:
+                return {channel, this, this->timer->CCR2};
+            case 3:
+                return {channel, this, this->timer->CCR3};
+            default:
+                return {channel, this, this->timer->CCR4};
         }
     }
 
-    auto Timer::get_count() const -> uint32_t
+    auto Timer::get_count() const volatile -> uint32_t
     {
         return this->timer->CNT;
     }
@@ -261,12 +263,93 @@ namespace timer
 
     void Timer::enable_channel(const uint8_t channel)
     {
-        this->timer->CCER |= (1 << ((channel - 1)*4));
+        this->timer->CCER |= (1 << ((channel - 1) * 4));
+    }
+
+    auto Timer::enable_interrupt(const interrupt::Flags interrupt) -> Timer &
+    {
+        /* Enable the interrupt in the timer */
+        this->timer->DIER |= static_cast<uint32_t>(interrupt);
+
+        /* Enable the interrupt in the NVIC */
+        switch (this->instance)
+        {
+            case Peripheral::TIM_2:
+                NVIC_EnableIRQ(TIM2_IRQn);
+                break;
+#ifndef STM32L053xx
+            case Peripheral::TIM_3:
+                NVIC_EnableIRQ(TIM3_IRQn);
+                break;
+#endif // STM32L053xx
+#ifdef STM32F4
+            case Peripheral::TIM_1:
+                if (0 != (interrupt & interrupt::Update))
+                    NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
+                if (0 != (interrupt &
+                          (interrupt::Channel1 | interrupt::Channel2 | interrupt::Channel3 | interrupt::Channel4)))
+                    NVIC_EnableIRQ(TIM1_CC_IRQn);
+                break;
+#endif // STM32F4
+            default:
+                break;
+        }
+
+        /* Return the timer reference */
+        return *this;
     }
 
     void Timer::disable_channel(const uint8_t channel)
     {
-        this->timer->CCER &= ~(1 << ((channel - 1)*4));
+        this->timer->CCER &= ~(1 << ((channel - 1) * 4));
+    }
+
+    auto Timer::disable_interrupt(const interrupt::Flags interrupt) -> Timer &
+    {
+        /* Disable the interrupt in the timer */
+        this->timer->DIER &= ~static_cast<uint32_t>(interrupt);
+
+        /* Get the still enabled interrupts */
+        interrupt::Flags enabled_interrupts = static_cast<interrupt::Flags>(this->timer->DIER & 0x0F);
+
+        /* Disable the interrupt in the NVIC */
+#ifdef STM32F4
+        /* TIM1 has a different IRQn assignment */
+        if (this->instance == Peripheral::TIM_1)
+        {
+            /* Check which interrupts can be disabled */
+            if (0 != (interrupt & interrupt::Update) && 0 == (enabled_interrupts & interrupt::Update))
+                NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
+            if (0 != (interrupt &
+                      (interrupt::Channel1 | interrupt::Channel2 | interrupt::Channel3 | interrupt::Channel4)) &&
+                0 == (enabled_interrupts & (interrupt::Channel1 | interrupt::Channel2 | interrupt::Channel3 | interrupt::Channel4)))
+                NVIC_DisableIRQ(TIM1_CC_IRQn);
+
+            /* Return the timer reference */
+            return *this;
+        }
+#endif // STM32F4
+
+        /* Check wether all interrupts are disabled */
+        if (0 == enabled_interrupts)
+        {
+            switch (this->instance)
+            {
+                case Peripheral::TIM_2:
+                    NVIC_DisableIRQ(TIM2_IRQn);
+                    break;
+#ifndef STM32L053xx
+                case Peripheral::TIM_3:
+                    NVIC_DisableIRQ(TIM3_IRQn);
+                    break;
+#endif // STM32L053xx
+                default:
+                    break;
+            }
+        }
+
+        /* Return the timer reference */
+        return *this;
     }
 
     void Timer::start()
@@ -279,5 +362,49 @@ namespace timer
     {
         /* Unset the CEN bit */
         this->timer->CR1 &= ~TIM_CR1_CEN;
+    }
+
+    /* === Channel === */
+    auto Timer::Channel::set_compare_value(const uint32_t value) -> Channel &
+    {
+        this->compare_value = value;
+
+        // Return the channel reference
+        return *this;
+    }
+
+    auto Timer::Channel::set_duty_cycle(const float percentage) -> Channel &
+    {
+        // check if percentage is in range
+        if (percentage > 1.0f || percentage < 0.0f)
+            return *this;
+        this->compare_value = static_cast<uint32_t>(percentage * this->theTimer->timer->ARR);
+
+        // Return the channel reference
+        return *this;
+    }
+
+    auto Timer::Channel::set_mode(const Mode mode) -> Channel &
+    {
+        this->theTimer->set_channel(this->channel, mode);
+
+        // Return the channel reference
+        return *this;
+    }
+
+    auto Timer::Channel::input_capture() volatile -> std::optional<uint32_t>
+    {
+        /* Check whether an input value is available */
+        if (this->theTimer->timer->SR & (TIM_SR_CC1IF << (this->channel - 1)))
+        {
+            // Clear the interrupt flag
+            this->theTimer->timer->SR &= ~(TIM_SR_CC1IF << (this->channel - 1));
+
+            // Return the captured value
+            return this->theTimer->timer->CCR1;
+        }
+
+        /* No recent capture */
+        return std::nullopt;
     }
 }; // namespace timer

@@ -29,6 +29,7 @@
 #include <chrono>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <ratio>
 
 /* === Get the available peripherals === */
@@ -40,8 +41,23 @@ namespace timer
     // === Enums ===
     enum class Mode
     {
-        Normal,
+        Capture,
+        Compare,
         PWM
+    };
+
+    namespace interrupt
+    {
+        /**
+         * @brief Bitmask flags for the timer interrupts.
+         */
+        typedef uint8_t Flags;
+        static constexpr Flags Update = TIM_DIER_UIE; /**< Interrupt on timer update. */
+        static constexpr Flags Channel1 = TIM_DIER_CC1IE; /**< Interrupt on capture/compare channel 1. */
+        static constexpr Flags Channel2 = TIM_DIER_CC2IE; /**< Interrupt on capture/compare channel 2. */
+        static constexpr Flags Channel3 = TIM_DIER_CC3IE; /**< Interrupt on capture/compare channel 3. */
+        static constexpr Flags Channel4 = TIM_DIER_CC4IE; /**< Interrupt on capture/compare channel 4. */
+        static constexpr Flags Trigger = TIM_DIER_TIE; /**< Interrupt on trigger input event. */
     };
 
     // === Classes ===
@@ -49,6 +65,11 @@ namespace timer
      * @brief Timer abstraction class for STM32 microcontrollers.
      * It provides a simple interface to configure the timer peripherals
      * and set the operating mode of the timer channels.
+     *
+     * @note The channel configuration does not check whether the combination
+     * of setting is valid! The input capture and output compare modes are
+     * mutually exclusive. The user has to ensure that the correct mode is set and
+     * use the correct access methods to read or write the channel values!
      */
     class Timer
     {
@@ -142,7 +163,7 @@ namespace timer
          * @brief Get the current count of the timer
          * @return The current count of the timer in ticks.
          */
-        [[nodiscard]] auto get_count() const -> uint32_t;
+        [[nodiscard]] auto get_count() const volatile -> uint32_t;
 
         /**
          * @brief Check if the timer is enabled.
@@ -161,6 +182,16 @@ namespace timer
         void enable_channel(uint8_t channel);
 
         /**
+         * @brief Enable one or more interrupts of the timer.
+         * This enables the interrupt in the timer peripheral as
+         * well as in the NVIC.
+         * 
+         * @param interrupt The interrupt flags to be enabled.
+         * @return Timer& Returns a reference to the timer object.
+         */
+        [[maybe_unused]] auto enable_interrupt(interrupt::Flags interrupt) -> Timer &;
+
+        /**
          * @brief Disable one capture/compare channel of the timer.
          * @details This should in theory take less CPU cycles than
          * getting the channel instance and disable it.
@@ -168,6 +199,16 @@ namespace timer
          * @param channel The channel to be disabled.
          */
         void disable_channel(uint8_t channel);
+
+        /**
+         * @brief Disable one or more interrupts of the timer.
+         * This disables the interrupt in the timer peripheral as
+         * well as in the NVIC.
+         * 
+         * @param interrupt The interrupt flags to be disabled.
+         * @return Timer& Returns a reference to the timer object.
+         */
+        [[maybe_unused]] auto disable_interrupt(interrupt::Flags interrupt) -> Timer &;
 
         /**
          * @brief Start the timer.
@@ -185,6 +226,7 @@ namespace timer
 
       private:
         /**
+         * @class Timer::Channel
          * @brief Class representing a timer channel.
          * The class keeps are reference to the timer and sets its
          * capture/compare channel related properties.
@@ -192,8 +234,8 @@ namespace timer
          * @details This is an abstraction of the capture and compare
          * channels of an timer. Since the channel is inherently bound to
          * the timer, it keeps a reference to the timer instance.
-         * This class is not intended to be used directly, hence the private
-         * declaration.
+         * This class is not intended to be constructed without an associated
+         * timer instance, hence the private declaration.
          */
         class Channel
         {
@@ -222,16 +264,12 @@ namespace timer
             /* === Setters === */
             /**
              * @brief Set the compare value of the channel.
+             * @attention This does not check whether the channel actually IS in compare mode!
+             *
              * @param value The compare value of the channel.
              * @return Channel& Returns a reference to the channel object.
              */
-            auto set_compare_value(const uint32_t value) -> Channel &
-            {
-                this->compare_value = value;
-
-                // Return the channel reference
-                return *this;
-            }
+            auto set_compare_value(const uint32_t value) -> Channel &;
 
             /**
              * @brief Set the duty cycle of the channel when in PWM mode.
@@ -241,29 +279,14 @@ namespace timer
              * @param percentage The duty cycle percentage of the channel.
              * @return Channel& Returns a reference to the channel object.
              */
-            auto set_duty_cycle(const float percentage) -> Channel &
-            {
-                // check if percentage is in range
-                if (percentage > 1.0f || percentage < 0.0f)
-                    return *this;
-                this->compare_value = static_cast<uint32_t>(percentage * this->theTimer->timer->ARR);
-
-                // Return the channel reference
-                return *this;
-            }
+            auto set_duty_cycle(const float percentage) -> Channel &;
 
             /**
              * @brief Set the operating mode of the channel.
              * @param mode The mode of the channel.
              * @return Channel& Returns a reference to the channel object.
              */
-            auto set_mode(const Mode mode) -> Channel &
-            {
-                this->theTimer->set_channel(this->channel, mode);
-
-                // Return the channel reference
-                return *this;
-            }
+            auto set_mode(const Mode mode) -> Channel &;
 
             /**
              * @brief Set the pulse width of the channel when in PWM mode.
@@ -288,6 +311,15 @@ namespace timer
                 return *this;
             }
 
+            /* === Getters === */
+            /**
+             * @brief Get the capture value of the channel.
+             * @attention This does not check whether the channel actually IS in capture mode!
+             *
+             * @return The current value of the Capture/Compare register of the channel.
+             */
+            [[nodiscard]] auto get_capture_value() const volatile -> uint32_t { return this->compare_value; }
+
             /* === Methods === */
             /**
              * @brief Enable the operation of the channel.
@@ -298,6 +330,19 @@ namespace timer
              * @brief Disable the operation of the channel.
              */
             void disable() { this->theTimer->disable_channel(this->channel); }
+
+            /**
+             * @brief Get the input capture of the channel.
+             * @note The return value is optional. It only contains
+             * a value if the channel has a valid captured value which
+             * is not yet read.
+             * This function automatically resets the capture status
+             * flags of the channel. This means calling this function
+             * twice in a row will NOT result in the same output!
+             *
+             * @return Returns the captured value of the channel, if available.
+             */
+            [[nodiscard]] auto input_capture() volatile -> std::optional<uint32_t>;
 
           private:
             /* === Properties === */

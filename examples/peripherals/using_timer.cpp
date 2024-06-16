@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    using_timer.cpp
  * @author  SO
- * @version v4.2.0
+ * @version v5.1.0
  * @date    30-May-2023
  * @brief   This example shows how to use the timer driver interface.
  ==============================================================================
@@ -58,8 +58,8 @@ void Run_Timer_Example(void)
         .set_duty_cycle(0.5f)
         .enable();
 
-    /* Start the timer and the compare channel */
-    timer.start();
+    /* Enable the update interrupt and start the timer */
+    timer.enable_interrupt(timer::interrupt::Update).start();
 
     while (1)
     {

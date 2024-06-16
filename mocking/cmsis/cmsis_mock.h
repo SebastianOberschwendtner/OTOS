@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -138,9 +138,10 @@ typedef enum
 } IRQn_Type;
 
 // === Mocked Functions ===
-void        NVIC_EnableIRQ(IRQn_Type IRQn);
-void        NVIC_SetPriority(IRQn_Type IRQn, uint32_t priority);
-uint32_t    SysTick_Config(uint32_t ticks);
+void NVIC_EnableIRQ(IRQn_Type IRQn);
+void NVIC_DisableIRQ(IRQn_Type IRQn);
+void NVIC_SetPriority(IRQn_Type IRQn, uint32_t priority);
+auto SysTick_Config(uint32_t ticks) -> uint32_t;
 
 #endif
 

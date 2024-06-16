@@ -1,6 +1,6 @@
 /**
  * OTOS - Open Tec Operating System
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2021 - 2024 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,8 +21,8 @@
  ==============================================================================
  * @file    cmsis_mock.cpp
  * @author  SO
- * @version v2.9.2
- * @date    04-Oktober-2021
+ * @version v5.1.0
+ * @date    04-October-2021
  * @brief   Mocks of the CMSIS driver functions.
  ==============================================================================
  */
@@ -30,9 +30,9 @@
 // === Includes ===
 #include "cmsis_mock.h"
 
-
 // === Mocks ===
 Mock::Callable<bool> CMSIS_NVIC_EnableIRQ;
+Mock::Callable<bool> CMSIS_NVIC_DisableIRQ;
 Mock::Callable<bool> CMSIS_NVIC_SetPriority;
 Mock::Callable<uint32_t> CMSIS_SysTick_Config;
 
@@ -45,6 +45,15 @@ Mock::Callable<uint32_t> CMSIS_SysTick_Config;
 void NVIC_EnableIRQ(IRQn_Type IRQn)
 {
     CMSIS_NVIC_EnableIRQ.add_call(static_cast<int>(IRQn));
+};
+
+/**
+ * @brief Mock the disabling of IRQs.
+ * @param IRQn The IRQ number to disable.
+ */
+void NVIC_DisableIRQ(IRQn_Type IRQn)
+{
+    CMSIS_NVIC_DisableIRQ.add_call(static_cast<int>(IRQn));
 };
 
 /**
@@ -63,7 +72,7 @@ void NVIC_SetPriority(IRQn_Type IRQn, uint32_t priority)
  * @param ticks The amount of ticks between interrupts
  * @return Returns 0 when SysTick timer was initialized successfully, 1 when there was an error.
  */
-uint32_t SysTick_Config(uint32_t ticks)
+auto SysTick_Config(uint32_t ticks) -> uint32_t
 {
     CMSIS_SysTick_Config.add_call(static_cast<int>(ticks));
     return 0;
