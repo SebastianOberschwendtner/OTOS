@@ -65,4 +65,4 @@ jobs:
     - name: Install Platform Native
       run: pio pkg install
     - name: Run the Unit Tests
-      run: pio test -d ${GITHUB_WORKSPACE} -e native
+      run: pio test -d ${GITHUB_WORKSPACE} -e native -e native-minsize

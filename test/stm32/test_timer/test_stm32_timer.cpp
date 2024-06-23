@@ -435,6 +435,32 @@ void test_status_flags()
     TEST_ASSERT_EQUAL(TIM_SR_UIF, TIM1->SR);
 };
 
+/**
+ * @brief Test atomic access functions.
+ */
+void test_atomic_access()
+{
+    /* Set stuff up */
+    setUp();
+    auto timer = timer::Timer::create<Peripheral::TIM_1>();
+    TIM1->CCR1 = 0x12;
+    TIM1->CNT = 0x15;
+    TIM1->SR = TIM_SR_CC2IF;
+
+    /* Test atomic access of the capture registers */
+    auto capture = timer::atomic::get_capture<1>(timer);
+    TEST_ASSERT_EQUAL(0x12, capture);
+
+    /* Test setting the counter value */
+    timer::atomic::set_count<0x20>(timer);
+    TEST_ASSERT_EQUAL(0x20, TIM1->CNT);
+
+    /* Test atomic access of the status register */
+    TEST_ASSERT_TRUE(timer::atomic::is_set<timer::status::Channel2 | timer::status::Update>(timer));
+    timer::atomic::clear_status<timer::status::Channel2>(timer);
+    TEST_ASSERT_EQUAL(0x00, TIM1->SR);
+};
+
 /* === Main === */
 int main(int argc, char **argv)
 {
@@ -452,5 +478,6 @@ int main(int argc, char **argv)
     RUN_TEST(test_input_capture);
     RUN_TEST(test_enable_disable_interrupts);
     RUN_TEST(test_status_flags);
+    RUN_TEST(test_atomic_access);
     return UNITY_END();
 };

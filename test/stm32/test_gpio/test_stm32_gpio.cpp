@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    test_gpio_stm32.cpp
  * @author  SO
- * @version v5.0.0
+ * @version v5.1.0
  * @date    16-March-2021
  * @brief   Unit tests for the gpio drivers of stm32 controllers.
  ==============================================================================
@@ -439,6 +439,30 @@ void test_reset_pending_interrupt()
     TEST_ASSERT_EQUAL(0b101, EXTI->PR);
 }
 
+/**
+ * @brief Test functions suitable to be used within interrupts
+ */
+void test_atomic_access()
+{
+    /* Setup the test */
+    setUp();
+    auto PA0 = gpio::Pin::create<gpio::Port::A>(0);
+
+    /* Test setting the output */
+    gpio::atomic::set_high<0>(PA0);
+    TEST_ASSERT_EQUAL((1<<0), GPIOA->BSRR);
+    gpio::atomic::set_low<0>(PA0);
+    TEST_ASSERT_EQUAL((1<<16), GPIOA->BSRR);
+    gpio::atomic::toggle<0>(PA0);
+    TEST_ASSERT_EQUAL((1<<0), GPIOA->ODR);
+    gpio::atomic::toggle<0>(PA0);
+    TEST_ASSERT_EQUAL((0<<0), GPIOA->ODR);
+
+    /* Test reading the input */
+    GPIOA->IDR = 0b0001;
+    TEST_ASSERT_TRUE(gpio::atomic::get_state<0>(PA0));
+}
+
 /* === Run tests === */
 int main(int argc, char **argv)
 {
@@ -459,5 +483,6 @@ int main(int argc, char **argv)
     RUN_TEST(test_edges);
     RUN_TEST(test_enable_interrupt);
     RUN_TEST(test_reset_pending_interrupt);
+    RUN_TEST(test_atomic_access);
     return UNITY_END();
 };

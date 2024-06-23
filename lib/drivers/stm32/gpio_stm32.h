@@ -57,7 +57,32 @@ namespace gpio
         Rising = 1, Falling = 2, Both = 3
     };
 
+    /* === Forward declarations for the atomic access mechanism === */
+    class Pin;
+    namespace atomic
+    {   
+        template <uint8_t pin_number> auto get_state(const Pin &pin) -> bool;
+        template <uint8_t pin_number> void set_high(Pin &pin);
+        template <uint8_t pin_number> void set_low(Pin &pin);
+        template <uint8_t pin_number> void toggle(Pin &pin);
+    }; // namespace atomic
+
     /* === Classes === */
+    /**
+     * @class gpio::Pin
+     * @brief Class abstraction for the GPIO pins of the STM32 devices.
+     * 
+     * @details The Pin class is a wrapper around the GPIO pins of the STM32 devices.
+     * It provides a simple interface to set the mode, output type, pull type, speed,
+     * and state of the pin.
+     * The class includes a mechanism to detect edges on consecutive reads of the pin
+     * without the need for an interrupt.
+     * Interrupts are supported by the class as well. The class provides a method to enable
+     * edge-triggered interrupts on the pin.
+     * 
+     * @note This class provides atomic access to the GPIO pins which can be used within
+     * interrupt handlers. Look at the `gpio::atomic` namespace for available functions.
+     */
     class Pin
     {
       public:
@@ -79,12 +104,6 @@ namespace gpio
         Pin(Pin &&) = default;
         auto operator=(const Pin &) -> Pin & = default;
         auto operator=(Pin &&) -> Pin & = default;
-
-        /**
-         * @brief Constructor for PIN object without specified output type.
-         * @param Port The Port the pin belongs to
-         * @param Pin The pin number of the pin in the port
-         */
 
         /* === Setters === */
         /**
@@ -177,7 +196,7 @@ namespace gpio
          * @brief Get the logical pin state of the GPIO pin.
          * @return The logical state of the pin.
          */
-        auto get_state() const -> bool;
+        auto get_state() const volatile -> bool;
 
         /**
          * @brief Check whether the PIN got a falling edge
@@ -247,14 +266,97 @@ namespace gpio
          */
         auto get_af_code(stm32::Peripheral function) const -> char;
 
+        /* === Friends === */
+        template<uint8_t pin_number> friend auto gpio::atomic::get_state(const Pin &pin) -> bool;
+        template<uint8_t pin_number> friend void gpio::atomic::set_high(Pin &pin);
+        template<uint8_t pin_number> friend void gpio::atomic::set_low(Pin &pin);
+        template<uint8_t pin_number> friend void gpio::atomic::toggle(Pin &pin);
+
         /* === Properties === */
         volatile GPIO_TypeDef *port; /**< The underlying GPIO port of the pin. */
-        uint8_t pin;     /**< The pin number of the pin in the port. */
-        Port port_id;               /**< The port id of the pin. */
-        bool state_old = false;          /**< The old state of the pin for software edge detection. */
-        bool edge_rising = false;        /**< Whether the software edge detection detected a rising edge. */
-        bool edge_falling = false;       /**< Whether the software edge detection detected a falling edge. */
+        uint8_t pin;                 /**< The pin number of the pin in the port. */
+        Port port_id;                /**< The port id of the pin. */
+        bool state_old{false};       /**< The old state of the pin for software edge detection. */
+        bool edge_rising{false};     /**< Whether the software edge detection detected a rising edge. */
+        bool edge_falling{false};    /**< Whether the software edge detection detected a falling edge. */
+#ifndef OTOS_REDUCE_MEMORY_USAGE
+        uint32_t set_mask{0};        /**< The mask to set the pin high. */
+        uint32_t reset_mask{0};      /**< The mask to set the pin low. */
+#endif // OTOS_REDUCE_MEMORY_USAGE
     };
+
+    /* === Atomic access functions === */
+    namespace atomic
+    {   
+        /**
+         * @brief Get the state of the GPIO pin. Atomic access, can be used
+         * within an interrupt handler.
+         * 
+         * @tparam pin_number The pin number of the pin in the port. (Zero-indexed)
+         * @param pin The pin object to get the state from.
+         * @return The state of the pin.
+         */
+        template <uint8_t pin_number>
+        [[nodiscard]] auto get_state(const Pin &pin) -> bool
+        {
+            /* Get the bit mask for the pin */
+            constexpr uint32_t bit_mask = 1 << pin_number;
+
+            /* Return the state of the pin */
+            return (pin.port->IDR & bit_mask) != 0;
+        }
+
+        /**
+         * @brief Set the GPIO pin high. Atomic access, can be used
+         * within an interrupt handler.
+         * 
+         * @tparam pin_number The pin number of the pin in the port. (Zero-indexed)
+         * @param pin The pin object to set high.
+         */
+        template <uint8_t pin_number>
+        void set_high(Pin &pin)
+        {
+            /* Get the bit mask for the pin */
+            constexpr uint32_t bit_mask = 1 << pin_number;
+
+            /* Set the pin high */
+            pin.port->BSRR = bit_mask;
+        }
+
+        /**
+         * @brief Set the GPIO pin low. Atomic access, can be used
+         * within an interrupt handler.
+         * 
+         * @tparam pin_number The pin number of the pin in the port. (Zero-indexed)
+         * @param pin The pin object to set low.
+         */
+        template <uint8_t pin_number>
+        void set_low(Pin &pin)
+        {
+            /* Get the bit mask for the pin */
+            constexpr uint32_t bit_mask = 1 << (pin_number + 16);
+
+            /* Set the pin low */
+            pin.port->BSRR = bit_mask;
+        }
+
+        /**
+         * @brief Toggle the GPIO pin. Atomic access, can be used
+         * within an interrupt handler.
+         * 
+         * @tparam pin_number The pin number of the pin in the port. (Zero-indexed)
+         * @param pin The pin object to toggle.
+         */
+        template <uint8_t pin_number>
+        void toggle(Pin &pin)
+        {
+            /* Get the bit mask for the pin */
+            constexpr uint32_t bit_mask = 1 << pin_number;
+
+            /* Toggle the pin */
+            pin.port->ODR ^= bit_mask;
+        }
+    }; // namespace atomic
 }; // namespace gpio
 
-#endif
+#endif // GPIO_STM32_H_

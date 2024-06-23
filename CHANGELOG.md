@@ -8,6 +8,8 @@
     - Timer channel can be configured to input capture mode.
     - Adds enabling and disabling of timer interrupts.
     - Adds readout and clearing of timer interrupt status flags.
+    - Adds **atomic** access functions to GPIO and Timer drivers, which can be called within interrupt handlers without overhead by the driver interface abstractions.
+- Adds the define `OTOS_REDUCE_MEMORY_USAGE` which sets the implementation strategy of the functions to focus and memory usage rather than number of clock cycles.
 
 ### Fixed Issues:
 - n/a

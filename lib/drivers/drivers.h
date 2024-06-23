@@ -30,6 +30,8 @@
 #ifndef DRIVERS_H_
 #define DRIVERS_H_
 
+/* === C*/
+
 /* === Includes === */
 /// @todo Check for the microcontroller type (STM32/AVR/...) before including the drivers. */
 #include "stm32/core_stm32.h"

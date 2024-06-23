@@ -21,7 +21,7 @@
  ==============================================================================
  * @file    gpio_stm32.cpp
  * @author  SO
- * @version v5.0.0
+ * @version v5.1.0
  * @date    25-August-2021
  * @brief   GPIO driver for STM32 microcontrollers.
  ==============================================================================
@@ -277,6 +277,15 @@ namespace gpio
     {
         /* Set the mode of the pin */
         this->set_mode(mode);
+
+#ifndef OTOS_REDUCE_MEMORY_USAGE
+        /*
+         * Get the bit shifted masks to set and reset
+         * the pin here to save clock cycles later
+         */
+        this->set_mask = (1 << this->pin);
+        this->reset_mask = (1 << (this->pin + 16));
+#endif // OTOS_REDUCE_MEMORY_USAGE
     };
 
     /* === Methods === */
@@ -331,7 +340,11 @@ namespace gpio
     auto Pin::set_high() -> Pin &
     {
         /* Set the BS bit */
+#ifndef OTOS_REDUCE_MEMORY_USAGE
+        port->BSRR = this->set_mask;
+#else
         port->BSRR = (1 << this->pin);
+#endif // OTOS_REDUCE_MEMORY_USAGE
 
         /* Return the reference to the pin object */
         return *this;
@@ -340,7 +353,11 @@ namespace gpio
     auto Pin::set_low() -> Pin &
     {
         /* Set the BR bit */
+#ifndef OTOS_REDUCE_MEMORY_USAGE
+        port->BSRR = this->reset_mask;
+#else
         port->BSRR = (1 << (this->pin + 16));
+#endif // OTOS_REDUCE_MEMORY_USAGE
 
         /* Return the reference to the pin object */
         return *this;
@@ -408,11 +425,15 @@ namespace gpio
 
     auto Pin::toggle() -> Pin &
     {
+#ifndef OTOS_REDUCE_MEMORY_USAGE
+        port->ODR ^= this->set_mask;
+#else
         port->ODR ^= (1 << this->pin);
+#endif // OTOS_REDUCE_MEMORY_USAGE
         return *this;
     };
 
-    auto Pin::get_state() const -> bool
+    auto Pin::get_state() const volatile -> bool
     {
         return (this->port->IDR & (1 << this->pin));
     };

@@ -52,13 +52,13 @@ namespace timer
          * @brief Bitmask flags for the timer interrupts.
          */
         typedef uint8_t Flags;
-        static constexpr Flags Update = TIM_DIER_UIE; /**< Interrupt on timer update. */
+        static constexpr Flags Update = TIM_DIER_UIE;     /**< Interrupt on timer update. */
         static constexpr Flags Channel1 = TIM_DIER_CC1IE; /**< Interrupt on capture/compare channel 1. */
         static constexpr Flags Channel2 = TIM_DIER_CC2IE; /**< Interrupt on capture/compare channel 2. */
         static constexpr Flags Channel3 = TIM_DIER_CC3IE; /**< Interrupt on capture/compare channel 3. */
         static constexpr Flags Channel4 = TIM_DIER_CC4IE; /**< Interrupt on capture/compare channel 4. */
-        static constexpr Flags Trigger = TIM_DIER_TIE; /**< Interrupt on trigger input event. */
-    };
+        static constexpr Flags Trigger = TIM_DIER_TIE;    /**< Interrupt on trigger input event. */
+    }; // namespace interrupt
 
     namespace status
     {
@@ -66,17 +66,31 @@ namespace timer
          * @brief Bitmask flags for the timer status.
          */
         typedef uint16_t Flags;
-        static constexpr Flags Update = TIM_SR_UIF; /**< Timer update event. */
-        static constexpr Flags Channel1 = TIM_SR_CC1IF; /**< Capture/compare channel 1 event. */
-        static constexpr Flags Channel2 = TIM_SR_CC2IF; /**< Capture/compare channel 2 event. */
-        static constexpr Flags Channel3 = TIM_SR_CC3IF; /**< Capture/compare channel 3 event. */
-        static constexpr Flags Channel4 = TIM_SR_CC4IF; /**< Capture/compare channel 4 event. */
-        static constexpr Flags Trigger = TIM_SR_TIF; /**< Trigger input event. */
+        static constexpr Flags Update = TIM_SR_UIF;         /**< Timer update event. */
+        static constexpr Flags Channel1 = TIM_SR_CC1IF;     /**< Capture/compare channel 1 event. */
+        static constexpr Flags Channel2 = TIM_SR_CC2IF;     /**< Capture/compare channel 2 event. */
+        static constexpr Flags Channel3 = TIM_SR_CC3IF;     /**< Capture/compare channel 3 event. */
+        static constexpr Flags Channel4 = TIM_SR_CC4IF;     /**< Capture/compare channel 4 event. */
+        static constexpr Flags Trigger = TIM_SR_TIF;        /**< Trigger input event. */
         static constexpr Flags Overcapture1 = TIM_SR_CC1OF; /**< Overcapture on channel 1. */
         static constexpr Flags Overcapture2 = TIM_SR_CC2OF; /**< Overcapture on channel 2. */
         static constexpr Flags Overcapture3 = TIM_SR_CC3OF; /**< Overcapture on channel 3. */
         static constexpr Flags Overcapture4 = TIM_SR_CC4OF; /**< Overcapture on channel 4. */
-    }
+    }; // namespace status
+
+    /* === Forward declarations for the atomic access mechanism === */
+    class Timer;
+    namespace atomic
+    {
+        template <status::Flags flags>
+        void clear_status(Timer &timer);
+        template <uint8_t channel_number>
+        auto get_capture(const Timer &timer) -> uint32_t;
+        template <status::Flags flags>
+        auto is_set(const Timer &timer) -> bool;
+        template <uint32_t count_value>
+        void set_count(Timer &timer);
+    }; // namespace atomic
 
     // === Classes ===
     /**
@@ -130,7 +144,7 @@ namespace timer
 
         /**
          * @brief Set the count of the timer.
-         * 
+         *
          * @param count The count value of the timer.
          * @return Timer& Returns a reference to the timer object.
          */
@@ -224,7 +238,7 @@ namespace timer
          * @brief Enable one or more interrupts of the timer.
          * This enables the interrupt in the timer peripheral as
          * well as in the NVIC.
-         * 
+         *
          * @param interrupt The interrupt flags to be enabled.
          * @return Timer& Returns a reference to the timer object.
          */
@@ -243,7 +257,7 @@ namespace timer
          * @brief Disable one or more interrupts of the timer.
          * This disables the interrupt in the timer peripheral as
          * well as in the NVIC.
-         * 
+         *
          * @param interrupt The interrupt flags to be disabled.
          * @return Timer& Returns a reference to the timer object.
          */
@@ -254,7 +268,7 @@ namespace timer
          * This issues an update event of the timer which resets the count.
          * The timer automatically resets the count register according to
          * the counter mode.
-         * 
+         *
          * @return Timer& Returns a reference to the timer object.
          */
         [[maybe_unused]] auto reset_count() -> Timer &;
@@ -268,10 +282,6 @@ namespace timer
          * @brief Stop the timer.
          */
         void stop();
-
-        /* Let the GPIO assign function access the private members */
-        template <class IO>
-        friend void gpio::assign(IO pin, Timer &timer);
 
       private:
         /**
@@ -416,6 +426,18 @@ namespace timer
          */
         Timer(std::uintptr_t timer_address, stm32::Peripheral timer, uint32_t f_apb);
 
+        /* === Friends === */
+        template <status::Flags flags>
+        friend void atomic::clear_status(Timer &timer);
+        template <uint8_t channel_number>
+        friend auto atomic::get_capture(const Timer &timer) -> uint32_t;
+        template <status::Flags flags>
+        friend auto atomic::is_set(const Timer &timer) -> bool;
+        template <uint32_t count_value>
+        friend void atomic::set_count(Timer &timer);
+        template <class IO>
+        friend void gpio::assign(IO pin, Timer &timer);
+
         /* === Properties === */
         volatile TIM_TypeDef *timer; /**< The underlying timer hardware address of the peripheral. */
         stm32::Peripheral instance;  /**< The instance of the timer. */
@@ -423,11 +445,93 @@ namespace timer
         OTOS::hertz f_tick{F_CPU};   /**< [Hz] The tick frequency of the timer. */
     };
 
-    // === Functions ===
+    /* === Functions === */
     /**
      * @brief Configure the SysTick timer for interrupts every 1 ms.
      */
     void SysTick_Configure();
+
+    /* === Atomic access functions === */
+    namespace atomic
+    {
+        /**
+         * @brief Clear the status flags of the timer. Atomic access,
+         * can be used within an interrupt handler.
+         *
+         * @tparam flags The status flags to be cleared.
+         * @param timer The timer instance.
+         */
+        template <status::Flags flags>
+        void clear_status(Timer &timer)
+        {
+            timer.timer->SR &= ~static_cast<uint32_t>(flags);
+        }
+
+        /**
+         * @brief Get the capture value of one timer channel. Atomic access,
+         * can be used within an interrupt handler.
+         *
+         * @note This function does not check whether the channel actually
+         * captured anything. It just returns the current value of the
+         * capture/compare register.
+         *
+         * @tparam channel_number The channel number of the channel. Must be between 1 and 4.
+         * @param timer The timer instance the channel belongs to.
+         * @return The capture value of the channel.
+         */
+        template <uint8_t channel_number>
+        [[nodiscard]] auto get_capture(const Timer &timer) -> uint32_t
+        {
+            /* Assert that the channel exists */
+            static_assert(channel_number >= 1 && channel_number <= 4, "Invalid channel number!");
+
+            /* Get the capture value */
+            if constexpr (channel_number == 1)
+            {
+                return timer.timer->CCR1;
+            }
+            else if constexpr (channel_number == 2)
+            {
+                return timer.timer->CCR2;
+            }
+            else if constexpr (channel_number == 3)
+            {
+                return timer.timer->CCR3;
+            }
+            else if constexpr (channel_number == 4)
+            {
+                return timer.timer->CCR4;
+            }
+        }
+
+        /**
+         * @brief Check if a status flag of the timer is set. Atomic access,
+         * can be used within an interrupt handler.
+         * @note This only checks whether ONE of the status flags is set.
+         *
+         * @tparam flags The status flags to be checked.
+         * @param timer The timer instance.
+         * @return True if one of the status flag(s) is set, false otherwise.
+         */
+        template <status::Flags flags>
+        [[nodiscard]] auto is_set(const Timer &timer) -> bool
+        {
+            return (timer.timer->SR & static_cast<uint32_t>(flags)) != 0;
+        }
+
+        /**
+         * @brief Set the count of the timer. Atomic access,
+         * can be used within an interrupt handler.
+         *
+         * @tparam count_value The count value of the timer.
+         * @param timer The timer instance.
+         */
+        template <uint32_t count_value>
+        void set_count(timer::Timer &timer)
+        {
+            timer.timer->CNT = count_value;
+        }
+    }; // namespace atomic
 }; // namespace timer
 
 namespace gpio
@@ -450,4 +554,4 @@ namespace gpio
     }
 }; // namespace gpio
 
-#endif
+#endif // TIMER_STM32_H_
