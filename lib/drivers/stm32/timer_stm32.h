@@ -82,14 +82,11 @@ namespace timer
     class Timer;
     namespace atomic
     {
-        template <status::Flags flags>
-        void clear_status(Timer &timer);
+        void clear_status(Timer &timer, status::Flags flags);
         template <uint8_t channel_number>
         auto get_capture(const Timer &timer) -> uint32_t;
-        template <status::Flags flags>
-        auto is_set(const Timer &timer) -> bool;
-        template <uint32_t count_value>
-        void set_count(Timer &timer);
+        auto is_set(const Timer &timer, status::Flags flags) -> bool;
+        void set_count(Timer &timer, uint32_t count);
     }; // namespace atomic
 
     // === Classes ===
@@ -315,7 +312,7 @@ namespace timer
              * @param timer Pointer to the timer instance this channel belongs to.
              * @param CompareRegister The reference to the compare register of the channel.
              */
-            Channel(const uint8_t channel, Timer *const timer, volatile uint32_t &CompareRegister)
+            Channel(const uint8_t channel, Timer &timer, volatile uint32_t &CompareRegister)
                 : theTimer(timer), channel(channel), compare_value(CompareRegister)
             {
             }
@@ -361,7 +358,7 @@ namespace timer
             auto set_pulse_width(const std::chrono::duration<rep, period> duration) -> Channel &
             {
                 // calculate the compare value and match the ratios
-                rep calc_value = duration.count() * this->theTimer->f_tick.count();
+                rep calc_value = duration.count() * this->theTimer.f_tick.count();
                 calc_value *= period::num;
                 calc_value /= period::den;
                 this->compare_value = calc_value;
@@ -383,12 +380,12 @@ namespace timer
             /**
              * @brief Enable the operation of the channel.
              */
-            void enable() { this->theTimer->enable_channel(this->channel); }
+            void enable() { this->theTimer.enable_channel(this->channel); }
 
             /**
              * @brief Disable the operation of the channel.
              */
-            void disable() { this->theTimer->disable_channel(this->channel); }
+            void disable() { this->theTimer.disable_channel(this->channel); }
 
             /**
              * @brief Get the input capture of the channel.
@@ -405,7 +402,7 @@ namespace timer
 
           private:
             /* === Properties === */
-            Timer *theTimer;                  /**< Pointer to the timer instance the channel belongs to.*/
+            Timer &theTimer;                  /**< Pointer to the timer instance the channel belongs to.*/
             uint8_t channel{0};               /**< The channel number of the channel instance.*/
             volatile uint32_t &compare_value; /**< Reference to the compare register of the channel.*/
         };
@@ -427,19 +424,16 @@ namespace timer
         Timer(std::uintptr_t timer_address, stm32::Peripheral timer, uint32_t f_apb);
 
         /* === Friends === */
-        template <status::Flags flags>
-        friend void atomic::clear_status(Timer &timer);
+        friend void atomic::clear_status(Timer &timer, status::Flags flags);
         template <uint8_t channel_number>
         friend auto atomic::get_capture(const Timer &timer) -> uint32_t;
-        template <status::Flags flags>
-        friend auto atomic::is_set(const Timer &timer) -> bool;
-        template <uint32_t count_value>
-        friend void atomic::set_count(Timer &timer);
+        friend auto atomic::is_set(const Timer &timer, status::Flags flags) -> bool;
+        friend void atomic::set_count(Timer &timer, uint32_t count);
         template <class IO>
         friend void gpio::assign(IO pin, Timer &timer);
 
         /* === Properties === */
-        volatile TIM_TypeDef *timer; /**< The underlying timer hardware address of the peripheral. */
+        volatile TIM_TypeDef &timer; /**< The underlying timer hardware address of the peripheral. */
         stm32::Peripheral instance;  /**< The instance of the timer. */
         uint32_t f_base{0};          /**< [Hz] The frequency of the timer base clock. */
         OTOS::hertz f_tick{F_CPU};   /**< [Hz] The tick frequency of the timer. */
@@ -458,13 +452,12 @@ namespace timer
          * @brief Clear the status flags of the timer. Atomic access,
          * can be used within an interrupt handler.
          *
-         * @tparam flags The status flags to be cleared.
          * @param timer The timer instance.
+         * @param flags The status flags to be cleared.
          */
-        template <status::Flags flags>
-        void clear_status(Timer &timer)
+        OTOS_ATOMIC void clear_status(Timer &timer, const status::Flags flags)
         {
-            timer.timer->SR &= ~static_cast<uint32_t>(flags);
+            timer.timer.SR &= ~static_cast<uint32_t>(flags);
         }
 
         /**
@@ -480,7 +473,7 @@ namespace timer
          * @return The capture value of the channel.
          */
         template <uint8_t channel_number>
-        [[nodiscard]] auto get_capture(const Timer &timer) -> uint32_t
+        [[nodiscard]] OTOS_ATOMIC auto get_capture(const Timer &timer) -> uint32_t
         {
             /* Assert that the channel exists */
             static_assert(channel_number >= 1 && channel_number <= 4, "Invalid channel number!");
@@ -488,19 +481,19 @@ namespace timer
             /* Get the capture value */
             if constexpr (channel_number == 1)
             {
-                return timer.timer->CCR1;
+                return timer.timer.CCR1;
             }
             else if constexpr (channel_number == 2)
             {
-                return timer.timer->CCR2;
+                return timer.timer.CCR2;
             }
             else if constexpr (channel_number == 3)
             {
-                return timer.timer->CCR3;
+                return timer.timer.CCR3;
             }
             else if constexpr (channel_number == 4)
             {
-                return timer.timer->CCR4;
+                return timer.timer.CCR4;
             }
         }
 
@@ -509,27 +502,25 @@ namespace timer
          * can be used within an interrupt handler.
          * @note This only checks whether ONE of the status flags is set.
          *
-         * @tparam flags The status flags to be checked.
          * @param timer The timer instance.
+         * @param flags The status flags to be checked.
          * @return True if one of the status flag(s) is set, false otherwise.
          */
-        template <status::Flags flags>
-        [[nodiscard]] auto is_set(const Timer &timer) -> bool
+        [[nodiscard]] OTOS_ATOMIC auto is_set(const Timer &timer, const status::Flags flags) -> bool
         {
-            return (timer.timer->SR & static_cast<uint32_t>(flags)) != 0;
+            return (timer.timer.SR & static_cast<uint32_t>(flags)) > 0;
         }
 
         /**
          * @brief Set the count of the timer. Atomic access,
          * can be used within an interrupt handler.
          *
-         * @tparam count_value The count value of the timer.
          * @param timer The timer instance.
+         * @param count The count to set the timer to.
          */
-        template <uint32_t count_value>
-        void set_count(timer::Timer &timer)
+        OTOS_ATOMIC void set_count(timer::Timer &timer, const uint32_t count)
         {
-            timer.timer->CNT = count_value;
+            timer.timer.CNT = count;
         }
     }; // namespace atomic
 }; // namespace timer

@@ -408,4 +408,5 @@ namespace dma
         _32bit = 2
     };
 }; // namespace dma
-#endif
+
+#endif // INTERFACE_H_
