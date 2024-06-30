@@ -177,10 +177,10 @@ namespace timer
         const std::uintptr_t timer_address,
         const Peripheral timer,
         const uint32_t f_apb)
-        : timer{*reinterpret_cast<volatile TIM_TypeDef *>(timer_address)}, instance{timer}, f_base{f_apb}
+        : timer{reinterpret_cast<TIM_TypeDef *>(timer_address)}, instance{timer}, f_base{f_apb}
     {
         // Set the top value to the maximum
-        this->timer.ARR = 0xFFFF;
+        this->timer->ARR = 0xFFFF;
     }
 
     /* === Methods === */
@@ -201,7 +201,7 @@ namespace timer
         }
 
         /* Get the pointer to the correct capture/compare register */
-        auto *CCMRx = channel > 2 ? &this->timer.CCMR2 : &this->timer.CCMR1;
+        auto *CCMRx = channel > 2 ? &this->timer->CCMR2 : &this->timer->CCMR1;
 
         /* Update the mode bits */
         uint8_t bit_pos = (((channel - 1) % 2) * 8);
@@ -214,7 +214,7 @@ namespace timer
     auto Timer::set_count(const uint16_t count) -> Timer &
     {
         /* Set the count */
-        this->timer.CNT = count;
+        this->timer->CNT = count;
 
         /* Return the timer reference */
         return *this;
@@ -226,7 +226,7 @@ namespace timer
         const uint32_t prescaler = (this->f_base / frequency.count()) - 1;
 
         /* Set the prescaler value */
-        this->timer.PSC = prescaler;
+        this->timer->PSC = prescaler;
 
         /* Save the actual tick frequency */
         this->f_tick = this->f_base / (prescaler + 1);
@@ -238,7 +238,7 @@ namespace timer
     auto Timer::set_top_value(const uint32_t top_value) -> Timer &
     {
         /* Set the top value */
-        this->timer.ARR = top_value;
+        this->timer->ARR = top_value;
 
         /* Return the timer reference */
         return *this;
@@ -250,35 +250,35 @@ namespace timer
         switch (channel)
         {
             case 1:
-                return {channel, *this, this->timer.CCR1};
+                return {channel, *this, this->timer->CCR1};
             case 2:
-                return {channel, *this, this->timer.CCR2};
+                return {channel, *this, this->timer->CCR2};
             case 3:
-                return {channel, *this, this->timer.CCR3};
+                return {channel, *this, this->timer->CCR3};
             default:
-                return {channel, *this, this->timer.CCR4};
+                return {channel, *this, this->timer->CCR4};
         }
     }
 
     auto Timer::get_count() const volatile -> uint32_t
     {
-        return this->timer.CNT;
+        return this->timer->CNT;
     }
 
     auto Timer::get_status() const volatile -> status::Flags
     {
-        return static_cast<status::Flags>(this->timer.SR);
+        return static_cast<status::Flags>(this->timer->SR);
     }
 
     auto Timer::is_running() const -> bool
     {
-        return (timer.CR1 & TIM_CR1_CEN) > 0;
+        return (timer->CR1 & TIM_CR1_CEN) > 0;
     }
 
     auto Timer::clear_status(const status::Flags status) -> Timer &
     {
         /* Clear the status flags */
-        this->timer.SR &= ~static_cast<uint32_t>(status);
+        this->timer->SR &= ~static_cast<uint32_t>(status);
 
         /* Return the timer reference */
         return *this;
@@ -286,13 +286,13 @@ namespace timer
 
     void Timer::enable_channel(const uint8_t channel)
     {
-        this->timer.CCER |= (1 << ((channel - 1) * 4));
+        this->timer->CCER |= (1 << ((channel - 1) * 4));
     }
 
     auto Timer::enable_interrupt(const interrupt::Flags interrupt) -> Timer &
     {
         /* Enable the interrupt in the timer */
-        this->timer.DIER |= static_cast<uint32_t>(interrupt);
+        this->timer->DIER |= static_cast<uint32_t>(interrupt);
 
         /* Enable the interrupt in the NVIC */
         switch (this->instance)
@@ -324,16 +324,16 @@ namespace timer
 
     void Timer::disable_channel(const uint8_t channel)
     {
-        this->timer.CCER &= ~(1 << ((channel - 1) * 4));
+        this->timer->CCER &= ~(1 << ((channel - 1) * 4));
     }
 
     auto Timer::disable_interrupt(const interrupt::Flags interrupt) -> Timer &
     {
         /* Disable the interrupt in the timer */
-        this->timer.DIER &= ~static_cast<uint32_t>(interrupt);
+        this->timer->DIER &= ~static_cast<uint32_t>(interrupt);
 
         /* Get the still enabled interrupts */
-        interrupt::Flags enabled_interrupts = static_cast<interrupt::Flags>(this->timer.DIER & 0x0F);
+        interrupt::Flags enabled_interrupts = static_cast<interrupt::Flags>(this->timer->DIER & 0x0F);
 
         /* Disable the interrupt in the NVIC */
 #ifdef STM32F4
@@ -378,7 +378,7 @@ namespace timer
     auto Timer::reset_count() -> Timer &
     {
         /* Generate the update event to reset the count*/
-        this->timer.EGR |= TIM_EGR_UG;
+        this->timer->EGR |= TIM_EGR_UG;
 
         /* Return the timer reference */
         return *this;
@@ -387,13 +387,13 @@ namespace timer
     void Timer::start()
     {
         /* Set the CEN bit */
-        this->timer.CR1 |= TIM_CR1_CEN;
+        this->timer->CR1 |= TIM_CR1_CEN;
     }
 
     void Timer::stop()
     {
         /* Unset the CEN bit */
-        this->timer.CR1 &= ~TIM_CR1_CEN;
+        this->timer->CR1 &= ~TIM_CR1_CEN;
     }
 
     /* === Channel === */
@@ -410,7 +410,7 @@ namespace timer
         // check if percentage is in range
         if (percentage > 1.0f || percentage < 0.0f)
             return *this;
-        this->compare_value = static_cast<uint32_t>(percentage * this->theTimer.timer.ARR);
+        this->compare_value = static_cast<uint32_t>(percentage * this->theTimer.timer->ARR);
 
         // Return the channel reference
         return *this;
@@ -427,13 +427,13 @@ namespace timer
     auto Timer::Channel::input_capture() volatile -> std::optional<uint32_t>
     {
         /* Check whether an input value is available */
-        if (this->theTimer.timer.SR & (TIM_SR_CC1IF << (this->channel - 1)))
+        if (this->theTimer.timer->SR & (TIM_SR_CC1IF << (this->channel - 1)))
         {
             // Clear the interrupt flag
-            this->theTimer.timer.SR &= ~(TIM_SR_CC1IF << (this->channel - 1));
+            this->theTimer.timer->SR &= ~(TIM_SR_CC1IF << (this->channel - 1));
 
             // Return the captured value
-            return this->theTimer.timer.CCR1;
+            return this->theTimer.timer->CCR1;
         }
 
         /* No recent capture */

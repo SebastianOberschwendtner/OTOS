@@ -452,12 +452,12 @@ void test_atomic_access()
     TEST_ASSERT_EQUAL(0x12, capture);
 
     /* Test setting the counter value */
-    timer::atomic::set_count<0x20>(timer);
+    timer::atomic::set_count(timer, 0x20);
     TEST_ASSERT_EQUAL(0x20, TIM1->CNT);
 
     /* Test atomic access of the status register */
-    TEST_ASSERT_TRUE(timer::atomic::is_set<timer::status::Channel2 | timer::status::Update>(timer));
-    timer::atomic::clear_status<timer::status::Channel2>(timer);
+    TEST_ASSERT_TRUE(timer::atomic::is_set(timer, timer::status::Channel2 | timer::status::Update));
+    timer::atomic::clear_status(timer, timer::status::Channel2);
     TEST_ASSERT_EQUAL(0x00, TIM1->SR);
 };
 

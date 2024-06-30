@@ -124,8 +124,8 @@ namespace timer
         Timer() = delete;
         Timer(const Timer &) = default;
         Timer(Timer &&) = default;
-        auto operator=(const Timer &) -> Timer & = default;
-        auto operator=(Timer &&) -> Timer & = default;
+        auto operator=(const Timer &other) -> Timer & = default;
+        auto operator=(Timer && other) -> Timer & = default;
 
         /* === Setters === */
         /**
@@ -433,7 +433,7 @@ namespace timer
         friend void gpio::assign(IO pin, Timer &timer);
 
         /* === Properties === */
-        volatile TIM_TypeDef &timer; /**< The underlying timer hardware address of the peripheral. */
+        volatile TIM_TypeDef *timer; /**< The underlying timer hardware address of the peripheral. */
         stm32::Peripheral instance;  /**< The instance of the timer. */
         uint32_t f_base{0};          /**< [Hz] The frequency of the timer base clock. */
         OTOS::hertz f_tick{F_CPU};   /**< [Hz] The tick frequency of the timer. */
@@ -457,7 +457,7 @@ namespace timer
          */
         OTOS_ATOMIC void clear_status(Timer &timer, const status::Flags flags)
         {
-            timer.timer.SR &= ~static_cast<uint32_t>(flags);
+            timer.timer->SR &= ~static_cast<uint32_t>(flags);
         }
 
         /**
@@ -481,19 +481,19 @@ namespace timer
             /* Get the capture value */
             if constexpr (channel_number == 1)
             {
-                return timer.timer.CCR1;
+                return timer.timer->CCR1;
             }
             else if constexpr (channel_number == 2)
             {
-                return timer.timer.CCR2;
+                return timer.timer->CCR2;
             }
             else if constexpr (channel_number == 3)
             {
-                return timer.timer.CCR3;
+                return timer.timer->CCR3;
             }
             else if constexpr (channel_number == 4)
             {
-                return timer.timer.CCR4;
+                return timer.timer->CCR4;
             }
         }
 
@@ -508,7 +508,7 @@ namespace timer
          */
         [[nodiscard]] OTOS_ATOMIC auto is_set(const Timer &timer, const status::Flags flags) -> bool
         {
-            return (timer.timer.SR & static_cast<uint32_t>(flags)) > 0;
+            return (timer.timer->SR & static_cast<uint32_t>(flags)) > 0;
         }
 
         /**
@@ -520,7 +520,7 @@ namespace timer
          */
         OTOS_ATOMIC void set_count(timer::Timer &timer, const uint32_t count)
         {
-            timer.timer.CNT = count;
+            timer.timer->CNT = count;
         }
     }; // namespace atomic
 }; // namespace timer

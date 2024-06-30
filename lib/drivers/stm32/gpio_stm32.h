@@ -283,7 +283,7 @@ namespace gpio
         friend void gpio::atomic::toggle(Pin &pin);
 
         /* === Properties === */
-        volatile GPIO_TypeDef &port; /**< The underlying GPIO port of the pin. */
+        volatile GPIO_TypeDef *port; /**< The underlying GPIO port of the pin. */
 #ifndef OTOS_REDUCE_MEMORY_USAGE
         uint32_t set_mask{0};     /**< The mask to set the pin high. */
         uint32_t reset_mask{0};   /**< The mask to set the pin low. */
@@ -309,9 +309,9 @@ namespace gpio
         {
             /* Return the state of the pin */
 #ifndef OTOS_REDUCE_MEMORY_USAGE
-        return (pin.port.IDR & pin.set_mask);
+        return (pin.port->IDR & pin.set_mask);
 #else
-        return (pin.port.IDR & (1 << pin.pin));
+        return (pin.port->IDR & (1 << pin.pin));
 #endif // OTOS_REDUCE_MEMORY_USAGE
         }
 
@@ -332,9 +332,9 @@ namespace gpio
         {
             /* Set the pin high */
 #ifndef OTOS_REDUCE_MEMORY_USAGE
-            pin.port.BSRR = pin.set_mask;
+            pin.port->BSRR = pin.set_mask;
 #else
-            pin.port.BSRR = (1 << pin.pin);
+            pin.port->BSRR = (1 << pin.pin);
 #endif // OTOS_REDUCE_MEMORY_USAGE
         }
 
@@ -348,9 +348,9 @@ namespace gpio
         {
             /* Set the pin low */
 #ifndef OTOS_REDUCE_MEMORY_USAGE
-            pin.port.BSRR = pin.reset_mask;
+            pin.port->BSRR = pin.reset_mask;
 #else
-            pin.port.BSRR = 1 << 16 << pin.pin;
+            pin.port->BSRR = 1 << 16 << pin.pin;
 #endif // OTOS_REDUCE_MEMORY_USAGE
         }
 
@@ -364,9 +364,9 @@ namespace gpio
         {
             /* Toggle the pin */
 #ifndef OTOS_REDUCE_MEMORY_USAGE
-            pin.port.ODR ^= pin.set_mask;
+            pin.port->ODR ^= pin.set_mask;
 #else
-            pin.port.ODR ^= (1 << pin.pin);
+            pin.port->ODR ^= (1 << pin.pin);
 #endif // OTOS_REDUCE_MEMORY_USAGE
         }
     }; // namespace atomic

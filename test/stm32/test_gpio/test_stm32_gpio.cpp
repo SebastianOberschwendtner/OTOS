@@ -449,18 +449,18 @@ void test_atomic_access()
     auto PA0 = gpio::Pin::create<gpio::Port::A>(0);
 
     /* Test setting the output */
-    gpio::atomic::set_high<0>(PA0);
+    gpio::atomic::set_high(PA0);
     TEST_ASSERT_EQUAL((1<<0), GPIOA->BSRR);
-    gpio::atomic::set_low<0>(PA0);
+    gpio::atomic::set_low(PA0);
     TEST_ASSERT_EQUAL((1<<16), GPIOA->BSRR);
-    gpio::atomic::toggle<0>(PA0);
+    gpio::atomic::toggle(PA0);
     TEST_ASSERT_EQUAL((1<<0), GPIOA->ODR);
-    gpio::atomic::toggle<0>(PA0);
+    gpio::atomic::toggle(PA0);
     TEST_ASSERT_EQUAL((0<<0), GPIOA->ODR);
 
     /* Test reading the input */
     GPIOA->IDR = 0b0001;
-    TEST_ASSERT_TRUE(gpio::atomic::get_state<0>(PA0));
+    TEST_ASSERT_TRUE(gpio::atomic::get_state(PA0));
 }
 
 /* === Run tests === */
