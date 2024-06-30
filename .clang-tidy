@@ -18,7 +18,6 @@ Checks:
   -cppcoreguidelines-avoid-non-const-global-variables'
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
-AnalyzeTemporaryDtors: false
 FormatStyle:     LLVM
 User:            Sebastian
 CheckOptions:

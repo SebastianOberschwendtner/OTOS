@@ -321,16 +321,16 @@ namespace gpio
         if (this->pin < 8)
         {
             /* Save old register state and delete the part which will change */
-            uint32_t _Reg = this->port->AFR[0] & ~(0b1111 << (4 * this->pin));
+            uint32_t reg = this->port->AFR[0] & ~(0b1111 << (4 * this->pin));
             /* Get the code for teh alternate function and set the register */
-            this->port->AFR[0] = _Reg | (af_code << (4 * this->pin));
+            this->port->AFR[0] = reg | (af_code << (4 * this->pin));
         }
         else
         {
             /* Save old register state and delete the part which will change */
-            uint32_t _Reg = this->port->AFR[1] & ~(0b1111 << (4 * (this->pin - 8)));
+            uint32_t reg = this->port->AFR[1] & ~(0b1111 << (4 * (this->pin - 8)));
             /* Get the code for the alternate function and set the register */
-            this->port->AFR[1] = _Reg | (af_code << (4 * (this->pin - 8)));
+            this->port->AFR[1] = reg | (af_code << (4 * (this->pin - 8)));
         }
 
         /* Return the reference to the pin object */
@@ -366,10 +366,10 @@ namespace gpio
     auto Pin::set_mode(const Mode NewMode) -> Pin &
     {
         /* Save old register state and delete the part which will change */
-        uint32_t _Reg = this->port->MODER & ~(0b11 << (2 * this->pin));
+        uint32_t reg = this->port->MODER & ~(0b11 << (2 * this->pin));
 
         /* Combine the old and the new data and write the register */
-        this->port->MODER = _Reg | (static_cast<uint8_t>(NewMode) << (2 * this->pin));
+        this->port->MODER = reg | (static_cast<uint8_t>(NewMode) << (2 * this->pin));
 
         /* Return the reference to the pin object */
         return *this;
@@ -378,10 +378,10 @@ namespace gpio
     auto Pin::set_output_type(const Output NewType) -> Pin &
     {
         /* Save old register state and delete the part which will change */
-        uint32_t _Reg = this->port->OTYPER & ~(1 << this->pin);
+        uint32_t reg = this->port->OTYPER & ~(1 << this->pin);
 
         /* Combine the old and the new data and write the register */
-        this->port->OTYPER = _Reg | (static_cast<uint8_t>(NewType) << this->pin);
+        this->port->OTYPER = reg | (static_cast<uint8_t>(NewType) << this->pin);
 
         /* Return the reference to the pin object */
         return *this;
@@ -390,10 +390,10 @@ namespace gpio
     auto Pin::set_pull(const Pull NewPull) -> Pin &
     {
         /* Save old register state and delete the part which will change */
-        uint32_t _Reg = this->port->PUPDR & ~(0b11 << (2 * this->pin));
+        uint32_t reg = this->port->PUPDR & ~(0b11 << (2 * this->pin));
 
         /* Combine the old and the new data and write the register */
-        this->port->PUPDR = _Reg | (static_cast<uint8_t>(NewPull) << (2 * this->pin));
+        this->port->PUPDR = reg | (static_cast<uint8_t>(NewPull) << (2 * this->pin));
 
         /* Return the reference to the pin object */
         return *this;
@@ -402,10 +402,10 @@ namespace gpio
     auto Pin::set_speed(const Speed NewSpeed) -> Pin &
     {
         /* Save old register state and delete the part which will change */
-        uint32_t _Reg = this->port->OSPEEDR & ~(0b11 << (2 * this->pin));
+        uint32_t reg = this->port->OSPEEDR & ~(0b11 << (2 * this->pin));
 
         /* Combine the old and the new data and write the register */
-        this->port->OSPEEDR = _Reg | (static_cast<uint8_t>(NewSpeed) << (2 * this->pin));
+        this->port->OSPEEDR = reg | (static_cast<uint8_t>(NewSpeed) << (2 * this->pin));
 
         /* Return the reference to the pin object */
         return *this;
@@ -573,4 +573,4 @@ namespace gpio
         return detail::get_af_code(this->port_id, this->pin, function);
     };
 
-}; // namespace GPIO
+}; // namespace gpio

@@ -1,5 +1,5 @@
 # Changelog for OTOS
-## [v5.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v5.1.0) *(2024-mm-dd)*
+## [v5.1.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v5.1.0) *(2024-06-30)*
 
 >Released by `SO`
 
@@ -14,7 +14,6 @@
 ### Fixed Issues:
 - n/a
 
-# Changelog for OTOS
 ## [v5.0.0](https://github.com/SebastianOberschwendtner/OTOS/releases/tag/v5.0.0) *(2024-05-31)*
 
 >Released by `SO`
