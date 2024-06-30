@@ -22,19 +22,23 @@
 #define INTERFACE_H_
 
 /* === Includes === */
-#include <optional>
-#include <cstdint>
 #include <array>
+#include <cstdint>
+#include <optional>
 #include <misc/error_codes.h>
 
+/* === Defines === */
+/** For atomic driver functions which can be used within interrupts */
+#define OTOS_ATOMIC [[gnu::always_inline]] inline
+
 /* === Common enums === */
-enum class Edge: bool
+enum class Edge : bool
 {
     Falling = false,
     Rising = true
 };
 
-enum class Level: bool
+enum class Level : bool
 {
     Low = false,
     High = true
@@ -43,10 +47,10 @@ enum class Level: bool
 /* === Common base class for every driver === */
 namespace driver
 {
-    template<typename Peripheral_t>
+    template <typename Peripheral_t>
     class Base
     {
-    public:
+      public:
         /* === Constructor === */
         Base() = default;
         Base(const Peripheral_t IO_instance) : instance{IO_instance} {};
@@ -61,7 +65,7 @@ namespace driver
         /* === Properties === */
         Peripheral_t instance{};
 
-    private:
+      private:
         /* === Properties === */
         error::Code error{error::Code::None};
         uint32_t timeout{0};
@@ -76,7 +80,7 @@ namespace gpio
 {
     /**
      * @brief Set the alternate function of a GPIO pin.
-     * 
+     *
      * @tparam IO The GPIO pin class which implements the alternate function.
      * @param Pin The instance of the pin class.
      * @param IO_Controller The desired alternate function of the pin.
@@ -93,9 +97,12 @@ namespace bus
 {
     // === Enums ===
     // Bus state
-    enum class State: uint8_t
+    enum class State : uint8_t
     {
-        Init = 1, Idle, Busy, Error
+        Init = 1,
+        Idle,
+        Busy,
+        Error
     };
 
     // Data type to handle different byte formats
@@ -306,47 +313,47 @@ namespace bus
 namespace sdio
 {
     /*
-    * The following functions are just wrapper for the SDIO controller class
-    * You can provide your own specialized overloads when you want to use an SPI bus
-    * to communicate with an sd card.
-    */
-    template<class sdio>
-    bool send_command_no_response(sdio& card, const uint8_t command, const uint32_t arguments)
+     * The following functions are just wrapper for the SDIO controller class
+     * You can provide your own specialized overloads when you want to use an SPI bus
+     * to communicate with an sd card.
+     */
+    template <class sdio>
+    bool send_command_no_response(sdio &card, const uint8_t command, const uint32_t arguments)
     {
         return card.send_command_no_response(command, arguments);
     };
-    template<class sdio>
-    std::optional<uint32_t> send_command_R1_response(sdio& card, const uint8_t command, const uint32_t arguments)
+    template <class sdio>
+    std::optional<uint32_t> send_command_R1_response(sdio &card, const uint8_t command, const uint32_t arguments)
     {
         return card.send_command_R1_response(command, arguments);
     };
-    template<class sdio>
-    std::optional<uint32_t> send_command_R2_response(sdio& card, const uint8_t command, const uint32_t arguments)
+    template <class sdio>
+    std::optional<uint32_t> send_command_R2_response(sdio &card, const uint8_t command, const uint32_t arguments)
     {
         return card.send_command_R2_response(command, arguments);
     };
-    template<class sdio>
-    std::optional<uint32_t> send_command_R3_response(sdio& card, const uint8_t command, const uint32_t arguments)
+    template <class sdio>
+    std::optional<uint32_t> send_command_R3_response(sdio &card, const uint8_t command, const uint32_t arguments)
     {
         return card.send_command_R3_response(command, arguments);
     };
-    template<class sdio>
-    std::optional<uint32_t> send_command_R6_response(sdio& card, const uint8_t command, const uint32_t arguments)
+    template <class sdio>
+    std::optional<uint32_t> send_command_R6_response(sdio &card, const uint8_t command, const uint32_t arguments)
     {
         return card.send_command_R6_response(command, arguments);
     };
-    template<class sdio>
-    std::optional<uint32_t> send_command_R7_response(sdio& card, const uint8_t command, const uint32_t arguments)
+    template <class sdio>
+    std::optional<uint32_t> send_command_R7_response(sdio &card, const uint8_t command, const uint32_t arguments)
     {
         return card.send_command_R1_response(command, arguments);
     };
-    template<class sdio>
-    bool read_single_block(sdio& card, const uint32_t* buffer_begin, const uint32_t* buffer_end)
+    template <class sdio>
+    bool read_single_block(sdio &card, const uint32_t *buffer_begin, const uint32_t *buffer_end)
     {
         return card.read_single_block(buffer_begin, buffer_end);
     };
-    template<class sdio>
-    bool write_single_block(sdio& card, const uint32_t* buffer_begin, const uint32_t* buffer_end)
+    template <class sdio>
+    bool write_single_block(sdio &card, const uint32_t *buffer_begin, const uint32_t *buffer_end)
     {
         return card.write_single_block(buffer_begin, buffer_end);
     };
@@ -358,7 +365,7 @@ namespace timer
 
     /**
      * @brief Start a timer.
-     * 
+     *
      * @tparam timer Timer controller class which implements behavior.
      * @param my_timer The instance of the timer class which should be started.
      */
@@ -367,7 +374,7 @@ namespace timer
 
     /**
      * @brief Stop a timer.
-     * 
+     *
      * @tparam timer Timer controller class which implements behavior.
      * @param my_timer The instance of the timer class which should be stopped.
      */
@@ -376,7 +383,7 @@ namespace timer
 
     /**
      * @brief Get the current count of the timer.
-     * 
+     *
      * @tparam timer Timer controller class which implements behavior.
      * @param my_timer The instance of the timer class where the count should be returned from.
      * @return uint32_t: The current count of the timer.
@@ -394,7 +401,7 @@ namespace dma
         memory_to_peripheral,
         memory_to_memory
     };
-    enum class Width: uint8_t
+    enum class Width : uint8_t
     {
         _8bit = 0,
         _16bit = 1,

@@ -273,7 +273,7 @@ namespace gpio
 
     /* === Constructors === */
     Pin::Pin(const std::uintptr_t port_address, const Port port_id, const std::uint8_t Pin, Mode mode)
-        : port{reinterpret_cast<volatile GPIO_TypeDef *>(port_address)}, pin{Pin}, port_id{port_id}
+        : port{*reinterpret_cast<volatile GPIO_TypeDef *>(port_address)}, pin{Pin}, port_id{port_id}
     {
         /* Set the mode of the pin */
         this->set_mode(mode);
@@ -283,8 +283,8 @@ namespace gpio
          * Get the bit shifted masks to set and reset
          * the pin here to save clock cycles later
          */
-        this->set_mask = (1 << this->pin);
-        this->reset_mask = (1 << (this->pin + 16));
+        this->set_mask = 1 << this->pin;
+        this->reset_mask = 1 << 16 << this->pin;
 #endif // OTOS_REDUCE_MEMORY_USAGE
     };
 
@@ -321,16 +321,16 @@ namespace gpio
         if (this->pin < 8)
         {
             /* Save old register state and delete the part which will change */
-            uint32_t _Reg = this->port->AFR[0] & ~(0b1111 << (4 * this->pin));
+            uint32_t _Reg = this->port.AFR[0] & ~(0b1111 << (4 * this->pin));
             /* Get the code for teh alternate function and set the register */
-            this->port->AFR[0] = _Reg | (af_code << (4 * this->pin));
+            this->port.AFR[0] = _Reg | (af_code << (4 * this->pin));
         }
         else
         {
             /* Save old register state and delete the part which will change */
-            uint32_t _Reg = this->port->AFR[1] & ~(0b1111 << (4 * (this->pin - 8)));
-            /* Get the code for teh alternate function and set the register */
-            this->port->AFR[1] = _Reg | (af_code << (4 * (this->pin - 8)));
+            uint32_t _Reg = this->port.AFR[1] & ~(0b1111 << (4 * (this->pin - 8)));
+            /* Get the code for the alternate function and set the register */
+            this->port.AFR[1] = _Reg | (af_code << (4 * (this->pin - 8)));
         }
 
         /* Return the reference to the pin object */
@@ -341,9 +341,9 @@ namespace gpio
     {
         /* Set the BS bit */
 #ifndef OTOS_REDUCE_MEMORY_USAGE
-        port->BSRR = this->set_mask;
+        this->port.BSRR = this->set_mask;
 #else
-        port->BSRR = (1 << this->pin);
+        this->port.BSRR = (1 << this->pin);
 #endif // OTOS_REDUCE_MEMORY_USAGE
 
         /* Return the reference to the pin object */
@@ -354,9 +354,9 @@ namespace gpio
     {
         /* Set the BR bit */
 #ifndef OTOS_REDUCE_MEMORY_USAGE
-        port->BSRR = this->reset_mask;
+        this->port.BSRR = this->reset_mask;
 #else
-        port->BSRR = (1 << (this->pin + 16));
+        this->port.BSRR = 1 << 16 << this->pin;
 #endif // OTOS_REDUCE_MEMORY_USAGE
 
         /* Return the reference to the pin object */
@@ -366,10 +366,10 @@ namespace gpio
     auto Pin::set_mode(const Mode NewMode) -> Pin &
     {
         /* Save old register state and delete the part which will change */
-        uint32_t _Reg = this->port->MODER & ~(0b11 << (2 * this->pin));
+        uint32_t _Reg = this->port.MODER & ~(0b11 << (2 * this->pin));
 
         /* Combine the old and the new data and write the register */
-        this->port->MODER = _Reg | (static_cast<uint8_t>(NewMode) << (2 * this->pin));
+        this->port.MODER = _Reg | (static_cast<uint8_t>(NewMode) << (2 * this->pin));
 
         /* Return the reference to the pin object */
         return *this;
@@ -378,10 +378,10 @@ namespace gpio
     auto Pin::set_output_type(const Output NewType) -> Pin &
     {
         /* Save old register state and delete the part which will change */
-        uint32_t _Reg = this->port->OTYPER & ~(1 << this->pin);
+        uint32_t _Reg = this->port.OTYPER & ~(1 << this->pin);
 
         /* Combine the old and the new data and write the register */
-        this->port->OTYPER = _Reg | (static_cast<uint8_t>(NewType) << this->pin);
+        this->port.OTYPER = _Reg | (static_cast<uint8_t>(NewType) << this->pin);
 
         /* Return the reference to the pin object */
         return *this;
@@ -390,10 +390,10 @@ namespace gpio
     auto Pin::set_pull(const Pull NewPull) -> Pin &
     {
         /* Save old register state and delete the part which will change */
-        uint32_t _Reg = this->port->PUPDR & ~(0b11 << (2 * this->pin));
+        uint32_t _Reg = this->port.PUPDR & ~(0b11 << (2 * this->pin));
 
         /* Combine the old and the new data and write the register */
-        this->port->PUPDR = _Reg | (static_cast<uint8_t>(NewPull) << (2 * this->pin));
+        this->port.PUPDR = _Reg | (static_cast<uint8_t>(NewPull) << (2 * this->pin));
 
         /* Return the reference to the pin object */
         return *this;
@@ -402,10 +402,10 @@ namespace gpio
     auto Pin::set_speed(const Speed NewSpeed) -> Pin &
     {
         /* Save old register state and delete the part which will change */
-        uint32_t _Reg = this->port->OSPEEDR & ~(0b11 << (2 * this->pin));
+        uint32_t _Reg = this->port.OSPEEDR & ~(0b11 << (2 * this->pin));
 
         /* Combine the old and the new data and write the register */
-        this->port->OSPEEDR = _Reg | (static_cast<uint8_t>(NewSpeed) << (2 * this->pin));
+        this->port.OSPEEDR = _Reg | (static_cast<uint8_t>(NewSpeed) << (2 * this->pin));
 
         /* Return the reference to the pin object */
         return *this;
@@ -426,16 +426,20 @@ namespace gpio
     auto Pin::toggle() -> Pin &
     {
 #ifndef OTOS_REDUCE_MEMORY_USAGE
-        port->ODR ^= this->set_mask;
+        this->port.ODR ^= this->set_mask;
 #else
-        port->ODR ^= (1 << this->pin);
+        this->port.ODR ^= (1 << this->pin);
 #endif // OTOS_REDUCE_MEMORY_USAGE
         return *this;
     };
 
     auto Pin::get_state() const volatile -> bool
     {
-        return (this->port->IDR & (1 << this->pin));
+#ifndef OTOS_REDUCE_MEMORY_USAGE
+        return (this->port.IDR & this->set_mask);
+#else
+        return (this->port.IDR & (1 << this->pin));
+#endif // OTOS_REDUCE_MEMORY_USAGE
     };
 
     auto Pin::falling_edge() const -> bool
